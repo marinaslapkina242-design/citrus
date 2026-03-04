@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>CITRUS | CREATIVE & MULTIPLAYER</title>
+    <title>CITRUS | ULTIMATE EDITION</title>
     <script src="/socket.io/socket.io.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -11,54 +11,71 @@
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: 'Segoe UI', sans-serif; background: var(--c-bg); color: var(--c-text); overflow: hidden; }
         .hidden { display: none !important; }
         button { cursor: pointer; border: none; outline: none; transition: 0.2s; font-weight: bold; }
-        #ui-login { position: fixed; inset: 0; background: #000; display: flex; justify-content: center; align-items: center; z-index: 1000; }
-        .login-box { background: #111; padding: 40px; border-radius: 20px; border: 1px solid var(--c-main); text-align: center; width: 350px; }
-        .login-box input { width: 100%; padding: 15px; margin: 15px 0; background: #222; border: none; color: white; border-radius: 10px; outline: none; }
-        .btn-primary { background: var(--c-main); color: #000; padding: 15px; border-radius: 10px; width: 100%; }
+        #ui-login { position: fixed; inset: 0; background: url('https://w.wallhaven.cc/full/85/wallhaven-85m88y.jpg') center/cover; display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .login-box { background: rgba(0,0,0,0.9); padding: 40px; border-radius: 20px; border: 1px solid var(--c-main); text-align: center; width: 380px; backdrop-filter: blur(10px); }
+        .login-box input { width: 100%; padding: 15px; margin: 15px 0; background: #222; border: 1px solid #333; color: white; border-radius: 10px; outline: none; }
+        .btn-primary { background: var(--c-main); color: #000; padding: 15px; border-radius: 10px; width: 100%; font-size: 16px; box-shadow: 0 0 15px rgba(0,229,255,0.3); }
         #ui-hub { display: flex; flex-direction: column; height: 100vh; position: relative; z-index: 10; }
-        .hub-header { height: 70px; background: #0a0a0a; display: flex; align-items: center; padding: 0 40px; border-bottom: 1px solid #333; }
+        .hub-header { height: 70px; background: #0a0a0a; display: flex; align-items: center; padding: 0 40px; border-bottom: 1px solid #222; }
         .hub-body { display: flex; flex: 1; }
-        .sidebar { width: 250px; background: #0a0a0b; border-right: 1px solid #222; }
-        .nav-item { padding: 20px 30px; color: #888; cursor: pointer; }
-        .nav-item.active { color: var(--c-main); background: #151515; border-left: 3px solid var(--c-main); }
-        .content-area { flex: 1; padding: 40px; overflow-y: auto; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
-        .card { background: var(--c-panel); border-radius: 15px; border: 1px solid #222; overflow: hidden; cursor: pointer; }
-        .card-thumb { height: 120px; display: flex; justify-content: center; align-items: center; font-size: 40px; background: #1a1a1a; }
+        .sidebar { width: 260px; background: #080808; border-right: 1px solid #1a1a1a; padding: 20px 0; }
+        .nav-item { padding: 18px 30px; color: #666; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: 0.3s; }
+        .nav-item:hover, .nav-item.active { color: var(--c-main); background: #111; border-left: 4px solid var(--c-main); }
+        .content-area { flex: 1; padding: 40px; overflow-y: auto; background: radial-gradient(circle at top right, #0f0f0f, #050505); }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
+        .card { background: var(--c-panel); border-radius: 16px; border: 1px solid #222; overflow: hidden; cursor: pointer; transition: 0.3s; }
+        .card:hover { border-color: var(--c-main); transform: translateY(-5px); }
+        .card-thumb { height: 130px; display: flex; justify-content: center; align-items: center; font-size: 45px; background: #161616; }
         .card-info { padding: 15px; }
         #engine-view { position: fixed; inset: 0; display: none; z-index: 50; }
-        .studio-panel { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); padding: 10px 20px; border-radius: 20px; border: 1px solid var(--c-main); display: flex; gap: 10px; pointer-events: auto; }
+        .studio-panel { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); padding: 12px 25px; border-radius: 30px; border: 1px solid var(--c-main); display: flex; gap: 15px; pointer-events: auto; }
         .btn-exit { position: absolute; top: 20px; right: 20px; background: #ff3b30; color: white; padding: 10px 20px; border-radius: 8px; pointer-events: auto; }
-        .crosshair { position: absolute; top: 50%; left: 50%; width: 10px; height: 10px; border: 2px solid white; border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; }
+        .crosshair { position: absolute; top: 50%; left: 50%; width: 12px; height: 12px; border: 2px solid #fff; border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; opacity: 0.5; }
     </style>
 </head>
 <body>
 
     <div id="ui-login">
         <div class="login-box">
-            <h1 style="color:var(--c-main);">CITRUS</h1>
-            <input type="text" id="username" placeholder="Твой никнейм">
-            <button class="btn-primary" onclick="app.login()">ВОЙТИ</button>
+            <h1 style="color:var(--c-main); font-size: 42px; margin: 0 0 10px 0;">CITRUS</h1>
+            <p style="color:#777; margin-bottom: 25px;">Creative Metaverse</p>
+            <input type="text" id="username" placeholder="Твой никнейм..." autocomplete="off">
+            <button class="btn-primary" onclick="app.login()">ВОЙТИ В МИР</button>
         </div>
     </div>
 
     <div id="ui-hub" class="hidden">
         <div class="hub-header">
-            <h2>CITRUS</h2>
-            <div style="margin-left:auto;"><span id="display-name"></span> | 💎 <span id="balance-val">5000</span></div>
+            <h2 style="color:var(--c-main); margin:0;">CITRUS</h2>
+            <div style="margin-left:auto; display:flex; gap:25px; align-items:center;">
+                <b id="display-name"></b>
+                <span style="color:var(--c-main); background:rgba(0,229,255,0.1); padding:5px 15px; border-radius:20px;">💎 <span id="balance-val">5000</span></span>
+            </div>
         </div>
         <div class="hub-body">
             <div class="sidebar">
-                <div class="nav-item active" onclick="app.switchTab('games')">Миры</div>
-                <div class="nav-item" onclick="app.switchTab('studio')">Студия</div>
+                <div class="nav-item active" onclick="app.switchTab('games')"><i class="fas fa-play"></i> Плейсы</div>
+                <div class="nav-item" onclick="app.switchTab('shop')"><i class="fas fa-shopping-cart"></i> Магазин</div>
+                <div class="nav-item" onclick="app.switchTab('studio')"><i class="fas fa-tools"></i> Студия</div>
             </div>
             <div class="content-area">
                 <div id="tab-games">
-                    <h3>Мои игры</h3>
+                    <h3>Все миры</h3>
                     <div class="grid" id="my-games-grid"></div>
                 </div>
+                <div id="tab-shop" class="hidden">
+                    <h3>Предметы</h3>
+                    <div class="grid">
+                        <div class="card" onclick="app.buyItem('Крылья', 'wings', 1000)">
+                            <div class="card-thumb">🦋</div>
+                            <div class="card-info"><b>Крылья Неона</b><br>💎 1000</div>
+                        </div>
+                    </div>
+                </div>
                 <div id="tab-studio" class="hidden">
-                    <button class="btn-primary" onclick="app.launch('studio')">СОЗДАТЬ НОВЫЙ МИР</button>
+                    <div style="text-align:center; padding: 100px 0;">
+                        <button class="btn-primary" style="width:280px;" onclick="app.launch('studio')">СОЗДАТЬ ИГРУ</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -67,7 +84,8 @@
     <div id="engine-view">
         <div class="crosshair" id="crosshair"></div>
         <div class="studio-panel hidden" id="studio-ui">
-            <button onclick="app.publishGame()" style="background:var(--c-main); padding:5px 15px; border-radius:5px;">ОПУБЛИКОВАТЬ</button>
+            <button onclick="app.publishGame()" style="background:var(--c-main); color:#000; padding:8px 20px; border-radius:20px;">ОПУБЛИКОВАТЬ</button>
+            <span style="color:#777; padding-top:5px;">ЛКМ - Блок | ПКМ - Стереть</span>
         </div>
         <button class="btn-exit" onclick="app.exitGame()">ВЫЙТИ</button>
         <div id="gl-canvas"></div>
@@ -80,17 +98,18 @@
             scene: null, camera: null, renderer: null, clock: null,
             playerGroup: null, rig: {}, keys: {}, mode: 'none',
             objectsToIntersect: [], mapBlocks: [], customMaps: [],
-            raycaster: new THREE.Raycaster(),
+            balance: 5000, inventory: [], raycaster: new THREE.Raycaster(),
 
             init() {
                 this.socket = io();
-                this.loadMaps();
+                this.loadData();
                 this.renderMyGames();
                 
                 document.addEventListener('keydown', (e) => this.keys[e.code] = true);
                 document.addEventListener('keyup', (e) => this.keys[e.code] = false);
                 document.addEventListener('contextmenu', e => e.preventDefault());
 
+                // Синхронизация игроков
                 this.socket.on('playerMoved', (p) => {
                     if (this.otherPlayers[p.id]) {
                         this.otherPlayers[p.id].position.set(p.x, p.y, p.z);
@@ -99,28 +118,64 @@
                 });
             },
 
+            // ОРИГИНАЛЬНЫЙ ПЕРСОНАЖ С РИГОМ И АНИМАЦИЕЙ
+            buildCharacter() {
+                const group = new THREE.Group();
+                const torso = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.2, 0.4), new THREE.MeshStandardMaterial({color: 0x222}));
+                torso.position.y = 1.6; group.add(torso);
+                
+                const head = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.5), new THREE.MeshStandardMaterial({color: 0xffcc99}));
+                head.position.y = 0.9; torso.add(head);
+
+                const limbGeom = new THREE.BoxGeometry(0.3, 1, 0.3);
+                const limbMat = new THREE.MeshStandardMaterial({color: 0x111});
+
+                const createLimb = (x, y) => {
+                    const g = new THREE.Group();
+                    const m = new THREE.Mesh(limbGeom, limbMat);
+                    m.position.y = -0.5; g.add(m);
+                    g.position.set(x, y, 0); torso.add(g); return g;
+                };
+
+                this.rig = {
+                    lArm: createLimb(-0.6, 0.5), rArm: createLimb(0.6, 0.5),
+                    lLeg: createLimb(-0.25, -0.6), rLeg: createLimb(0.25, -0.6),
+                    torso: torso
+                };
+
+                if(this.inventory.includes('wings')) {
+                    const w = new THREE.Mesh(new THREE.PlaneGeometry(2, 1), new THREE.MeshBasicMaterial({color: 0x00E5FF, side: 2, transparent:true, opacity:0.5}));
+                    w.position.set(0, 0, -0.3); torso.add(w);
+                }
+
+                return group;
+            },
+
             login() {
-                const name = document.getElementById('username').value || "Player";
-                document.getElementById('display-name').innerText = name;
+                const n = document.getElementById('username').value || "Player";
+                document.getElementById('display-name').innerText = n;
                 document.getElementById('ui-login').classList.add('hidden');
                 document.getElementById('ui-hub').classList.remove('hidden');
                 this.init();
             },
 
             switchTab(t) {
-                document.getElementById('tab-games').classList.toggle('hidden', t !== 'games');
-                document.getElementById('tab-studio').classList.toggle('hidden', t !== 'studio');
+                ['games', 'shop', 'studio'].forEach(id => document.getElementById('tab-'+id).classList.add('hidden'));
+                document.getElementById('tab-'+t).classList.remove('hidden');
+                document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+                event.currentTarget.classList.add('active');
             },
 
-            launch(mode, mapIndex = null) {
+            launch(mode, mapIdx = null) {
                 this.mode = mode;
                 document.getElementById('ui-hub').classList.add('hidden');
                 document.getElementById('engine-view').style.display = 'block';
                 document.getElementById('studio-ui').classList.toggle('hidden', mode !== 'studio');
-                this.setupScene(mapIndex);
+                document.getElementById('crosshair').style.display = mode === 'studio' ? 'block' : 'none';
+                this.setupScene(mapIdx);
             },
 
-            setupScene(mapIndex) {
+            setupScene(mapIdx) {
                 const container = document.getElementById('gl-canvas');
                 container.innerHTML = '';
                 this.scene = new THREE.Scene();
@@ -131,33 +186,29 @@
                 container.appendChild(this.renderer.domElement);
                 this.clock = new THREE.Clock();
 
-                this.scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+                this.scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+                const light = new THREE.PointLight(0x00E5FF, 1, 100); light.position.set(10, 20, 10); this.scene.add(light);
                 
-                const ground = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), new THREE.MeshStandardMaterial({color: 0x111111}));
+                const ground = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshStandardMaterial({color: 0x111}));
                 ground.rotation.x = -Math.PI/2;
                 this.scene.add(ground);
                 this.objectsToIntersect = [ground];
 
-                if(mapIndex !== null) {
-                    const map = this.customMaps[mapIndex];
-                    map.blocks.forEach(b => this.spawnBlock(b.x, b.y, b.z, b.color));
+                if(mapIdx !== null) {
+                    this.customMaps[mapIdx].blocks.forEach(b => this.spawnBlock(b.x, b.y, b.z, b.color));
                 }
 
                 if(this.mode === 'studio') {
-                    this.camera.position.set(0, 10, 20);
+                    this.camera.position.set(0, 15, 30);
                 } else {
-                    this.playerGroup = new THREE.Group();
-                    const body = new THREE.Mesh(new THREE.BoxGeometry(1, 2, 1), new THREE.MeshStandardMaterial({color: 0x00E5FF}));
-                    body.position.y = 1;
-                    this.playerGroup.add(body);
+                    this.playerGroup = this.buildCharacter();
                     this.scene.add(this.playerGroup);
                 }
-
                 this.loop();
             },
 
             spawnBlock(x, y, z, color) {
-                const b = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), new THREE.MeshStandardMaterial({color}));
+                const b = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), new THREE.MeshStandardMaterial({color, roughness: 0.2}));
                 b.position.set(x, y, z);
                 this.scene.add(b);
                 this.objectsToIntersect.push(b);
@@ -167,22 +218,37 @@
                 if(this.mode === 'none') return;
                 requestAnimationFrame(() => this.loop());
                 const dt = this.clock.getDelta();
+                const t = this.clock.getElapsedTime();
 
                 if(this.mode === 'studio') {
-                    const s = 20 * dt;
+                    const s = 30 * dt;
                     if(this.keys['KeyW']) this.camera.translateZ(-s);
                     if(this.keys['KeyS']) this.camera.translateZ(s);
                     if(this.keys['KeyA']) this.camera.translateX(-s);
                     if(this.keys['KeyD']) this.camera.translateX(s);
                 } else {
-                    const s = 12 * dt;
-                    if(this.keys['KeyW']) this.playerGroup.translateZ(-s);
-                    if(this.keys['KeyS']) this.playerGroup.translateZ(s);
-                    if(this.keys['KeyA']) this.playerGroup.translateX(-s);
-                    if(this.keys['KeyD']) this.playerGroup.translateX(s);
+                    // ХОДЬБА (W - вперед)
+                    const s = 15 * dt;
+                    let isMoving = false;
+                    if(this.keys['KeyW']) { this.playerGroup.translateZ(-s); isMoving = true; }
+                    if(this.keys['KeyS']) { this.playerGroup.translateZ(s); isMoving = true; }
+                    if(this.keys['KeyA']) { this.playerGroup.translateX(-s); isMoving = true; }
+                    if(this.keys['KeyD']) { this.playerGroup.translateX(s); isMoving = true; }
 
-                    this.camera.position.lerp(new THREE.Vector3(0, 5, 10).applyMatrix4(this.playerGroup.matrixWorld), 0.1);
-                    this.camera.lookAt(this.playerGroup.position);
+                    // АНИМАЦИЯ (SWING)
+                    if(isMoving) {
+                        const swing = Math.sin(t * 12) * 0.6;
+                        this.rig.lLeg.rotation.x = swing; this.rig.rLeg.rotation.x = -swing;
+                        this.rig.lArm.rotation.x = -swing; this.rig.rArm.rotation.x = swing;
+                    } else {
+                        this.rig.lLeg.rotation.x = 0; this.rig.rLeg.rotation.x = 0;
+                        this.rig.lArm.rotation.x = 0; this.rig.rArm.rotation.x = 0;
+                    }
+
+                    // КАМЕРА
+                    const ideal = new THREE.Vector3(0, 6, 12).applyMatrix4(this.playerGroup.matrixWorld);
+                    this.camera.position.lerp(ideal, 0.1);
+                    this.camera.lookAt(this.playerGroup.position.x, 2, this.playerGroup.position.z);
                     
                     this.socket.emit('playerMovement', { x: this.playerGroup.position.x, y: this.playerGroup.position.y, z: this.playerGroup.position.z, ry: this.playerGroup.rotation.y });
                 }
@@ -190,23 +256,33 @@
             },
 
             publishGame() {
-                const name = prompt("Название игры:");
+                const name = prompt("Название карты:");
                 if(name) {
-                    this.customMaps.push({name, blocks: this.mapBlocks});
+                    this.customMaps.push({name, blocks: [...this.mapBlocks]});
                     localStorage.setItem('citrus_maps', JSON.stringify(this.customMaps));
-                    alert("Сохранено!");
                     this.exitGame();
                 }
             },
 
-            loadMaps() {
-                const saved = localStorage.getItem('citrus_maps');
-                if(saved) this.customMaps = JSON.parse(saved);
+            buyItem(n, id, p) {
+                if(this.balance >= p && !this.inventory.includes(id)) {
+                    this.balance -= p; this.inventory.push(id);
+                    document.getElementById('balance-val').innerText = this.balance;
+                    localStorage.setItem('citrus_data', JSON.stringify({balance: this.balance, inv: this.inventory}));
+                    alert("Предмет куплен!");
+                }
+            },
+
+            loadData() {
+                const d = localStorage.getItem('citrus_data');
+                if(d) { const j = JSON.parse(d); this.balance = j.balance; this.inventory = j.inv; }
+                const m = localStorage.getItem('citrus_maps');
+                if(m) this.customMaps = JSON.parse(m);
             },
 
             renderMyGames() {
                 const grid = document.getElementById('my-games-grid');
-                grid.innerHTML = '';
+                grid.innerHTML = '<div class="card" onclick="app.launch(\'play\')"><div class="card-thumb">🌍</div><div class="card-info"><b>Main Lobby</b></div></div>';
                 this.customMaps.forEach((m, i) => {
                     grid.innerHTML += `<div class="card" onclick="app.launch('play', ${i})"><div class="card-thumb">🎮</div><div class="card-info"><b>${m.name}</b></div></div>`;
                 });
@@ -215,18 +291,18 @@
             exitGame() { location.reload(); }
         };
 
-        // КЛИКИ В СТУДИИ
+        // КЛИКИ И МЫШЬ
         window.addEventListener('mousedown', (e) => {
             if(app.mode === 'studio' && document.pointerLockElement) {
                 app.raycaster.setFromCamera({x:0, y:0}, app.camera);
                 const hits = app.raycaster.intersectObjects(app.objectsToIntersect);
                 if(hits.length > 0) {
                     const hit = hits[0];
-                    if(e.button === 0) { // ЛКМ - БЛОК
+                    if(e.button === 0) {
                         const p = hit.point.clone().add(hit.face.normal).divideScalar(2).floor().multiplyScalar(2).addScalar(1);
                         app.spawnBlock(p.x, p.y, p.z, 0x00E5FF);
                         app.mapBlocks.push({x: p.x, y: p.y, z: p.z, color: 0x00E5FF});
-                    } else if(e.button === 2 && hit.object !== app.objectsToIntersect[0]) { // ПКМ - УДАЛИТЬ
+                    } else if(e.button === 2 && hit.object !== app.objectsToIntersect[0]) {
                         app.scene.remove(hit.object);
                         app.objectsToIntersect = app.objectsToIntersect.filter(o => o !== hit.object);
                     }
@@ -246,6 +322,8 @@
                 }
             }
         });
+
+        app.init();
     </script>
 </body>
 </html>
