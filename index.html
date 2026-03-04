@@ -1,57 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-// В начало твоего script добавь:
-this.socket = io();
-this.otherPlayers = {}; // Группа для хранения моделей друзей
-
-// Внутри setupScene добавь логику получения других игроков:
-this.socket.on('currentPlayers', (players) => {
-    Object.keys(players).forEach((id) => {
-        if (id !== this.socket.id) {
-            this.addOtherPlayer(players[id]);
-        }
-    });
-});
-
-this.socket.on('newPlayer', (playerInfo) => {
-    this.addOtherPlayer(playerInfo);
-});
-
-this.socket.on('playerMoved', (playerInfo) => {
-    if (this.otherPlayers[playerInfo.id]) {
-        this.otherPlayers[playerInfo.id].position.set(playerInfo.x, playerInfo.y, playerInfo.z);
-        this.otherPlayers[playerInfo.id].rotation.y = playerInfo.ry;
-    }
-});
-
-this.socket.on('playerDisconnected', (id) => {
-    if (this.otherPlayers[id]) {
-        this.scene.remove(this.otherPlayers[id]);
-        delete this.otherPlayers[id];
-    }
-});
-
-// Функция добавления чужой модельки:
-app.addOtherPlayer = function(info) {
-    const model = this.buildCharacter(false); // Делаем модельку без рига управления
-    model.position.set(info.x, info.y, info.z);
-    this.otherPlayers[info.id] = model;
-    this.scene.add(model);
-};
-
-// Внутри engineLoop (там где движение твоего игрока) добавь отправку данных:
-if (this.mode === 'play') {
-    // ... твой код движения ...
-    
-    // ОТПРАВКА НА СЕРВЕР
-    this.socket.emit('playerMovement', {
-        x: this.playerGroup.position.x,
-        y: this.playerGroup.position.y,
-        z: this.playerGroup.position.z,
-        ry: this.playerGroup.rotation.y
-    });
-}
     <meta charset="UTF-8">
     <title>CITRUS | CREATOR EDITION</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -636,4 +585,5 @@ if (this.mode === 'play') {
         app.init();
     </script>
 </body>
+
 </html>
