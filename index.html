@@ -499,41 +499,107 @@
                 alert("ИГРА ОПУБЛИКОВАНА! Теперь она есть в меню.");
                 this.exitGame();
             },
+            
+        // --- ОБНОВЛЕННЫЙ ИГРОВОЙ ЦИКЛ С ФИЗИКОЙ И ПРАВИЛЬНЫМ НАПРАВЛЕНИЕМ ---
+        engineLoop() {
+            if(this.mode === 'none') return;
+            requestAnimationFrame(() => this.engineLoop());
+            
+            const delta = this.clock.getDelta();
+            const time = this.clock.getElapsedTime();
 
-            // --- ИГРОВОЙ ЦИКЛ И АНИМАЦИИ ---
-            engineLoop() {
-                if(this.mode === 'none') return;
-                requestAnimationFrame(() => this.engineLoop());
-                
-                const delta = this.clock.getDelta();
-                const time = this.clock.getElapsedTime();
+            if(this.mode === 'play' && this.playerGroup) {
+                const speed = 15;
+                const moveVector = new THREE.Vector3(0, 0, 0);
 
-                if(this.mode === 'play' && this.playerGroup) {
-                    this.velocity.x = 0; this.velocity.z = 0;
-                    const speed = 15;
+                // ОПРЕДЕЛЯЕМ НАПРАВЛЕНИЕ (W - вперед, S - назад)
+                // Используем локальные оси персонажа
+                if (this.keys['KeyW']) moveVector.z -= 1;
+                if (this.keys['KeyS']) moveVector.z += 1;
+                if (this.keys['KeyA']) moveVector.x -= 1;
+                if (this.keys['KeyD']) moveVector.x += 1;
+
+                if (moveVector.length() > 0) {
+                    moveVector.normalize();
                     
-                    this.direction.z = Number(this.keys['KeyS'] || 0) - Number(this.keys['KeyW'] || 0);
-                    this.direction.x = Number(this.keys['KeyD'] || 0) - Number(this.keys['KeyA'] || 0);
-                    this.direction.normalize();
-
-                    if (this.keys['KeyW'] || this.keys['KeyS']) this.velocity.z -= this.direction.z * speed;
-                    if (this.keys['KeyA'] || this.keys['KeyD']) this.velocity.x -= this.direction.x * speed;
-
-                    this.playerGroup.translateX(-this.velocity.x * delta);
-                    this.playerGroup.translateZ(this.velocity.z * delta);
-
-                    // Прыжок
-                    this.velocity.y -= 35 * delta;
-                    if(this.keys['Space'] && this.canJump) {
-                        this.velocity.y = 15;
-                        this.canJump = false;
+                    // Трансформируем вектор движения в мировые координаты персонажа
+                    const worldMove = moveVector.applyQuaternion(this.playerGroup.quaternion).multiplyScalar(speed * delta);
+                    
+                    // ПРОВЕРКА КОЛЛИЗИЙ ПЕРЕД ДВИЖЕНИЕМ
+                    if (!this.checkCollision(this.playerGroup.position, worldMove)) {
+                        this.playerGroup.position.add(worldMove);
                     }
-                    this.playerGroup.position.y += this.velocity.y * delta;
-                    if(this.playerGroup.position.y <= 0) {
-                        this.playerGroup.position.y = 0;
-                        this.velocity.y = 0;
-                        this.canJump = true;
-                    }
+                }
+
+                // ПРЫЖОК И ГРАВИТАЦИЯ
+                this.velocity.y -= 35 * delta;
+                this.playerGroup.position.y += this.velocity.y * delta;
+
+                if(this.keys['Space'] && this.canJump) {
+                    this.velocity.y = 15;
+                    this.canJump = false;
+                }
+
+                // Приземление (на пол)
+                if(this.playerGroup.position.y <= 1.1) { // 1.1 - высота спавна над полом
+                    this.playerGroup.position.y = 1.1;
+                    this.velocity.y = 0;
+                    this.canJump = true;
+                }
+
+                // АНИМАЦИЯ ХОДЬБЫ
+                const isMoving = moveVector.length() > 0;
+                if (isMoving && this.canJump) {
+                    const swing = Math.sin(time * 15) * 0.8; 
+                    this.rig.leftArm.rotation.x = swing;
+                    this.rig.rightArm.rotation.x = -swing;
+                    this.rig.leftLeg.rotation.x = -swing;
+                    this.rig.rightLeg.rotation.x = swing;
+                } else {
+                    this.rig.leftArm.rotation.x = THREE.MathUtils.lerp(this.rig.leftArm.rotation.x, 0, 0.1);
+                    this.rig.rightArm.rotation.x = THREE.MathUtils.lerp(this.rig.rightArm.rotation.x, 0, 0.1);
+                    this.rig.leftLeg.rotation.x = THREE.MathUtils.lerp(this.rig.leftLeg.rotation.x, 0, 0.1);
+                    this.rig.rightLeg.rotation.x = THREE.MathUtils.lerp(this.rig.rightLeg.rotation.x, 0, 0.1);
+                }
+
+                // КАМЕРА (следует за игроком)
+                const camOffset = new THREE.Vector3(0, 5, 12).applyMatrix4(this.playerGroup.matrixWorld);
+                this.camera.position.lerp(camOffset, 0.1);
+                this.camera.lookAt(this.playerGroup.position.x, this.playerGroup.position.y + 1, this.playerGroup.position.z);
+
+            } else if (this.mode === 'studio') {
+                const flySpeed = 35 * delta;
+                if(this.keys['KeyW']) this.camera.translateZ(-flySpeed);
+                if(this.keys['KeyS']) this.camera.translateZ(flySpeed);
+                if(this.keys['KeyA']) this.camera.translateX(-flySpeed);
+                if(this.keys['KeyD']) this.camera.translateX(flySpeed);
+                if(this.keys['KeyE']) this.camera.position.y += flySpeed;
+                if(this.keys['KeyQ']) this.camera.position.y -= flySpeed;
+            }
+
+            this.renderer.render(this.scene, this.camera);
+        },
+
+        // ФУНКЦИЯ ПРОВЕРКИ СТОЛКНОВЕНИЙ
+        checkCollision(pos, moveStep) {
+            // Создаем луч в направлении движения
+            const rayPos = pos.clone();
+            rayPos.y += 0.5; // Проверяем на уровне туловища
+            
+            const rayDir = moveStep.clone().normalize();
+            this.raycaster.set(rayPos, rayDir);
+            
+            // Ищем пересечения с блоками (исключаем землю)
+            const intersects = this.raycaster.intersectObjects(this.objectsToIntersect.slice(1));
+            
+            if (intersects.length > 0) {
+                // Если расстояние до блока меньше шага или радиуса персонажа (0.8)
+                if (intersects[0].distance < moveStep.length() + 0.8) {
+                    return true; // Столкновение!
+                }
+            }
+            return false;
+        },
 
                     // --- ПРОЦЕДУРНАЯ АНИМАЦИЯ ХОДЬБЫ ---
                     const isMoving = Math.abs(this.velocity.x) > 0 || Math.abs(this.velocity.z) > 0;
@@ -586,4 +652,5 @@
     </script>
 </body>
 </html>
+
 
