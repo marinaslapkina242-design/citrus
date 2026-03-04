@@ -2,588 +2,190 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>CITRUS | CREATOR EDITION</title>
+    <title>CITRUS | MULTIPLAYER EDITION</title>
+    <script src="/socket.io/socket.io.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root { --c-main: #00E5FF; --c-bg: #050505; --c-panel: #111; --c-text: #fff; }
         * { box-sizing: border-box; user-select: none; }
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--c-bg); color: var(--c-text); overflow: hidden; }
-        
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: 'Segoe UI', sans-serif; background: var(--c-bg); color: var(--c-text); overflow: hidden; }
         .hidden { display: none !important; }
         button { cursor: pointer; border: none; outline: none; transition: 0.2s; font-family: inherit; font-weight: bold; }
-        button:active { transform: scale(0.95); }
-
-        /* ВХОД */
-        #ui-login { position: fixed; inset: 0; background: url('https://w.wallhaven.cc/full/85/wallhaven-85m88y.jpg') center/cover; display: flex; justify-content: center; align-items: center; z-index: 1000; }
-        .login-box { background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px); padding: 40px; border-radius: 20px; border: 1px solid var(--c-main); text-align: center; width: 350px; }
-        .login-box input { width: 100%; padding: 15px; margin: 15px 0; background: rgba(255,255,255,0.1); border: none; color: white; border-radius: 10px; font-size: 16px; outline: none; }
-        .btn-primary { background: var(--c-main); color: #000; padding: 15px; border-radius: 10px; width: 100%; font-size: 16px; box-shadow: 0 0 15px rgba(0, 229, 255, 0.4); }
-
-        /* САЙТ */
+        #ui-login { position: fixed; inset: 0; background: radial-gradient(circle, #111, #000); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .login-box { background: rgba(0, 0, 0, 0.8); padding: 40px; border-radius: 20px; border: 1px solid var(--c-main); text-align: center; width: 350px; box-shadow: 0 0 30px rgba(0,229,255,0.2); }
+        .login-box input { width: 100%; padding: 15px; margin: 15px 0; background: #222; border: 1px solid #333; color: white; border-radius: 10px; outline: none; }
+        .btn-primary { background: var(--c-main); color: #000; padding: 15px; border-radius: 10px; width: 100%; font-size: 16px; }
         #ui-hub { display: flex; flex-direction: column; height: 100vh; position: relative; z-index: 10; }
-        .hub-header { height: 70px; background: rgba(10,10,10,0.9); display: flex; align-items: center; padding: 0 40px; border-bottom: 1px solid #333; }
-        .hub-body { display: flex; flex: 1; overflow: hidden; }
-        .sidebar { width: 250px; background: #0a0a0b; border-right: 1px solid #222; padding: 20px 0; }
-        .nav-item { padding: 15px 30px; color: #888; cursor: pointer; display: flex; align-items: center; gap: 15px; transition: 0.3s; border-left: 3px solid transparent; }
-        .nav-item:hover, .nav-item.active { color: var(--c-main); background: #151515; border-left-color: var(--c-main); }
-        .content-area { flex: 1; padding: 40px; overflow-y: auto; background: radial-gradient(circle at top right, #111, #000); }
-
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
-        .card { background: var(--c-panel); border-radius: 15px; border: 1px solid #222; overflow: hidden; cursor: pointer; transition: 0.3s; }
-        .card:hover { border-color: var(--c-main); transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
-        .card-thumb { height: 140px; display: flex; justify-content: center; align-items: center; font-size: 50px; background: #1a1a1a; }
-        .card-info { padding: 15px; }
-
-        #avatar-container { width: 100%; height: 400px; background: #000; border-radius: 20px; border: 1px solid #333; box-shadow: inset 0 0 50px rgba(0,229,255,0.1); }
-
-        /* ИГРА & СТУДИЯ */
+        .hub-header { height: 70px; background: #0a0a0a; display: flex; align-items: center; padding: 0 40px; border-bottom: 1px solid #222; }
+        .hub-body { display: flex; flex: 1; }
+        .sidebar { width: 250px; background: #080808; border-right: 1px solid #222; }
+        .nav-item { padding: 20px; color: #888; cursor: pointer; border-left: 3px solid transparent; }
+        .nav-item.active { color: var(--c-main); background: #111; border-left-color: var(--c-main); }
+        .content-area { flex: 1; padding: 40px; background: #050505; overflow-y: auto; }
         #engine-view { position: fixed; inset: 0; display: none; z-index: 50; }
-        canvas { display: block; width: 100%; height: 100%; }
-        .hud-overlay { position: absolute; inset: 0; pointer-events: none; }
-        .crosshair { position: absolute; top: 50%; left: 50%; width: 12px; height: 12px; background: rgba(255,255,255,0.8); border-radius: 50%; transform: translate(-50%, -50%); display: none; }
-        
-        .studio-panel { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); padding: 15px 30px; border-radius: 30px; border: 1px solid var(--c-main); pointer-events: auto; display: flex; gap: 15px; align-items: center; }
-        .btn-studio { background: #222; color: white; padding: 10px 20px; border-radius: 8px; }
-        .btn-studio:hover { background: #333; }
-        .btn-publish { background: var(--c-main); color: #000; padding: 10px 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,229,255,0.5); }
-
-        .btn-exit { position: absolute; top: 20px; right: 20px; background: #ff3b30; color: white; padding: 10px 20px; border-radius: 8px; pointer-events: auto; }
+        canvas { width: 100%; height: 100%; }
+        .btn-exit { position: absolute; top: 20px; right: 20px; background: #ff3b30; color: white; padding: 10px 20px; border-radius: 8px; z-index: 100; }
     </style>
 </head>
 <body>
 
     <div id="ui-login">
         <div class="login-box">
-            <h1 style="color:var(--c-main); margin-top:0; font-size:40px;">CITRUS</h1>
-            <p style="color:#aaa; margin-bottom: 30px;">Твой мир. Твои правила.</p>
-            <input type="text" id="username" placeholder="Придумай крутой никнейм" autocomplete="off">
-            <button class="btn-primary" onclick="app.login()">ВОЙТИ В МЕТАВСЕЛЕННУЮ</button>
+            <h1 style="color:var(--c-main); font-size:40px; margin:0;">CITRUS</h1>
+            <p style="color:#666;">Твой мир. Твои правила.</p>
+            <input type="text" id="username" placeholder="Придумай никнейм">
+            <button class="btn-primary" onclick="app.login()">ВОЙТИ В СЕТЬ</button>
         </div>
     </div>
 
     <div id="ui-hub" class="hidden">
         <div class="hub-header">
-            <h2 style="color:var(--c-main); margin:0; letter-spacing: 2px;">CITRUS</h2>
-            <div style="margin-left:auto; display:flex; align-items:center; gap:30px;">
-                <span id="display-name" style="font-weight:bold; font-size: 18px;">Player</span>
-                <span style="background:rgba(0,229,255,0.1); padding:8px 20px; border-radius:20px; color:var(--c-main); font-weight:bold; border: 1px solid var(--c-main);">💎 <span id="balance-val">5000</span></span>
-            </div>
+            <h2 style="color:var(--c-main); margin:0;">CITRUS</h2>
+            <div style="margin-left:auto;"><span id="display-name"></span> | 💎 <span id="balance-val">5000</span></div>
         </div>
         <div class="hub-body">
             <div class="sidebar">
-                <div class="nav-item active" onclick="app.switchTab('games')"><i class="fas fa-compass"></i> Плейсы</div>
-                <div class="nav-item" onclick="app.switchTab('avatar')"><i class="fas fa-user-ninja"></i> Аватар 2.0</div>
-                <div class="nav-item" onclick="app.switchTab('shop')"><i class="fas fa-shopping-bag"></i> Магазин</div>
-                <div class="nav-item" onclick="app.switchTab('studio')"><i class="fas fa-laptop-code"></i> Студия</div>
+                <div class="nav-item active">Мультиплеер</div>
             </div>
-            
             <div class="content-area">
-                <div id="tab-games">
-                    <h2>Официальные миры</h2>
-                    <div class="grid" style="margin-bottom: 40px;">
-                        <div class="card" onclick="app.launch('play', 'default')">
-                            <div class="card-thumb" style="background: linear-gradient(45deg, #111, #333);">🌍</div>
-                            <div class="card-info"><b>Citrus Open World</b><br><small style="color:#888;">Классическая карта</small></div>
-                        </div>
-                    </div>
-
-                    <h2 style="color: var(--c-main);">Мои опубликованные игры</h2>
-                    <div class="grid" id="my-games-grid">
-                        <p style="color:#666; grid-column: 1 / -1;">Ты еще не опубликовал ни одной игры. Зайди в Студию!</p>
-                    </div>
-                </div>
-
-                <div id="tab-avatar" class="hidden">
-                    <h2>Настройка Аватара</h2>
-                    <div style="display:flex; gap:30px;">
-                        <div style="flex:2;"><div id="avatar-container"></div></div>
-                        <div style="flex:1;">
-                            <div style="background:#151515; padding:30px; border-radius:20px; border:1px solid #222;">
-                                <h3>Твой стиль</h3>
-                                <p style="color:#888;">Все изменения сохраняются автоматически.</p>
-                                <button class="btn-primary" onclick="app.resetAvatar()" style="background:#333; color:white; box-shadow:none; margin-top:20px;">Снять все предметы</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="tab-shop" class="hidden">
-                    <h2>Легендарные предметы</h2>
-                    <div class="grid">
-                        <div class="card" onclick="app.buyItem('Кибер-Очки', 'glasses', 500)">
-                            <div class="card-thumb">🕶️</div>
-                            <div class="card-info"><b>Кибер-Очки</b><br><small style="color:var(--c-main);">💎 500</small></div>
-                        </div>
-                        <div class="card" onclick="app.buyItem('Неоновые Крылья', 'wings', 1500)">
-                            <div class="card-thumb">🪽</div>
-                            <div class="card-info"><b>Неоновые Крылья</b><br><small style="color:var(--c-main);">💎 1500</small></div>
-                        </div>
-                        <div class="card" onclick="app.buyItem('Меч Пустоты', 'sword', 2000)">
-                            <div class="card-thumb">🗡️</div>
-                            <div class="card-info"><b>Меч Пустоты</b><br><small style="color:var(--c-main);">💎 2000</small></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="tab-studio" class="hidden">
-                    <div style="text-align:center; padding-top:50px;">
-                        <i class="fas fa-cube" style="font-size:100px; color:var(--c-main); margin-bottom:20px;"></i>
-                        <h1 style="margin:0;">Citrus Studio Pro</h1>
-                        <p style="color:#888; font-size:18px; margin-bottom: 40px;">Создавай миры и публикуй их на платформу.</p>
-                        <button class="btn-primary" style="width:300px; font-size:20px;" onclick="app.launch('studio', 'new')">СОЗДАТЬ НОВУЮ ИГРУ</button>
-                    </div>
+                <h2>Доступные миры</h2>
+                <div style="background:#111; padding:20px; border-radius:15px; border:1px solid #222; cursor:pointer;" onclick="app.launch()">
+                    <h3>🌐 Общий сервер (Online)</h3>
+                    <p style="color:#888;">Зайди и встреться с друзьями прямо сейчас.</p>
                 </div>
             </div>
         </div>
     </div>
 
     <div id="engine-view">
-        <div class="hud-overlay">
-            <div id="crosshair" class="crosshair"></div>
-            
-            <div id="studio-ui" class="studio-panel hidden">
-                <span style="color:#aaa; margin-right: 10px;">ЛКМ: Ставить блоки | WASD+EQ: Полет</span>
-                <button class="btn-studio" onclick="app.clearMap()">Очистить карту</button>
-                <button class="btn-publish" onclick="app.publishGame()">ОПУБЛИКОВАТЬ ИГРУ</button>
-            </div>
-
-            <button class="btn-exit" onclick="app.exitGame()">ВЫЙТИ ИЗ ИГРЫ</button>
-        </div>
+        <button class="btn-exit" onclick="location.reload()">ВЫЙТИ</button>
         <div id="gl-canvas"></div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
         const app = {
-            username: "Player",
-            balance: 5000,
-            inventory: [],
-            customMaps: [],
-            currentMapToLoad: null,
-            
-            scene: null, camera: null, renderer: null, clock: null,
-            playerGroup: null, rig: {}, 
-            keys: {}, mode: 'none', 
-            
-            velocity: new THREE.Vector3(), direction: new THREE.Vector3(),
-            canJump: false, raycaster: new THREE.Raycaster(),
-            objectsToIntersect: [], mapBlocks: [], // Для сохранения блоков
+            socket: null,
+            otherPlayers: {},
+            playerGroup: null,
+            scene: null, camera: null, renderer: null, clock: new THREE.Clock(),
+            keys: {},
 
             init() {
-                this.loadData(); // Загружаем сохранения навсегда!
-
+                // Подключаем сокеты (автоматически найдет твой Render-сервер)
+                this.socket = io();
+                
                 document.addEventListener('keydown', (e) => this.keys[e.code] = true);
                 document.addEventListener('keyup', (e) => this.keys[e.code] = false);
-                
-                document.getElementById('gl-canvas').addEventListener('click', () => {
-                    if (this.mode !== 'none') document.body.requestPointerLock();
+
+                // Слушаем сервер
+                this.socket.on('currentPlayers', (players) => {
+                    Object.keys(players).forEach((id) => {
+                        if (id !== this.socket.id) this.addOtherPlayer(id, players[id]);
+                    });
                 });
-                document.addEventListener('mousedown', (e) => {
-                    if (this.mode === 'studio' && document.pointerLockElement) this.placeBlock();
+
+                this.socket.on('newPlayer', (p) => this.addOtherPlayer(p.id, p));
+
+                this.socket.on('playerMoved', (p) => {
+                    if (this.otherPlayers[p.id]) {
+                        this.otherPlayers[p.id].position.set(p.x, p.y, p.z);
+                        this.otherPlayers[p.id].rotation.y = p.ry;
+                    }
                 });
-                document.addEventListener('mousemove', (e) => {
-                    if (document.pointerLockElement) {
-                        if(this.mode === 'play' && this.playerGroup) {
-                            this.playerGroup.rotation.y -= e.movementX * 0.003;
-                        } else if (this.mode === 'studio') {
-                            this.camera.rotation.y -= e.movementX * 0.003;
-                            this.camera.rotation.x -= e.movementY * 0.003;
-                            this.camera.rotation.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, this.camera.rotation.x));
-                        }
+
+                this.socket.on('playerDisconnected', (id) => {
+                    if (this.otherPlayers[id]) {
+                        this.scene.remove(this.otherPlayers[id]);
+                        delete this.otherPlayers[id];
                     }
                 });
             },
 
-            // --- СИСТЕМА СОХРАНЕНИЙ (localStorage) ---
-            saveData() {
-                const data = {
-                    username: this.username,
-                    balance: this.balance,
-                    inventory: this.inventory,
-                    customMaps: this.customMaps
-                };
-                localStorage.setItem('citrus_save_v1', JSON.stringify(data));
-            },
-
-            loadData() {
-                const saved = localStorage.getItem('citrus_save_v1');
-                if (saved) {
-                    const data = JSON.parse(saved);
-                    this.username = data.username || "Player";
-                    this.balance = data.balance || 5000;
-                    this.inventory = data.inventory || [];
-                    this.customMaps = data.customMaps || [];
-                }
-            },
-
-            // --- UI ---
             login() {
-                const input = document.getElementById('username').value.trim();
-                if(input) this.username = input;
-                document.getElementById('display-name').innerText = this.username;
-                document.getElementById('balance-val').innerText = this.balance;
-                
+                const name = document.getElementById('username').value || "Player";
+                document.getElementById('display-name').innerText = name;
                 document.getElementById('ui-login').classList.add('hidden');
                 document.getElementById('ui-hub').classList.remove('hidden');
-                
-                this.renderMyGames();
-                this.initAvatarPreview();
-                this.saveData();
+                this.init();
             },
 
-            switchTab(tabId) {
-                document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-                event.currentTarget.classList.add('active');
-                ['games', 'avatar', 'shop', 'studio'].forEach(id => document.getElementById('tab-' + id).classList.add('hidden'));
-                document.getElementById('tab-' + tabId).classList.remove('hidden');
-            },
-
-            buyItem(name, id, price) {
-                if(this.inventory.includes(id)) return alert("Предмет уже куплен!");
-                if(this.balance >= price) {
-                    this.balance -= price;
-                    this.inventory.push(id);
-                    document.getElementById('balance-val').innerText = this.balance;
-                    this.updateAvatarPreview();
-                    this.saveData(); // Сохраняем!
-                    alert(`Успешно куплено: ${name}!`);
-                } else alert("Не хватает кристаллов!");
-            },
-
-            resetAvatar() {
-                this.inventory = [];
-                this.updateAvatarPreview();
-                this.saveData();
-            },
-
-            renderMyGames() {
-                const grid = document.getElementById('my-games-grid');
-                if(this.customMaps.length === 0) return;
-                
-                grid.innerHTML = '';
-                this.customMaps.forEach((map, index) => {
-                    grid.innerHTML += `
-                        <div class="card" onclick="app.launch('play', ${index})">
-                            <div class="card-thumb" style="background: #1a1a2e; color: var(--c-main);">🎮</div>
-                            <div class="card-info"><b>${map.name}</b><br><small>Блоков: ${map.blocks.length}</small></div>
-                        </div>
-                    `;
-                });
-            },
-
-            // --- ДЕТАЛИЗИРОВАННЫЙ АВАТАР И АНИМАЦИИ ---
-            initAvatarPreview() {
-                if(this.pRender) return;
-                const cont = document.getElementById('avatar-container');
-                this.pScene = new THREE.Scene();
-                this.pCam = new THREE.PerspectiveCamera(40, cont.clientWidth/cont.clientHeight, 0.1, 100);
-                this.pRender = new THREE.WebGLRenderer({alpha: true, antialias: true});
-                this.pRender.setSize(cont.clientWidth, cont.clientHeight);
-                cont.appendChild(this.pRender.domElement);
-
-                this.pScene.add(new THREE.AmbientLight(0xffffff, 0.8));
-                const dl = new THREE.DirectionalLight(0x00E5FF, 0.6); dl.position.set(5, 5, 5); this.pScene.add(dl);
-                const dl2 = new THREE.DirectionalLight(0xffffff, 0.4); dl2.position.set(-5, 5, -5); this.pScene.add(dl2);
-
-                this.pCam.position.set(0, 1.5, 6);
-                this.updateAvatarPreview();
-                
-                const anim = () => {
-                    if(document.getElementById('tab-avatar').classList.contains('hidden') === false && this.pAvatar) {
-                        this.pAvatar.rotation.y += 0.01;
-                    }
-                    this.pRender.render(this.pScene, this.pCam);
-                    requestAnimationFrame(anim);
-                };
-                anim();
-            },
-
-            updateAvatarPreview() {
-                if(this.pAvatar) this.pScene.remove(this.pAvatar);
-                this.pAvatar = this.buildCharacter(false); // Для меню риг не нужен
-                this.pScene.add(this.pAvatar);
-            },
-
-            // Создаем крутого персонажа со скелетом
-            buildCharacter(needsRig) {
-                const group = new THREE.Group();
-                
-                // Материалы
-                const matBody = new THREE.MeshStandardMaterial({color: 0x222222, roughness: 0.3, metalness: 0.5});
-                const matSkin = new THREE.MeshStandardMaterial({color: 0xffcc99, roughness: 0.5});
-                const matLimb = new THREE.MeshStandardMaterial({color: 0x111111, roughness: 0.5});
-
-                // Создаем части тела так, чтобы они вращались от сустава (смещаем геометрию)
-                const createLimb = (w, h, d, mat, yOffset) => {
-                    const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
-                    mesh.geometry.translate(0, -h/2, 0); // Центр вращения - сверху
-                    const pivot = new THREE.Group();
-                    pivot.add(mesh);
-                    return pivot;
-                };
-
-                // Туловище
-                const torso = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.2, 0.4), matBody);
-                torso.position.y = 1.4;
-                group.add(torso);
-
-                // Голова
-                const head = new THREE.Mesh(new THREE.SphereGeometry(0.35, 32, 32), matSkin);
-                head.position.y = 0.8; 
-                torso.add(head);
-
-                // Руки и Ноги (Скелет)
-                const leftArm = createLimb(0.3, 1.0, 0.3, matLimb);
-                leftArm.position.set(-0.55, 0.6, 0); torso.add(leftArm);
-                
-                const rightArm = createLimb(0.3, 1.0, 0.3, matLimb);
-                rightArm.position.set(0.55, 0.6, 0); torso.add(rightArm);
-
-                const leftLeg = createLimb(0.35, 1.1, 0.35, matLimb);
-                leftLeg.position.set(-0.2, -0.6, 0); torso.add(leftLeg);
-
-                const rightLeg = createLimb(0.35, 1.1, 0.35, matLimb);
-                rightLeg.position.set(0.2, -0.6, 0); torso.add(rightLeg);
-
-                // Аксессуары
-                if(this.inventory.includes('wings')) {
-                    const wingGeo = new THREE.BoxGeometry(3, 1, 0.1);
-                    const wingMat = new THREE.MeshStandardMaterial({color: 0x00E5FF, transparent: true, opacity: 0.8, emissive: 0x00E5FF, emissiveIntensity: 0.5});
-                    const wings = new THREE.Mesh(wingGeo, wingMat);
-                    wings.position.set(0, 0.2, -0.25);
-                    torso.add(wings);
-                }
-                if(this.inventory.includes('glasses')) {
-                    const glass = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.15, 0.1), new THREE.MeshStandardMaterial({color: 0x000, metalness: 1}));
-                    glass.position.set(0, 0, 0.32); head.add(glass);
-                }
-                if(this.inventory.includes('sword')) {
-                    const sword = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.5, 0.2), new THREE.MeshStandardMaterial({color: 0xaaaaaa, metalness:0.8}));
-                    sword.position.set(0, -0.5, -0.5); sword.rotation.x = Math.PI/4;
-                    rightArm.add(sword);
-                }
-
-                if(needsRig) {
-                    this.rig = { leftArm, rightArm, leftLeg, rightLeg, torso };
-                }
-
-                return group;
-            },
-
-            // --- ДВИЖОК ИГРЫ ---
-            launch(mode, mapIndex) {
-                this.mode = mode;
-                this.currentMapToLoad = mapIndex;
+            launch() {
                 document.getElementById('ui-hub').classList.add('hidden');
                 document.getElementById('engine-view').style.display = 'block';
-                
-                document.getElementById('crosshair').style.display = mode === 'studio' ? 'block' : 'none';
-                document.getElementById('studio-ui').classList.toggle('hidden', mode !== 'studio');
-
                 this.setupScene();
             },
 
             setupScene() {
-                const canvas = document.getElementById('gl-canvas');
-                canvas.innerHTML = '';
-                
                 this.scene = new THREE.Scene();
-                this.scene.background = new THREE.Color(0x0a0a10); // Темный стильный фон
-                this.scene.fog = new THREE.FogExp2(0x0a0a10, 0.015);
-
-                this.camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.1, 1000);
+                this.scene.background = new THREE.Color(0x050505);
+                this.camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
                 this.renderer = new THREE.WebGLRenderer({antialias: true});
                 this.renderer.setSize(window.innerWidth, window.innerHeight);
-                this.renderer.shadowMap.enabled = true; // Тени!
-                canvas.appendChild(this.renderer.domElement);
+                document.getElementById('gl-canvas').appendChild(this.renderer.domElement);
 
-                this.clock = new THREE.Clock();
-                this.mapBlocks = []; // Сброс блоков
+                this.scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+                const sun = new THREE.DirectionalLight(0x00E5FF, 1);
+                sun.position.set(10, 20, 10);
+                this.scene.add(sun);
 
-                // Крутой свет
-                const hemi = new THREE.HemisphereLight(0xffffff, 0x444444, 0.6); this.scene.add(hemi);
-                const dirLight = new THREE.DirectionalLight(0x00E5FF, 1);
-                dirLight.position.set(20, 50, 20);
-                dirLight.castShadow = true;
-                this.scene.add(dirLight);
-
-                // Земля (Сетка)
-                const groundMat = new THREE.MeshStandardMaterial({color: 0x111111, roughness: 0.8});
-                const ground = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), groundMat);
-                ground.rotation.x = -Math.PI/2;
-                ground.receiveShadow = true;
-                this.scene.add(ground);
-                
-                const grid = new THREE.GridHelper(200, 100, 0x00E5FF, 0x333333);
-                grid.position.y = 0.01;
+                const grid = new THREE.GridHelper(100, 50, 0x00E5FF, 0x222222);
                 this.scene.add(grid);
 
-                this.objectsToIntersect = [ground];
+                // Создаем ТВОЕГО игрока
+                this.playerGroup = this.buildCharacter(0x00E5FF);
+                this.scene.add(this.playerGroup);
 
-                // ЗАГРУЗКА КАРТЫ
-                if(this.mode === 'play' && this.currentMapToLoad !== 'default' && this.currentMapToLoad !== null) {
-                    const mapData = this.customMaps[this.currentMapToLoad];
-                    mapData.blocks.forEach(b => {
-                        this.spawnBlock(b.x, b.y, b.z, b.color);
+                this.loop();
+            },
+
+            buildCharacter(color) {
+                const g = new THREE.Group();
+                const body = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.2, 0.4), new THREE.MeshStandardMaterial({color: color}));
+                body.position.y = 1.2;
+                const head = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.5), new THREE.MeshStandardMaterial({color: 0xffcc99}));
+                head.position.y = 0.9;
+                body.add(head);
+                g.add(body);
+                return g;
+            },
+
+            addOtherPlayer(id, info) {
+                const model = this.buildCharacter(0xff0055); // Друзья будут розовыми
+                model.position.set(info.x, info.y, info.z);
+                this.otherPlayers[id] = model;
+                this.scene.add(model);
+            },
+
+            loop() {
+                requestAnimationFrame(() => this.loop());
+                const dt = this.clock.getDelta();
+
+                // Движение
+                const speed = 10;
+                if(this.keys['KeyW']) this.playerGroup.translateZ(-speed * dt);
+                if(this.keys['KeyS']) this.playerGroup.translateZ(speed * dt);
+                if(this.keys['KeyA']) this.playerGroup.rotation.y += 3 * dt;
+                if(this.keys['KeyD']) this.playerGroup.rotation.y -= 3 * dt;
+
+                // Отправка позиции на сервер
+                if(this.socket) {
+                    this.socket.emit('playerMovement', {
+                        x: this.playerGroup.position.x,
+                        y: this.playerGroup.position.y,
+                        z: this.playerGroup.position.z,
+                        ry: this.playerGroup.rotation.y
                     });
-                } else if(this.currentMapToLoad === 'default') {
-                    // Спавним стандартные деревья
-                    for(let i=0; i<20; i++) {
-                        this.spawnBlock((Math.random()-0.5)*50, 1, (Math.random()-0.5)*50, 0x4CAF50);
-                    }
                 }
 
-                if(this.mode === 'play') {
-                    this.playerGroup = this.buildCharacter(true); // Запрашиваем риг для анимации
-                    this.playerGroup.position.set(0, 1.1, 0);
-                    this.playerGroup.traverse(c => { if(c.isMesh) c.castShadow = true; });
-                    this.scene.add(this.playerGroup);
-                } else {
-                    this.camera.position.set(0, 5, 10);
-                }
-
-                window.onresize = () => {
-                    this.camera.aspect = window.innerWidth / window.innerHeight;
-                    this.camera.updateProjectionMatrix();
-                    this.renderer.setSize(window.innerWidth, window.innerHeight);
-                };
-
-                this.engineLoop();
-            },
-
-            // --- СТРОИТЕЛЬСТВО И ПУБЛИКАЦИЯ ---
-            spawnBlock(x, y, z, color) {
-                const mat = new THREE.MeshStandardMaterial({color: color, roughness:0.2, metalness:0.3});
-                const block = new THREE.Mesh(new THREE.BoxGeometry(2,2,2), mat);
-                block.position.set(x, y, z);
-                block.castShadow = true; block.receiveShadow = true;
-                this.scene.add(block);
-                this.objectsToIntersect.push(block);
-                this.mapBlocks.push({x, y, z, color}); // Сохраняем дату
-            },
-
-            placeBlock() {
-                this.raycaster.setFromCamera(new THREE.Vector2(0,0), this.camera);
-                const intersects = this.raycaster.intersectObjects(this.objectsToIntersect);
-                if(intersects.length > 0) {
-                    const p = intersects[0].point;
-                    const n = intersects[0].face.normal;
-                    // Привязка к сетке (Snap to grid)
-                    const bx = Math.round((p.x + n.x)/2)*2;
-                    const by = Math.max(1, Math.round((p.y + n.y)/2)*2 - 1); // Пол на 0, блок 2x2 -> центр Y=1
-                    const bz = Math.round((p.z + n.z)/2)*2;
-                    
-                    const randomColor = [0x00E5FF, 0xFF9500, 0xFF0055, 0x00FF66][Math.floor(Math.random()*4)];
-                    this.spawnBlock(bx, by, bz, randomColor);
-                }
-            },
-
-            clearMap() {
-                this.mapBlocks = [];
-                const ground = this.objectsToIntersect[0];
-                this.objectsToIntersect.slice(1).forEach(obj => this.scene.remove(obj));
-                this.objectsToIntersect = [ground];
-            },
-
-            publishGame() {
-                if(this.mapBlocks.length === 0) return alert("Карта пустая! Поставь хоть один блок.");
-                const mapName = prompt("Введите название вашей игры:", "My Epic Map");
-                if(!mapName) return;
-
-                this.customMaps.push({
-                    name: mapName,
-                    blocks: this.mapBlocks
-                });
-                
-                this.saveData(); // СОХРАНЯЕМ НАВСЕГДА
-                alert("ИГРА ОПУБЛИКОВАНА! Теперь она есть в меню.");
-                this.exitGame();
-            },
-
-            // --- ИГРОВОЙ ЦИКЛ И АНИМАЦИИ ---
-            engineLoop() {
-                if(this.mode === 'none') return;
-                requestAnimationFrame(() => this.engineLoop());
-                
-                const delta = this.clock.getDelta();
-                const time = this.clock.getElapsedTime();
-
-                if(this.mode === 'play' && this.playerGroup) {
-                    this.velocity.x = 0; this.velocity.z = 0;
-                    const speed = 15;
-                    
-                    this.direction.z = Number(this.keys['KeyS'] || 0) - Number(this.keys['KeyW'] || 0);
-                    this.direction.x = Number(this.keys['KeyD'] || 0) - Number(this.keys['KeyA'] || 0);
-                    this.direction.normalize();
-
-                    if (this.keys['KeyW'] || this.keys['KeyS']) this.velocity.z -= this.direction.z * speed;
-                    if (this.keys['KeyA'] || this.keys['KeyD']) this.velocity.x -= this.direction.x * speed;
-
-                    this.playerGroup.translateX(-this.velocity.x * delta);
-                    this.playerGroup.translateZ(this.velocity.z * delta);
-
-                    // Прыжок
-                    this.velocity.y -= 35 * delta;
-                    if(this.keys['Space'] && this.canJump) {
-                        this.velocity.y = 15;
-                        this.canJump = false;
-                    }
-                    this.playerGroup.position.y += this.velocity.y * delta;
-                    if(this.playerGroup.position.y <= 0) {
-                        this.playerGroup.position.y = 0;
-                        this.velocity.y = 0;
-                        this.canJump = true;
-                    }
-
-                    // --- ПРОЦЕДУРНАЯ АНИМАЦИЯ ХОДЬБЫ ---
-                    const isMoving = Math.abs(this.velocity.x) > 0 || Math.abs(this.velocity.z) > 0;
-                    if (isMoving && this.canJump) {
-                        // Двигаем руками и ногами противофазно через синус
-                        const swing = Math.sin(time * 15) * 0.8; 
-                        this.rig.leftArm.rotation.x = swing;
-                        this.rig.rightArm.rotation.x = -swing;
-                        this.rig.leftLeg.rotation.x = -swing;
-                        this.rig.rightLeg.rotation.x = swing;
-                        // Небольшое покачивание тела
-                        this.rig.torso.rotation.z = Math.sin(time * 7.5) * 0.05;
-                    } else {
-                        // Сброс в стойку смирно
-                        this.rig.leftArm.rotation.x = THREE.MathUtils.lerp(this.rig.leftArm.rotation.x, 0, 0.1);
-                        this.rig.rightArm.rotation.x = THREE.MathUtils.lerp(this.rig.rightArm.rotation.x, 0, 0.1);
-                        this.rig.leftLeg.rotation.x = THREE.MathUtils.lerp(this.rig.leftLeg.rotation.x, 0, 0.1);
-                        this.rig.rightLeg.rotation.x = THREE.MathUtils.lerp(this.rig.rightLeg.rotation.x, 0, 0.1);
-                        this.rig.torso.rotation.z = THREE.MathUtils.lerp(this.rig.torso.rotation.z, 0, 0.1);
-                    }
-
-                    // Камера
-                    const camOffset = new THREE.Vector3(0, 4, 10).applyMatrix4(this.playerGroup.matrixWorld);
-                    this.camera.position.lerp(camOffset, 0.1);
-                    this.camera.lookAt(this.playerGroup.position.x, this.playerGroup.position.y + 1.5, this.playerGroup.position.z);
-
-                } else if (this.mode === 'studio') {
-                    const flySpeed = 30 * delta;
-                    if(this.keys['KeyW']) this.camera.translateZ(-flySpeed);
-                    if(this.keys['KeyS']) this.camera.translateZ(flySpeed);
-                    if(this.keys['KeyA']) this.camera.translateX(-flySpeed);
-                    if(this.keys['KeyD']) this.camera.translateX(flySpeed);
-                    if(this.keys['KeyE']) this.camera.position.y += flySpeed;
-                    if(this.keys['KeyQ']) this.camera.position.y -= flySpeed;
-                }
+                // Камера за игроком
+                const camPos = new THREE.Vector3(0, 5, 10).applyMatrix4(this.playerGroup.matrixWorld);
+                this.camera.position.lerp(camPos, 0.1);
+                this.camera.lookAt(this.playerGroup.position);
 
                 this.renderer.render(this.scene, this.camera);
-            },
-
-            exitGame() {
-                document.exitPointerLock();
-                this.mode = 'none';
-                document.getElementById('engine-view').style.display = 'none';
-                document.getElementById('ui-hub').classList.remove('hidden');
-                this.renderMyGames(); // Обновляем список игр
             }
         };
-
-        app.init();
     </script>
 </body>
-
 </html>
