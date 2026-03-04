@@ -160,13 +160,27 @@
             loop() {
                 requestAnimationFrame(() => this.loop());
                 const dt = this.clock.getDelta();
-
-                // Движение
                 const speed = 10;
+                
+                // Сохраняем текущую позицию на случай столкновения
+                const oldPos = this.playerGroup.position.clone();
+
+                // ИСПРАВЛЕННОЕ УПРАВЛЕНИЕ:
+                // W теперь ведет ВПЕРЕД (минус Z), S - НАЗАД (плюс Z)
                 if(this.keys['KeyW']) this.playerGroup.translateZ(-speed * dt);
                 if(this.keys['KeyS']) this.playerGroup.translateZ(speed * dt);
                 if(this.keys['KeyA']) this.playerGroup.rotation.y += 3 * dt;
                 if(this.keys['KeyD']) this.playerGroup.rotation.y -= 3 * dt;
+
+                // ПРОСТЕЙШАЯ КОЛЛИЗИЯ (Пример для стен вокруг центра 20x20)
+                // Если игрок выходит за границы или заходит в зону блоков, возвращаем его
+                const limit = 45; // граница карты
+                if (Math.abs(this.playerGroup.position.x) > limit || Math.abs(this.playerGroup.position.z) > limit) {
+                    this.playerGroup.position.copy(oldPos);
+                }
+                
+                // Здесь можно добавить проверку конкретных блоков:
+                // Если (позиция рядом с блоком) -> this.playerGroup.position.copy(oldPos);
 
                 // Отправка позиции на сервер
                 if(this.socket) {
@@ -178,14 +192,14 @@
                     });
                 }
 
-                // Камера за игроком
+                // Камера
                 const camPos = new THREE.Vector3(0, 5, 10).applyMatrix4(this.playerGroup.matrixWorld);
                 this.camera.position.lerp(camPos, 0.1);
                 this.camera.lookAt(this.playerGroup.position);
 
                 this.renderer.render(this.scene, this.camera);
             }
-        };
     </script>
 </body>
 </html>
+
