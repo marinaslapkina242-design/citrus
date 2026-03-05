@@ -417,32 +417,86 @@ objectsToIntersect.forEach((obj,i)=>{
 // APP
 // ═══════════════════════════════════
 const app = {
-    // ── VARIABLES
-    scene: null, camera: null, renderer: null, clock: null,
-    keys: {}, velocity: new THREE.Vector3(), spaceGrav: false, canJump: false,
-    mode: 'none', currentMap: null, raycaster: new THREE.Raycaster(), selColor: 0xCCCCCC,
-    objectsToIntersect: [], mapBlocks: [], collectibles: [], loopFn: null, rig: {}, pAvatar: null,
+    scene: null, camera: null, renderer: null, 
+    keys: {}, nickname: '', socket: null, players: {},
+    isLocked: false,
 
-    // ── INIT & LOOP (С ИЗМЕНЕНИЯМИ ДЛЯ ID)
-    init(){
-        this.loadData();
-        // АВТО-ВХОД
-        if (this.username && this.username !== '') {
-            document.getElementById('ui-login').classList.add('hidden');
-            document.getElementById('ui-hub').classList.remove('hidden');
-            this.renderMyGames(); this.renderFriends(); this.renderOnline(); this.initAvatarPreview(); this.renderShop();
-            this.updateUI();
-        }
+    init() {
+        this.scene = new THREE.Scene();
+        this.scene.background = new THREE.Color(0x0a0a0a);
+        this.scene.fog = new THREE.FogExp2(0x0a0a0a, 0.05);
 
-        window.addEventListener('keydown',e=>this.keys[e.code]=true);
-        window.addEventListener('keyup',e=>this.keys[e.code]=false);
-        window.addEventListener('mousedown',e=>this.onMouseClick(e));
-        window.addEventListener('mousemove',e=>this.onMouseMove(e));
+        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        this.renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('engine-view'), antialias: true });
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+
+        // Свет
+        const ambient = new THREE.AmbientLight(0xffffff, 0.5);
+        this.scene.add(ambient);
+        const sun = new THREE.DirectionalLight(0xffffff, 0.8);
+        sun.position.set(10, 20, 10);
+        this.scene.add(sun);
+
+        // Пол
+        const grid = new THREE.GridHelper(100, 100, 0xff9800, 0x222222);
+        this.scene.add(grid);
+
+        window.addEventListener('keydown', (e) => this.keys[e.code] = true);
+        window.addEventListener('keyup', (e) => this.keys[e.code] = false);
+        window.addEventListener('mousemove', (e) => this.onMouseMove(e));
         
-        this.buildPalette();
-        this._initTouch();
+        document.addEventListener('pointerlockchange', () => {
+            this.isLocked = document.pointerLockElement === document.getElementById('engine-view');
+        });
+
+        this.animate();
     },
 
+    connect() {
+        this.nickname = document.getElementById('nick-input').value;
+        const serverIp = document.getElementById('server-input').value;
+        
+        document.getElementById('ui-login').classList.add('hidden');
+        document.getElementById('crosshair').classList.remove('hidden');
+        document.getElementById('engine-view').requestPointerLock();
+
+        console.log("Попытка подключения к:", serverIp);
+        // Здесь логика WebSocket, если у тебя есть запущенный сервер:
+        // this.socket = new WebSocket(`ws://${serverIp}:8080`);
+    },
+
+    onMouseMove(e) {
+        if (!this.isLocked) return;
+        this.camera.rotation.y -= e.movementX * 0.002;
+        // Ограничение поворота головы вверх/вниз
+        let nextX = this.camera.rotation.x - e.movementY * 0.002;
+        this.camera.rotation.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, nextX));
+    },
+
+    animate() {
+        requestAnimationFrame(() => this.animate());
+
+        if (this.isLocked) {
+            const speed = 0.15;
+            const direction = new THREE.Vector3();
+            const front = new THREE.Vector3();
+            const side = new THREE.Vector3();
+
+            // Получаем направление взгляда (только по горизонтали)
+            this.camera.getWorldDirection(direction);
+            front.set(direction.x, 0, direction.z).normalize();
+            side.set(-front.z, 0, front.x); // Вектор вбок
+
+            // ПРАВИЛЬНАЯ ХОДЬБА (Вперед/Назад/Боком)
+            if (this.keys['KeyW']) this.camera.position.addScaledVector(front, speed);
+            if (this.keys['KeyS']) this.camera.position.addScaledVector(front, -speed);
+            if (this.keys['KeyA']) this.camera.position.addScaledVector(side, -speed);
+            if (this.keys['KeyD']) this.camera.position.addScaledVector(side, speed);
+        }
+
+        this.renderer.render(this.scene, this.camera);
+    }
+};
     // ── DATA & ID SYSTEM
     loadData(){
         const s=localStorage.getItem('citrus_v5_pro');
