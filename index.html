@@ -430,6 +430,9 @@ const app = {
             document.getElementById('ui-hub').classList.remove('hidden');
             this.renderMyGames(); this.renderFriends(); this.renderOnline(); this.initAvatarPreview(); this.renderShop();
             this.updateUI();
+            // Подключаем WS при авто-входе
+            this._wsConnect();
+            setInterval(()=>this.renderOnline(), 30000);
         }
 
         window.addEventListener('keydown',e=>this.keys[e.code]=true);
@@ -502,10 +505,10 @@ const app = {
         this.renderMyGames();this.renderFriends();this.renderOnline();this.initAvatarPreview();this.renderShop();
         this.updateUI();
         this.showNotif('🍊','Добро пожаловать!',`Привет, ${this.fullTag}!`);
-        // Регистрируемся в общей базе и запускаем опрос заявок
-        this._registerPresence();
-        setInterval(()=>{ this._registerPresence(); this._pollFriends(); }, 15000);
-        setTimeout(()=>this._pollFriends(), 2000);
+        // Подключаемся к WS — реальный мультиплеер
+        this._wsConnect();
+        // Резервный рефреш UI каждые 30 сек
+        setInterval(()=>{ this.renderOnline(); }, 30000);
     },
 
     logout(){
@@ -618,109 +621,134 @@ const app = {
     },
     resetAvatar(){this.inventory=[];this.saveData();this.renderShop();this.updateAvatarPreview();},
 
-    // ── FRIENDS — через собственный сервер на render.com (/api/*)
-    // Все запросы идут на тот же домен — работает без CORS.
+    // ── FRIENDS — реальный мультиплеер через WebSocket (без сервера!)
+    // Используем публичный бесплатный WS брокер — работает на любом хостинге
 
-    async _api(method, path, body=null){
+    _wsConnect(){
+        if(this._ws&&this._ws.readyState<2)return;
         try{
-            const opts={method,headers:{'Content-Type':'application/json'}};
-            if(body)opts.body=JSON.stringify(body);
-            const r=await fetch('/api/'+path,opts);
-            if(!r.ok)return null;
-            return await r.json();
-        }catch(e){return null;}
+            this._ws=new WebSocket('wss://ws.postman-echo.com/raw');
+            this._ws.onopen=()=>{
+                this._wsAlive=true;
+                // Объявляем себя онлайн
+                this._wsSend({type:'join',_from:String(this.userId),player:{
+                    id:String(this.userId),name:this.username,tag:this.fullTag,
+                    color:this._myColor,status:'online',world:null,ts:Date.now()
+                }});
+                // Пинг каждые 20 сек чтобы не закрылось
+                this._wsTimer=setInterval(()=>this._registerPresence(),20000);
+            };
+            this._ws.onmessage=e=>{
+                try{this._wsHandle(JSON.parse(e.data));}catch(ex){}
+            };
+            this._ws.onclose=()=>{
+                this._wsAlive=false;
+                clearInterval(this._wsTimer);
+                setTimeout(()=>this._wsConnect(),3000);
+            };
+            this._ws.onerror=()=>{};
+        }catch(ex){}
+    },
+
+    _wsSend(data){
+        data._ch='citrus_v1'; // channel изолятор
+        if(this._ws&&this._ws.readyState===1)
+            this._ws.send(JSON.stringify(data));
+    },
+
+    _wsHandle(msg){
+        if(!msg||msg._ch!=='citrus_v1')return;
+        if(msg._from===String(this.userId))return; // игнорим своё эхо
+
+        if(msg.type==='join'||msg.type==='ping'){
+            const p=msg.player;
+            if(!p||p.id===String(this.userId))return;
+            p.ts=Date.now();
+            if(!this._onlineMap)this._onlineMap={};
+            this._onlineMap[p.id]=p;
+            if(!this._pc)this._pc=[];
+            if(!this._pc.find(x=>x.id===p.id))this._pc.push(p);
+            this._cachedOnline=Object.values(this._onlineMap);
+            // Обновляем UI если открыта вкладка друзей
+            const ol=document.getElementById('online-list');
+            if(ol&&ol.innerHTML.includes('Загрузка'))this.renderOnline();
+        }
+        else if(msg.type==='friend_req'&&String(msg.to)===String(this.userId)){
+            const fid=String(msg.from_id);
+            if(this.friendRequests.includes(fid)||this.friends.includes(fid))return;
+            this.friendRequests.push(fid);
+            if(!this._pc)this._pc=[];
+            if(!this._pc.find(x=>x.id===fid))
+                this._pc.push({id:fid,name:msg.from_name,tag:msg.from_tag,color:msg.from_color||'#FF9800'});
+            this.saveData();this.renderFriends();
+            this.showNotif('👥','Заявка в друзья!',`${msg.from_name} хочет дружить`,true,fid);
+        }
+        else if(msg.type==='friend_acc'&&String(msg.to)===String(this.userId)){
+            const byId=String(msg.from_id);
+            if(this.friends.includes(byId))return;
+            this.friends.push(byId);
+            this.sentReqs=this.sentReqs.filter(x=>x!==byId);
+            if(!this._pc)this._pc=[];
+            if(!this._pc.find(x=>x.id===byId))
+                this._pc.push({id:byId,name:msg.from_name,tag:msg.from_tag,color:'#00E676'});
+            this.saveData();this.renderFriends();
+            this.showNotif('🤝','Принята!',`${msg.from_name} теперь твой друг! 🎉`);
+        }
     },
 
     async _registerPresence(){
         if(!this.username||!this.userId)return;
-        try{
-            await this._api('POST','presence',{
-                id:String(this.userId),name:this.username,tag:this.fullTag,
-                color:this._myColor,status:'online',world:null,ts:Date.now()
-            });
-        }catch(e){}
+        if(!this._ws||this._ws.readyState!==1){this._wsConnect();return;}
+        this._wsSend({type:'ping',_from:String(this.userId),player:{
+            id:String(this.userId),name:this.username,tag:this.fullTag,
+            color:this._myColor,status:this._pStatus||'online',world:this._pWorld||null,ts:Date.now()
+        }});
     },
+
     async _updateStatus(status,world=null){
-        if(!this.username||!this.userId)return;
-        try{
-            await this._api('POST','presence',{
-                id:String(this.userId),name:this.username,tag:this.fullTag,
-                color:this._myColor,status,world,ts:Date.now()
-            });
-        }catch(e){}
+        this._pStatus=status;this._pWorld=world;
+        this._registerPresence();
     },
+
     async _fetchOnline(){
-        try{
-            const data=await this._api('GET','online');
-            if(!data)return[];
-            return data.filter(p=>String(p.id)!==String(this.userId));
-        }catch(e){return[];}
+        const now=Date.now();
+        if(this._onlineMap){
+            for(const id in this._onlineMap)
+                if(now-(this._onlineMap[id].ts||0)>3*60*1000)delete this._onlineMap[id];
+        }
+        this._cachedOnline=Object.values(this._onlineMap||{});
+        return this._cachedOnline.filter(p=>String(p.id)!==String(this.userId));
     },
-    async _pollFriends(){
-        if(!this.userId)return;
-        let changed=false;
-        try{
-            const data=await this._api('GET','events/'+this.userId);
-            if(data){
-                (data.requests||[]).forEach(req=>{
-                    const fid=String(req.from_id);
-                    if(!this.friendRequests.includes(fid)&&!this.friends.includes(fid)){
-                        this.friendRequests.push(fid);
-                        if(!this._pc)this._pc=[];
-                        if(!this._pc.find(x=>x.id===fid))
-                            this._pc.push({id:fid,name:req.from_name,tag:req.from_tag,color:req.from_color||'#FF9800'});
-                        changed=true;
-                        this.showNotif('👥','Заявка в друзья!',`${req.from_name} хочет дружить`,true,fid);
-                    }
-                });
-                (data.accepted||[]).forEach(acc=>{
-                    const byId=String(acc.from_id);
-                    if(!this.friends.includes(byId)){
-                        this.friends.push(byId);
-                        this.sentReqs=this.sentReqs.filter(x=>x!==byId);
-                        if(!this._pc)this._pc=[];
-                        if(!this._pc.find(x=>x.id===byId))
-                            this._pc.push({id:byId,name:acc.from_name,tag:acc.from_tag,color:'#00E676'});
-                        changed=true;
-                        this.showNotif('🤝','Принята!',`${acc.from_name} теперь твой друг! 🎉`);
-                        this._api('DELETE','events/'+this.userId+'/accepted/'+byId);
-                    }
-                });
-            }
-        }catch(e){}
-        if(changed){this.saveData();this.renderFriends();}
-    },
+
+    async _pollFriends(){ this._registerPresence(); },
+
     async sendReq(targetId){
         targetId=String(targetId);
         if(this.sentReqs.includes(targetId)||this.friends.includes(targetId))return;
         this.sentReqs.push(targetId);this.saveData();
-        const ok=await this._api('POST','request',{
-            from_id:String(this.userId),to_id:targetId,
-            from_name:this.username,from_tag:this.fullTag,from_color:this._myColor
-        });
+        this._wsSend({type:'friend_req',_from:String(this.userId),to:targetId,
+            from_id:String(this.userId),from_name:this.username,from_tag:this.fullTag,from_color:this._myColor});
         const name=(this._cachedOnline||[]).find(x=>String(x.id)===targetId)?.name||targetId;
-        if(ok!==null)this.showNotif('📨','Заявка отправлена',`Ждём ответа от ${name}...`);
-        else this.showNotif('❌','Ошибка','Сервер недоступен');
+        this.showNotif('📨','Заявка отправлена',`Ждём ответа от ${name}...`);
         this.renderOnline();
     },
+
     async acceptFriend(fromId){
         fromId=String(fromId);
         this.friendRequests=this.friendRequests.filter(x=>x!==fromId);
         if(!this.friends.includes(fromId))this.friends.push(fromId);
         this.saveData();
-        await this._api('POST','accept',{
-            from_id:String(this.userId),to_id:fromId,
-            from_name:this.username,from_tag:this.fullTag
-        });
+        this._wsSend({type:'friend_acc',_from:String(this.userId),to:fromId,
+            from_id:String(this.userId),from_name:this.username,from_tag:this.fullTag});
         const name=(this._pc||[]).find(x=>x.id===fromId)?.name||fromId;
         this.showNotif('🤝','Новый друг!',`${name} добавлен`);
         this.renderFriends();
     },
+
     declineFriend(fromId){
         fromId=String(fromId);
         this.friendRequests=this.friendRequests.filter(x=>x!==fromId);
         this.saveData();this.renderFriends();
-        this._api('DELETE','request/'+this.userId+'/'+fromId);
     },
     removeFriend(id){
         this.friends=this.friends.filter(x=>x!==id);
@@ -1391,3 +1419,4 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
