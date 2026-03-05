@@ -490,25 +490,21 @@ const app = {
     },
 
     // ── AUTH
-    login(){
-        const v=document.getElementById('username').value.trim();
-        if(v.length < 2) { alert("Никнейм должен быть длиннее 1 символа!"); return; }
+    login() {
+        const v = document.getElementById('username').value.trim();
+        if (v.length < 3) return this.showNotif('ОШИБКА', 'НИК СЛИШКОМ КОРОТКИЙ');
+        this.username = v;
+        this.userId = Math.floor(1000 + Math.random() * 8999);
         
-        this.username=v;
-        if(!this.userId) this.userId = Math.floor(1000 + Math.random() * 9000);
-        this.fullTag = `${this.username}#${this.userId}`;
+        // --- НОВОЕ: Регистрация в общей базе для поиска ---
+        let globalDB = JSON.parse(localStorage.getItem('citrus_global_users') || '[]');
+        if(!globalDB.find(u => u.id === this.userId)) {
+            globalDB.push({name: this.username, id: this.userId});
+            localStorage.setItem('citrus_global_users', JSON.stringify(globalDB));
+        }
+        // --------------------------------------------------
         
-        this.saveData();
-        
-        document.getElementById('ui-login').classList.add('hidden');
-        document.getElementById('ui-hub').classList.remove('hidden');
-        this.renderMyGames();this.renderFriends();this.renderOnline();this.initAvatarPreview();this.renderShop();
-        this.updateUI();
-        this.showNotif('🍊','Добро пожаловать!',`Привет, ${this.fullTag}!`);
-        // Подключаемся к WS — реальный мультиплеер
-        this._wsConnect();
-        // Резервный рефреш UI каждые 30 сек
-        setInterval(()=>{ this.renderOnline(); }, 30000);
+        this.saveData(); this.showHub();
     },
 
     logout(){
@@ -823,32 +819,39 @@ const app = {
     },
 
     // Поиск по нику или тегу (ищем среди онлайн)
-    async searchPlayer(){
-        const q=document.getElementById('srch').value.trim().toLowerCase();
-        const r=document.getElementById('srch-res');
-        if(!q){r.innerHTML='';return;}
-        r.innerHTML='<div style="color:#555;font-size:12px;padding:8px">Поиск...</div>';
-        const players=await this._fetchOnline();
-        const f=players.filter(p=>
-            p.name.toLowerCase().includes(q)||
-            (p.tag&&p.tag.toLowerCase().includes(q))||
-            String(p.id)===q
-        );
-        if(!f.length){r.innerHTML='<div style="color:#444;font-size:13px;padding:8px">Не найдено.<br><small style="color:#333">Игрок должен быть онлайн прямо сейчас</small></div>';return;}
-        r.innerHTML='<div style="font-size:11px;color:#333;margin:9px 0 7px;text-transform:uppercase;letter-spacing:1.5px">Найдено</div>';
-        f.forEach(p=>{
-            const isFr=this.friends.includes(String(p.id)),sent=this.sentReqs.includes(String(p.id));
-            r.innerHTML+=`<div class="fr">
-                <div class="fa2" style="background:${p.color||'#888'}22;color:${p.color||'#888'}">${(p.name[0]||'?').toUpperCase()}</div>
-                <div class="fi"><div class="fn">${p.name}</div><div class="fs">${p.tag||p.id}</div></div>
-                ${isFr?'<span style="color:#00E676;font-size:12px">✓ Друг</span>':
-                  sent?'<span style="color:#555;font-size:12px">✓ Отправлено</span>':
-                  `<button class="bx b-add" onclick="app.sendReq('${p.id}')">+ Добавить</button>`}
-            </div>`;
+     searchPlayer() {
+        const q = document.getElementById('srch').value.trim().toLowerCase();
+        const res = document.getElementById('srch-res'); res.innerHTML = '';
+        if (!q) return;
+
+        // Ищем среди всех, кто когда-либо заходил
+        const db = JSON.parse(localStorage.getItem('citrus_global_users') || '[]');
+        const found = db.filter(u => u.name.toLowerCase().includes(q) && u.id !== this.userId);
+
+        if (!found.length) {
+            res.innerHTML = '<div style="color:#555;font-size:12px;padding:5px">Игрок не найден</div>';
+            return;
+        }
+
+        found.forEach(u => {
+            const isFr = this.friends.some(f => f.id === u.id);
+            res.innerHTML += `
+                <div class="fr">
+                    <div class="fi"><span class="fn">${u.name}#${u.id}</span></div>
+                    <div class="fb">
+                        ${isFr ? '<span style="color:gray;font-size:11px">В друзьях</span>' : 
+                        `<button class="bx b-add" onclick="app.addRealFriend(${u.id},'${u.name}')">ДОБАВИТЬ</button>`}
+                    </div>
+                </div>`;
         });
     },
 
-    simReq(){}, // удалено — только реальные игроки
+    addRealFriend(id, name) {
+        this.friends.push({id: id, name: name, status: 'online'});
+        this.saveData(); this.renderFriends();
+        this.showNotif('СИСТЕМА', `Вы добавили ${name} в друзья!`);
+        this.searchPlayer(); 
+    },
 
     // ── NOTIFS
     showNotif(icon,title,body,hasBtns=false,fid=null){
@@ -1419,4 +1422,5 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
