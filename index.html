@@ -61,13 +61,15 @@
         #ingame-ui { position: absolute; top: 16px; left: 16px; background: rgba(0,0,0,0.75); padding: 10px 18px; border-radius: 12px; border: 1px solid var(--c-main); font-size: 20px; font-weight: bold; }
         .c-swatch { width: 22px; height: 22px; border-radius: 5px; cursor: pointer; border: 2px solid transparent; transition: 0.15s; display: inline-block; }
         .c-swatch:hover, .c-swatch.sel { border-color: #fff; transform: scale(1.2); }
-        .controls-hint { position: absolute; bottom: 16px; left: 16px; background: rgba(0,0,0,0.7); border: 1px solid #1a1a1a; border-radius: 10px; padding: 12px 16px; pointer-events: none; }
+        .controls-hint { position: absolute; bottom: 16px; right: 16px; background: rgba(0,0,0,0.7); border: 1px solid #1a1a1a; border-radius: 10px; padding: 12px 16px; pointer-events: none; text-align: right; }
         .controls-hint p { font-size: 12px; color: #555; margin: 2px 0; }
         .controls-hint span { color: #888; }
 
         /* FRIENDS */
         .friends-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-        .fp { background: #0e0e0e; border: 1px solid #1e1e1e; border-radius: 14px; padding: 20px; }
+        .fp { background: #0e0e0e; border: 1px solid #1e1e1e; border-radius: 14px; padding: 20px; max-height: 80vh; overflow-y: auto; }
+        .fp::-webkit-scrollbar { width: 3px; }
+        .fp::-webkit-scrollbar-thumb { background: #333; }
         .fp h3 { font-size: 11px; color: #444; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 14px; }
         .fr { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.02); border: 1px solid transparent; margin-bottom: 7px; }
         .fr:hover { border-color: #2a2a2a; }
@@ -109,14 +111,14 @@
         /* TOUCH CONTROLS */
         #touch-controls { display: none; position: absolute; inset: 0; pointer-events: none; }
         @media (pointer: coarse) { #touch-controls { display: block; } }
-        .joystick-zone { position: absolute; bottom: 24px; left: 24px; width: 130px; height: 130px; pointer-events: auto; }
+        .joystick-zone { position: absolute; bottom: 24px; right: 24px; width: 130px; height: 130px; pointer-events: auto; }
         .joystick-base { width: 130px; height: 130px; background: rgba(255,255,255,0.06); border: 2px solid rgba(255,255,255,0.12); border-radius: 50%; position: relative; }
         .joystick-knob { width: 54px; height: 54px; background: rgba(255,152,0,0.5); border: 2px solid rgba(255,152,0,0.8); border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); transition: background 0.1s; box-shadow: 0 0 12px rgba(255,152,0,0.3); }
-        .touch-right { position: absolute; bottom: 24px; right: 24px; display: flex; flex-direction: column; gap: 10px; align-items: flex-end; pointer-events: auto; }
+        .touch-right { position: absolute; bottom: 24px; left: 24px; display: flex; flex-direction: column; gap: 10px; align-items: flex-end; pointer-events: auto; }
         .touch-btn { width: 62px; height: 62px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: bold; pointer-events: auto; border: 2px solid rgba(255,255,255,0.15); background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); color: #fff; cursor: pointer; -webkit-tap-highlight-color: transparent; }
         .touch-btn:active { transform: scale(0.9); background: rgba(255,152,0,0.3); }
         .touch-btn.jump { background: rgba(255,152,0,0.2); border-color: rgba(255,152,0,0.5); }
-        .touch-cam { position: absolute; bottom: 24px; right: 110px; width: 130px; height: 130px; pointer-events: auto; }
+        .touch-cam { position: absolute; bottom: 24px; right: 170px; width: 130px; height: 130px; pointer-events: auto; }
         .touch-cam-base { width: 130px; height: 130px; background: rgba(0,229,255,0.04); border: 2px solid rgba(0,229,255,0.1); border-radius: 50%; position: relative; }
         .touch-cam-knob { width: 44px; height: 44px; background: rgba(0,229,255,0.3); border: 2px solid rgba(0,229,255,0.6); border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); }
         .touch-place-btn { position: absolute; top: 50%; right: 16px; transform: translateY(-50%); width: 56px; height: 56px; border-radius: 14px; background: rgba(255,152,0,0.2); border: 2px solid rgba(255,152,0,0.5); display: flex; align-items: center; justify-content: center; font-size: 24px; pointer-events: auto; cursor: pointer; -webkit-tap-highlight-color: transparent; }
@@ -135,6 +137,10 @@
         .mbtns { display: flex; gap: 9px; }
         .mbtns button { flex: 1; padding: 11px; border-radius: 8px; font-size: 14px; font-weight: bold; }
         @keyframes spin { from{transform:rotate(0deg)}to{transform:rotate(360deg)} }
+
+        /* CHAT UI */
+        .chat-msg { background: rgba(0,0,0,0.6); padding: 5px 10px; border-radius: 6px; margin-top: 4px; word-wrap: break-word; line-height: 1.4; }
+        #chat-input:focus { border-color: var(--c-main) !important; background: rgba(0,0,0,0.8) !important; }
     </style>
 </head>
 <body>
@@ -145,7 +151,7 @@
     <div class="login-box">
         <h1 style="color:var(--c-main);margin:0 0 5px;font-size:48px;text-shadow:0 0 30px rgba(255,152,0,0.5);">CITRUS</h1>
         <p style="color:#555;margin:0 0 26px;font-size:12px;letter-spacing:2px;text-transform:uppercase;">Online · Creator Edition</p>
-        <input type="text" id="username" placeholder="Введи никнейм..." autocomplete="off" maxlength="12">
+        <input type="text" id="username" placeholder="Введи никнейм..." autocomplete="off" maxlength="12" onkeydown="if(event.key==='Enter') app.login()">
         <button class="btn-primary" onclick="app.login()">⚡ ИГРАТЬ</button>
     </div>
 </div>
@@ -228,8 +234,8 @@
                     <div class="fp">
                         <h3>🔍 Найти игрока</h3>
                         <div class="srow">
-                            <input type="text" id="srch" placeholder="Никнейм..." autocomplete="off">
-                            <button onclick="app.searchPlayer()">Найти</button>
+                            <input type="text" id="srch" placeholder="Введите ник или оставьте пустым для всех" autocomplete="off" oninput="app.searchPlayer()">
+                            <button onclick="app.searchPlayer()">Поиск</button>
                         </div>
                         <div id="srch-res"></div>
                         <div style="margin-top:18px;">
@@ -288,6 +294,12 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
             <h4>В игре</h4>
             <div id="mp-list"></div>
         </div>
+        
+        <div id="chat-container" style="display:none; position:absolute; bottom:20px; left:20px; width:320px; max-height:250px; flex-direction:column; pointer-events:none; z-index:100;">
+            <div id="chat-messages" style="flex:1; overflow-y:auto; color:white; font-size:13px; margin-bottom:10px; pointer-events:auto; text-shadow:1px 1px 2px #000; display:flex; flex-direction:column; justify-content:flex-end;"></div>
+            <input type="text" id="chat-input" placeholder="Чат (Enter)..." autocomplete="off" onkeydown="app.handleChatInput(event)" style="background:rgba(0,0,0,0.5); border:1px solid rgba(255,152,0,0.3); color:white; padding:10px 14px; border-radius:10px; outline:none; font-size:13px; pointer-events:auto; transition:0.2s; box-shadow:0 5px 15px rgba(0,0,0,0.3);">
+        </div>
+
         <button class="btn-exit" onclick="app.exitGame()">← В ХАБ</button>
         <div class="controls-hint" id="kb-hint">
             <p><span>WASD</span> — движение</p>
@@ -361,7 +373,6 @@ const COLORS=[
     {c:0x9C27B0,n:'Кристалл'},{c:0xFF4081,n:'Розовый'},{c:0x00BCD4,n:'Лёд'},
     {c:0x795548,n:'Земля' },{c:0xF44336,n:'Красный' },{c:0x212121,n:'Обсидиан'}
 ];
-const ONLINE=[]; // только реальные игроки через Firebase
 const TPLS={
     spawn:`// Спавним блоки по кругу
 const n=12, r=8;
@@ -421,7 +432,7 @@ const app = {
     mode: 'none', currentMap: null, raycaster: new THREE.Raycaster(), selColor: 0xCCCCCC,
     objectsToIntersect: [], mapBlocks: [], collectibles: [], loopFn: null, rig: {}, pAvatar: null,
 
-    // ── INIT & LOOP (С ИЗМЕНЕНИЯМИ ДЛЯ ID)
+    // ── INIT
     init(){
         this.loadData();
         // АВТО-ВХОД
@@ -430,13 +441,20 @@ const app = {
             document.getElementById('ui-hub').classList.remove('hidden');
             this.renderMyGames(); this.renderFriends(); this.renderOnline(); this.initAvatarPreview(); this.renderShop();
             this.updateUI();
-            // Подключаем WS при авто-входе
             this._wsConnect();
             setInterval(()=>this.renderOnline(), 30000);
         }
 
-        window.addEventListener('keydown',e=>this.keys[e.code]=true);
-        window.addEventListener('keyup',e=>this.keys[e.code]=false);
+        // ОБНОВЛЕННЫЕ СОБЫТИЯ КЛАВИАТУРЫ (Защита при вводе в чат)
+        window.addEventListener('keydown', e => {
+            if(document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
+            this.keys[e.code] = true;
+        });
+        window.addEventListener('keyup', e => {
+            if(document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
+            this.keys[e.code] = false;
+        });
+        
         window.addEventListener('mousedown',e=>this.onMouseClick(e));
         window.addEventListener('mousemove',e=>this.onMouseMove(e));
         
@@ -495,16 +513,17 @@ const app = {
         if (v.length < 3) return this.showNotif('ОШИБКА', 'НИК СЛИШКОМ КОРОТКИЙ');
         this.username = v;
         this.userId = Math.floor(1000 + Math.random() * 8999);
+        this.fullTag = `${this.username}#${this.userId}`;
         
-        // --- НОВОЕ: Регистрация в общей базе для поиска ---
         let globalDB = JSON.parse(localStorage.getItem('citrus_global_users') || '[]');
         if(!globalDB.find(u => u.id === this.userId)) {
             globalDB.push({name: this.username, id: this.userId});
             localStorage.setItem('citrus_global_users', JSON.stringify(globalDB));
         }
-        // --------------------------------------------------
         
-        this.saveData(); this.showHub();
+        this.saveData(); 
+        this.showHub();
+        this._wsConnect();
     },
 
     logout(){
@@ -512,8 +531,8 @@ const app = {
         location.reload();
     },
 
+    // ── TOUCH
     _initTouch(){
-        // Левый джойстик — движение
         const jz=document.getElementById('joy-zone');
         const jk=document.getElementById('joy-knob');
         if(!jz)return;
@@ -531,7 +550,6 @@ const app = {
                 const d=Math.sqrt(dx*dx+dy*dy);
                 if(d>JR){dx=dx/d*JR;dy=dy/d*JR;}
                 jk.style.transform=`translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
-                // Маппируем в keys
                 const th=0.25;
                 this.keys['KeyW']=dy<-JR*th;
                 this.keys['KeyS']=dy>JR*th;
@@ -545,7 +563,6 @@ const app = {
         };
         jz.addEventListener('touchend',jEnd);jz.addEventListener('touchcancel',jEnd);
 
-        // Правый джойстик — камера
         const cz=document.getElementById('cam-zone');
         const ck=document.getElementById('cam-knob');
         if(!cz)return;
@@ -592,7 +609,11 @@ const app = {
         document.getElementById('tab-'+id).classList.remove('hidden');
         document.getElementById('nav-'+id)?.classList.add('active');
         if(id==='avatar')this.updateAvatarPreview();
-        if(id==='friends'){this.renderFriends();this.renderOnline();}
+        if(id==='friends'){
+            this.renderFriends();
+            this.renderOnline();
+            this.searchPlayer(); // Показываем всех при открытии вкладки!
+        }
     },
 
     // ── SHOP
@@ -617,21 +638,17 @@ const app = {
     },
     resetAvatar(){this.inventory=[];this.saveData();this.renderShop();this.updateAvatarPreview();},
 
-    // ── FRIENDS — реальный мультиплеер через WebSocket (без сервера!)
-    // Используем публичный бесплатный WS брокер — работает на любом хостинге
-
+    // ── MULTIPLAYER / WEBSOCKET / CHAT
     _wsConnect(){
         if(this._ws&&this._ws.readyState<2)return;
         try{
             this._ws=new WebSocket('wss://ws.postman-echo.com/raw');
             this._ws.onopen=()=>{
                 this._wsAlive=true;
-                // Объявляем себя онлайн
                 this._wsSend({type:'join',_from:String(this.userId),player:{
                     id:String(this.userId),name:this.username,tag:this.fullTag,
                     color:this._myColor,status:'online',world:null,ts:Date.now()
                 }});
-                // Пинг каждые 20 сек чтобы не закрылось
                 this._wsTimer=setInterval(()=>this._registerPresence(),20000);
             };
             this._ws.onmessage=e=>{
@@ -647,14 +664,19 @@ const app = {
     },
 
     _wsSend(data){
-        data._ch='citrus_v1'; // channel изолятор
-        if(this._ws&&this._ws.readyState===1)
-            this._ws.send(JSON.stringify(data));
+        data._ch='citrus_v1';
+        if(this._ws&&this._ws.readyState===1) this._ws.send(JSON.stringify(data));
     },
 
     _wsHandle(msg){
         if(!msg||msg._ch!=='citrus_v1')return;
-        if(msg._from===String(this.userId))return; // игнорим своё эхо
+        if(msg._from===String(this.userId))return;
+
+        // Обработка чата
+        if(msg.type==='chat') {
+            this.appendChatMessage(msg.name, msg.text, msg.color);
+            return;
+        }
 
         if(msg.type==='join'||msg.type==='ping'){
             const p=msg.player;
@@ -665,7 +687,6 @@ const app = {
             if(!this._pc)this._pc=[];
             if(!this._pc.find(x=>x.id===p.id))this._pc.push(p);
             this._cachedOnline=Object.values(this._onlineMap);
-            // Обновляем UI если открыта вкладка друзей
             const ol=document.getElementById('online-list');
             if(ol&&ol.innerHTML.includes('Загрузка'))this.renderOnline();
         }
@@ -692,6 +713,30 @@ const app = {
         }
     },
 
+    // ── IN-GAME CHAT
+    handleChatInput(e) {
+        e.stopPropagation(); // Не отдаем нажатия движку (W/A/S/D)
+        if (e.key === 'Enter') {
+            const text = e.target.value.trim();
+            if (text) {
+                this._wsSend({type: 'chat', _from: String(this.userId), name: this.username, text: text, color: this._myColor});
+                this.appendChatMessage(this.username, text, this._myColor); // Показываем у себя
+                e.target.value = '';
+            }
+            e.target.blur(); // Снимаем фокус с поля
+            document.getElementById('gl-canvas').focus();
+        }
+    },
+    appendChatMessage(name, text, color) {
+        const msgs = document.getElementById('chat-messages');
+        if(!msgs) return;
+        const div = document.createElement('div');
+        div.className = 'chat-msg';
+        div.innerHTML = `<b style="color:${color||'#FF9800'}">${name}:</b> ${text}`;
+        msgs.appendChild(div);
+        msgs.scrollTop = msgs.scrollHeight; // Скролл вниз
+    },
+
     async _registerPresence(){
         if(!this.username||!this.userId)return;
         if(!this._ws||this._ws.readyState!==1){this._wsConnect();return;}
@@ -716,8 +761,6 @@ const app = {
         return this._cachedOnline.filter(p=>String(p.id)!==String(this.userId));
     },
 
-    async _pollFriends(){ this._registerPresence(); },
-
     async sendReq(targetId){
         targetId=String(targetId);
         if(this.sentReqs.includes(targetId)||this.friends.includes(targetId))return;
@@ -727,7 +770,7 @@ const app = {
         const name=(this._cachedOnline||[]).find(x=>String(x.id)===targetId)?.name||targetId;
         this.showNotif('📨','Заявка отправлена',`Ждём ответа от ${name}...`);
         this.renderOnline();
-        this.searchPlayer(); // Обновляем результаты поиска
+        this.searchPlayer(); // Обновляем поиск
     },
 
     async acceptFriend(fromId){
@@ -751,18 +794,57 @@ const app = {
         this.friends=this.friends.filter(x=>x!==id);
         this.saveData();this.renderFriends();this.renderOnline();
     },
-    inviteFriend(id){
-        const p=(this._cachedOnline||[]).find(x=>x.id===String(id));
-        this.showNotif('🎮','Приглашение отправлено',p?`Ждём ${p.name}...`:'Отправлено!');
+
+    // ── SEARCH ALL PLAYERS
+    searchPlayer() {
+        const q = document.getElementById('srch').value.trim().toLowerCase();
+        const res = document.getElementById('srch-res'); res.innerHTML = '';
+        
+        let db = JSON.parse(localStorage.getItem('citrus_global_users') || '[]');
+        let onlinePlayers = this._cachedOnline || [];
+        
+        // Объединяем локальную базу и онлайн-игроков без дубликатов
+        let allUsersMap = new Map();
+        db.forEach(u => allUsersMap.set(String(u.id), u));
+        onlinePlayers.forEach(u => allUsersMap.set(String(u.id), { id: String(u.id), name: u.name }));
+        
+        let allUsers = Array.from(allUsersMap.values());
+        
+        // Исключаем себя
+        let found = allUsers.filter(u => String(u.id) !== String(this.userId));
+        
+        // Если есть запрос, фильтруем. Если пусто — показываем всех!
+        if (q) {
+            found = found.filter(u => u.name.toLowerCase().includes(q));
+        }
+
+        if (!found.length) {
+            res.innerHTML = '<div style="color:#555;font-size:12px;padding:5px">Никого не найдено.</div>';
+            return;
+        }
+
+        found.forEach(u => {
+            const uidStr = String(u.id);
+            const isFr = this.friends.includes(uidStr);
+            const sent = this.sentReqs.includes(uidStr);
+            res.innerHTML += `
+                <div class="fr">
+                    <div class="fi"><span class="fn">${u.name} <small style="color:#666">#${u.id}</small></span></div>
+                    <div class="fb">
+                        ${isFr ? '<span style="color:gray;font-size:11px">В друзьях</span>' : 
+                          sent ? '<span style="color:var(--c-blue);font-size:11px">Отправлено</span>' :
+                        `<button class="bx b-add" onclick="app.sendReq('${u.id}')">ДОБАВИТЬ</button>`}
+                    </div>
+                </div>`;
+        });
     },
 
-    // Рендер списка друзей
     renderFriends(){
         const fl=document.getElementById('friends-list');if(!fl)return;
         fl.innerHTML='';
         const pc=this._pc||[];
         const online=this._cachedOnline||[];
-        if(!this.friends.length)fl.innerHTML='<div style="color:#444;font-size:13px;padding:10px">Пока нет друзей.<br><small style="color:#333">Найди игрока во вкладке "Найти"</small></div>';
+        if(!this.friends.length)fl.innerHTML='<div style="color:#444;font-size:13px;padding:10px">Пока нет друзей.<br><small style="color:#333">Найди игрока во вкладке выше</small></div>';
         this.friends.forEach(fid=>{
             fid=String(fid);
             const p=pc.find(x=>x.id===fid)||{id:fid,name:fid,color:'#888'};
@@ -794,7 +876,6 @@ const app = {
         }else rw.style.display='none';
     },
 
-    // Рендер онлайн-игроков (загружаем из shared storage)
     async renderOnline(){
         const ol=document.getElementById('online-list');if(!ol)return;
         ol.innerHTML='<div style="color:#555;font-size:12px;padding:8px;display:flex;align-items:center;gap:8px"><span style="animation:spin 1s linear infinite;display:inline-block">⟳</span> Загрузка...</div>';
@@ -819,46 +900,6 @@ const app = {
         });
     },
 
-    // Поиск по нику или тегу (ищем среди онлайн и в localStorage)
-    searchPlayer() {
-        const q = document.getElementById('srch').value.trim().toLowerCase();
-        const res = document.getElementById('srch-res'); res.innerHTML = '';
-        if (!q) return;
-
-        // Собираем всех: и тех кто в localStorage, и тех кто онлайн
-        let db = JSON.parse(localStorage.getItem('citrus_global_users') || '[]');
-        let onlinePlayers = this._cachedOnline || [];
-        
-        // Убираем дубликаты по ID
-        let allUsersMap = new Map();
-        db.forEach(u => allUsersMap.set(String(u.id), u));
-        onlinePlayers.forEach(u => allUsersMap.set(String(u.id), { id: String(u.id), name: u.name }));
-        
-        let allUsers = Array.from(allUsersMap.values());
-
-        const found = allUsers.filter(u => u.name.toLowerCase().includes(q) && String(u.id) !== String(this.userId));
-
-        if (!found.length) {
-            res.innerHTML = '<div style="color:#555;font-size:12px;padding:5px">Игрок не найден</div>';
-            return;
-        }
-
-        found.forEach(u => {
-            const uidStr = String(u.id);
-            const isFr = this.friends.includes(uidStr);
-            const sent = this.sentReqs.includes(uidStr);
-            res.innerHTML += `
-                <div class="fr">
-                    <div class="fi"><span class="fn">${u.name}#${u.id}</span></div>
-                    <div class="fb">
-                        ${isFr ? '<span style="color:gray;font-size:11px">В друзьях</span>' : 
-                          sent ? '<span style="color:var(--c-blue);font-size:11px">Отправлено</span>' :
-                        `<button class="bx b-add" onclick="app.sendReq('${u.id}')">ДОБАВИТЬ</button>`}
-                    </div>
-                </div>`;
-        });
-    },
-
     // ── NOTIFS
     showNotif(icon,title,body,hasBtns=false,fid=null){
         const c=document.getElementById('notifs');
@@ -873,7 +914,7 @@ const app = {
         setTimeout(()=>{n.classList.remove('show');setTimeout(()=>n.remove(),400)},hasBtns?12000:3800);
     },
 
-    // ── CHARACTER (ОРИГИНАЛЬНЫЙ С ИНВЕНТАРЕМ)
+    // ── CHARACTER
     buildCharacter(needsRig){
         const group=new THREE.Group();
         const matSkin =new THREE.MeshStandardMaterial({color:0xffcc99,roughness:0.4});
@@ -956,16 +997,19 @@ const app = {
     launch(mode,mapId){
         this.mode=mode;this.currentMap=mapId;
         this.velocity.set(0,0,0);this.canJump=false;this.loopFn=null;this.spaceGrav=false;
+        
         document.getElementById('ui-hub').classList.add('hidden');
         document.getElementById('engine-view').style.display='block';
         document.getElementById('crosshair').style.display=mode==='studio'?'block':'none';
         document.getElementById('studio-ui').classList.toggle('hidden',mode!=='studio');
         document.getElementById('ingame-ui').style.display=(mode==='play'&&mapId==='gather')?'flex':'none';
         document.getElementById('mp-panel').classList.toggle('hidden',mode!=='play');
-        // Тач: показываем кнопку блока в студии
+        
+        // Чат виден только в игре
+        document.getElementById('chat-container').style.display=(mode==='play')?'flex':'none';
+        
         const placeBtnEl=document.getElementById('btn-place');
         if(placeBtnEl)placeBtnEl.classList.toggle('hidden',mode!=='studio');
-        // На мобиле скрываем подсказку клавиатуры
         const kbHint=document.getElementById('kb-hint');
         if(kbHint)kbHint.style.display=('ontouchstart' in window)?'none':'block';
         const he=document.getElementById('hint-extra');
@@ -1003,7 +1047,6 @@ const app = {
             if(this.currentMap==='parkour')this.playerGroup.position.y=5;
             this.scene.add(this.playerGroup);
             this.renderMpPanel();
-            // Загружаем скрипт карты, если есть
             if(typeof this.currentMap==='number'){
                 const m=this.customMaps[this.currentMap];
                 if(m&&m.script&&m.script.includes('// @loop')){
@@ -1018,14 +1061,13 @@ const app = {
             this.camera.rotation.order='YXZ';
         }
         
-        // ВАЖНОЕ ИСПРАВЛЕНИЕ: Блокируем курсор при старте
         document.body.requestPointerLock = document.body.requestPointerLock || document.body.mozRequestPointerLock;
         if(window.innerWidth > 768) document.body.requestPointerLock();
         
         this.engineLoop();
     },
 
-    // ── WORLDS (ОРИГИНАЛЬНЫЕ)
+    // ── WORLDS
     buildWorld(){
         const addGround=color=>{
             const g=new THREE.Mesh(new THREE.PlaneGeometry(300,300),new THREE.MeshStandardMaterial({color,roughness:0.9}));
@@ -1213,7 +1255,6 @@ const app = {
     onMouseMove(e) {
         if (!document.pointerLockElement) return;
         if (this.mode === 'play') {
-            // Мышь вращает камеру вокруг игрока (yaw/pitch)
             this._camYaw   = (this._camYaw   || Math.PI) - e.movementX * 0.003;
             this._camPitch = Math.max(-1.2, Math.min(1.2, (this._camPitch || 0.2) - e.movementY * 0.003));
         }
@@ -1255,14 +1296,12 @@ const app = {
         const time=this.clock.getElapsedTime();
 
         if(this.mode==='play'&&this.playerGroup){
-            // ── Инициализация углов камеры
             if(this._camYaw===undefined){this._camYaw=Math.PI;this._camPitch=0.2;}
 
             const camYaw = this._camYaw;
             const fwd = new THREE.Vector3(Math.sin(camYaw), 0, Math.cos(camYaw));
             const right = new THREE.Vector3(Math.cos(camYaw), 0, -Math.sin(camYaw));
 
-            // ── Движение WASD (Относительно камеры)
             const move = new THREE.Vector3();
             if(this.keys['KeyW']) move.sub(fwd);
             if(this.keys['KeyS']) move.add(fwd);
@@ -1273,7 +1312,6 @@ const app = {
             if(moving){
                 move.normalize().multiplyScalar(14 * delta);
                 
-                // Персонаж поворачивается по направлению движения
                 const tgtAngle = Math.atan2(move.x, move.z);
                 let diff = tgtAngle - this.playerGroup.rotation.y;
                 while(diff >  Math.PI) diff -= Math.PI*2;
@@ -1284,14 +1322,12 @@ const app = {
                     this.playerGroup.position.add(move);
                 }
             } else {
-                // Плавный доворот спиной к камере, чтобы всегда смотреть в затылок при остановке
                 let diff = (camYaw + Math.PI) - this.playerGroup.rotation.y;
                 while(diff >  Math.PI) diff -= Math.PI*2;
                 while(diff < -Math.PI) diff += Math.PI*2;
                 this.playerGroup.rotation.y += diff * 0.1;
             }
 
-            // ── Гравитация и прыжок
             const grav = this.spaceGrav ? 14 : 40;
             this.velocity.y -= grav * delta;
             this.playerGroup.position.y += this.velocity.y * delta;
@@ -1305,22 +1341,16 @@ const app = {
             if(this.keys['Space'] && this.canJump){this.velocity.y=jumpH; this.canJump=false;}
             if(this.playerGroup.position.y < -25){this.playerGroup.position.set(0,5,0); this.velocity.y=0;}
 
-            // ── Камера (Вид от 3-го лица "в затылок")
-            const dist = 5.0; // Отдаление камеры
+            const dist = 5.0; 
             const pitch = this._camPitch || 0.2;
-            
-            // Смещение сзади
             const offset = new THREE.Vector3(0, 0, dist);
             offset.applyEuler(new THREE.Euler(pitch, camYaw, 0, 'YXZ'));
             
-            // Идеальная позиция камеры (игрок + смещение)
             const idealCamPos = this.playerGroup.position.clone().add(new THREE.Vector3(0, 1.2, 0)).add(offset);
             
-            // Плавное следование камеры за персонажем
             this.camera.position.lerp(idealCamPos, 0.2);
             this.camera.lookAt(this.playerGroup.position.clone().add(new THREE.Vector3(0, 1.5, 0)));
             
-            // Сбор монет
             for(let i=this.collectibles.length-1;i>=0;i--){
                 const c=this.collectibles[i];
                 c.rotation.y+=2*delta;c.position.y=0.5+Math.sin(time*3+i)*0.2;
@@ -1328,7 +1358,6 @@ const app = {
                     this.scene.remove(c);this.collectibles.splice(i,1);this.balance+=10;this.saveData();
                 }
             }
-            // Анимации
             if(moving&&this.canJump){
                 const s=Math.sin(time*15)*0.8;
                 this.rig.leftArm.rotation.x=s;this.rig.rightArm.rotation.x=-s;
