@@ -417,47 +417,41 @@ objectsToIntersect.forEach((obj,i)=>{
 // APP
 // ═══════════════════════════════════
 const app = {
-    scene: null, camera: null, renderer: null, 
-    player: null, cameraHolder: null,
-    keys: {}, isLocked: false,
-    mode: 'none', username: '',
+            socket: null, otherPlayers: {},
+            username: "Player", balance: 5000, inventory: [], customMaps: [],
+            scene: null, camera: null, renderer: null, clock: null,
+            playerGroup: null, rig: {}, keys: {}, mode: 'none',
+            velocity: new THREE.Vector3(), objectsToIntersect: [], mapBlocks: [],
 
-    init() {
-        this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(0x0a0a0a);
-        
-        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        this.renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('engine-view'), antialias: true });
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
+            init() {
+                this.loadData();
+                document.addEventListener('keydown', (e) => this.keys[e.code] = true);
+                document.addEventListener('keyup', (e) => this.keys[e.code] = false);
+                
+                // Сетевые события
+                this.socket = io();
+                this.socket.on('currentPlayers', (players) => {
+                    Object.keys(players).forEach(id => {
+                        if (id !== this.socket.id) this.addOtherPlayer(id, players[id]);
+                    });
+                });
+                this.socket.on('newPlayer', p => this.addOtherPlayer(p.id, p));
+                this.socket.on('playerMoved', p => {
+                    if (this.otherPlayers[p.id]) {
+                        this.otherPlayers[p.id].position.set(p.x, p.y, p.z);
+                        this.otherPlayers[p.id].rotation.y = p.ry;
+                    }
+                });
+                this.socket.on('playerDisconnected', id => {
+                    if (this.otherPlayers[id]) { this.scene.remove(this.otherPlayers[id]); delete this.otherPlayers[id]; }
+                });
 
-        this.scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-        const grid = new THREE.GridHelper(200, 50, 0xff9800, 0x222222);
-        this.scene.add(grid);
-
-        // ПЕРСОНАЖ (только ты, без ботов)
-        const geo = new THREE.BoxGeometry(1, 2, 1);
-        const mat = new THREE.MeshPhongMaterial({ color: 0x00E5FF });
-        this.player = new THREE.Mesh(geo, mat);
-        this.player.position.y = 1;
-        this.scene.add(this.player);
-
-        // КАМЕРА СЗАДИ
-        this.cameraHolder = new THREE.Object3D();
-        this.scene.add(this.cameraHolder);
-        this.camera.position.set(0, 3, 6); // 6 метров назад, 3 метра вверх
-        this.camera.lookAt(0, 1, 0);
-        this.cameraHolder.add(this.camera);
-
-        window.addEventListener('keydown', (e) => this.keys[e.code] = true);
-        window.addEventListener('keyup', (e) => this.keys[e.code] = false);
-        window.addEventListener('mousemove', (e) => this.onMouseMove(e));
-        
-        document.addEventListener('pointerlockchange', () => {
-            this.isLocked = document.pointerLockElement === document.getElementById('engine-view');
-        });
-
-        this.animate();
-    },
+                document.addEventListener('mousemove', (e) => {
+                    if (document.pointerLockElement && this.playerGroup) {
+                        this.playerGroup.rotation.y -= e.movementX * 0.003;
+                    }
+                });
+            },
 
     // ── DATA & ID SYSTEM
     loadData(){
@@ -1276,3 +1270,4 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
