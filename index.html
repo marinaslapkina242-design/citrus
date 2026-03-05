@@ -134,6 +134,7 @@
         .modal-bx input:focus { border-color: var(--c-main); }
         .mbtns { display: flex; gap: 9px; }
         .mbtns button { flex: 1; padding: 11px; border-radius: 8px; font-size: 14px; font-weight: bold; }
+        @keyframes spin { from{transform:rotate(0deg)}to{transform:rotate(360deg)} }
     </style>
 </head>
 <body>
@@ -360,10 +361,7 @@ const COLORS=[
     {c:0x9C27B0,n:'Кристалл'},{c:0xFF4081,n:'Розовый'},{c:0x00BCD4,n:'Лёд'},
     {c:0x795548,n:'Земля' },{c:0xF44336,n:'Красный' },{c:0x212121,n:'Обсидиан'}
 ];
-const ONLINE=[
-    {id: 'bot1', name: 'CoolGamer', status: 'online', color: '#00E5FF'},
-    {id: 'bot2', name: 'MasterCitrus', status: 'ingame', world: 'Паркур', color: '#FF9800'}
-]; // Реальные игроки — через сервер (в будущем)
+const ONLINE=[]; // только реальные игроки через window.storage
 const TPLS={
     spawn:`// Спавним блоки по кругу
 const n=12, r=8;
@@ -500,6 +498,10 @@ const app = {
         this.renderMyGames();this.renderFriends();this.renderOnline();this.initAvatarPreview();this.renderShop();
         this.updateUI();
         this.showNotif('🍊','Добро пожаловать!',`Привет, ${this.fullTag}!`);
+        // Регистрируемся в общей базе и запускаем опрос заявок
+        this._registerPresence();
+        setInterval(()=>{ this._registerPresence(); this._pollFriends(); }, 15000);
+        setTimeout(()=>this._pollFriends(), 2000);
     },
 
     logout(){
@@ -611,111 +613,244 @@ const app = {
     },
     resetAvatar(){this.inventory=[];this.saveData();this.renderShop();this.updateAvatarPreview();},
 
-    // ── FRIENDS
+    // ── FRIENDS (РЕАЛЬНАЯ СИСТЕМА — window.storage shared)
+    // Каждый игрок при входе регистрируется в общей базе.
+    // Заявки и подтверждения хранятся в shared storage — видны всем.
+
+    // Зарегистрировать/обновить себя в общей базе онлайн-игроков
+    async _registerPresence(){
+        if(!this.username||!this.userId)return;
+        try{
+            await window.storage.set('player:'+this.userId, JSON.stringify({
+                id:String(this.userId), name:this.username, tag:this.fullTag,
+                color:this._myColor, status:'online', world:null, ts:Date.now()
+            }), true);
+        }catch(e){}
+    },
+
+    // Обновить статус (в игре / онлайн)
+    async _updateStatus(status, world=null){
+        if(!this.username||!this.userId)return;
+        try{
+            await window.storage.set('player:'+this.userId, JSON.stringify({
+                id:String(this.userId), name:this.username, tag:this.fullTag,
+                color:this._myColor, status, world, ts:Date.now()
+            }), true);
+        }catch(e){}
+    },
+
+    // Получить всех живых онлайн-игроков (кроме себя, активные за 3 мин)
+    async _fetchOnline(){
+        try{
+            const keys=await window.storage.list('player:', true);
+            if(!keys||!keys.keys)return[];
+            const now=Date.now(), out=[];
+            for(const k of keys.keys){
+                try{
+                    const r=await window.storage.get(k,true);
+                    if(!r)continue;
+                    const p=JSON.parse(r.value);
+                    if(p.id===String(this.userId))continue;
+                    if(now-(p.ts||0)>3*60*1000)continue;
+                    out.push(p);
+                }catch(e){}
+            }
+            return out;
+        }catch(e){return[];}
+    },
+
+    // Проверяем входящие заявки и принятия наших заявок
+    async _pollFriends(){
+        if(!this.userId)return;
+        let changed=false;
+        try{
+            // Входящие заявки
+            const rks=await window.storage.list('fr:'+this.userId+':', true);
+            if(rks&&rks.keys){
+                for(const k of rks.keys){
+                    try{
+                        const r=await window.storage.get(k,true);if(!r)continue;
+                        const req=JSON.parse(r.value);
+                        const fid=req.from;
+                        if(!this.friendRequests.includes(fid)&&!this.friends.includes(fid)){
+                            this.friendRequests.push(fid);
+                            if(!this._pc)this._pc=[];
+                            if(!this._pc.find(x=>x.id===fid))
+                                this._pc.push({id:fid,name:req.fromName,tag:req.fromTag,color:req.fromColor||'#FF9800'});
+                            changed=true;
+                            this.showNotif('👥','Заявка в друзья!',
+                                `${req.fromName} (${req.fromTag||fid}) хочет дружить`,true,fid);
+                        }
+                    }catch(e){}
+                }
+            }
+            // Подтверждения наших заявок
+            const aks=await window.storage.list('facc:'+this.userId+':', true);
+            if(aks&&aks.keys){
+                for(const k of aks.keys){
+                    try{
+                        const r=await window.storage.get(k,true);if(!r)continue;
+                        const acc=JSON.parse(r.value);
+                        const byId=acc.by;
+                        if(!this.friends.includes(byId)){
+                            this.friends.push(byId);
+                            this.sentReqs=this.sentReqs.filter(x=>x!==byId);
+                            if(!this._pc)this._pc=[];
+                            if(!this._pc.find(x=>x.id===byId))
+                                this._pc.push({id:byId,name:acc.byName,tag:acc.byTag,color:'#00E676'});
+                            changed=true;
+                            this.showNotif('🤝','Заявка принята!',`${acc.byName} теперь твой друг! 🎉`);
+                        }
+                        await window.storage.delete(k,true);
+                    }catch(e){}
+                }
+            }
+        }catch(e){}
+        if(changed){this.saveData();this.renderFriends();}
+    },
+
+    // Отправить заявку в друзья
+    async sendReq(targetId){
+        targetId=String(targetId);
+        if(this.sentReqs.includes(targetId)||this.friends.includes(targetId))return;
+        this.sentReqs.push(targetId);
+        this.saveData();
+        try{
+            await window.storage.set('fr:'+targetId+':'+this.userId, JSON.stringify({
+                from:String(this.userId), fromName:this.username,
+                fromTag:this.fullTag, fromColor:this._myColor, ts:Date.now()
+            }), true);
+            // Найдём имя в кеше онлайн
+            const name=(this._cachedOnline||[]).find(x=>x.id===targetId)?.name||targetId;
+            this.showNotif('📨','Заявка отправлена',`Ждём ответа от ${name}...`);
+        }catch(e){
+            this.showNotif('📨','Заявка отправлена','Доставим когда игрок зайдёт онлайн');
+        }
+        this.renderOnline();
+    },
+
+    // Принять заявку
+    async acceptFriend(fromId){
+        fromId=String(fromId);
+        this.friendRequests=this.friendRequests.filter(x=>x!==fromId);
+        if(!this.friends.includes(fromId))this.friends.push(fromId);
+        this.saveData();
+        try{
+            await window.storage.delete('fr:'+this.userId+':'+fromId, true);
+            await window.storage.set('facc:'+fromId+':'+this.userId, JSON.stringify({
+                by:String(this.userId), byName:this.username, byTag:this.fullTag, ts:Date.now()
+            }), true);
+        }catch(e){}
+        const name=(this._pc||[]).find(x=>x.id===fromId)?.name||fromId;
+        this.showNotif('🤝','Новый друг!',`${name} добавлен в друзья`);
+        this.renderFriends();
+    },
+
+    declineFriend(fromId){
+        fromId=String(fromId);
+        this.friendRequests=this.friendRequests.filter(x=>x!==fromId);
+        this.saveData();this.renderFriends();
+        try{window.storage.delete('fr:'+this.userId+':'+fromId,true);}catch(e){}
+    },
+    removeFriend(id){
+        this.friends=this.friends.filter(x=>x!==id);
+        this.saveData();this.renderFriends();this.renderOnline();
+    },
+    inviteFriend(id){
+        const p=(this._cachedOnline||[]).find(x=>x.id===String(id));
+        this.showNotif('🎮','Приглашение отправлено',p?`Ждём ${p.name}...`:'Отправлено!');
+    },
+
+    // Рендер списка друзей
     renderFriends(){
         const fl=document.getElementById('friends-list');if(!fl)return;
         fl.innerHTML='';
-        if(!this.friends.length)fl.innerHTML='<div style="color:#444;font-size:13px;padding:10px">Пока нет друзей</div>';
+        const pc=this._pc||[];
+        const online=this._cachedOnline||[];
+        if(!this.friends.length)fl.innerHTML='<div style="color:#444;font-size:13px;padding:10px">Пока нет друзей.<br><small style="color:#333">Найди игрока во вкладке "Найти"</small></div>';
         this.friends.forEach(fid=>{
-            const p=ONLINE.find(x=>x.id===fid);if(!p)return;
-            const st=p.status==='ingame'?`🎮 ${p.world}`:p.status==='online'?'● Онлайн':'○ Оффлайн';
-            const sc=p.status==='ingame'?'ig':p.status==='online'?'on':'';
+            fid=String(fid);
+            const p=pc.find(x=>x.id===fid)||{id:fid,name:fid,color:'#888'};
+            const on=online.find(x=>x.id===fid);
+            const st=on?(on.status==='ingame'?'🎮 '+on.world:'● Онлайн'):'○ Оффлайн';
+            const sc=on?(on.status==='ingame'?'ig':'on'):'';
             fl.innerHTML+=`<div class="fr">
-                <div class="fa2" style="background:${p.color}22;color:${p.color}">${p.name[0]}</div>
-                <div class="fi"><div class="fn">${p.name}</div><div class="fs ${sc}">${st}</div></div>
+                <div class="fa2" style="background:${p.color}22;color:${p.color}">${(p.name[0]||'?').toUpperCase()}</div>
+                <div class="fi"><div class="fn">${p.name}</div>
+                <div class="fs ${sc}">${p.tag||p.id} · ${st}</div></div>
                 <div class="fb">
-                    ${p.status!=='offline'?`<button class="bx b-add" onclick="app.inviteFriend('${p.id}')">Играть</button>`:''}
-                    <button class="bx b-del" onclick="app.removeFriend('${p.id}')">✕</button>
+                    <button class="bx b-del" onclick="app.removeFriend('${fid}')">✕</button>
                 </div></div>`;
         });
         const rw=document.getElementById('req-wrap'),rl=document.getElementById('req-list');
         if(this.friendRequests.length){
             rw.style.display='block';rl.innerHTML='';
             this.friendRequests.forEach(fid=>{
-                const p=ONLINE.find(x=>x.id===fid);if(!p)return;
+                fid=String(fid);
+                const p=pc.find(x=>x.id===fid)||{id:fid,name:fid,color:'#FF4081'};
                 rl.innerHTML+=`<div class="fr" style="border-color:rgba(255,64,129,0.2);background:rgba(255,64,129,0.03)">
-                    <div class="fa2" style="background:${p.color}22;color:${p.color}">${p.name[0]}</div>
-                    <div class="fi"><div class="fn">${p.name}</div><div class="fs">Хочет дружить</div></div>
+                    <div class="fa2" style="background:${p.color}22;color:${p.color}">${(p.name[0]||'?').toUpperCase()}</div>
+                    <div class="fi"><div class="fn">${p.name}</div><div class="fs">${p.tag||p.id} · хочет дружить</div></div>
                     <div class="fb">
-                        <button class="bx b-ok"  onclick="app.acceptFriend('${p.id}')">✓</button>
-                        <button class="bx b-no"  onclick="app.declineFriend('${p.id}')">✕</button>
+                        <button class="bx b-ok" onclick="app.acceptFriend('${fid}')">✓ Принять</button>
+                        <button class="bx b-no" onclick="app.declineFriend('${fid}')">✕</button>
                     </div></div>`;
             });
         }else rw.style.display='none';
     },
-    renderOnline(){
-        const ol=document.getElementById('online-list');if(!ol)return;ol.innerHTML='';
-        const list=ONLINE.filter(p=>p.status!=='offline'&&!this.friends.includes(p.id));
-        if(!list.length){ol.innerHTML='<div style="color:#444;font-size:13px">Нет других онлайн</div>';return;}
+
+    // Рендер онлайн-игроков (загружаем из shared storage)
+    async renderOnline(){
+        const ol=document.getElementById('online-list');if(!ol)return;
+        ol.innerHTML='<div style="color:#555;font-size:12px;padding:8px;display:flex;align-items:center;gap:8px"><span style="animation:spin 1s linear infinite;display:inline-block">⟳</span> Загрузка...</div>';
+        const players=await this._fetchOnline();
+        this._cachedOnline=players;
+        if(!this._pc)this._pc=[];
+        players.forEach(p=>{if(!this._pc.find(x=>x.id===p.id))this._pc.push(p);});
+        const list=players.filter(p=>!this.friends.includes(p.id));
+        ol.innerHTML='';
+        if(!list.length){
+            ol.innerHTML='<div style="color:#444;font-size:13px;padding:8px">Никого онлайн.<br><small style="color:#333">Поделись ссылкой с другом — он появится здесь!</small></div>';
+            return;
+        }
         list.forEach(p=>{
-            const sent=this.sentReqs.includes(p.id);
+            const sent=this.sentReqs.includes(String(p.id));
             ol.innerHTML+=`<div class="fr">
-                <div class="fa2" style="background:${p.color}22;color:${p.color}">${p.name[0]}</div>
-                <div class="fi"><div class="fn">${p.name}</div><div class="fs ${p.status==='ingame'?'ig':'on'}">${p.status==='ingame'?'🎮 '+p.world:'● Онлайн'}</div></div>
-                <button class="bx ${sent?'b-del':'b-add'}" onclick="app.sendReq('${p.id}')">${sent?'Отправлено':'+ Друг'}</button>
+                <div class="fa2" style="background:${p.color||'#888'}22;color:${p.color||'#888'}">${(p.name[0]||'?').toUpperCase()}</div>
+                <div class="fi"><div class="fn">${p.name}</div>
+                <div class="fs ${p.status==='ingame'?'ig':'on'}">${p.tag||p.id} · ${p.status==='ingame'?'🎮 '+p.world:'● Онлайн'}</div></div>
+                <button class="bx ${sent?'b-del':'b-add'}" onclick="app.sendReq('${p.id}')">${sent?'✓ Отправлено':'+ Друг'}</button>
             </div>`;
         });
     },
-    searchPlayer(){
+
+    // Поиск по нику или тегу (ищем среди онлайн)
+    async searchPlayer(){
         const q=document.getElementById('srch').value.trim().toLowerCase();
         const r=document.getElementById('srch-res');
         if(!q){r.innerHTML='';return;}
-        const f=ONLINE.filter(p=>p.name.toLowerCase().includes(q));
-        if(!f.length){r.innerHTML='<div style="color:#444;font-size:13px;padding:8px">Не найдено</div>';return;}
-        r.innerHTML='<div style="font-size:11px;color:#333;margin:9px 0 7px;text-transform:uppercase;letter-spacing:1.5px">Результат</div>';
+        r.innerHTML='<div style="color:#555;font-size:12px;padding:8px">Поиск...</div>';
+        const players=await this._fetchOnline();
+        const f=players.filter(p=>
+            p.name.toLowerCase().includes(q)||
+            (p.tag&&p.tag.toLowerCase().includes(q))||
+            String(p.id)===q
+        );
+        if(!f.length){r.innerHTML='<div style="color:#444;font-size:13px;padding:8px">Не найдено.<br><small style="color:#333">Игрок должен быть онлайн прямо сейчас</small></div>';return;}
+        r.innerHTML='<div style="font-size:11px;color:#333;margin:9px 0 7px;text-transform:uppercase;letter-spacing:1.5px">Найдено</div>';
         f.forEach(p=>{
-            const isFr=this.friends.includes(p.id),sent=this.sentReqs.includes(p.id);
+            const isFr=this.friends.includes(String(p.id)),sent=this.sentReqs.includes(String(p.id));
             r.innerHTML+=`<div class="fr">
-                <div class="fa2" style="background:${p.color}22;color:${p.color}">${p.name[0]}</div>
-                <div class="fi"><div class="fn">${p.name}</div><div class="fs">${p.status==='offline'?'Оффлайн':p.status==='ingame'?'В игре':'Онлайн'}</div></div>
+                <div class="fa2" style="background:${p.color||'#888'}22;color:${p.color||'#888'}">${(p.name[0]||'?').toUpperCase()}</div>
+                <div class="fi"><div class="fn">${p.name}</div><div class="fs">${p.tag||p.id}</div></div>
                 ${isFr?'<span style="color:#00E676;font-size:12px">✓ Друг</span>':
-                  sent?'<span style="color:#555;font-size:12px">Отправлено</span>':
+                  sent?'<span style="color:#555;font-size:12px">✓ Отправлено</span>':
                   `<button class="bx b-add" onclick="app.sendReq('${p.id}')">+ Добавить</button>`}
             </div>`;
         });
     },
-    sendReq(id){
-        if(this.sentReqs.includes(id)||this.friends.includes(id))return;
-        this.sentReqs.push(id);
-        const p=ONLINE.find(x=>x.id===id);
-        this.showNotif('📨','Заявка отправлена',`Ждём ответа от ${p.name}...`);
-        this.renderOnline();
-        setTimeout(()=>{
-            if(Math.random()>0.25){
-                this.friends.push(id);this.sentReqs=this.sentReqs.filter(x=>x!==id);
-                this.saveData();this.renderFriends();this.renderOnline();
-                this.showNotif('🤝','Принята!',`${p.name} теперь твой друг! 🎉`);
-            }else{
-                this.sentReqs=this.sentReqs.filter(x=>x!==id);
-                this.showNotif('😕','Отклонено',`${p.name} отклонил заявку`);
-                this.renderOnline();
-            }
-        },2500+Math.random()*4000);
-    },
-    acceptFriend(id){
-        this.friendRequests=this.friendRequests.filter(x=>x!==id);
-        if(!this.friends.includes(id))this.friends.push(id);
-        this.saveData();this.renderFriends();
-        const p=ONLINE.find(x=>x.id===id);
-        this.showNotif('🤝','Новый друг!',`${p.name} добавлен`);
-    },
-    declineFriend(id){this.friendRequests=this.friendRequests.filter(x=>x!==id);this.saveData();this.renderFriends();},
-    removeFriend(id){this.friends=this.friends.filter(x=>x!==id);this.saveData();this.renderFriends();this.renderOnline();},
-    inviteFriend(id){
-        const p=ONLINE.find(x=>x.id===id);
-        this.showNotif('🎮','Приглашение отправлено',`Ждём ${p.name}...`);
-        setTimeout(()=>{
-            if(Math.random()>0.3){this.showNotif('✅','Принято!',`${p.name} присоединяется...`);setTimeout(()=>this.launch('play','lobby'),1200);}
-            else this.showNotif('❌','Занят',`${p.name} сейчас не может`);
-        },2000);
-    },
-    simReq(){
-        const av=ONLINE.filter(p=>!this.friends.includes(p.id)&&!this.friendRequests.includes(p.id));
-        if(!av.length)return;
-        const p=av[Math.floor(Math.random()*av.length)];
-        this.friendRequests.push(p.id);this.saveData();this.renderFriends();
-        this.showNotif('👥','Заявка в друзья!',`${p.name} хочет дружить`,true,p.id);
-    },
+
+    simReq(){}, // удалено — только реальные игроки
 
     // ── NOTIFS
     showNotif(icon,title,body,hasBtns=false,fid=null){
@@ -1039,7 +1174,8 @@ const app = {
     renderMpPanel(){
         const list=document.getElementById('mp-list');if(!list)return;
         list.innerHTML=`<div class="mpp"><div class="mpd"></div>${this.username} (ты)</div>`;
-        this.friends.map(id=>ONLINE.find(p=>p.id===id)).filter(p=>p&&p.status==='ingame').slice(0,3)
+        const online=this._cachedOnline||[];
+        this.friends.map(id=>online.find(p=>p.id===String(id))).filter(p=>p&&p.status==='ingame').slice(0,3)
             .forEach(p=>{list.innerHTML+=`<div class="mpp"><div class="mpd"></div>${p.name}</div>`;});
     },
 
@@ -1136,7 +1272,7 @@ const app = {
             if(this.playerGroup.position.y<-25){this.playerGroup.position.set(0,5,0);this.velocity.y=0;}
             
             // Камера — точная формула (сзади спины)
-            const cameraOffset=new THREE.Vector3(0,5,10);
+            const cameraOffset=new THREE.Vector3(0,5,-10);
             const relativeCameraOffset=cameraOffset.clone().applyQuaternion(this.playerGroup.quaternion);
             this.camera.position.copy(this.playerGroup.position).add(relativeCameraOffset);
             this.camera.lookAt(this.playerGroup.position);
