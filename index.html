@@ -420,43 +420,34 @@ const app = {
     scene: null, camera: null, renderer: null, 
     player: null, cameraHolder: null,
     keys: {}, isLocked: false,
+    mode: 'none', username: '',
 
     init() {
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(0x050505);
-        this.scene.fog = new THREE.FogExp2(0x050505, 0.02);
-
+        this.scene.background = new THREE.Color(0x0a0a0a);
+        
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         this.renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('engine-view'), antialias: true });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
 
-        // Свет
-        this.scene.add(new THREE.AmbientLight(0xffffff, 0.4));
-        const sun = new THREE.DirectionalLight(0xffffff, 0.8);
-        sun.position.set(10, 20, 10);
-        this.scene.add(sun);
-
-        // Земля
-        const grid = new THREE.GridHelper(200, 40, 0xff9800, 0x222222);
+        this.scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+        const grid = new THREE.GridHelper(200, 50, 0xff9800, 0x222222);
         this.scene.add(grid);
 
-        // Создаем Игрока (персонаж)
+        // ПЕРСОНАЖ (только ты, без ботов)
         const geo = new THREE.BoxGeometry(1, 2, 1);
         const mat = new THREE.MeshPhongMaterial({ color: 0x00E5FF });
         this.player = new THREE.Mesh(geo, mat);
         this.player.position.y = 1;
         this.scene.add(this.player);
 
-        // Система камеры "Вид сзади"
+        // КАМЕРА СЗАДИ
         this.cameraHolder = new THREE.Object3D();
         this.scene.add(this.cameraHolder);
-        
-        // Смещение камеры: 4 метра назад, 2.5 метра вверх
-        this.camera.position.set(0, 2.5, 5); 
-        this.camera.lookAt(0, 1, 0); 
+        this.camera.position.set(0, 3, 6); // 6 метров назад, 3 метра вверх
+        this.camera.lookAt(0, 1, 0);
         this.cameraHolder.add(this.camera);
 
-        // Управление
         window.addEventListener('keydown', (e) => this.keys[e.code] = true);
         window.addEventListener('keyup', (e) => this.keys[e.code] = false);
         window.addEventListener('mousemove', (e) => this.onMouseMove(e));
@@ -468,55 +459,6 @@ const app = {
         this.animate();
     },
 
-    start() {
-        document.getElementById('ui-login').classList.add('hidden');
-        document.getElementById('crosshair').classList.remove('hidden');
-        document.getElementById('engine-view').requestPointerLock();
-    },
-
-    onMouseMove(e) {
-        if (!this.isLocked) return;
-        // Вращаем игрока мышкой
-        this.player.rotation.y -= e.movementX * 0.003;
-        
-        // Наклон камеры
-        this.cameraHolder.rotation.x -= e.movementY * 0.002;
-        this.cameraHolder.rotation.x = Math.max(-0.4, Math.min(0.4, this.cameraHolder.rotation.x));
-    },
-
-    animate() {
-        requestAnimationFrame(() => this.animate());
-
-        if (this.isLocked) {
-            const speed = 0.15;
-            const vector = new THREE.Vector3();
-
-            // Движение вперед/назад/влево/вправо относительно взгляда
-            if (this.keys['KeyW']) {
-                vector.set(0, 0, -speed).applyQuaternion(this.player.quaternion);
-                this.player.position.add(vector);
-            }
-            if (this.keys['KeyS']) {
-                vector.set(0, 0, speed).applyQuaternion(this.player.quaternion);
-                this.player.position.add(vector);
-            }
-            if (this.keys['KeyA']) {
-                vector.set(-speed, 0, 0).applyQuaternion(this.player.quaternion);
-                this.player.position.add(vector);
-            }
-            if (this.keys['KeyD']) {
-                vector.set(speed, 0, 0).applyQuaternion(this.player.quaternion);
-                this.player.position.add(vector);
-            }
-        }
-
-        // Приклеиваем камеру к игроку
-        this.cameraHolder.position.copy(this.player.position);
-        this.cameraHolder.rotation.y = this.player.rotation.y;
-
-        this.renderer.render(this.scene, this.camera);
-    }
-};
     // ── DATA & ID SYSTEM
     loadData(){
         const s=localStorage.getItem('citrus_v5_pro');
