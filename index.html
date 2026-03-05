@@ -546,27 +546,28 @@
                 return -999; // Летим вниз
             },
 
-            engineLoop() {
+           engineLoop() {
                 if(this.mode === 'none') return;
                 requestAnimationFrame(() => this.engineLoop());
-                const delta = Math.min(this.clock.getDelta(), 0.1); // защита от лагов
+                const delta = this.clock.getDelta();
                 const time = this.clock.getElapsedTime();
 
                 if(this.mode === 'play' && this.playerGroup) {
                     const move = new THREE.Vector3(0, 0, 0);
-                    
-                    if (this.keys['KeyW']) move.z -= 1; 
-                    if (this.keys['KeyS']) move.z += 1;
-                    if (this.keys['KeyA']) move.x -= 1; 
-                    if (this.keys['KeyD']) move.x += 1;
+                    // --- ТЕПЕРЬ ПРАВИЛЬНОЕ НАПРАВЛЕНИЕ ДВИЖЕНИЯ ---
+                    // KeyW теперь идет в +Z (вперед), а KeyS — в -Z (назад)
+                    if (this.keys['KeyW']) move.z += 1; // Было -1
+                    if (this.keys['KeyS']) move.z -= 1; // Было +1
+                    // --------------------------------------------
+                    if (this.keys['KeyA']) move.x -= 1; if (this.keys['KeyD']) move.x += 1;
 
                     if (move.length() > 0) {
                         move.normalize();
-                        const worldMove = move.applyQuaternion(this.playerGroup.quaternion).multiplyScalar(12 * delta);
-                        if (!this.checkCollision(this.playerGroup.position, worldMove)) {
-                            this.playerGroup.position.add(worldMove);
-                        }
+                        const worldMove = move.applyQuaternion(this.playerGroup.quaternion).multiplyScalar(15 * delta);
+                        if (!this.checkCollision(this.playerGroup.position, worldMove)) this.playerGroup.position.add(worldMove);
                     }
+
+                    this.velocity.y -= 35 * delta;
 
                     // --- ИСПРАВЛЕННАЯ ФИЗИКА И ПРЫЖКИ ---
                     const gravity = 40;
@@ -686,4 +687,3 @@
     </script>
 </body>
 </html>
-
