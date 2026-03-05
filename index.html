@@ -428,65 +428,118 @@ objectsToIntersect.forEach((obj,i)=>{
 // ═══════════════════════════════════
 // APP
 // ═══════════════════════════════════
-const app={
-    username:'',balance:0,inventory:[],customMaps:[],
-    friends:[],friendRequests:[],sentReqs:[],
-    scene:null,camera:null,renderer:null,clock:null,
-    playerGroup:null,rig:{},keys:{},mode:'none',currentMap:null,
-    velocity:new THREE.Vector3(),
-    raycaster:new THREE.Raycaster(),
-    objectsToIntersect:[],mapBlocks:[],collectibles:[],
-    canJump:false,selColor:0xCCCCCC,modalCb:null,loopFn:null,
-    spaceGrav:false,
+const app = {
+    // --- ПЕРЕМЕННЫЕ ---
+    scene: null, camera: null, renderer: null, playerGroup: null,
+    keys: {}, velocity: new THREE.Vector3(), canJump: false,
+    mode: 'none', mapBlocks: [], customMaps: [],
+    playerData: null, // Здесь будет храниться ник и ID
 
-    init(){
-        this.loadData();
-        this.renderShop();
-        this.buildPalette();
-        // Клавиатура
-        document.addEventListener('keydown',e=>this.keys[e.code]=true);
-        document.addEventListener('keyup',  e=>this.keys[e.code]=false);
-        document.addEventListener('contextmenu',e=>e.preventDefault());
-        // Мышь — поворот
-        this._lastMouseX=0; this._lastMouseY=0; this._mouseDown=false;
-        document.addEventListener('mousemove',e=>{
-            // Со pointer lock (ПК)
-            if(document.pointerLockElement){
-                if(this.mode==='play'&&this.playerGroup)
-                    this.playerGroup.rotation.y-=e.movementX*0.003;
-                else if(this.mode==='studio'){
-                    this.camera.rotation.order='YXZ';
-                    this.camera.rotation.y-=e.movementX*0.003;
-                    this.camera.rotation.x-=e.movementY*0.003;
-                    this.camera.rotation.x=Math.max(-Math.PI/2,Math.min(Math.PI/2,this.camera.rotation.x));
-                }
-                return;
-            }
-            // Без pointer lock — правая кнопка мыши для студии
-            if(this._mouseDown&&this.mode==='studio'){
-                const dx=e.clientX-this._lastMouseX, dy=e.clientY-this._lastMouseY;
-                this._lastMouseX=e.clientX; this._lastMouseY=e.clientY;
-                this.camera.rotation.order='YXZ';
-                this.camera.rotation.y-=dx*0.004;
-                this.camera.rotation.x-=dy*0.004;
-                this.camera.rotation.x=Math.max(-Math.PI/2,Math.min(Math.PI/2,this.camera.rotation.x));
-            }
-        });
-        document.addEventListener('mousedown',e=>{
-            if(e.button===2||(this.mode==='studio'&&e.button===0)){
-                this._mouseDown=true; this._lastMouseX=e.clientX; this._lastMouseY=e.clientY;
-            }
-            if(this.mode==='studio'&&e.button===0&&!document.pointerLockElement) this.placeBlock();
-        },{capture:false});
-        document.addEventListener('mouseup',()=>this._mouseDown=false);
-        // Клик на canvas — pointer lock (только ПК)
-        document.getElementById('gl-canvas').addEventListener('click',()=>{
-            if(this.mode!=='none'&&!('ontouchstart' in window))document.body.requestPointerLock();
-        });
-        document.getElementById('username').addEventListener('keydown',e=>{if(e.key==='Enter')this.login();});
-        // Touch
-        this._initTouch();
+    // --- 1. ЗАГРУЗКА АККАУНТА ---
+    init() {
+        // Проверяем, есть ли сохраненный игрок в памяти браузера
+        const saved = localStorage.getItem('citrus_user');
+        if (saved) {
+            this.playerData = JSON.parse(saved);
+            console.log("Аккаунт загружен:", this.playerData.fullTag);
+            
+            // Сразу переходим в меню
+            document.getElementById('ui-login').classList.add('hidden');
+            document.getElementById('ui-menu').classList.remove('hidden');
+            
+            // Отображаем ник#ID (если добавишь элемент с таким id в HTML)
+            const nickDisplay = document.getElementById('user-nick-display');
+            if(nickDisplay) nickDisplay.innerText = this.playerData.fullTag;
+        }
+        
+        // Загружаем карты пользователя
+        const maps = localStorage.getItem('citrus_maps');
+        if(maps) this.customMaps = JSON.parse(maps);
     },
+
+    // --- 2. РЕГИСТРАЦИЯ С АЙДИ ---
+    register() {
+        const nameInput = document.getElementById('login-name');
+        const name = nameInput.value.trim();
+        
+        if (name.length < 2) {
+            alert("Слишком короткий ник!");
+            return;
+        }
+
+        // Создаем случайный ID от 1000 до 9999
+        const randomID = Math.floor(1000 + Math.random() * 9000);
+        
+        this.playerData = {
+            name: name,
+            id: randomID,
+            fullTag: `${name}#${randomID}`
+        };
+
+        // Сохраняем в память браузера навсегда
+        localStorage.setItem('citrus_user', JSON.stringify(this.playerData));
+
+        // Переходим в меню
+        document.getElementById('ui-login').classList.add('hidden');
+        document.getElementById('ui-menu').classList.remove('hidden');
+        
+        console.log("Добро пожаловать,", this.playerData.fullTag);
+    },
+
+    // --- ОСТАЛЬНАЯ ЛОГИКА ТВОЕЙ ИГРЫ ---
+    launch(mode, mapIdx) {
+        this.mode = mode;
+        document.getElementById('ui-menu').classList.add('hidden');
+        document.getElementById('engine-view').classList.remove('hidden');
+        
+        this.setupScene();
+        
+        if(mode === 'play') {
+            const map = this.customMaps[mapIdx];
+            if(map) map.blocks.forEach(b => this.addBlock(b.pos, b.color, b.type));
+            this.spawnPlayer();
+        }
+        
+        this.engineLoop();
+    },
+
+    setupScene() {
+        const container = document.getElementById('engine-view');
+        container.innerHTML = '';
+        
+        this.scene = new THREE.Scene();
+        this.scene.background = new THREE.Color(0x87CEEB);
+        
+        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+        this.renderer = new THREE.WebGLRenderer({ antialias: true });
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        container.appendChild(this.renderer.domElement);
+        
+        const light = new THREE.DirectionalLight(0xffffff, 1);
+        light.position.set(10, 20, 10);
+        this.scene.add(light, new THREE.AmbientLight(0xffffff, 0.6));
+    },
+
+    spawnPlayer() {
+        this.playerGroup = new THREE.Group();
+        // (Тут код создания твоего персонажа из твоего файла...)
+        const body = new THREE.Mesh(new THREE.BoxGeometry(1, 1.5, 0.5), new THREE.MeshStandardMaterial({color: 0xff4400}));
+        this.playerGroup.add(body);
+        this.playerGroup.position.set(0, 5, 0);
+        this.scene.add(this.playerGroup);
+    },
+
+    engineLoop() {
+        if(this.mode === 'none') return;
+        requestAnimationFrame(() => this.engineLoop());
+        
+        // Логика движения и прыжков...
+        this.renderer.render(this.scene, this.camera);
+    }
+};
+
+// Самая важная строчка для авто-входа:
+window.onload = () => { app.init(); };    
 
     _initTouch(){
         // Левый джойстик — движение
@@ -1277,6 +1330,7 @@ app.init();
 </script>
 </body>
 </html>
+
 
 
 
