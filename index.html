@@ -198,6 +198,18 @@
                         <div class="card-thumb" style="background:radial-gradient(circle,rgba(80,0,200,0.1),#050505)">🚀</div>
                         <div class="card-info"><div><b>Космическая База</b><br><small style="color:#a070ff">Невесомость</small></div></div>
                     </div>
+                    <div class="card" onclick="app.launch('play','hideseek')">
+                        <div class="card-thumb" style="background:radial-gradient(circle,rgba(0,200,100,0.1),#050505)">🙈</div>
+                        <div class="card-info"><div><b>Прятки</b><br><small style="color:#00e676">Найди всех!</small></div></div>
+                    </div>
+                    <div class="card" onclick="app.launch('play','snowmount')">
+                        <div class="card-thumb" style="background:radial-gradient(circle,rgba(100,200,255,0.12),#050505)">🏔️</div>
+                        <div class="card-info"><div><b>Снежная Гора</b><br><small style="color:#00e5ff">🏆 2000 🍊 за вершину!</small></div></div>
+                    </div>
+                    <div class="card" onclick="app.launch('play','dungeon')">
+                        <div class="card-thumb" style="background:radial-gradient(circle,rgba(150,0,200,0.12),#050505)">⚔️</div>
+                        <div class="card-info"><div><b>Тёмное Подземелье</b><br><small style="color:#c060ff">Выберись живым</small></div></div>
+                    </div>
                 </div>
                 <div class="section-title">Миры игроков</div>
                 <div class="grid" id="my-games-grid"></div>
@@ -362,10 +374,30 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
 // ДАННЫЕ
 // ═══════════════════════════════════
 const SHOP_ITEMS = [
-    {id:'glasses',name:'Крутые Очки',    icon:'🕶️',price:100 },
-    {id:'crown',  name:'Золотая Корона', icon:'👑', price:500 },
-    {id:'wings',  name:'Неоновые Крылья',icon:'🪽', price:1500},
-    {id:'sword',  name:'Световой Меч',   icon:'🗡️',price:3000}
+    {id:'glasses',    name:'Крутые Очки',        icon:'🕶️', price:100 },
+    {id:'crown',      name:'Золотая Корона',      icon:'👑',  price:500 },
+    {id:'wings',      name:'Неоновые Крылья',     icon:'🪽',  price:1500},
+    {id:'sword',      name:'Световой Меч',        icon:'🗡️', price:3000},
+    {id:'hat',        name:'Ковбойская Шляпа',    icon:'🤠',  price:200 },
+    {id:'mask',       name:'Золотая Маска',       icon:'🎭',  price:350 },
+    {id:'cape',       name:'Плащ Тьмы',           icon:'🦇',  price:800 },
+    {id:'headphones', name:'Наушники',            icon:'🎧',  price:150 },
+    {id:'medal',      name:'Медаль Чемпиона',     icon:'🥇',  price:600 },
+    {id:'flame',      name:'Огненный Ореол',      icon:'🔥',  price:1200},
+    {id:'ice',        name:'Ледяной Аурa',        icon:'❄️',  price:1000},
+    {id:'star',       name:'Звёздный Шлейф',      icon:'⭐',  price:750 },
+    {id:'rainbow',    name:'Радужный Эффект',     icon:'🌈',  price:1800},
+    {id:'robot',      name:'Робот-Маска',         icon:'🤖',  price:900 },
+    {id:'alien',      name:'Шлем Пришельца',      icon:'👽',  price:1100},
+    {id:'gem',        name:'Кристальный Посох',   icon:'💎',  price:2500},
+    {id:'shield',     name:'Щит Героя',           icon:'🛡️', price:1300},
+    {id:'bow',        name:'Лук Эльфа',           icon:'🏹',  price:700 },
+    {id:'party',      name:'Колпак Вечеринки',    icon:'🎉',  price:80  },
+    {id:'detective',  name:'Шляпа Детектива',     icon:'🕵️', price:450 },
+    {id:'santa',      name:'Шапка Санты',         icon:'🎅',  price:300 },
+    {id:'wizard',     name:'Шляпа Волшебника',    icon:'🧙',  price:550 },
+    {id:'devil',      name:'Рога Дьявола',        icon:'😈',  price:666 },
+    {id:'halo',       name:'Ангельский Нимб',     icon:'😇',  price:888 }
 ];
 const COLORS=[
     {c:0xCCCCCC,n:'Камень'},{c:0xFF9800,n:'Апельсин'},{c:0x4CAF50,n:'Трава'},
@@ -524,6 +556,13 @@ const app = {
         this.saveData(); 
         this.showHub();
         this._wsConnect();
+    },
+
+    showHub(){
+        document.getElementById('ui-login').classList.add('hidden');
+        document.getElementById('ui-hub').classList.remove('hidden');
+        this.renderMyGames(); this.renderFriends(); this.renderOnline(); this.initAvatarPreview(); this.renderShop();
+        this.updateUI();
     },
 
     logout(){
@@ -1002,7 +1041,7 @@ const app = {
         document.getElementById('engine-view').style.display='block';
         document.getElementById('crosshair').style.display=mode==='studio'?'block':'none';
         document.getElementById('studio-ui').classList.toggle('hidden',mode!=='studio');
-        document.getElementById('ingame-ui').style.display=(mode==='play'&&mapId==='gather')?'flex':'none';
+        document.getElementById('ingame-ui').style.display=(mode==='play'&&(mapId==='gather'||mapId==='hideseek'||mapId==='snowmount'||mapId==='dungeon'))?'flex':'none';
         document.getElementById('mp-panel').classList.toggle('hidden',mode!=='play');
         
         // Чат виден только в игре
@@ -1021,7 +1060,7 @@ const app = {
     setupScene(){
         const canvas=document.getElementById('gl-canvas');canvas.innerHTML='';
         this.scene=new THREE.Scene();
-        const bgs={lobby:0x0a0a18,gather:0x0d1f0a,parkour:0x87CEEB,volcano:0x1a0800,space:0x000005};
+        const bgs={lobby:0x0a0a18,gather:0x0d1f0a,parkour:0x87CEEB,volcano:0x1a0800,space:0x000005,hideseek:0x0d1a0d,snowmount:0x87CEEB,dungeon:0x050508};
         const bg=bgs[this.currentMap]||0x0a0a10;
         this.scene.background=new THREE.Color(bg);
         this.scene.fog=new THREE.FogExp2(bg,0.016);
@@ -1209,6 +1248,155 @@ const app = {
             sg.setAttribute('position',new THREE.Float32BufferAttribute(sp,3));
             this.scene.add(new THREE.Points(sg,new THREE.PointsMaterial({color:0xffffff,size:0.5})));
         }
+        else if(this.currentMap==='hideseek'){
+            // ПРЯТКИ: лесная поляна с кустами и деревьями для укрытий
+            this.scene.background=new THREE.Color(0x0d1a0d);
+            this.scene.fog=new THREE.FogExp2(0x0d1a0d,0.022);
+            addGround(0x1a3010);
+            // Деревья — укрытия
+            for(let i=0;i<60;i++){
+                const tx=(Math.random()-0.5)*160,tz=(Math.random()-0.5)*160;
+                if(Math.abs(tx)<8&&Math.abs(tz)<8)continue;
+                const h=4+Math.random()*5;
+                const trunk=new THREE.Mesh(new THREE.CylinderGeometry(0.3,0.5,h),new THREE.MeshStandardMaterial({color:0x4a2a0a,roughness:0.9}));
+                trunk.position.set(tx,h/2,tz);trunk.castShadow=true;
+                this.scene.add(trunk);this.objectsToIntersect.push(trunk);
+                const foliage=new THREE.Mesh(new THREE.SphereGeometry(2.5+Math.random(),8,8),new THREE.MeshStandardMaterial({color:0x1a5e20,roughness:0.9}));
+                foliage.position.set(tx,h+1,tz);foliage.castShadow=true;this.scene.add(foliage);this.objectsToIntersect.push(foliage);
+            }
+            // Кусты
+            for(let i=0;i<40;i++){
+                const bx=(Math.random()-0.5)*140,bz=(Math.random()-0.5)*140;
+                const bush=new THREE.Mesh(new THREE.SphereGeometry(1.2+Math.random()*0.8,7,7),new THREE.MeshStandardMaterial({color:0x2e7d32,roughness:1}));
+                bush.position.set(bx,0.8,bz);bush.scale.y=0.6;this.scene.add(bush);this.objectsToIntersect.push(bush);
+            }
+            // Деревянные домики (укрытия)
+            const housePos=[[15,0,15],[-20,0,10],[25,0,-18],[-10,0,-25],[0,0,30]];
+            housePos.forEach(([hx,hy,hz])=>{
+                const walls=new THREE.Mesh(new THREE.BoxGeometry(6,4,6),new THREE.MeshStandardMaterial({color:0x8d6e63,roughness:0.9}));
+                walls.position.set(hx,2,hz);walls.castShadow=true;this.scene.add(walls);this.objectsToIntersect.push(walls);
+                const roof=new THREE.Mesh(new THREE.ConeGeometry(5,3,4),new THREE.MeshStandardMaterial({color:0x5d4037,roughness:0.8}));
+                roof.position.set(hx,5.5,hz);roof.rotation.y=Math.PI/4;this.scene.add(roof);
+            });
+            // Фонари
+            for(let i=0;i<6;i++){
+                const a=(i/6)*Math.PI*2;
+                const lamp=new THREE.PointLight(0xFFE080,1.2,14);lamp.position.set(Math.cos(a)*20,4,Math.sin(a)*20);this.scene.add(lamp);
+            }
+            // Инфо HUD
+            if(!this._hsTimer){
+                this._hsTimer=60;this._hsFound=0;this._hsTotal=5;
+                this._hsInterval=setInterval(()=>{
+                    this._hsTimer--;
+                    if(this._hsTimer<=0){clearInterval(this._hsInterval);this._hsInterval=null;this._hsTimer=null;
+                        this.showNotif('🙈','Время вышло!','Водящий победил! Игра окончена');}
+                    this.showHideSeekHud();
+                },1000);
+                this.showHideSeekHud();
+            }
+        }
+        else if(this.currentMap==='snowmount'){
+            // СНЕЖНАЯ ГОРА: подъём за 5-7 минут, приз 2000 цитрусов
+            this.scene.background=new THREE.Color(0x87CEEB);
+            this.scene.fog=new THREE.Fog(0xd0eaf0,60,300);
+            addGround(0xaaddee);
+            // Снежные равнины
+            for(let i=0;i<30;i++){
+                const sx=(Math.random()-0.5)*200,sz=(Math.random()-0.5)*200;
+                if(Math.abs(sx)<15&&Math.abs(sz)<15)continue;
+                const snowPatch=new THREE.Mesh(new THREE.CylinderGeometry(3+Math.random()*5,3+Math.random()*5,0.3,12),
+                    new THREE.MeshStandardMaterial({color:0xf0f8ff,roughness:0.9}));
+                snowPatch.position.set(sx,0.1,sz);this.scene.add(snowPatch);
+            }
+            // Елки
+            for(let i=0;i<35;i++){
+                const ex=(Math.random()-0.5)*180,ez=(Math.random()-0.5)*180;
+                if(Math.abs(ex)<10&&Math.abs(ez)<10)continue;
+                const trunk=new THREE.Mesh(new THREE.CylinderGeometry(0.2,0.35,3),new THREE.MeshStandardMaterial({color:0x4a2a0a}));
+                trunk.position.set(ex,1.5,ez);this.scene.add(trunk);this.objectsToIntersect.push(trunk);
+                [3,2,1].forEach((s,j)=>{
+                    const cone=new THREE.Mesh(new THREE.ConeGeometry(s*0.7,s,8),new THREE.MeshStandardMaterial({color:0x1b5e20,roughness:0.9}));
+                    cone.position.set(ex,2+j*1.5,ez);this.scene.add(cone);this.objectsToIntersect.push(cone);
+                });
+            }
+            // Гора — спиральная тропа
+            const mBase=new THREE.Mesh(new THREE.ConeGeometry(30,80,16),new THREE.MeshStandardMaterial({color:0x8899aa,roughness:0.8}));
+            mBase.position.set(0,40,-60);this.scene.add(mBase);this.objectsToIntersect.push(mBase);
+            // Снег на горе
+            const mSnow=new THREE.Mesh(new THREE.ConeGeometry(12,30,16),new THREE.MeshStandardMaterial({color:0xeef6ff,roughness:0.7}));
+            mSnow.position.set(0,75,-60);this.scene.add(mSnow);
+            // Ступеньки-платформы по горе
+            const stairColors=[0x90a4ae,0xb0bec5,0xcfd8dc,0xeceff1];
+            for(let i=0;i<28;i++){
+                const ang=(i/28)*Math.PI*5;const rad=25-i*0.7;const ht=i*2.8;
+                const step=new THREE.Mesh(new THREE.BoxGeometry(5,0.6,4),new THREE.MeshStandardMaterial({color:stairColors[i%4],roughness:0.7}));
+                step.position.set(Math.cos(ang)*rad,ht,-60+Math.sin(ang)*rad);step.castShadow=true;step.receiveShadow=true;
+                this.scene.add(step);this.objectsToIntersect.push(step);
+                // Снег на ступеньках
+                const snow=new THREE.Mesh(new THREE.BoxGeometry(4.8,0.15,3.8),new THREE.MeshStandardMaterial({color:0xffffff,roughness:1}));
+                snow.position.set(Math.cos(ang)*rad,ht+0.37,-60+Math.sin(ang)*rad);this.scene.add(snow);
+            }
+            // Вершина — золотая платформа с призом
+            const summit=new THREE.Mesh(new THREE.CylinderGeometry(6,6,0.8,16),new THREE.MeshStandardMaterial({color:0xFFD700,emissive:0xFFAA00,emissiveIntensity:0.6,metalness:0.5}));
+            summit.position.set(0,79,-60);this.scene.add(summit);this.objectsToIntersect.push(summit);
+            summit.userData.isSummit=true;
+            const sumLight=new THREE.PointLight(0xFFD700,5,25);sumLight.position.set(0,83,-60);this.scene.add(sumLight);
+            // Трофей на вершине
+            const trophy=new THREE.Mesh(new THREE.SphereGeometry(1.5,12,12),new THREE.MeshStandardMaterial({color:0xFFD700,emissive:0xFF8800,emissiveIntensity:1.2,metalness:0.8}));
+            trophy.position.set(0,81.5,-60);this.scene.add(trophy);
+            // Снегопад-частицы
+            const snowGeo=new THREE.BufferGeometry();const snowPos=[];
+            for(let i=0;i<1200;i++)snowPos.push((Math.random()-0.5)*200,Math.random()*100-5,(Math.random()-0.5)*200);
+            snowGeo.setAttribute('position',new THREE.Float32BufferAttribute(snowPos,3));
+            this._snowParticles=new THREE.Points(snowGeo,new THREE.PointsMaterial({color:0xffffff,size:0.4,transparent:true,opacity:0.8}));
+            this.scene.add(this._snowParticles);
+            // Таймер горы
+            if(!this._mtTimer){
+                this._mtSeconds=0;this._mtReached=false;
+                this._mtInterval=setInterval(()=>{
+                    if(this._mtReached)return;
+                    this._mtSeconds++;this.showSnowMountHud();
+                    const pl=this.playerGroup;
+                    if(pl&&pl.position.distanceTo(new THREE.Vector3(0,79,-60))<7&&!this._mtReached){
+                        this._mtReached=true;clearInterval(this._mtInterval);this._mtInterval=null;
+                        this.balance+=2000;this.saveData();
+                        this.showNotif('🏆','ВЕРШИНА ПОКОРЕНА!','Получено 2000 🍊 на баланс!');
+                    }
+                },1000);
+                this.showSnowMountHud();
+            }
+        }
+        else if(this.currentMap==='dungeon'){
+            // ТЁМНОЕ ПОДЗЕМЕЛЬЕ
+            this.scene.background=new THREE.Color(0x050508);
+            this.scene.fog=new THREE.FogExp2(0x050508,0.04);
+            addGround(0x1a1218);
+            const wallMat=new THREE.MeshStandardMaterial({color:0x2a1f2a,roughness:0.95});
+            // Коридоры
+            const corridors=[[0,0,0,4,3,30],[0,0,-30,30,3,4],[20,0,-30,4,3,40],[-20,0,-30,4,3,40],[0,0,-60,40,3,4]];
+            corridors.forEach(([x,y,z,w,h,d])=>{
+                const wall=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),wallMat);
+                wall.position.set(x,h/2,z);wall.castShadow=true;this.scene.add(wall);this.objectsToIntersect.push(wall);
+            });
+            // Факелы
+            const torchPos=[[5,2.5,-10],[-5,2.5,-10],[10,2.5,-30],[-10,2.5,-30],[0,2.5,-55]];
+            torchPos.forEach(([tx,ty,tz])=>{
+                const tl=new THREE.PointLight(0xFF6600,2,10);tl.position.set(tx,ty,tz);this.scene.add(tl);
+                const flame=new THREE.Mesh(new THREE.SphereGeometry(0.2,6,6),new THREE.MeshStandardMaterial({emissive:0xFF4400,emissiveIntensity:2}));
+                flame.position.set(tx,ty,tz);this.scene.add(flame);
+            });
+            // Кристаллы для сбора
+            const crystalMat=new THREE.MeshStandardMaterial({color:0xaa00ff,emissive:0x7700cc,emissiveIntensity:1,transparent:true,opacity:0.85});
+            for(let i=0;i<12;i++){
+                const cr=new THREE.Mesh(new THREE.OctahedronGeometry(0.35),crystalMat);
+                const pts=[[-2,1,-8],[2,1,-12],[-8,1,-30],[8,1,-30],[-8,1,-40],[8,1,-50],[-5,1,-55],[5,1,-55],[0,1,-25],[-3,1,-20],[3,1,-45],[0,1,-48]];
+                cr.position.set(...pts[i]);this.scene.add(cr);this.collectibles.push(cr);
+            }
+            // Выход (портал)
+            const portal=new THREE.Mesh(new THREE.TorusGeometry(2.5,0.4,12,48),new THREE.MeshStandardMaterial({color:0xaa00ff,emissive:0x7700ff,emissiveIntensity:2}));
+            portal.position.set(0,2.5,-62);portal.rotation.x=Math.PI/2;this.scene.add(portal);
+            const portalLight=new THREE.PointLight(0xaa00ff,4,15);portalLight.position.set(0,2,-62);this.scene.add(portalLight);
+        }
         else if(this.mode==='studio'){
             addGround(0x111118);
             this.scene.add(new THREE.GridHelper(100,50,0x222244,0x111133));
@@ -1358,6 +1546,23 @@ const app = {
                     this.scene.remove(c);this.collectibles.splice(i,1);this.balance+=10;this.saveData();
                 }
             }
+            // Снегопад анимация
+            if(this._snowParticles){
+                const pos=this._snowParticles.geometry.attributes.position.array;
+                for(let i=1;i<pos.length;i+=3){pos[i]-=delta*4;if(pos[i]<-5)pos[i]=95;}
+                this._snowParticles.geometry.attributes.position.needsUpdate=true;
+            }
+            // Подземелье: кристаллы вращаются
+            if(this.currentMap==='dungeon'){
+                for(let i=this.collectibles.length-1;i>=0;i--){
+                    const c=this.collectibles[i];
+                    c.rotation.y+=1.5*delta;c.position.y=1+Math.sin(time*2+i)*0.15;
+                    if(c.position.distanceTo(this.playerGroup.position)<1.4){
+                        this.scene.remove(c);this.collectibles.splice(i,1);this.balance+=50;this.saveData();
+                        this.showNotif('💎','Кристалл!','+50 🍊');
+                    }
+                }
+            }
             if(moving&&this.canJump){
                 const s=Math.sin(time*15)*0.8;
                 this.rig.leftArm.rotation.x=s;this.rig.rightArm.rotation.x=-s;
@@ -1452,8 +1657,22 @@ const app = {
         });
     },
 
+    showHideSeekHud(){
+        const mins=Math.floor((this._hsTimer||0)/60),secs=(this._hsTimer||0)%60;
+        document.getElementById('ingame-balance').innerText=`${this.balance} | 🙈 ${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')} | Найдено: ${this._hsFound||0}/${this._hsTotal||5}`;
+    },
+    showSnowMountHud(){
+        const s=this._mtSeconds||0;
+        const mins=Math.floor(s/60),secs=s%60;
+        document.getElementById('ingame-balance').innerText=`${this.balance} 🍊 | ⏱ ${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')} | 🏔️ К вершине!`;
+    },
+
     exitGame(){
         this.spaceGrav=false;this.loopFn=null;this.mode='none';
+        // Очищаем таймеры мини-игр
+        if(this._hsInterval){clearInterval(this._hsInterval);this._hsInterval=null;}this._hsTimer=null;
+        if(this._mtInterval){clearInterval(this._mtInterval);this._mtInterval=null;}this._mtSeconds=null;this._mtReached=false;
+        this._snowParticles=null;
         document.exitPointerLock();
         document.getElementById('engine-view').style.display='none';
         document.getElementById('eng-script-ov').style.display='none';
@@ -1467,5 +1686,3 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
-
-
