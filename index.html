@@ -361,7 +361,7 @@ const COLORS=[
     {c:0x9C27B0,n:'Кристалл'},{c:0xFF4081,n:'Розовый'},{c:0x00BCD4,n:'Лёд'},
     {c:0x795548,n:'Земля' },{c:0xF44336,n:'Красный' },{c:0x212121,n:'Обсидиан'}
 ];
-const ONLINE=[]; // только реальные игроки через window.storage
+const ONLINE=[]; // только реальные игроки через Firebase
 const TPLS={
     spawn:`// Спавним блоки по кругу
 const n=12, r=8;
@@ -443,12 +443,14 @@ const app = {
 
     // ── DATA & ID SYSTEM
     loadData(){
+        const COLORS=['#FF4081','#00E5FF','#FFD740','#69F0AE','#E040FB','#FF6E40','#40C4FF','#CCFF90'];
         const s=localStorage.getItem('citrus_v5_pro');
         if(s){
             const d=JSON.parse(s);
             this.username=d.username||'';
             this.userId=d.userId||Math.floor(1000 + Math.random() * 9000);
             this.fullTag = this.username ? `${this.username}#${this.userId}` : '';
+            this._myColor = d.myColor || COLORS[this.userId % COLORS.length];
             this.balance=d.balance||0;
             this.inventory=d.inventory||[];
             this.customMaps=d.customMaps||[];
@@ -457,12 +459,14 @@ const app = {
             this.sentReqs = d.sentReqs||[];
         } else {
             this.userId = Math.floor(1000 + Math.random() * 9000);
+            this._myColor = COLORS[this.userId % COLORS.length];
             this.inventory = []; this.customMaps = []; this.friends = []; this.friendRequests = []; this.sentReqs = [];
         }
     },
     saveData(){
         localStorage.setItem('citrus_v5_pro',JSON.stringify({
             username:this.username, userId:this.userId, balance:this.balance,
+            myColor:this._myColor,
             inventory:this.inventory, customMaps:this.customMaps,
             friends:this.friends, friendRequests:this.friendRequests, sentReqs:this.sentReqs
         }));
@@ -613,96 +617,94 @@ const app = {
     },
     resetAvatar(){this.inventory=[];this.saveData();this.renderShop();this.updateAvatarPreview();},
 
-    // ── FRIENDS (РЕАЛЬНАЯ СИСТЕМА — window.storage shared)
-    // Каждый игрок при входе регистрируется в общей базе.
-    // Заявки и подтверждения хранятся в shared storage — видны всем.
+    // ── FRIENDS (РЕАЛЬНАЯ СИСТЕМА — Firebase Realtime DB, работает на render.com)
+    // Бесплатный публичный REST, не нужна регистрация от игрока.
 
-    // Зарегистрировать/обновить себя в общей базе онлайн-игроков
+    _fbUrl(path){ return `https://citrus-game-default-rtdb.firebaseio.com/${path}.json`; },
+
+    async _fbSet(path, data){
+        await fetch(this._fbUrl(path),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+    },
+    async _fbGet(path){
+        const r=await fetch(this._fbUrl(path));
+        if(!r.ok)return null;
+        return await r.json();
+    },
+    async _fbDelete(path){ await fetch(this._fbUrl(path),{method:'DELETE'}); },
+    async _fbPatch(path,data){
+        await fetch(this._fbUrl(path),{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+    },
+
+    // Зарегистрировать/обновить себя в базе онлайн-игроков
     async _registerPresence(){
         if(!this.username||!this.userId)return;
         try{
-            await window.storage.set('player:'+this.userId, JSON.stringify({
+            await this._fbSet('players/'+this.userId,{
                 id:String(this.userId), name:this.username, tag:this.fullTag,
                 color:this._myColor, status:'online', world:null, ts:Date.now()
-            }), true);
+            });
         }catch(e){}
     },
 
-    // Обновить статус (в игре / онлайн)
-    async _updateStatus(status, world=null){
+    async _updateStatus(status,world=null){
         if(!this.username||!this.userId)return;
         try{
-            await window.storage.set('player:'+this.userId, JSON.stringify({
-                id:String(this.userId), name:this.username, tag:this.fullTag,
-                color:this._myColor, status, world, ts:Date.now()
-            }), true);
+            await this._fbPatch('players/'+this.userId,{status,world,ts:Date.now()});
         }catch(e){}
     },
 
-    // Получить всех живых онлайн-игроков (кроме себя, активные за 3 мин)
+    // Получить всех живых онлайн-игроков (активные за последние 5 минут)
     async _fetchOnline(){
         try{
-            const keys=await window.storage.list('player:', true);
-            if(!keys||!keys.keys)return[];
-            const now=Date.now(), out=[];
-            for(const k of keys.keys){
-                try{
-                    const r=await window.storage.get(k,true);
-                    if(!r)continue;
-                    const p=JSON.parse(r.value);
-                    if(p.id===String(this.userId))continue;
-                    if(now-(p.ts||0)>3*60*1000)continue;
-                    out.push(p);
-                }catch(e){}
+            const data=await this._fbGet('players');
+            if(!data)return[];
+            const now=Date.now(),out=[];
+            for(const uid in data){
+                const p=data[uid];
+                if(String(p.id)===String(this.userId))continue;
+                if(now-(p.ts||0)>5*60*1000)continue; // 5 минут — онлайн
+                out.push(p);
             }
             return out;
         }catch(e){return[];}
     },
 
-    // Проверяем входящие заявки и принятия наших заявок
+    // Проверяем входящие заявки и подтверждения
     async _pollFriends(){
         if(!this.userId)return;
         let changed=false;
         try{
-            // Входящие заявки
-            const rks=await window.storage.list('fr:'+this.userId+':', true);
-            if(rks&&rks.keys){
-                for(const k of rks.keys){
-                    try{
-                        const r=await window.storage.get(k,true);if(!r)continue;
-                        const req=JSON.parse(r.value);
-                        const fid=req.from;
-                        if(!this.friendRequests.includes(fid)&&!this.friends.includes(fid)){
-                            this.friendRequests.push(fid);
-                            if(!this._pc)this._pc=[];
-                            if(!this._pc.find(x=>x.id===fid))
-                                this._pc.push({id:fid,name:req.fromName,tag:req.fromTag,color:req.fromColor||'#FF9800'});
-                            changed=true;
-                            this.showNotif('👥','Заявка в друзья!',
-                                `${req.fromName} (${req.fromTag||fid}) хочет дружить`,true,fid);
-                        }
-                    }catch(e){}
+            // Входящие заявки в друзья
+            const reqs=await this._fbGet('requests/'+this.userId);
+            if(reqs){
+                for(const fromId in reqs){
+                    const req=reqs[fromId];
+                    if(!this.friendRequests.includes(fromId)&&!this.friends.includes(fromId)){
+                        this.friendRequests.push(fromId);
+                        if(!this._pc)this._pc=[];
+                        if(!this._pc.find(x=>x.id===fromId))
+                            this._pc.push({id:fromId,name:req.fromName,tag:req.fromTag,color:req.fromColor||'#FF9800'});
+                        changed=true;
+                        this.showNotif('👥','Заявка в друзья!',
+                            `${req.fromName} (${req.fromTag||fromId}) хочет дружить`,true,fromId);
+                    }
                 }
             }
             // Подтверждения наших заявок
-            const aks=await window.storage.list('facc:'+this.userId+':', true);
-            if(aks&&aks.keys){
-                for(const k of aks.keys){
-                    try{
-                        const r=await window.storage.get(k,true);if(!r)continue;
-                        const acc=JSON.parse(r.value);
-                        const byId=acc.by;
-                        if(!this.friends.includes(byId)){
-                            this.friends.push(byId);
-                            this.sentReqs=this.sentReqs.filter(x=>x!==byId);
-                            if(!this._pc)this._pc=[];
-                            if(!this._pc.find(x=>x.id===byId))
-                                this._pc.push({id:byId,name:acc.byName,tag:acc.byTag,color:'#00E676'});
-                            changed=true;
-                            this.showNotif('🤝','Заявка принята!',`${acc.byName} теперь твой друг! 🎉`);
-                        }
-                        await window.storage.delete(k,true);
-                    }catch(e){}
+            const accs=await this._fbGet('accepted/'+this.userId);
+            if(accs){
+                for(const byId in accs){
+                    const acc=accs[byId];
+                    if(!this.friends.includes(byId)){
+                        this.friends.push(byId);
+                        this.sentReqs=this.sentReqs.filter(x=>x!==byId);
+                        if(!this._pc)this._pc=[];
+                        if(!this._pc.find(x=>x.id===byId))
+                            this._pc.push({id:byId,name:acc.byName,tag:acc.byTag,color:'#00E676'});
+                        changed=true;
+                        this.showNotif('🤝','Заявка принята!',`${acc.byName} теперь твой друг! 🎉`);
+                    }
+                    await this._fbDelete('accepted/'+this.userId+'/'+byId);
                 }
             }
         }catch(e){}
@@ -716,11 +718,10 @@ const app = {
         this.sentReqs.push(targetId);
         this.saveData();
         try{
-            await window.storage.set('fr:'+targetId+':'+this.userId, JSON.stringify({
+            await this._fbSet('requests/'+targetId+'/'+this.userId,{
                 from:String(this.userId), fromName:this.username,
                 fromTag:this.fullTag, fromColor:this._myColor, ts:Date.now()
-            }), true);
-            // Найдём имя в кеше онлайн
+            });
             const name=(this._cachedOnline||[]).find(x=>x.id===targetId)?.name||targetId;
             this.showNotif('📨','Заявка отправлена',`Ждём ответа от ${name}...`);
         }catch(e){
@@ -736,10 +737,10 @@ const app = {
         if(!this.friends.includes(fromId))this.friends.push(fromId);
         this.saveData();
         try{
-            await window.storage.delete('fr:'+this.userId+':'+fromId, true);
-            await window.storage.set('facc:'+fromId+':'+this.userId, JSON.stringify({
+            await this._fbDelete('requests/'+this.userId+'/'+fromId);
+            await this._fbSet('accepted/'+fromId+'/'+this.userId,{
                 by:String(this.userId), byName:this.username, byTag:this.fullTag, ts:Date.now()
-            }), true);
+            });
         }catch(e){}
         const name=(this._pc||[]).find(x=>x.id===fromId)?.name||fromId;
         this.showNotif('🤝','Новый друг!',`${name} добавлен в друзья`);
@@ -750,7 +751,7 @@ const app = {
         fromId=String(fromId);
         this.friendRequests=this.friendRequests.filter(x=>x!==fromId);
         this.saveData();this.renderFriends();
-        try{window.storage.delete('fr:'+this.userId+':'+fromId,true);}catch(e){}
+        try{this._fbDelete('requests/'+this.userId+'/'+fromId);}catch(e){}
     },
     removeFriend(id){
         this.friends=this.friends.filter(x=>x!==id);
@@ -1249,7 +1250,6 @@ const app = {
 
         if(this.mode==='play'&&this.playerGroup){
             const move=new THREE.Vector3();
-            // ИСПРАВЛЕННАЯ ОСЬ
             if(this.keys['KeyW'])move.z-=1;
             if(this.keys['KeyS'])move.z+=1;
             if(this.keys['KeyA'])move.x-=1;
@@ -1257,8 +1257,29 @@ const app = {
             
             if(move.length()>0){
                 move.normalize();
-                const wm=move.applyQuaternion(this.playerGroup.quaternion).multiplyScalar(15*delta);
-                if(!this.checkCollision(this.playerGroup.position,wm))this.playerGroup.position.add(wm);
+                // Двигаемся по направлению ВЗГЛЯДА КАМЕРЫ (горизонталь)
+                // Берём forward вектор камеры, убираем Y-компоненту
+                const camFwd=new THREE.Vector3();
+                this.camera.getWorldDirection(camFwd);
+                camFwd.y=0; camFwd.normalize();
+                const camRight=new THREE.Vector3();
+                camRight.crossVectors(camFwd,new THREE.Vector3(0,1,0)).normalize();
+                // Итоговое смещение
+                const wm=new THREE.Vector3();
+                wm.addScaledVector(camFwd,-move.z); // W=вперёд, S=назад
+                wm.addScaledVector(camRight,move.x); // D=вправо, A=влево
+                wm.normalize().multiplyScalar(14*delta);
+                // Поворачиваем персонажа в сторону движения
+                if(wm.length()>0){
+                    const targetAngle=Math.atan2(wm.x,wm.z);
+                    const curAngle=this.playerGroup.rotation.y;
+                    let diff=targetAngle-curAngle;
+                    while(diff>Math.PI)diff-=Math.PI*2;
+                    while(diff<-Math.PI)diff+=Math.PI*2;
+                    this.playerGroup.rotation.y+=diff*0.18;
+                }
+                if(!this.checkCollision(this.playerGroup.position,wm))
+                    this.playerGroup.position.add(wm);
             }
             const grav=this.spaceGrav?14:40;
             this.velocity.y-=grav*delta;
@@ -1396,3 +1417,4 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
