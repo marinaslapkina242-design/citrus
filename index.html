@@ -566,7 +566,7 @@ const app = {
                 ck.style.transform=`translate(calc(-50% + ${Math.max(-CR,Math.min(CR,t.clientX-cOx+0))}px), calc(-50% + ${Math.max(-CR,Math.min(CR,t.clientY-cOy+0))}px))`;
                 if(this.mode==='play'){
                     this._camYaw   = (this._camYaw   || Math.PI) - dx * 0.005;
-                    this._camPitch = Math.max(-0.4, Math.min(0.6, (this._camPitch || 0.3) - dy * 0.005));
+                    this._camPitch = Math.max(-1.2, Math.min(1.2, (this._camPitch || 0.2) - dy * 0.005));
                 } else if(this.mode==='studio'){
                     this.camera.rotation.order='YXZ';
                     this.camera.rotation.y-=dx*0.005;
@@ -727,6 +727,7 @@ const app = {
         const name=(this._cachedOnline||[]).find(x=>String(x.id)===targetId)?.name||targetId;
         this.showNotif('📨','Заявка отправлена',`Ждём ответа от ${name}...`);
         this.renderOnline();
+        this.searchPlayer(); // Обновляем результаты поиска
     },
 
     async acceptFriend(fromId){
@@ -818,15 +819,24 @@ const app = {
         });
     },
 
-    // Поиск по нику или тегу (ищем среди онлайн)
-     searchPlayer() {
+    // Поиск по нику или тегу (ищем среди онлайн и в localStorage)
+    searchPlayer() {
         const q = document.getElementById('srch').value.trim().toLowerCase();
         const res = document.getElementById('srch-res'); res.innerHTML = '';
         if (!q) return;
 
-        // Ищем среди всех, кто когда-либо заходил
-        const db = JSON.parse(localStorage.getItem('citrus_global_users') || '[]');
-        const found = db.filter(u => u.name.toLowerCase().includes(q) && u.id !== this.userId);
+        // Собираем всех: и тех кто в localStorage, и тех кто онлайн
+        let db = JSON.parse(localStorage.getItem('citrus_global_users') || '[]');
+        let onlinePlayers = this._cachedOnline || [];
+        
+        // Убираем дубликаты по ID
+        let allUsersMap = new Map();
+        db.forEach(u => allUsersMap.set(String(u.id), u));
+        onlinePlayers.forEach(u => allUsersMap.set(String(u.id), { id: String(u.id), name: u.name }));
+        
+        let allUsers = Array.from(allUsersMap.values());
+
+        const found = allUsers.filter(u => u.name.toLowerCase().includes(q) && String(u.id) !== String(this.userId));
 
         if (!found.length) {
             res.innerHTML = '<div style="color:#555;font-size:12px;padding:5px">Игрок не найден</div>';
@@ -834,23 +844,19 @@ const app = {
         }
 
         found.forEach(u => {
-            const isFr = this.friends.some(f => f.id === u.id);
+            const uidStr = String(u.id);
+            const isFr = this.friends.includes(uidStr);
+            const sent = this.sentReqs.includes(uidStr);
             res.innerHTML += `
                 <div class="fr">
                     <div class="fi"><span class="fn">${u.name}#${u.id}</span></div>
                     <div class="fb">
                         ${isFr ? '<span style="color:gray;font-size:11px">В друзьях</span>' : 
-                        `<button class="bx b-add" onclick="app.addRealFriend(${u.id},'${u.name}')">ДОБАВИТЬ</button>`}
+                          sent ? '<span style="color:var(--c-blue);font-size:11px">Отправлено</span>' :
+                        `<button class="bx b-add" onclick="app.sendReq('${u.id}')">ДОБАВИТЬ</button>`}
                     </div>
                 </div>`;
         });
-    },
-
-    addRealFriend(id, name) {
-        this.friends.push({id: id, name: name, status: 'online'});
-        this.saveData(); this.renderFriends();
-        this.showNotif('СИСТЕМА', `Вы добавили ${name} в друзья!`);
-        this.searchPlayer(); 
     },
 
     // ── NOTIFS
@@ -1208,8 +1214,8 @@ const app = {
         if (!document.pointerLockElement) return;
         if (this.mode === 'play') {
             // Мышь вращает камеру вокруг игрока (yaw/pitch)
-            this._camYaw   = (this._camYaw   || 0) - e.movementX * 0.003;
-            this._camPitch = Math.max(-0.4, Math.min(0.6, (this._camPitch || 0.3) - e.movementY * 0.003));
+            this._camYaw   = (this._camYaw   || Math.PI) - e.movementX * 0.003;
+            this._camPitch = Math.max(-1.2, Math.min(1.2, (this._camPitch || 0.2) - e.movementY * 0.003));
         }
         else if (this.mode === 'studio') {
             this.camera.rotation.order='YXZ';
@@ -1241,7 +1247,7 @@ const app = {
         return hits.length>0&&hits[0].distance<moveStep.length()+0.6;
     },
 
-    // ── ENGINE LOOP
+    // ── ENGINE LOOP (КАМЕРА ОТ 3-ГО ЛИЦА В ЗАТЫЛОК)
     engineLoop(){
         if(this.mode==='none')return;
         requestAnimationFrame(()=>this.engineLoop());
@@ -1250,30 +1256,39 @@ const app = {
 
         if(this.mode==='play'&&this.playerGroup){
             // ── Инициализация углов камеры
-            if(this._camYaw===undefined){this._camYaw=Math.PI;this._camPitch=0.3;}
+            if(this._camYaw===undefined){this._camYaw=Math.PI;this._camPitch=0.2;}
 
-            // ── Вектор вперёд по YAW камеры (горизонталь)
             const camYaw = this._camYaw;
-            const fwd  = new THREE.Vector3( Math.sin(camYaw), 0,  Math.cos(camYaw));
-            const right = new THREE.Vector3( Math.cos(camYaw), 0, -Math.sin(camYaw));
+            const fwd = new THREE.Vector3(Math.sin(camYaw), 0, Math.cos(camYaw));
+            const right = new THREE.Vector3(Math.cos(camYaw), 0, -Math.sin(camYaw));
 
-            // ── Движение WASD
+            // ── Движение WASD (Относительно камеры)
             const move = new THREE.Vector3();
-            if(this.keys['KeyW']) move.add(fwd);
-            if(this.keys['KeyS']) move.sub(fwd);
+            if(this.keys['KeyW']) move.sub(fwd);
+            if(this.keys['KeyS']) move.add(fwd);
             if(this.keys['KeyA']) move.sub(right);
             if(this.keys['KeyD']) move.add(right);
 
-            if(move.length() > 0){
+            const moving = move.length() > 0;
+            if(moving){
                 move.normalize().multiplyScalar(14 * delta);
-                // Плавный поворот персонажа в сторону движения
+                
+                // Персонаж поворачивается по направлению движения
                 const tgtAngle = Math.atan2(move.x, move.z);
                 let diff = tgtAngle - this.playerGroup.rotation.y;
                 while(diff >  Math.PI) diff -= Math.PI*2;
                 while(diff < -Math.PI) diff += Math.PI*2;
                 this.playerGroup.rotation.y += diff * 0.2;
-                if(!this.checkCollision(this.playerGroup.position, move))
+                
+                if(!this.checkCollision(this.playerGroup.position, move)) {
                     this.playerGroup.position.add(move);
+                }
+            } else {
+                // Плавный доворот спиной к камере, чтобы всегда смотреть в затылок при остановке
+                let diff = (camYaw + Math.PI) - this.playerGroup.rotation.y;
+                while(diff >  Math.PI) diff -= Math.PI*2;
+                while(diff < -Math.PI) diff += Math.PI*2;
+                this.playerGroup.rotation.y += diff * 0.1;
             }
 
             // ── Гравитация и прыжок
@@ -1290,18 +1305,20 @@ const app = {
             if(this.keys['Space'] && this.canJump){this.velocity.y=jumpH; this.canJump=false;}
             if(this.playerGroup.position.y < -25){this.playerGroup.position.set(0,5,0); this.velocity.y=0;}
 
-            // ── Камера orbit вокруг игрока
-            const dist  = 10;
-            const pitch = this._camPitch || 0.3;
-            const cx = this.playerGroup.position.x + dist * Math.sin(camYaw) * Math.cos(pitch);
-            const cy = this.playerGroup.position.y + dist * Math.sin(pitch) + 1.5;
-            const cz = this.playerGroup.position.z + dist * Math.cos(camYaw) * Math.cos(pitch);
-            this.camera.position.set(cx, cy, cz);
-            this.camera.lookAt(
-                this.playerGroup.position.x,
-                this.playerGroup.position.y + 1.5,
-                this.playerGroup.position.z
-            );
+            // ── Камера (Вид от 3-го лица "в затылок")
+            const dist = 5.0; // Отдаление камеры
+            const pitch = this._camPitch || 0.2;
+            
+            // Смещение сзади
+            const offset = new THREE.Vector3(0, 0, dist);
+            offset.applyEuler(new THREE.Euler(pitch, camYaw, 0, 'YXZ'));
+            
+            // Идеальная позиция камеры (игрок + смещение)
+            const idealCamPos = this.playerGroup.position.clone().add(new THREE.Vector3(0, 1.2, 0)).add(offset);
+            
+            // Плавное следование камеры за персонажем
+            this.camera.position.lerp(idealCamPos, 0.2);
+            this.camera.lookAt(this.playerGroup.position.clone().add(new THREE.Vector3(0, 1.5, 0)));
             
             // Сбор монет
             for(let i=this.collectibles.length-1;i>=0;i--){
@@ -1312,7 +1329,6 @@ const app = {
                 }
             }
             // Анимации
-            const moving=move.length()>0;
             if(moving&&this.canJump){
                 const s=Math.sin(time*15)*0.8;
                 this.rig.leftArm.rotation.x=s;this.rig.rightArm.rotation.x=-s;
