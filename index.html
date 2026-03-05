@@ -418,33 +418,54 @@ objectsToIntersect.forEach((obj,i)=>{
 // ═══════════════════════════════════
 const app = {
     scene: null, camera: null, renderer: null, 
-    keys: {}, nickname: '', socket: null, players: {},
-    isLocked: false,
+    player: null, keys: {}, isLocked: false,
 
     init() {
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(0x0a0a0a);
-        this.scene.fog = new THREE.FogExp2(0x0a0a0a, 0.05);
+        this.scene.background = new THREE.Color(0x111111);
 
+        // Камера
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        
         this.renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('engine-view'), antialias: true });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
 
         // Свет
-        const ambient = new THREE.AmbientLight(0xffffff, 0.5);
-        this.scene.add(ambient);
-        const sun = new THREE.DirectionalLight(0xffffff, 0.8);
-        sun.position.set(10, 20, 10);
-        this.scene.add(sun);
+        const light = new THREE.DirectionalLight(0xffffff, 1);
+        light.position.set(5, 10, 7);
+        this.scene.add(light);
+        this.scene.add(new THREE.AmbientLight(0x404040));
 
-        // Пол
-        const grid = new THREE.GridHelper(100, 100, 0xff9800, 0x222222);
+        // Пол (сетка)
+        const grid = new THREE.GridHelper(200, 50, 0xff9800, 0x444444);
         this.scene.add(grid);
 
+        // СОЗДАЕМ ИГРОКА (тот самый "друг" или ты сам)
+        const geo = new THREE.BoxGeometry(1, 2, 1);
+        const mat = new THREE.MeshPhongMaterial({ color: 0x00E5FF });
+        this.player = new THREE.Mesh(geo, mat);
+        this.player.position.y = 1; // Чтобы не в полу стоял
+        this.scene.add(this.player);
+
+        // НАСТРОЙКА КАМЕРЫ "СЗАДИ"
+        // Создаем пустой объект-держатель для камеры, чтобы вращать его мышкой
+        this.cameraHolder = new THREE.Object3D();
+        this.scene.add(this.cameraHolder);
+        
+        // Саму камеру отодвигаем НАЗАД (Z = 5) и ВВЕРХ (Y = 2)
+        this.camera.position.set(0, 2, 5); 
+        this.camera.lookAt(0, 1, 0); // Смотрим чуть выше центра игрока
+        this.cameraHolder.add(this.camera);
+
+        // Слушатели событий
         window.addEventListener('keydown', (e) => this.keys[e.code] = true);
         window.addEventListener('keyup', (e) => this.keys[e.code] = false);
         window.addEventListener('mousemove', (e) => this.onMouseMove(e));
         
+        document.getElementById('engine-view').addEventListener('click', () => {
+            document.getElementById('engine-view').requestPointerLock();
+        });
+
         document.addEventListener('pointerlockchange', () => {
             this.isLocked = document.pointerLockElement === document.getElementById('engine-view');
         });
@@ -452,25 +473,14 @@ const app = {
         this.animate();
     },
 
-    connect() {
-        this.nickname = document.getElementById('nick-input').value;
-        const serverIp = document.getElementById('server-input').value;
-        
-        document.getElementById('ui-login').classList.add('hidden');
-        document.getElementById('crosshair').classList.remove('hidden');
-        document.getElementById('engine-view').requestPointerLock();
-
-        console.log("Попытка подключения к:", serverIp);
-        // Здесь логика WebSocket, если у тебя есть запущенный сервер:
-        // this.socket = new WebSocket(`ws://${serverIp}:8080`);
-    },
-
     onMouseMove(e) {
         if (!this.isLocked) return;
-        this.camera.rotation.y -= e.movementX * 0.002;
-        // Ограничение поворота головы вверх/вниз
-        let nextX = this.camera.rotation.x - e.movementY * 0.002;
-        this.camera.rotation.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, nextX));
+        // Вращаем держатель камеры и самого игрока по горизонтали
+        this.player.rotation.y -= e.movementX * 0.003;
+        
+        // Наклон камеры вверх/вниз (только для держателя)
+        this.cameraHolder.rotation.x -= e.movementY * 0.003;
+        this.cameraHolder.rotation.x = Math.max(-0.5, Math.min(0.5, this.cameraHolder.rotation.x));
     },
 
     animate() {
@@ -478,21 +488,30 @@ const app = {
 
         if (this.isLocked) {
             const speed = 0.15;
-            const direction = new THREE.Vector3();
-            const front = new THREE.Vector3();
-            const side = new THREE.Vector3();
-
-            // Получаем направление взгляда (только по горизонтали)
-            this.camera.getWorldDirection(direction);
-            front.set(direction.x, 0, direction.z).normalize();
-            side.set(-front.z, 0, front.x); // Вектор вбок
-
-            // ПРАВИЛЬНАЯ ХОДЬБА (Вперед/Назад/Боком)
-            if (this.keys['KeyW']) this.camera.position.addScaledVector(front, speed);
-            if (this.keys['KeyS']) this.camera.position.addScaledVector(front, -speed);
-            if (this.keys['KeyA']) this.camera.position.addScaledVector(side, -speed);
-            if (this.keys['KeyD']) this.camera.position.addScaledVector(side, speed);
+            const vector = new THREE.Vector3();
+            
+            // Движение относительно поворота игрока
+            if (this.keys['KeyW']) {
+                vector.set(0, 0, -speed).applyQuaternion(this.player.quaternion);
+                this.player.position.add(vector);
+            }
+            if (this.keys['KeyS']) {
+                vector.set(0, 0, speed).applyQuaternion(this.player.quaternion);
+                this.player.position.add(vector);
+            }
+            if (this.keys['KeyA']) {
+                vector.set(-speed, 0, 0).applyQuaternion(this.player.quaternion);
+                this.player.position.add(vector);
+            }
+            if (this.keys['KeyD']) {
+                vector.set(speed, 0, 0).applyQuaternion(this.player.quaternion);
+                this.player.position.add(vector);
+            }
         }
+
+        // ПРИВЯЗКА КАМЕРЫ К ИГРОКУ
+        this.cameraHolder.position.copy(this.player.position);
+        this.cameraHolder.rotation.y = this.player.rotation.y;
 
         this.renderer.render(this.scene, this.camera);
     }
@@ -1314,3 +1333,4 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
