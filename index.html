@@ -27,6 +27,13 @@
         .nav-item.active { color: var(--c-main); background: rgba(255,152,0,0.06); border-left: 3px solid var(--c-main); }
         .content-area { flex: 1; padding: 35px; overflow-y: auto; background: #070707; }
 
+        /* CARDS */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 18px; }
+        .card { background: #0e0e0e; border-radius: 14px; border: 1px solid #1e1e1e; overflow: hidden; cursor: pointer; transition: 0.25s; }
+        .card:hover { border-color: var(--c-main); transform: translateY(-3px); }
+        .card-thumb { height: 130px; display: flex; justify-content: center; align-items: center; font-size: 55px; background: #0a0a0a; }
+        .card-info { padding: 16px 18px; }
+
         /* ENGINE */
         #engine-view { position: fixed; inset: 0; display: none; z-index: 50; }
         #crosshair { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 10px; height: 10px; border: 2px solid white; border-radius: 50%; pointer-events: none; z-index: 100; }
@@ -40,15 +47,15 @@
 <div id="ui-login">
     <div class="login-box">
         <h1 style="color:var(--c-main); font-size:48px; margin:0;">CITRUS</h1>
-        <p style="color:#555; margin-bottom:20px;">ONLINE EDITION</p>
-        <input type="text" id="login-nick" placeholder="Твой ник..." value="Игрок">
+        <p style="color:#555; margin-bottom:20px;">ИСПРАВЛЕННАЯ ВЕРСИЯ</p>
+        <input type="text" id="user-nick" placeholder="Твой ник..." value="Игрок">
         <button class="btn-primary" onclick="app.login()">⚡ ВОЙТИ</button>
     </div>
 </div>
 
 <div id="ui-hub" class="hidden">
     <div class="hub-header">
-        <h2 style="color:var(--c-main); margin:0;">CITRUS</h2>
+        <h2 style="color:var(--c-main); margin:0;">CITRUS ONLINE</h2>
         <div style="margin-left:auto; display:flex; align-items:center; gap:20px;">
             <span id="display-name" style="color:#ccc;"></span>
             <span style="color:var(--c-main);">🍊 <span id="balance-val">0</span></span>
@@ -57,16 +64,19 @@
     <div class="hub-body">
         <div class="sidebar">
             <div class="nav-item active" onclick="app.switchTab('games')"><i class="fas fa-gamepad"></i> Миры</div>
-            <div class="nav-item" onclick="app.switchTab('friends')"><i class="fas fa-users"></i> Найти друга</div>
             <div class="nav-item" onclick="app.switchTab('studio')"><i class="fas fa-cube"></i> Студия</div>
+            <div class="nav-item" onclick="app.switchTab('friends')"><i class="fas fa-users"></i> Друзья</div>
         </div>
         <div class="content-area">
             <div id="tab-games">
-                <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap:20px;">
-                    <div style="background:#111; border-radius:15px; padding:20px; cursor:pointer; border:1px solid #222;" onclick="app.launch()">
-                        <div style="font-size:40px; text-align:center;">🏙️</div>
-                        <div style="text-align:center; margin-top:10px;"><b>Главный Город</b></div>
+                <h3 style="color:#444;">МОИ КАРТЫ:</h3>
+                <div id="my-games-grid" class="grid">
                     </div>
+            </div>
+            <div id="tab-studio" class="hidden">
+                <div style="background:#111; padding:30px; border-radius:15px; text-align:center; border:1px solid #222;">
+                    <h3>🛠️ Создать новую карту</h3>
+                    <button class="btn-primary" style="width:200px; margin-top:20px;" onclick="app.createNewMap()">НОВАЯ КАРТА</button>
                 </div>
             </div>
             <div id="tab-friends" class="hidden">
@@ -74,9 +84,6 @@
                     <h3>👥 Друзья онлайн</h3>
                     <p style="color:#444;">Боты удалены. Список пуст.</p>
                 </div>
-            </div>
-            <div id="tab-studio" class="hidden">
-                <p>Инструменты Студии...</p>
             </div>
         </div>
     </div>
@@ -95,16 +102,22 @@ const app = {
     scene: null, camera: null, renderer: null, player: null,
     camRoot: null, camPitch: null,
     keys: {}, isLocked: false, active: false,
-    nick: 'Игрок',
+    customMaps: [],
+
+    init() {
+        // Загрузка карт из памяти
+        const saved = localStorage.getItem('citrus_maps');
+        if(saved) this.customMaps = JSON.parse(saved);
+        this.renderMyGames();
+    },
 
     login() {
-        // ИСПРАВЛЕННЫЙ ВХОД
-        const input = document.getElementById('login-nick');
-        this.nick = input.value || 'Игрок';
-        document.getElementById('display-name').innerText = this.nick;
+        const nick = document.getElementById('user-nick').value;
+        document.getElementById('display-name').innerText = nick;
         document.getElementById('ui-login').classList.add('hidden');
         document.getElementById('ui-hub').classList.remove('hidden');
         this.initEngine();
+        this.init(); // Загружаем карты при входе
     },
 
     switchTab(t) {
@@ -114,6 +127,33 @@ const app = {
         document.getElementById('tab-' + t).classList.remove('hidden');
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
         event.currentTarget.classList.add('active');
+    },
+
+    renderMyGames() {
+        const grid = document.getElementById('my-games-grid');
+        grid.innerHTML = '';
+        if(this.customMaps.length === 0) {
+            grid.innerHTML = '<p style="color:#555;">У тебя пока нет созданных карт.</p>';
+            return;
+        }
+        this.customMaps.forEach((map, i) => {
+            grid.innerHTML += `
+                <div class="card" onclick="app.launch(${i})">
+                    <div class="card-thumb">🏙️</div>
+                    <div class="card-info"><b>${map.name}</b></div>
+                </div>
+            `;
+        });
+    },
+
+    createNewMap() {
+        const name = prompt("Название карты:", "Мой мир " + (this.customMaps.length + 1));
+        if(name) {
+            this.customMaps.push({ name: name, blocks: [] });
+            localStorage.setItem('citrus_maps', JSON.stringify(this.customMaps));
+            this.renderMyGames();
+            this.switchTab('games');
+        }
     },
 
     initEngine() {
@@ -128,7 +168,7 @@ const app = {
         this.scene.add(new THREE.AmbientLight(0xffffff, 0.6));
         this.scene.add(new THREE.GridHelper(200, 50, 0xff9800, 0x222222));
 
-        // ТВОЙ ПЕРСОНАЖ
+        // ИГРОК
         this.player = new THREE.Mesh(
             new THREE.BoxGeometry(1, 2, 1),
             new THREE.MeshPhongMaterial({ color: 0x00E5FF })
@@ -136,13 +176,13 @@ const app = {
         this.player.position.y = 1;
         this.scene.add(this.player);
 
-        // ИСПРАВЛЕННАЯ КАМЕРА (3-Е ЛИЦО СЗАДИ)
+        // КАМЕРА (3-Е ЛИЦО)
         this.camRoot = new THREE.Object3D(); 
         this.camPitch = new THREE.Object3D();
         this.scene.add(this.camRoot);
         this.camRoot.add(this.camPitch);
         
-        this.camera.position.set(0, 3, 7); // 7 метров сзади, 3 метра сверху
+        this.camera.position.set(0, 3, 7); 
         this.camera.lookAt(0, 1, 0);
         this.camPitch.add(this.camera);
 
@@ -157,7 +197,7 @@ const app = {
         this.animate();
     },
 
-    launch() {
+    launch(index) {
         this.active = true;
         document.getElementById('ui-hub').classList.add('hidden');
         document.getElementById('engine-view').style.display = 'block';
@@ -173,35 +213,27 @@ const app = {
 
     onMouseMove(e) {
         if (!this.isLocked) return;
-        // Поворот игрока (влево-вправо)
         this.player.rotation.y -= e.movementX * 0.003;
-        // Поворот камеры (вверх-вниз)
         this.camPitch.rotation.x -= e.movementY * 0.002;
         this.camPitch.rotation.x = Math.max(-0.7, Math.min(0.5, this.camPitch.rotation.x));
     },
 
     animate() {
         requestAnimationFrame(() => this.animate());
-        
         if (this.active && this.isLocked) {
             const speed = 0.15;
             const move = new THREE.Vector3();
-
-            // ИСПРАВЛЕННАЯ ХОДЬБА (Относительно поворота)
             if (this.keys['KeyW']) move.z -= speed;
             if (this.keys['KeyS']) move.z += speed;
             if (this.keys['KeyA']) move.x -= speed;
             if (this.keys['KeyD']) move.x += speed;
-
             move.applyQuaternion(this.player.quaternion);
             this.player.position.add(move);
         }
-
         if (this.player) {
             this.camRoot.position.copy(this.player.position);
             this.camRoot.rotation.y = this.player.rotation.y;
         }
-
         this.renderer.render(this.scene, this.camera);
     }
 };
