@@ -457,34 +457,29 @@ const app = {
         if(maps) this.customMaps = JSON.parse(maps);
     },
 
-    // --- 2. РЕГИСТРАЦИЯ С АЙДИ ---
     register() {
-        const nameInput = document.getElementById('login-name');
-        const name = nameInput.value.trim();
-        
-        if (name.length < 2) {
-            alert("Слишком короткий ник!");
-            return;
-        }
+        const name = document.getElementById('login-name').value.trim();
+        if(name.length < 2) {
+        alert("Ник слишком короткий!");
+        return;
+    }
 
-        // Создаем случайный ID от 1000 до 9999
-        const randomID = Math.floor(1000 + Math.random() * 9000);
-        
-        this.playerData = {
-            name: name,
-            id: randomID,
-            fullTag: `${name}#${randomID}`
-        };
+    // Создаем ID и сохраняем
+    const randomID = Math.floor(1000 + Math.random() * 9000);
+    this.playerData = { 
+        name: name, 
+        id: randomID, 
+        fullTag: name + "#" + randomID 
+    };
 
-        // Сохраняем в память браузера навсегда
-        localStorage.setItem('citrus_user', JSON.stringify(this.playerData));
+    // Записываем в память браузера
+    localStorage.setItem('citrus_user', JSON.stringify(this.playerData));
 
-        // Переходим в меню
-        document.getElementById('ui-login').classList.add('hidden');
-        document.getElementById('ui-menu').classList.remove('hidden');
-        
-        console.log("Добро пожаловать,", this.playerData.fullTag);
-    },
+    document.getElementById('ui-login').classList.add('hidden');
+    document.getElementById('ui-menu').classList.remove('hidden');
+    
+    console.log("Успешный вход:", this.playerData.fullTag);
+  }, 
 
     // --- ОСТАЛЬНАЯ ЛОГИКА ТВОЕЙ ИГРЫ ---
     launch(mode, mapIdx) {
@@ -1329,7 +1324,6 @@ window.onload = () => { app.init(); };
 app.init();
 </script>
 </body>
-</html>
 
 
 
