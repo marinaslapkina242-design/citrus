@@ -565,8 +565,9 @@ const app = {
                 const d=Math.sqrt(dx*dx+dy*dy);
                 if(d>CR*2){continue;}
                 ck.style.transform=`translate(calc(-50% + ${Math.max(-CR,Math.min(CR,t.clientX-cOx+0))}px), calc(-50% + ${Math.max(-CR,Math.min(CR,t.clientY-cOy+0))}px))`;
-                if(this.mode==='play'&&this.playerGroup){
-                    this.playerGroup.rotation.y-=dx*0.005;
+                if(this.mode==='play'){
+                    this._camYaw   = (this._camYaw   || Math.PI) - dx * 0.005;
+                    this._camPitch = Math.max(-0.4, Math.min(0.6, (this._camPitch || 0.3) - dy * 0.005));
                 } else if(this.mode==='studio'){
                     this.camera.rotation.order='YXZ';
                     this.camera.rotation.y-=dx*0.005;
@@ -617,141 +618,109 @@ const app = {
     },
     resetAvatar(){this.inventory=[];this.saveData();this.renderShop();this.updateAvatarPreview();},
 
-    // ── FRIENDS (РЕАЛЬНАЯ СИСТЕМА — Firebase Realtime DB, работает на render.com)
-    // Бесплатный публичный REST, не нужна регистрация от игрока.
+    // ── FRIENDS — через собственный сервер на render.com (/api/*)
+    // Все запросы идут на тот же домен — работает без CORS.
 
-    _fbUrl(path){ return `https://citrus-game-default-rtdb.firebaseio.com/${path}.json`; },
-
-    async _fbSet(path, data){
-        await fetch(this._fbUrl(path),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
-    },
-    async _fbGet(path){
-        const r=await fetch(this._fbUrl(path));
-        if(!r.ok)return null;
-        return await r.json();
-    },
-    async _fbDelete(path){ await fetch(this._fbUrl(path),{method:'DELETE'}); },
-    async _fbPatch(path,data){
-        await fetch(this._fbUrl(path),{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+    async _api(method, path, body=null){
+        try{
+            const opts={method,headers:{'Content-Type':'application/json'}};
+            if(body)opts.body=JSON.stringify(body);
+            const r=await fetch('/api/'+path,opts);
+            if(!r.ok)return null;
+            return await r.json();
+        }catch(e){return null;}
     },
 
-    // Зарегистрировать/обновить себя в базе онлайн-игроков
     async _registerPresence(){
         if(!this.username||!this.userId)return;
         try{
-            await this._fbSet('players/'+this.userId,{
-                id:String(this.userId), name:this.username, tag:this.fullTag,
-                color:this._myColor, status:'online', world:null, ts:Date.now()
+            await this._api('POST','presence',{
+                id:String(this.userId),name:this.username,tag:this.fullTag,
+                color:this._myColor,status:'online',world:null,ts:Date.now()
             });
         }catch(e){}
     },
-
     async _updateStatus(status,world=null){
         if(!this.username||!this.userId)return;
         try{
-            await this._fbPatch('players/'+this.userId,{status,world,ts:Date.now()});
+            await this._api('POST','presence',{
+                id:String(this.userId),name:this.username,tag:this.fullTag,
+                color:this._myColor,status,world,ts:Date.now()
+            });
         }catch(e){}
     },
-
-    // Получить всех живых онлайн-игроков (активные за последние 5 минут)
     async _fetchOnline(){
         try{
-            const data=await this._fbGet('players');
+            const data=await this._api('GET','online');
             if(!data)return[];
-            const now=Date.now(),out=[];
-            for(const uid in data){
-                const p=data[uid];
-                if(String(p.id)===String(this.userId))continue;
-                if(now-(p.ts||0)>5*60*1000)continue; // 5 минут — онлайн
-                out.push(p);
-            }
-            return out;
+            return data.filter(p=>String(p.id)!==String(this.userId));
         }catch(e){return[];}
     },
-
-    // Проверяем входящие заявки и подтверждения
     async _pollFriends(){
         if(!this.userId)return;
         let changed=false;
         try{
-            // Входящие заявки в друзья
-            const reqs=await this._fbGet('requests/'+this.userId);
-            if(reqs){
-                for(const fromId in reqs){
-                    const req=reqs[fromId];
-                    if(!this.friendRequests.includes(fromId)&&!this.friends.includes(fromId)){
-                        this.friendRequests.push(fromId);
+            const data=await this._api('GET','events/'+this.userId);
+            if(data){
+                (data.requests||[]).forEach(req=>{
+                    const fid=String(req.from_id);
+                    if(!this.friendRequests.includes(fid)&&!this.friends.includes(fid)){
+                        this.friendRequests.push(fid);
                         if(!this._pc)this._pc=[];
-                        if(!this._pc.find(x=>x.id===fromId))
-                            this._pc.push({id:fromId,name:req.fromName,tag:req.fromTag,color:req.fromColor||'#FF9800'});
+                        if(!this._pc.find(x=>x.id===fid))
+                            this._pc.push({id:fid,name:req.from_name,tag:req.from_tag,color:req.from_color||'#FF9800'});
                         changed=true;
-                        this.showNotif('👥','Заявка в друзья!',
-                            `${req.fromName} (${req.fromTag||fromId}) хочет дружить`,true,fromId);
+                        this.showNotif('👥','Заявка в друзья!',`${req.from_name} хочет дружить`,true,fid);
                     }
-                }
-            }
-            // Подтверждения наших заявок
-            const accs=await this._fbGet('accepted/'+this.userId);
-            if(accs){
-                for(const byId in accs){
-                    const acc=accs[byId];
+                });
+                (data.accepted||[]).forEach(acc=>{
+                    const byId=String(acc.from_id);
                     if(!this.friends.includes(byId)){
                         this.friends.push(byId);
                         this.sentReqs=this.sentReqs.filter(x=>x!==byId);
                         if(!this._pc)this._pc=[];
                         if(!this._pc.find(x=>x.id===byId))
-                            this._pc.push({id:byId,name:acc.byName,tag:acc.byTag,color:'#00E676'});
+                            this._pc.push({id:byId,name:acc.from_name,tag:acc.from_tag,color:'#00E676'});
                         changed=true;
-                        this.showNotif('🤝','Заявка принята!',`${acc.byName} теперь твой друг! 🎉`);
+                        this.showNotif('🤝','Принята!',`${acc.from_name} теперь твой друг! 🎉`);
+                        this._api('DELETE','events/'+this.userId+'/accepted/'+byId);
                     }
-                    await this._fbDelete('accepted/'+this.userId+'/'+byId);
-                }
+                });
             }
         }catch(e){}
         if(changed){this.saveData();this.renderFriends();}
     },
-
-    // Отправить заявку в друзья
     async sendReq(targetId){
         targetId=String(targetId);
         if(this.sentReqs.includes(targetId)||this.friends.includes(targetId))return;
-        this.sentReqs.push(targetId);
-        this.saveData();
-        try{
-            await this._fbSet('requests/'+targetId+'/'+this.userId,{
-                from:String(this.userId), fromName:this.username,
-                fromTag:this.fullTag, fromColor:this._myColor, ts:Date.now()
-            });
-            const name=(this._cachedOnline||[]).find(x=>x.id===targetId)?.name||targetId;
-            this.showNotif('📨','Заявка отправлена',`Ждём ответа от ${name}...`);
-        }catch(e){
-            this.showNotif('📨','Заявка отправлена','Доставим когда игрок зайдёт онлайн');
-        }
+        this.sentReqs.push(targetId);this.saveData();
+        const ok=await this._api('POST','request',{
+            from_id:String(this.userId),to_id:targetId,
+            from_name:this.username,from_tag:this.fullTag,from_color:this._myColor
+        });
+        const name=(this._cachedOnline||[]).find(x=>String(x.id)===targetId)?.name||targetId;
+        if(ok!==null)this.showNotif('📨','Заявка отправлена',`Ждём ответа от ${name}...`);
+        else this.showNotif('❌','Ошибка','Сервер недоступен');
         this.renderOnline();
     },
-
-    // Принять заявку
     async acceptFriend(fromId){
         fromId=String(fromId);
         this.friendRequests=this.friendRequests.filter(x=>x!==fromId);
         if(!this.friends.includes(fromId))this.friends.push(fromId);
         this.saveData();
-        try{
-            await this._fbDelete('requests/'+this.userId+'/'+fromId);
-            await this._fbSet('accepted/'+fromId+'/'+this.userId,{
-                by:String(this.userId), byName:this.username, byTag:this.fullTag, ts:Date.now()
-            });
-        }catch(e){}
+        await this._api('POST','accept',{
+            from_id:String(this.userId),to_id:fromId,
+            from_name:this.username,from_tag:this.fullTag
+        });
         const name=(this._pc||[]).find(x=>x.id===fromId)?.name||fromId;
-        this.showNotif('🤝','Новый друг!',`${name} добавлен в друзья`);
+        this.showNotif('🤝','Новый друг!',`${name} добавлен`);
         this.renderFriends();
     },
-
     declineFriend(fromId){
         fromId=String(fromId);
         this.friendRequests=this.friendRequests.filter(x=>x!==fromId);
         this.saveData();this.renderFriends();
-        try{this._fbDelete('requests/'+this.userId+'/'+fromId);}catch(e){}
+        this._api('DELETE','request/'+this.userId+'/'+fromId);
     },
     removeFriend(id){
         this.friends=this.friends.filter(x=>x!==id);
@@ -1206,13 +1175,13 @@ const app = {
     // ── УПРАВЛЕНИЕ МЫШКОЙ (ВРАЩЕНИЕ)
     onMouseMove(e) {
         if (!document.pointerLockElement) return;
-
-        if (this.mode === 'play' && this.playerGroup) {
-            // В игре крутим всего персонажа влево-вправо
-            this.playerGroup.rotation.y -= e.movementX * 0.003;
-        } 
+        if (this.mode === 'play') {
+            // Мышь вращает камеру вокруг игрока (yaw/pitch)
+            this._camYaw   = (this._camYaw   || 0) - e.movementX * 0.003;
+            this._camPitch = Math.max(-0.4, Math.min(0.6, (this._camPitch || 0.3) - e.movementY * 0.003));
+        }
         else if (this.mode === 'studio') {
-            // В студии крутим саму камеру
+            this.camera.rotation.order='YXZ';
             this.camera.rotation.y -= e.movementX * 0.003;
             this.camera.rotation.x -= e.movementY * 0.003;
             this.camera.rotation.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, this.camera.rotation.x));
@@ -1249,54 +1218,59 @@ const app = {
         const time=this.clock.getElapsedTime();
 
         if(this.mode==='play'&&this.playerGroup){
-            const move=new THREE.Vector3();
-            if(this.keys['KeyW'])move.z-=1;
-            if(this.keys['KeyS'])move.z+=1;
-            if(this.keys['KeyA'])move.x-=1;
-            if(this.keys['KeyD'])move.x+=1;
-            
-            if(move.length()>0){
-                move.normalize();
-                // Двигаемся по направлению ВЗГЛЯДА КАМЕРЫ (горизонталь)
-                // Берём forward вектор камеры, убираем Y-компоненту
-                const camFwd=new THREE.Vector3();
-                this.camera.getWorldDirection(camFwd);
-                camFwd.y=0; camFwd.normalize();
-                const camRight=new THREE.Vector3();
-                camRight.crossVectors(camFwd,new THREE.Vector3(0,1,0)).normalize();
-                // Итоговое смещение
-                const wm=new THREE.Vector3();
-                wm.addScaledVector(camFwd,-move.z); // W=вперёд, S=назад
-                wm.addScaledVector(camRight,move.x); // D=вправо, A=влево
-                wm.normalize().multiplyScalar(14*delta);
-                // Поворачиваем персонажа в сторону движения
-                if(wm.length()>0){
-                    const targetAngle=Math.atan2(wm.x,wm.z);
-                    const curAngle=this.playerGroup.rotation.y;
-                    let diff=targetAngle-curAngle;
-                    while(diff>Math.PI)diff-=Math.PI*2;
-                    while(diff<-Math.PI)diff+=Math.PI*2;
-                    this.playerGroup.rotation.y+=diff*0.18;
-                }
-                if(!this.checkCollision(this.playerGroup.position,wm))
-                    this.playerGroup.position.add(wm);
+            // ── Инициализация углов камеры
+            if(this._camYaw===undefined){this._camYaw=Math.PI;this._camPitch=0.3;}
+
+            // ── Вектор вперёд по YAW камеры (горизонталь)
+            const camYaw = this._camYaw;
+            const fwd  = new THREE.Vector3( Math.sin(camYaw), 0,  Math.cos(camYaw));
+            const right = new THREE.Vector3( Math.cos(camYaw), 0, -Math.sin(camYaw));
+
+            // ── Движение WASD
+            const move = new THREE.Vector3();
+            if(this.keys['KeyW']) move.add(fwd);
+            if(this.keys['KeyS']) move.sub(fwd);
+            if(this.keys['KeyA']) move.sub(right);
+            if(this.keys['KeyD']) move.add(right);
+
+            if(move.length() > 0){
+                move.normalize().multiplyScalar(14 * delta);
+                // Плавный поворот персонажа в сторону движения
+                const tgtAngle = Math.atan2(move.x, move.z);
+                let diff = tgtAngle - this.playerGroup.rotation.y;
+                while(diff >  Math.PI) diff -= Math.PI*2;
+                while(diff < -Math.PI) diff += Math.PI*2;
+                this.playerGroup.rotation.y += diff * 0.2;
+                if(!this.checkCollision(this.playerGroup.position, move))
+                    this.playerGroup.position.add(move);
             }
-            const grav=this.spaceGrav?14:40;
-            this.velocity.y-=grav*delta;
-            this.playerGroup.position.y+=this.velocity.y*delta;
-            const gy=this.checkGround(this.playerGroup.position);
-            if(this.playerGroup.position.y<=gy){
-                this.playerGroup.position.y=gy;this.velocity.y=0;this.canJump=true;
-            }else this.canJump=false;
-            const jumpH=this.spaceGrav?10:16;
-            if(this.keys['Space']&&this.canJump){this.velocity.y=jumpH;this.canJump=false;}
-            if(this.playerGroup.position.y<-25){this.playerGroup.position.set(0,5,0);this.velocity.y=0;}
-            
-            // Камера — точная формула (сзади спины)
-            const cameraOffset=new THREE.Vector3(0,5,-10);
-            const relativeCameraOffset=cameraOffset.clone().applyQuaternion(this.playerGroup.quaternion);
-            this.camera.position.copy(this.playerGroup.position).add(relativeCameraOffset);
-            this.camera.lookAt(this.playerGroup.position);
+
+            // ── Гравитация и прыжок
+            const grav = this.spaceGrav ? 14 : 40;
+            this.velocity.y -= grav * delta;
+            this.playerGroup.position.y += this.velocity.y * delta;
+            const gy = this.checkGround(this.playerGroup.position);
+            if(this.playerGroup.position.y <= gy){
+                this.playerGroup.position.y = gy;
+                this.velocity.y = 0;
+                this.canJump = true;
+            } else this.canJump = false;
+            const jumpH = this.spaceGrav ? 10 : 16;
+            if(this.keys['Space'] && this.canJump){this.velocity.y=jumpH; this.canJump=false;}
+            if(this.playerGroup.position.y < -25){this.playerGroup.position.set(0,5,0); this.velocity.y=0;}
+
+            // ── Камера orbit вокруг игрока
+            const dist  = 10;
+            const pitch = this._camPitch || 0.3;
+            const cx = this.playerGroup.position.x + dist * Math.sin(camYaw) * Math.cos(pitch);
+            const cy = this.playerGroup.position.y + dist * Math.sin(pitch) + 1.5;
+            const cz = this.playerGroup.position.z + dist * Math.cos(camYaw) * Math.cos(pitch);
+            this.camera.position.set(cx, cy, cz);
+            this.camera.lookAt(
+                this.playerGroup.position.x,
+                this.playerGroup.position.y + 1.5,
+                this.playerGroup.position.z
+            );
             
             // Сбор монет
             for(let i=this.collectibles.length-1;i>=0;i--){
@@ -1417,4 +1391,3 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
-
