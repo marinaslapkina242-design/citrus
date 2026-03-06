@@ -204,7 +204,7 @@
                     </div>
                     <div class="card" onclick="app.launch('play','snowmount')">
                         <div class="card-thumb" style="background:radial-gradient(circle,rgba(100,200,255,0.12),#050505)">🏔️</div>
-                        <div class="card-info"><div><b>Снежная Гора</b><br><small style="color:#00e5ff">🏆 2 🍊 за вершину!</small></div></div>
+                        <div class="card-info"><div><b>Снежная Гора</b><br><small style="color:#00e5ff">🏆 3 🍊 за вершину!</small></div></div>
                     </div>
                     <div class="card" onclick="app.launch('play','dungeon')">
                         <div class="card-thumb" style="background:radial-gradient(circle,rgba(150,0,200,0.12),#050505)">⚔️</div>
@@ -2265,8 +2265,91 @@ const app = {
 
 window.onload = () => app.init();
 </script>
+<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+<script src="online.js"></script>
 </body>
 </html>
+
+<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+<script>
+// Ждем чуть-чуть, чтобы основной скрипт успел загрузиться
+setTimeout(() => {
+    if (typeof app === 'undefined') {
+        alert("Ошибка: Скрипт вставлен не в тот файл или основной код не загружен!");
+        return;
+    }
+
+    console.log("CITRUS ONLINE: Активация...");
+
+    // Создаем сетевой модуль
+    app.net = {
+        peer: null,
+        init() {
+            const myId = "CITRUS_" + (app.nick || "Player") + "_" + Math.floor(Math.random()*999);
+            this.peer = new Peer(myId);
+            this.peer.on('open', (id) => {
+                // Ищем вкладку друзей и силой вставляем туда ID
+                const tab = document.getElementById('tab-friends');
+                if(tab) {
+                    tab.innerHTML = `
+                        <div style="background:#111; padding:20px; border:1px solid #FF9800; border-radius:10px;">
+                            <h2 style="color:#FF9800;margin:0">ОНЛАЙН АКТИВЕН</h2>
+                            <p>Твой ID: <b style="color:#fff;font-family:monospace">${id}</b></p>
+                            <input type="text" id="connect-to" placeholder="Вставь ID друга..." style="padding:10px;width:100%;background:#000;color:#fff;border:1,px solid #333;margin:10px 0;">
+                            <button onclick="app.net.connect(document.getElementById('connect-to').value)" style="width:100%;padding:10px;background:#FF9800;color:#000;font-weight:bold;cursor:pointer;">ПОДКЛЮЧИТЬСЯ К ДРУГУ</button>
+                        </div>
+                    `;
+                }
+            });
+            this.peer.on('connection', (c) => this.setup(c));
+        },
+        connect(id) {
+            this.setup(this.peer.connect(id));
+        },
+        setup(conn) {
+            conn.on('open', () => {
+                app.showNotif("СЕТЬ", "Связь установлена!");
+                setInterval(() => {
+                    if(app.player) conn.send({x: app.player.position.x, y: app.player.position.y, z: app.player.position.z, ry: app.player.rotation.y});
+                }, 50);
+            });
+            conn.on('data', (data) => this.update(conn.peer, data));
+        },
+        update(id, data) {
+            if(!app._remote) app._remote = {};
+            if(!app._remote[id]) {
+                const m = new THREE.Mesh(new THREE.BoxGeometry(1,2,1), new THREE.MeshPhongMaterial({color: 0xFF4081}));
+                app.scene.add(m);
+                app._remote[id] = m;
+            }
+            app._remote[id].position.set(data.x, data.y, data.z);
+            app._remote[id].rotation.y = data.ry;
+        }
+    };
+
+    // Включаем онлайн при логине
+    const oldLogin = app.login;
+    app.login = function() {
+        oldLogin.apply(this, arguments);
+        app.net.init();
+    };
+
+    // Силой чиним камеру
+    app.onMouseMove = function(e) {
+        if (!this.isLocked) return;
+        this.player.rotation.y -= e.movementX * 0.003;
+        if (!this.camPitch) {
+            this.camPitch = new THREE.Object3D();
+            this.player.add(this.camPitch);
+            this.camPitch.add(this.camera);
+            this.camera.position.set(0, 2, 5);
+        }
+        this.camPitch.rotation.x -= e.movementY * 0.002;
+        this.camPitch.rotation.x = Math.max(-1.4, Math.min(1.4, this.camPitch.rotation.x));
+    };
+
+}, 2000); // Задержка 2 секунды для надежности
+</script>
 
 
 
