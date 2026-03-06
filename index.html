@@ -482,6 +482,9 @@ const app = {
     init(){
         this.loadData();
         this._loadPeerInfo(); // Восстанавливаем имена друзей из кэша
+        // Читаем почтовый ящик сразу и каждые 5 секунд
+        setTimeout(()=>{ this._readMailbox(); }, 800);
+        setInterval(()=>{ this._readMailbox(); }, 5000);
         // АВТО-ВХОД
         if (this.username && this.username !== '') {
             document.getElementById('ui-login').classList.add('hidden');
@@ -904,12 +907,82 @@ const app = {
         targetId=String(targetId);
         if(this.sentReqs.includes(targetId)||this.friends.includes(targetId))return;
         this.sentReqs.push(targetId);this.saveData();
+
+        // ── Пишем заявку напрямую в localStorage-почту получателя (работает всегда!)
+        this._writeMailbox(targetId, {
+            type: 'friend_req',
+            from_id: String(this.userId),
+            from_name: this.username,
+            from_tag: this.fullTag,
+            from_color: this._myColor,
+            ts: Date.now()
+        });
+
+        // ── Также через WebSocket если онлайн
         this._wsSend({type:'friend_req',_from:String(this.userId),to:targetId,
             from_id:String(this.userId),from_name:this.username,from_tag:this.fullTag,from_color:this._myColor});
-        const name=(this._cachedOnline||[]).find(x=>String(x.id)===targetId)?.name||targetId;
+
+        const name=(this._pc||[]).find(x=>String(x.id)===targetId)?.name||
+                   (this._cachedOnline||[]).find(x=>String(x.id)===targetId)?.name||targetId;
         this.showNotif('📨','Заявка отправлена',`Ждём ответа от ${name}...`);
-        this.renderOnline();
-        this.searchPlayer(); // Обновляем поиск
+        this.searchPlayer();
+        this.renderInbox();
+    },
+
+    // Записать письмо в почтовый ящик пользователя (через localStorage)
+    _writeMailbox(toId, letter) {
+        try {
+            const key = 'citrus_mail_' + toId;
+            const box = JSON.parse(localStorage.getItem(key) || '[]');
+            // Не дублируем заявку от того же отправителя
+            const alreadyExists = box.some(l => l.type === letter.type && l.from_id === letter.from_id);
+            if (!alreadyExists) {
+                box.push(letter);
+                localStorage.setItem(key, JSON.stringify(box));
+            }
+        } catch(e) {}
+    },
+
+    // Прочитать и применить свою почту из localStorage
+    _readMailbox() {
+        try {
+            const key = 'citrus_mail_' + String(this.userId);
+            const box = JSON.parse(localStorage.getItem(key) || '[]');
+            if (!box.length) return;
+            let changed = false;
+            box.forEach(letter => {
+                if (letter.type === 'friend_req') {
+                    const fid = String(letter.from_id);
+                    if (!this.friendRequests.includes(fid) && !this.friends.includes(fid)) {
+                        this.friendRequests.push(fid);
+                        if (!this._pc) this._pc = [];
+                        if (!this._pc.find(x => x.id === fid))
+                            this._pc.push({id:fid, name:letter.from_name, tag:letter.from_tag, color:letter.from_color||'#FF9800'});
+                        this._savePeerInfo(fid, letter.from_name, letter.from_tag, letter.from_color||'#FF9800');
+                        changed = true;
+                    }
+                } else if (letter.type === 'friend_acc') {
+                    const fid = String(letter.from_id);
+                    if (!this.friends.includes(fid)) {
+                        this.friends.push(fid);
+                        this.sentReqs = this.sentReqs.filter(x => x !== fid);
+                        if (!this._pc) this._pc = [];
+                        if (!this._pc.find(x => x.id === fid))
+                            this._pc.push({id:fid, name:letter.from_name, tag:letter.from_tag, color:letter.from_color||'#00E676'});
+                        this._savePeerInfo(fid, letter.from_name, letter.from_tag, letter.from_color||'#00E676');
+                        this.showNotif('🤝','Принята!',`${letter.from_name} теперь твой друг! 🎉`);
+                        changed = true;
+                    }
+                }
+            });
+            // Очищаем ящик после прочтения
+            localStorage.removeItem(key);
+            if (changed) {
+                this.saveData();
+                this.renderFriends();
+                this.renderInbox();
+            }
+        } catch(e) {}
     },
 
     async acceptFriend(fromId){
@@ -917,6 +990,17 @@ const app = {
         this.friendRequests=this.friendRequests.filter(x=>x!==fromId);
         if(!this.friends.includes(fromId))this.friends.push(fromId);
         this.saveData();
+
+        // Пишем подтверждение в почту отправителя
+        this._writeMailbox(fromId, {
+            type: 'friend_acc',
+            from_id: String(this.userId),
+            from_name: this.username,
+            from_tag: this.fullTag,
+            from_color: this._myColor,
+            ts: Date.now()
+        });
+
         this._wsSend({type:'friend_acc',_from:String(this.userId),to:fromId,
             from_id:String(this.userId),from_name:this.username,from_tag:this.fullTag});
         const name=(this._pc||[]).find(x=>x.id===fromId)?.name||fromId;
@@ -2097,6 +2181,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
