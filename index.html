@@ -204,7 +204,7 @@
                     </div>
                     <div class="card" onclick="app.launch('play','snowmount')">
                         <div class="card-thumb" style="background:radial-gradient(circle,rgba(100,200,255,0.12),#050505)">🏔️</div>
-                        <div class="card-info"><div><b>Снежная Гора</b><br><small style="color:#00e5ff">🏆 30 🍊 за вершину!</small></div></div>
+                        <div class="card-info"><div><b>Снежная Гора</b><br><small style="color:#00e5ff">🏆 2000 🍊 за вершину!</small></div></div>
                     </div>
                     <div class="card" onclick="app.launch('play','dungeon')">
                         <div class="card-thumb" style="background:radial-gradient(circle,rgba(150,0,200,0.12),#050505)">⚔️</div>
@@ -258,6 +258,7 @@
                         <h3 style="display:flex;align-items:center;gap:8px;">
                             📬 Почта
                             <span id="inbox-badge" style="display:none;background:var(--c-pink);color:#fff;font-size:10px;font-weight:bold;padding:2px 7px;border-radius:20px;"></span>
+                            <button onclick="app._readMailbox();app.renderInbox();" style="margin-left:auto;background:#111;color:#555;border:1px solid #222;padding:3px 9px;border-radius:6px;font-size:11px;cursor:pointer;">⟳ Обновить</button>
                         </h3>
                         <div id="inbox-tabs" style="display:flex;gap:6px;margin-bottom:14px;">
                             <button id="itab-in"  onclick="app.switchInbox('in')"  style="flex:1;padding:7px;border-radius:8px;font-size:11px;font-weight:bold;background:rgba(255,64,129,0.15);color:var(--c-pink);border:1px solid rgba(255,64,129,0.2);">Входящие</button>
@@ -932,10 +933,10 @@ const app = {
     // Записать письмо в почтовый ящик пользователя (через localStorage)
     _writeMailbox(toId, letter) {
         try {
-            const key = 'citrus_mail_' + toId;
+            const key = 'citrus_mail_' + String(toId);
             const box = JSON.parse(localStorage.getItem(key) || '[]');
             // Не дублируем заявку от того же отправителя
-            const alreadyExists = box.some(l => l.type === letter.type && l.from_id === letter.from_id);
+            const alreadyExists = box.some(l => l.type === letter.type && String(l.from_id) === String(letter.from_id));
             if (!alreadyExists) {
                 box.push(letter);
                 localStorage.setItem(key, JSON.stringify(box));
@@ -947,10 +948,18 @@ const app = {
     _readMailbox() {
         try {
             const key = 'citrus_mail_' + String(this.userId);
-            const box = JSON.parse(localStorage.getItem(key) || '[]');
+            const raw = localStorage.getItem(key);
+            if (!raw) return;
+            const box = JSON.parse(raw);
             if (!box.length) return;
             let changed = false;
-            box.forEach(letter => {
+
+            // Оставляем только непрочитанные (read !== true)
+            const unread = box.filter(l => !l.read);
+            if (!unread.length) return;
+
+            unread.forEach(letter => {
+                letter.read = true; // Помечаем как прочитанное
                 if (letter.type === 'friend_req') {
                     const fid = String(letter.from_id);
                     if (!this.friendRequests.includes(fid) && !this.friends.includes(fid)) {
@@ -975,8 +984,10 @@ const app = {
                     }
                 }
             });
-            // Очищаем ящик после прочтения
-            localStorage.removeItem(key);
+
+            // Сохраняем обновлённый ящик с пометками read:true
+            localStorage.setItem(key, JSON.stringify(box));
+
             if (changed) {
                 this.saveData();
                 this.renderFriends();
@@ -1180,6 +1191,9 @@ const app = {
         try{globalDB=JSON.parse(localStorage.getItem('citrus_global_users')||'[]');}catch(e){}
         const findPeer=id=>pc.find(x=>x.id===id)||globalDB.find(x=>String(x.id)===id)||{id,name:id,color:'#888'};
 
+        // Читаем почту при каждом открытии
+        this._readMailbox();
+
         // Бейдж
         const cnt=this.friendRequests.length;
         const badge=document.getElementById('inbox-badge');
@@ -1192,7 +1206,13 @@ const app = {
         if(inDiv){
             inDiv.innerHTML='';
             if(!this.friendRequests.length){
-                inDiv.innerHTML='<div style="color:#333;font-size:12px;padding:10px;text-align:center;line-height:1.8;">📭<br>Входящих заявок нет</div>';
+                // Проверяем сырой ящик для диагностики
+                const rawBox = localStorage.getItem('citrus_mail_' + String(this.userId));
+                const hasRaw = rawBox && JSON.parse(rawBox).length > 0;
+                inDiv.innerHTML=`<div style="color:#333;font-size:12px;padding:10px;text-align:center;line-height:1.8;">📭<br>Входящих заявок нет<br>
+                <span style="font-size:10px;color:#2a2a2a;">твой ID: <b style="color:#444">${this.userId}</b></span>
+                ${hasRaw ? `<br><button onclick="app._readMailbox();app.renderInbox();" style="margin-top:6px;background:rgba(255,64,129,0.15);color:var(--c-pink);border:1px solid rgba(255,64,129,0.3);padding:5px 12px;border-radius:7px;font-size:11px;cursor:pointer;">📬 Загрузить заявки</button>` : ''}
+                </div>`;
             } else {
                 this.friendRequests.forEach(fid=>{
                     fid=String(fid);
@@ -2181,6 +2201,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
