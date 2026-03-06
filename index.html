@@ -389,7 +389,7 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
 // ДАННЫЕ
 // ═══════════════════════════════════
 const SHOP_ITEMS = [
-    {id:'glasses',    name:'Крутые Оч��и',        icon:'🕶️', price:100 },
+    {id:'glasses',    name:'Крутые Очки',        icon:'🕶️', price:100 },
     {id:'crown',      name:'Золотая Корона',      icon:'👑',  price:500 },
     {id:'wings',      name:'Неоновые Крылья',     icon:'🪽',  price:1500},
     {id:'sword',      name:'Световой Меч',        icon:'🗡️', price:3000},
@@ -744,9 +744,8 @@ const app = {
                 for(let i=0;i<cid.length;i++)buf[14+i]=cid[i];
                 this._ws.send(buf.buffer);
                 setTimeout(()=>{
-                    // подписка на общий канал и на персональные топики
                     this._mqttSubscribe('citrus/v1');
-                    this._subscribePersonal();
+                    this._mqttSubscribe('citrus/fr/mail/' + String(this.userId) + '/+');
                     this._mqttPublishJson({type:'join',_from:String(this.userId),_ch:'citrus_v1',player:{
                         id:String(this.userId),name:this.username,tag:this.fullTag,
                         color:this._myColor,status:'online',world:null,ts:Date.now()
@@ -1007,7 +1006,7 @@ const app = {
 
     // _readMailbox теперь работает через подписку на MQTT retained topic
     _readMailbox() {
-        // Подписываемся на все входящие заявки при подключени�� (см. _subscribePersonal)
+        // Подписываемся на все входящие заявки при подключении (см. _subscribePersonal)
     },
 
     // Подписка на персональные топики при MQTT подключении
@@ -1210,7 +1209,7 @@ const app = {
             const p=findPeer(fid);
             const on=online.find(x=>x.id===fid);
             const st=on?(on.status==='ingame'?'🎮 '+on.world:'● Онлайн'):'○ Оффлайн';
-            const sc=on?(on.status==='ingame'?'ig':'on'):''; 
+            const sc=on?(on.status==='ingame'?'ig':'on'):'';
             const inviteBtn=on?`<button class="bx b-add" onclick="app.inviteFriend('${fid}','${p.name}')" style="font-size:10px">▶ Играть</button>`:'';
             fl.innerHTML+=`<div class="fr">
                 <div class="fa2" style="background:${p.color||'#888'}22;color:${p.color||'#888'}">${(p.name[0]||'?').toUpperCase()}</div>
@@ -1286,7 +1285,7 @@ const app = {
                         </div>
                         <div class="fb" style="flex-direction:column;gap:5px;">
                             <button class="bx b-ok" onclick="app.acceptFriend('${fid}')">✓ Принять</button>
-                            <button class="bx b-no" onclick="app.declineFriend('${fid}')">✕ Откл��нить</button>
+                            <button class="bx b-no" onclick="app.declineFriend('${fid}')">✕ Отклонить</button>
                         </div></div>`;
                 });
             }
@@ -2258,9 +2257,76 @@ const app = {
 };
 
 window.onload = () => app.init();
+
+/* === ЖЕЛЕЗОБЕТОННЫЙ МУЛЬТИПЛЕЕР === */
+<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+<script>
+(function() {
+    // Ждем появления объекта app
+    const checkApp = setInterval(() => {
+        if (typeof app !== 'undefined' && typeof THREE !== 'undefined') {
+            clearInterval(checkApp);
+            initMultiplayer();
+        }
+    }, 500);
+
+    function initMultiplayer() {
+        // Создаем плавающее окно
+        const netUI = document.createElement('div');
+        netUI.style.cssText = "position:fixed; bottom:20px; right:20px; background:rgba(0,0,0,0.9); border:2px solid #FF9800; padding:15px; border-radius:12px; z-index:99999; width:280px; color:white; font-family:sans-serif; box-shadow: 0 0 20px rgba(0,0,0,0.5);";
+        netUI.innerHTML = `<h3 style="margin:0;color:#FF9800">🌐 СЕТЬ</h3><div id="net-content">Загрузка PeerJS...</div>`;
+        document.body.appendChild(netUI);
+
+        app.net = {
+            peer: null,
+            models: {},
+            init() {
+                const myId = "ID_" + Math.floor(Math.random() * 99999);
+                this.peer = new Peer(myId);
+                this.peer.on('open', (id) => {
+                    document.getElementById('net-content').innerHTML = `
+                        <p style="font-size:12px">Твой код: <b style="color:#00E5FF;font-size:16px">${id}</b></p>
+                        <input type="text" id="friend-code" placeholder="Код друга..." style="width:100%;padding:8px;background:#111;color:#fff;border:1px solid #444;margin-bottom:8px;">
+                        <button onclick="app.net.connect(document.getElementById('friend-code').value)" style="width:100%;padding:8px;background:#00E676;color:#000;font-weight:bold;cursor:pointer;border:none;">ПОДКЛЮЧИТЬСЯ</button>
+                        <div id="net-log" style="font-size:10px;margin-top:5px;color:#888">Готов к работе</div>
+                    `;
+                });
+                this.peer.on('connection', (conn) => this.setupConnection(conn));
+            },
+            connect(targetId) {
+                if (!targetId) return;
+                this.setupConnection(this.peer.connect(targetId.trim()));
+            },
+            setupConnection(conn) {
+                conn.on('open', () => {
+                    document.getElementById('net-log').innerHTML = "✅ Связь с " + conn.peer;
+                    setInterval(() => {
+                        if (app.player && app.mode !== 'none') {
+                            conn.send({x: app.player.position.x, y: app.player.position.y, z: app.player.position.z, ry: app.player.rotation.y});
+                        }
+                    }, 50);
+                });
+                conn.on('data', (data) => {
+                    if (!app.scene) return;
+                    if (!this.models[conn.peer]) {
+                        const m = new THREE.Mesh(new THREE.BoxGeometry(1, 2, 1), new THREE.MeshPhongMaterial({color: 0xFF4081}));
+                        app.scene.add(m);
+                        this.models[conn.peer] = m;
+                    }
+                    this.models[conn.peer].position.set(data.x, data.y, data.z);
+                    this.models[conn.peer].rotation.y = data.ry;
+                });
+            }
+        };
+
+// Запускаем сеть
+        app.net.init();
+    }
+})();
 </script>
 </body>
 </html>
+
 
 
 
