@@ -389,7 +389,7 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
 // ДАННЫЕ
 // ═══════════════════════════════════
 const SHOP_ITEMS = [
-    {id:'glasses',    name:'Крутые Очки',        icon:'🕶️', price:100 },
+    {id:'glasses',    name:'Крутые Оч��и',        icon:'🕶️', price:100 },
     {id:'crown',      name:'Золотая Корона',      icon:'👑',  price:500 },
     {id:'wings',      name:'Неоновые Крылья',     icon:'🪽',  price:1500},
     {id:'sword',      name:'Световой Меч',        icon:'🗡️', price:3000},
@@ -744,8 +744,9 @@ const app = {
                 for(let i=0;i<cid.length;i++)buf[14+i]=cid[i];
                 this._ws.send(buf.buffer);
                 setTimeout(()=>{
+                    // подписка на общий канал и на персональные топики
                     this._mqttSubscribe('citrus/v1');
-                    this._mqttSubscribe('citrus/fr/mail/' + String(this.userId) + '/+');
+                    this._subscribePersonal();
                     this._mqttPublishJson({type:'join',_from:String(this.userId),_ch:'citrus_v1',player:{
                         id:String(this.userId),name:this.username,tag:this.fullTag,
                         color:this._myColor,status:'online',world:null,ts:Date.now()
@@ -1006,7 +1007,7 @@ const app = {
 
     // _readMailbox теперь работает через подписку на MQTT retained topic
     _readMailbox() {
-        // Подписываемся на все входящие заявки при подключении (см. _subscribePersonal)
+        // Подписываемся на все входящие заявки при подключени�� (см. _subscribePersonal)
     },
 
     // Подписка на персональные топики при MQTT подключении
@@ -1209,7 +1210,7 @@ const app = {
             const p=findPeer(fid);
             const on=online.find(x=>x.id===fid);
             const st=on?(on.status==='ingame'?'🎮 '+on.world:'● Онлайн'):'○ Оффлайн';
-            const sc=on?(on.status==='ingame'?'ig':'on'):'';
+            const sc=on?(on.status==='ingame'?'ig':'on'):''; 
             const inviteBtn=on?`<button class="bx b-add" onclick="app.inviteFriend('${fid}','${p.name}')" style="font-size:10px">▶ Играть</button>`:'';
             fl.innerHTML+=`<div class="fr">
                 <div class="fa2" style="background:${p.color||'#888'}22;color:${p.color||'#888'}">${(p.name[0]||'?').toUpperCase()}</div>
@@ -1285,7 +1286,7 @@ const app = {
                         </div>
                         <div class="fb" style="flex-direction:column;gap:5px;">
                             <button class="bx b-ok" onclick="app.acceptFriend('${fid}')">✓ Принять</button>
-                            <button class="bx b-no" onclick="app.declineFriend('${fid}')">✕ Отклонить</button>
+                            <button class="bx b-no" onclick="app.declineFriend('${fid}')">✕ Откл��нить</button>
                         </div></div>`;
                 });
             }
@@ -2260,6 +2261,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
