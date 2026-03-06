@@ -2323,9 +2323,130 @@ window.onload = () => app.init();
         app.net.init();
     }
 })();
+
+exitGame() {
+        this.spaceGrav = false; this.loopFn = null; this.mode = 'none';
+        this._updateStatus('online', null);
+        if (this._hsInterval) { clearInterval(this._hsInterval); this._hsInterval = null; }
+        if (this._mtInterval) { clearInterval(this._mtInterval); this._mtInterval = null; }
+        document.exitPointerLock();
+        document.getElementById('engine-view').style.display = 'none';
+        document.getElementById('eng-script-ov').style.display = 'none';
+        document.getElementById('ui-hub').classList.remove('hidden');
+    }
+}; // ЗДЕСЬ МЫ ЗАКРЫЛИ ОБЪЕКТ ИГРЫ
+
+/* === СИСТЕМА CITRUS ONLINE (ФИНАЛ) === */
+(function() {
+    const s = document.createElement('script');
+    s.src = "https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js";
+    document.head.appendChild(s);
+
+    s.onload = () => {
+        // Создаем плавающее окно
+        const ui = document.createElement('div');
+        ui.style.cssText = "position:fixed; bottom:20px; right:20px; background:rgba(0,0,0,0.9); border:2px solid #FF9800; padding:15px; border-radius:12px; z-index:99999; color:white; font-family:sans-serif; width:280px; box-shadow:0 0 20px rgba(0,0,0,0.5);";
+        ui.innerHTML = `<h3 style="margin:0;color:#FF9800">🌐 СЕТЕВОЙ МОДУЛЬ</h3><div id="net-info" style="margin:10px 0; font-size:13px;">Загрузка ID...</div>`;
+        document.body.appendChild(ui);
+
+        app.net = {
+            peer: null, models: {},
+            init() {
+                const myId = "ID_" + Math.floor(Math.random()*99999);
+                this.peer = new Peer(myId);
+                this.peer.on('open', id => {
+                    document.getElementById('net-info').innerHTML = `
+                        Код: <b style="color:#00E5FF; font-size:16px;">${id}</b>
+                        <input type="text" id="peer-target" placeholder="Код друга" style="width:100%; margin:10px 0; padding:8px; background:#111; color:#fff; border:1px solid #444;">
+                        <button onclick="app.net.connect(document.getElementById('peer-target').value)" style="width:100%; padding:10px; background:#00E676; color:#000; font-weight:bold; border:none; cursor:pointer;">ПОДКЛЮЧИТЬСЯ</button>
+                    `;
+                });
+                this.peer.on('connection', c => this.setup(c));
+            },
+            connect(id) { if(id) this.setup(this.peer.connect(id.trim())); },
+            setup(c) {
+                c.on('open', () => {
+                    app.showNotif("СЕТЬ", "Друг вошел в сеть!");
+                    setInterval(() => {
+                        if(app.player && app.mode !== 'none') {
+                            c.send({x:app.player.position.x, y:app.player.position.y, z:app.player.position.z, ry:app.player.rotation.y});
+                        }
+                    }, 50);
+                });
+                c.on('data', d => {
+                    if(!app.scene) return;
+                    if(!this.models[c.peer]) {
+                        this.models[c.peer] = new THREE.Mesh(new THREE.BoxGeometry(1,2,1), new THREE.MeshPhongMaterial({color:0xFF4081}));
+                        app.scene.add(this.models[c.peer]);
+                    }
+                    const m = this.models[c.peer];
+                    m.position.set(d.x, d.y, d.z); m.rotation.y = d.ry;
+                });
+            }
+        };
+
+}; // <-- ЭТА СКОБКА СПАСЕТ ТВОЮ РЕГИСТРАЦИЮ! Она закрывает основную игру.
+
+/* --- СЕТЕВОЙ МОДУЛЬ (ФИНАЛ) --- */
+(function() {
+    const s = document.createElement('script');
+    s.src = "https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js";
+    document.head.appendChild(s);
+
+    s.onload = () => {
+        const ui = document.createElement('div');
+        ui.style.cssText = "position:fixed; bottom:20px; right:20px; background:rgba(0,0,0,0.9); border:2px solid #FF9800; padding:15px; border-radius:12px; z-index:99999; color:white; font-family:sans-serif; width:280px;";
+        ui.innerHTML = `<h3 style="margin:0;color:#FF9800">🌐 СЕТЬ</h3><div id="net-info">Вход в систему...</div>`;
+        document.body.appendChild(ui);
+
+        app.net = {
+            peer: null, models: {},
+            init() {
+                const myId = "ID_" + Math.floor(Math.random()*9999);
+                this.peer = new Peer(myId);
+                this.peer.on('open', id => {
+                    document.getElementById('net-info').innerHTML = `
+                        Код: <b style="color:#00E5FF">${id}</b>
+                        <input type="text" id="p-target" placeholder="Код друга" style="width:100%; margin:10px 0; padding:5px; background:#111; color:#fff; border:1px solid #444;">
+                        <button onclick="app.net.connect(document.getElementById('p-target').value)" style="width:100%; padding:8px; background:#00E676; color:#000; font-weight:bold; border:none; cursor:pointer;">ИГРАТЬ ВМЕСТЕ</button>
+                    `;
+                });
+                this.peer.on('connection', c => this.setup(c));
+            },
+            connect(id) { if(id) this.setup(this.peer.connect(id.trim())); },
+            setup(c) {
+                c.on('open', () => {
+                    app.showNotif("СЕТЬ", "Друг подключен!");
+                    setInterval(() => {
+                        if(app.player && app.mode !== 'none') {
+                            c.send({x:app.player.position.x, y:app.player.position.y, z:app.player.position.z, ry:app.player.rotation.y});
+                        }
+                    }, 50);
+                });
+                c.on('data', d => {
+                    if(!app.scene) return;
+                    if(!this.models[c.peer]) {
+                        this.models[c.peer] = new THREE.Mesh(new THREE.BoxGeometry(1,2,1), new THREE.MeshPhongMaterial({color:0xFF4081}));
+                        app.scene.add(this.models[c.peer]);
+                    }
+                    this.models[c.peer].position.set(d.x, d.y, d.z);
+                    this.models[c.peer].rotation.y = d.ry;
+                });
+            }
+        };
+
+// Перехватываем логин, чтобы запустить сеть только после входа
+        const oldLogin = app.login;
+        app.login = function() {
+            oldLogin.apply(this, arguments);
+            app.net.init();
+        };
+    };
+})();
 </script>
 </body>
 </html>
+
 
 
 
