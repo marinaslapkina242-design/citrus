@@ -204,7 +204,7 @@
                     </div>
                     <div class="card" onclick="app.launch('play','snowmount')">
                         <div class="card-thumb" style="background:radial-gradient(circle,rgba(100,200,255,0.12),#050505)">🏔️</div>
-                        <div class="card-info"><div><b>Снежная Гора</b><br><small style="color:#00e5ff">🏆 30 🍊 за вершину!</small></div></div>
+                        <div class="card-info"><div><b>Снежная Гора</b><br><small style="color:#00e5ff">🏆 2000 🍊 за вершину!</small></div></div>
                     </div>
                     <div class="card" onclick="app.launch('play','dungeon')">
                         <div class="card-thumb" style="background:radial-gradient(circle,rgba(150,0,200,0.12),#050505)">⚔️</div>
@@ -484,7 +484,7 @@ const app = {
         this.loadData();
         this._loadPeerInfo();
         // Читаем Firebase почту каждые 6 секунд
-        setTimeout(()=>this._readMailbox(), 1500);
+        setTimeout(()=>this._readMailbox(), 2000);
         setInterval(()=>this._readMailbox(), 8000);
         // АВТО-ВХОД
         if (this.username && this.username !== '') {
@@ -594,7 +594,8 @@ const app = {
         this.saveData();
         this.showHub();
         this._wsConnect();
-        setTimeout(()=>this._readMailbox(), 1000);
+        this._apiRegister();
+        setTimeout(()=>this._readMailbox(), 1500);
     },
 
     showHub(){
@@ -724,12 +725,23 @@ const app = {
         try{
             if(!this._bc){
                 this._bc=new BroadcastChannel('citrus_v1');
-                this._bc.onmessage=e=>{try{this._wsHandle(e.data);}catch(ex){}};
+                this._bc.onmessage=e=>{
+                    try{
+                        const msg=e.data;
+                        if(msg && msg._inboxTopic) {
+                            // Personal inbox message via BroadcastChannel
+                            const changed=this._applyLetter(msg);
+                            if(changed){this.saveData();this.renderFriends();this.renderInbox();}
+                        } else {
+                            this._wsHandle(msg);
+                        }
+                    }catch(ex){}
+                };
             }
         }catch(ex){}
         // Публичный WebSocket брокер (HiveMQ)
         try{
-            this._ws=new WebSocket('wss://broker.hivemq.com:8884/mqtt');
+            this._ws=new WebSocket('wss://broker.emqx.io:8084/mqtt');
             this._ws.onopen=()=>{
                 this._wsAlive=true;
                 // MQTT CONNECT packet
@@ -757,18 +769,31 @@ const app = {
                 if(e.data instanceof ArrayBuffer||e.data instanceof Blob){
                     const toArr=b=>b instanceof Blob?b.arrayBuffer().then(ab=>new Uint8Array(ab)):Promise.resolve(new Uint8Array(b));
                     toArr(e.data).then(arr=>{
-                        if(arr[0]===0x30||arr[0]===0x31||arr[0]===0x32){// PUBLISH or PUBLISH+RETAIN or PUBACK
+                        const pktType = arr[0] & 0xF0;
+                        if(pktType === 0x30){ // PUBLISH (any QoS)
                             try{
+                                const qos = (arr[0] >> 1) & 0x03;
                                 let i=1;
+                                // decode remaining length
                                 let remLen=0,mul=1;
                                 while(true){const b=arr[i++];remLen+=(b&0x7f)*mul;mul*=128;if(!(b&0x80))break;}
+                                // topic
                                 const topicLen=(arr[i]<<8)|arr[i+1];i+=2;
                                 const topic=new TextDecoder().decode(arr.slice(i,i+topicLen));i+=topicLen;
+                                // packet id present for QoS > 0
+                                let packetId = 0;
+                                if(qos > 0){ packetId=(arr[i]<<8)|arr[i+1]; i += 2; }
                                 const payloadStr=new TextDecoder().decode(arr.slice(i));
-                                if(!payloadStr.trim())return; // пустой payload = удаление retained
+                                if(!payloadStr.trim()) return;
                                 const msg=JSON.parse(payloadStr);
                                 this._wsHandle(msg, topic);
+                                // Send PUBACK for QoS=1
+                                if(qos===1){
+                                    const puback=new Uint8Array([0x40,0x02,(packetId>>8)&0xff,packetId&0xff]);
+                                    try{this._ws.send(puback.buffer);}catch(e){}
+                                }
                             }catch(ex){}
+                        } else if(arr[0]===0x40){ // PUBACK - ignore
                         }
                     });
                 }
@@ -821,14 +846,13 @@ const app = {
     _wsHandle(msg, topic){
         if(!msg)return;
 
-        // ── Личные заявки через inbox топик
+        // ── Личные заявки (из MQTT или BroadcastChannel)
         if(msg.type==='friend_req' || msg.type==='friend_acc') {
-            if(!msg._ch) { // Пришло через личный топик citrus/inbox/<id>
-                this._idbAdd(msg).then(()=>{
-                    this._readMailbox();
-                });
-                return;
+            if(!msg._ch || String(msg.to)===String(this.userId)) {
+                const changed = this._applyLetter(msg);
+                if(changed){ this.saveData(); this.renderFriends(); this.renderInbox(); }
             }
+            return;
         }
 
         if(msg._ch!=='citrus_v1')return;
@@ -922,88 +946,76 @@ const app = {
         return this._cachedOnline.filter(p=>String(p.id)!==String(this.userId));
     },
 
-    // ════════════════════════════════════════════
-    //  СИСТЕМА ЗАЯВОК — HiveMQ Cloud (QoS 1, persistent)
-    //  + IndexedDB локальная очередь
-    //  Работает между ЛЮБЫМИ браузерами/устройствами
-    // ════════════════════════════════════════════
+    // ══════════════════════════════════════════════════════
+    //  СИСТЕМА ЗАЯВОК В ДРУЗЬЯ
+    //  Свой REST API (citrus-api.onrender.com) — 100% надёжно
+    //  Работает между любыми браузерами и устройствами
+    // ══════════════════════════════════════════════════════
 
-    // Открываем IndexedDB для хранения входящих заявок
-    async _idbOpen() {
-        return new Promise((res, rej) => {
-            const req = indexedDB.open('citrus_mail', 1);
-            req.onupgradeneeded = e => {
-                const db = e.target.result;
-                if(!db.objectStoreNames.contains('letters'))
-                    db.createObjectStore('letters', {keyPath: 'id', autoIncrement: true});
-            };
-            req.onsuccess = e => res(e.target.result);
-            req.onerror = () => res(null);
-        });
+    // URL бэкенда — меняется автоматически при деплое
+    get _API() {
+        return window._CITRUS_API || 'https://citrus-api-z1oe.onrender.com';
     },
 
-    async _idbAdd(letter) {
+    // ── Отправить письмо на сервер
+    async _apiPost(toId, letter) {
         try {
-            const db = await this._idbOpen();
-            if(!db) return;
-            const tx = db.transaction('letters', 'readwrite');
-            tx.objectStore('letters').add(letter);
+            const r = await fetch(`${this._API}/mail/${toId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(letter)
+            });
+            return r.ok;
+        } catch(e) { return false; }
+    },
+
+    // ── Прочитать свои письма с сервера
+    async _apiGetMail() {
+        try {
+            const r = await fetch(`${this._API}/mail/${this.userId}`);
+            if (!r.ok) return [];
+            return await r.json();
+        } catch(e) { return []; }
+    },
+
+    // ── Удалить письмо с сервера
+    async _apiDelMail(fromId, type) {
+        try {
+            await fetch(`${this._API}/mail/${this.userId}/${fromId}/${type}`, {
+                method: 'DELETE'
+            });
         } catch(e) {}
     },
 
-    async _idbGetAll() {
-        return new Promise(async res => {
-            try {
-                const db = await this._idbOpen();
-                if(!db) return res([]);
-                const tx = db.transaction('letters', 'readonly');
-                const req = tx.objectStore('letters').getAll();
-                req.onsuccess = () => res(req.result || []);
-                req.onerror = () => res([]);
-            } catch(e) { res([]); }
-        });
-    },
-
-    async _idbClear() {
+    // ── Зарегистрировать себя на сервере (для поиска)
+    async _apiRegister() {
         try {
-            const db = await this._idbOpen();
-            if(!db) return;
-            const tx = db.transaction('letters', 'readwrite');
-            tx.objectStore('letters').clear();
+            await fetch(`${this._API}/players/${this.userId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id: String(this.userId),
+                    name: this.username,
+                    tag: this.fullTag,
+                    color: this._myColor
+                })
+            });
         } catch(e) {}
     },
 
-    // Заглушки для совместимости
-    async _fbSet(path, val) {},
-    async _fbGet(path) { return null; },
-    async _fbDel(path) {},
-
-    // MQTT publish с QoS=1 в личный топик
-    _mqttPublishQoS1(topic, data) {
-        if(!this._ws || this._ws.readyState!==1) return;
+    // ── Поиск игроков на сервере
+    async _apiSearch(q) {
         try {
-            const enc = new TextEncoder();
-            const t = enc.encode(topic);
-            const payload = enc.encode(JSON.stringify(data));
-            const packetId = Math.floor(Math.random()*65535)+1;
-            const remLen = 2 + t.length + 2 + payload.length; // +2 for packet ID (QoS>0)
-            const buf = new Uint8Array(2 + remLen);
-            let i = 0;
-            buf[i++] = 0x32; // PUBLISH, QoS=1
-            buf[i++] = remLen;
-            buf[i++] = 0; buf[i++] = t.length;
-            for(let j=0;j<t.length;j++) buf[i++] = t[j];
-            buf[i++] = (packetId >> 8) & 0xff;
-            buf[i++] = packetId & 0xff;
-            for(let j=0;j<payload.length;j++) buf[i++] = payload[j];
-            this._ws.send(buf.buffer);
-        } catch(e) {}
+            const r = await fetch(`${this._API}/players/search?q=${encodeURIComponent(q)}`);
+            if (!r.ok) return [];
+            return await r.json();
+        } catch(e) { return []; }
     },
 
-    // Отправить заявку в друзья
+    // ── Отправить заявку в друзья
     async sendReq(targetId) {
         targetId = String(targetId);
-        if(this.sentReqs.includes(targetId) || this.friends.includes(targetId)) return;
+        if (this.sentReqs.includes(targetId) || this.friends.includes(targetId)) return;
         this.sentReqs.push(targetId);
         this.saveData();
 
@@ -1016,8 +1028,11 @@ const app = {
             ts:         Date.now()
         };
 
-        // Публикуем в личный топик получателя с QoS=1 (гарантированная доставка)
-        this._mqttPublishQoS1(`citrus/inbox/${targetId}`, letter);
+        const ok = await this._apiPost(targetId, letter);
+        if (!ok) {
+            // Fallback: MQTT если сервер недоступен
+            this._wsSend({ ...letter, to: targetId, _from: String(this.userId) });
+        }
 
         const name = (this._pc||[]).find(x=>String(x.id)===targetId)?.name || ('#'+targetId);
         this.showNotif('📨', 'Заявка отправлена', `Ждём ответа от ${name}...`);
@@ -1025,44 +1040,46 @@ const app = {
         this.renderInbox();
     },
 
-    // Читаем входящие заявки из IndexedDB (туда попадают через _wsHandle)
+    // ── Читаем входящие заявки с сервера
     async _readMailbox() {
-        if(!this.userId) return;
-        const letters = await this._idbGetAll();
-        if(!letters.length) return;
+        if (!this.userId) return;
+        const letters = await this._apiGetMail();
+        if (!letters.length) return;
         let changed = false;
-        for(const letter of letters) {
+        for (const letter of letters) {
             const applied = this._applyLetter(letter);
-            if(applied) changed = true;
+            if (applied) {
+                changed = true;
+                await this._apiDelMail(letter.from_id, letter.type);
+            }
         }
-        if(changed) {
-            await this._idbClear();
+        if (changed) {
             this.saveData();
             this.renderFriends();
             this.renderInbox();
         }
     },
 
-    // Применить входящее письмо
+    // ── Применить входящее письмо
     _applyLetter(letter) {
-        if(letter.type === 'friend_req') {
+        if (letter.type === 'friend_req') {
             const fid = String(letter.from_id);
-            if(this.friendRequests.includes(fid) || this.friends.includes(fid)) return false;
+            if (this.friendRequests.includes(fid) || this.friends.includes(fid)) return false;
             this.friendRequests.push(fid);
-            if(!this._pc) this._pc = [];
-            if(!this._pc.find(x=>x.id===fid))
+            if (!this._pc) this._pc = [];
+            if (!this._pc.find(x=>x.id===fid))
                 this._pc.push({id:fid, name:letter.from_name, tag:letter.from_tag, color:letter.from_color||'#FF9800'});
             this._savePeerInfo(fid, letter.from_name, letter.from_tag, letter.from_color||'#FF9800');
             this.showNotif('👥', 'Заявка в друзья!', `${letter.from_name} хочет дружить`, true, fid);
             return true;
         }
-        if(letter.type === 'friend_acc') {
+        if (letter.type === 'friend_acc') {
             const fid = String(letter.from_id);
-            if(this.friends.includes(fid)) return false;
+            if (this.friends.includes(fid)) return false;
             this.friends.push(fid);
             this.sentReqs = this.sentReqs.filter(x=>x!==fid);
-            if(!this._pc) this._pc = [];
-            if(!this._pc.find(x=>x.id===fid))
+            if (!this._pc) this._pc = [];
+            if (!this._pc.find(x=>x.id===fid))
                 this._pc.push({id:fid, name:letter.from_name, tag:letter.from_tag, color:letter.from_color||'#00E676'});
             this._savePeerInfo(fid, letter.from_name, letter.from_tag, letter.from_color||'#00E676');
             this.showNotif('🤝', 'Принята!', `${letter.from_name} теперь твой друг! 🎉`);
@@ -1071,15 +1088,14 @@ const app = {
         return false;
     },
 
-    // Принять заявку
+    // ── Принять заявку
     async acceptFriend(fromId) {
         fromId = String(fromId);
         this.friendRequests = this.friendRequests.filter(x=>x!==fromId);
-        if(!this.friends.includes(fromId)) this.friends.push(fromId);
+        if (!this.friends.includes(fromId)) this.friends.push(fromId);
         this.saveData();
 
-        // Уведомляем отправителя через личный топик с QoS=1
-        this._mqttPublishQoS1(`citrus/inbox/${fromId}`, {
+        const ok = await this._apiPost(fromId, {
             type:       'friend_acc',
             from_id:    String(this.userId),
             from_name:  this.username,
@@ -1087,12 +1103,17 @@ const app = {
             from_color: this._myColor,
             ts:         Date.now()
         });
+        if (!ok) {
+            this._wsSend({ type:'friend_acc', to:fromId, from_id:String(this.userId),
+                from_name:this.username, from_tag:this.fullTag, _from:String(this.userId) });
+        }
 
         const name = (this._pc||[]).find(x=>x.id===fromId)?.name || fromId;
         this.showNotif('🤝', 'Новый друг!', `${name} добавлен`);
         this.renderFriends();
         this.renderInbox();
     },
+
 
     declineFriend(fromId){
         fromId=String(fromId);
@@ -1110,12 +1131,27 @@ const app = {
         const q = raw.toLowerCase();
         const res = document.getElementById('srch-res');
         if (!q) { res.innerHTML = '<div style="color:#333;font-size:12px;padding:6px;">Введи ник и нажми Поиск</div>'; return; }
+        res.innerHTML = '<div style="color:#444;font-size:12px;padding:6px;">Поиск...</div>';
 
         let db = JSON.parse(localStorage.getItem('citrus_global_users') || '[]');
         let onlinePlayers = this._cachedOnline || [];
         let allUsersMap = new Map();
         db.forEach(u => allUsersMap.set(String(u.id), u));
         onlinePlayers.forEach(u => allUsersMap.set(String(u.id), {id:String(u.id), name:u.name, color:u.color}));
+
+        // Ищем на сервере (находит игроков из других браузеров)
+        const serverResults = await this._apiSearch(q);
+        serverResults.forEach(u => allUsersMap.set(String(u.id), u));
+
+        // Если введён точный тег Ник#1234 — ищем по ID на сервере
+        const tagMatch = raw.match(/^(.+)#(\d{4})$/);
+        if (tagMatch) {
+            try {
+                const r = await fetch(`${this._API}/players/${tagMatch[2]}`);
+                const p = await r.json();
+                if (p && p.id) allUsersMap.set(String(p.id), p);
+            } catch(e) {}
+        }
 
         let found = Array.from(allUsersMap.values()).filter(u => String(u.id) !== String(this.userId));
 
@@ -2265,91 +2301,8 @@ const app = {
 
 window.onload = () => app.init();
 </script>
-<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-<script src="online.js"></script>
 </body>
 </html>
-
-<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-<script>
-// Ждем чуть-чуть, чтобы основной скрипт успел загрузиться
-setTimeout(() => {
-    if (typeof app === 'undefined') {
-        alert("Ошибка: Скрипт вставлен не в тот файл или основной код не загружен!");
-        return;
-    }
-
-    console.log("CITRUS ONLINE: Активация...");
-
-    // Создаем сетевой модуль
-    app.net = {
-        peer: null,
-        init() {
-            const myId = "CITRUS_" + (app.nick || "Player") + "_" + Math.floor(Math.random()*999);
-            this.peer = new Peer(myId);
-            this.peer.on('open', (id) => {
-                // Ищем вкладку друзей и силой вставляем туда ID
-                const tab = document.getElementById('tab-friends');
-                if(tab) {
-                    tab.innerHTML = `
-                        <div style="background:#111; padding:20px; border:1px solid #FF9800; border-radius:10px;">
-                            <h2 style="color:#FF9800;margin:0">ОНЛАЙН АКТИВЕН</h2>
-                            <p>Твой ID: <b style="color:#fff;font-family:monospace">${id}</b></p>
-                            <input type="text" id="connect-to" placeholder="Вставь ID друга..." style="padding:10px;width:100%;background:#000;color:#fff;border:1,px solid #333;margin:10px 0;">
-                            <button onclick="app.net.connect(document.getElementById('connect-to').value)" style="width:100%;padding:10px;background:#FF9800;color:#000;font-weight:bold;cursor:pointer;">ПОДКЛЮЧИТЬСЯ К ДРУГУ</button>
-                        </div>
-                    `;
-                }
-            });
-            this.peer.on('connection', (c) => this.setup(c));
-        },
-        connect(id) {
-            this.setup(this.peer.connect(id));
-        },
-        setup(conn) {
-            conn.on('open', () => {
-                app.showNotif("СЕТЬ", "Связь установлена!");
-                setInterval(() => {
-                    if(app.player) conn.send({x: app.player.position.x, y: app.player.position.y, z: app.player.position.z, ry: app.player.rotation.y});
-                }, 50);
-            });
-            conn.on('data', (data) => this.update(conn.peer, data));
-        },
-        update(id, data) {
-            if(!app._remote) app._remote = {};
-            if(!app._remote[id]) {
-                const m = new THREE.Mesh(new THREE.BoxGeometry(1,2,1), new THREE.MeshPhongMaterial({color: 0xFF4081}));
-                app.scene.add(m);
-                app._remote[id] = m;
-            }
-            app._remote[id].position.set(data.x, data.y, data.z);
-            app._remote[id].rotation.y = data.ry;
-        }
-    };
-
-    // Включаем онлайн при логине
-    const oldLogin = app.login;
-    app.login = function() {
-        oldLogin.apply(this, arguments);
-        app.net.init();
-    };
-
-    // Силой чиним камеру
-    app.onMouseMove = function(e) {
-        if (!this.isLocked) return;
-        this.player.rotation.y -= e.movementX * 0.003;
-        if (!this.camPitch) {
-            this.camPitch = new THREE.Object3D();
-            this.player.add(this.camPitch);
-            this.camPitch.add(this.camera);
-            this.camera.position.set(0, 2, 5);
-        }
-        this.camPitch.rotation.x -= e.movementY * 0.002;
-        this.camPitch.rotation.x = Math.max(-1.4, Math.min(1.4, this.camPitch.rotation.x));
-    };
-
-}, 2000); // Задержка 2 секунды для надежности
-</script>
 
 
 
