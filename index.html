@@ -238,30 +238,41 @@
             </div>
 
             <div id="tab-friends" class="hidden">
-                <div id="req-wrap" style="margin-bottom:18px;display:none;">
-                    <div class="section-title" style="color:var(--c-pink);">⚡ Входящие заявки</div>
-                    <div id="req-list"></div>
-                </div>
-                <div class="friends-grid">
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;">
+
+                    <!-- ПОИСК -->
                     <div class="fp">
                         <h3>🔍 Найти игрока</h3>
                         <div class="srow">
-                            <input type="text" id="srch" placeholder="Ник или Ник#1234..." autocomplete="off" oninput="app.searchPlayer()" onkeydown="if(event.key==='Enter')app.searchPlayer()">
+                            <input type="text" id="srch" placeholder="Ник или Ник#1234..." autocomplete="off" onkeydown="if(event.key==='Enter')app.searchPlayer()">
                             <button onclick="app.searchPlayer()">Поиск</button>
                         </div>
-                        <div style="font-size:11px;color:#333;margin:-6px 0 10px;padding:0 2px;">
-                            Твой тег: <span id="my-tag-hint" style="color:var(--c-main);cursor:pointer;text-decoration:underline dotted" title="Нажми чтобы скопировать" onclick="navigator.clipboard&&navigator.clipboard.writeText(app.fullTag).then(()=>app.showNotif('📋','Скопировано!',app.fullTag))"></span>
+                        <div style="font-size:11px;color:#444;margin:-4px 0 12px;padding:0 2px;">
+                            Твой тег: <span id="my-tag-hint" style="color:var(--c-main);cursor:pointer;border-bottom:1px dotted var(--c-main);" title="Нажми — скопировать" onclick="navigator.clipboard&&navigator.clipboard.writeText(app.fullTag).then(()=>app.showNotif('📋','Скопировано!',app.fullTag))"></span>
                         </div>
-                        <div id="srch-res"></div>
-                        <div style="margin-top:18px;">
-                            <h3>🌐 Онлайн сейчас</h3>
-                            <div id="online-list"></div>
-                        </div>
+                        <div id="srch-res"><div style="color:#333;font-size:12px;padding:6px;">Введи ник и нажми Поиск</div></div>
                     </div>
+
+                    <!-- ПОЧТА / ВХОДЯЩИЕ -->
+                    <div class="fp" style="position:relative;">
+                        <h3 style="display:flex;align-items:center;gap:8px;">
+                            📬 Почта
+                            <span id="inbox-badge" style="display:none;background:var(--c-pink);color:#fff;font-size:10px;font-weight:bold;padding:2px 7px;border-radius:20px;"></span>
+                        </h3>
+                        <div id="inbox-tabs" style="display:flex;gap:6px;margin-bottom:14px;">
+                            <button id="itab-in"  onclick="app.switchInbox('in')"  style="flex:1;padding:7px;border-radius:8px;font-size:11px;font-weight:bold;background:rgba(255,64,129,0.15);color:var(--c-pink);border:1px solid rgba(255,64,129,0.2);">Входящие</button>
+                            <button id="itab-out" onclick="app.switchInbox('out')" style="flex:1;padding:7px;border-radius:8px;font-size:11px;font-weight:bold;background:#111;color:#555;border:1px solid #1e1e1e;">Исходящие</button>
+                        </div>
+                        <div id="inbox-in"></div>
+                        <div id="inbox-out" style="display:none;"></div>
+                    </div>
+
+                    <!-- МОИ ДРУЗЬЯ -->
                     <div class="fp">
                         <h3>💚 Мои друзья</h3>
                         <div id="friends-list"></div>
                     </div>
+
                 </div>
             </div>
 
@@ -653,8 +664,7 @@ const app = {
         if(id==='avatar')this.updateAvatarPreview();
         if(id==='friends'){
             this.renderFriends();
-            this.renderOnline();
-            this.searchPlayer(); // Показываем всех при открытии вкладки!
+            this.renderInbox();
             const hint=document.getElementById('my-tag-hint');
             if(hint)hint.innerText=this.fullTag||'войди в игру';
         }
@@ -809,7 +819,7 @@ const app = {
                 this._pc.push({id:fid,name:msg.from_name,tag:msg.from_tag,color:msg.from_color||'#FF9800'});
             // Сохраняем данные отправителя чтобы не потерять после перезагрузки
             this._savePeerInfo(fid, msg.from_name, msg.from_tag, msg.from_color||'#FF9800');
-            this.saveData();this.renderFriends();
+            this.saveData();this.renderFriends();this.renderInbox();
             this.showNotif('👥','Заявка в друзья!',`${msg.from_name} хочет дружить`,true,fid);
         }
         else if(msg.type==='friend_acc'&&String(msg.to)===String(this.userId)){
@@ -912,12 +922,13 @@ const app = {
         const name=(this._pc||[]).find(x=>x.id===fromId)?.name||fromId;
         this.showNotif('🤝','Новый друг!',`${name} добавлен`);
         this.renderFriends();
+        this.renderInbox();
     },
 
     declineFriend(fromId){
         fromId=String(fromId);
         this.friendRequests=this.friendRequests.filter(x=>x!==fromId);
-        this.saveData();this.renderFriends();
+        this.saveData();this.renderFriends();this.renderInbox();
     },
     removeFriend(id){
         this.friends=this.friends.filter(x=>x!==id);
@@ -1031,12 +1042,14 @@ const app = {
         fl.innerHTML='';
         const pc=this._pc||[];
         const online=this._cachedOnline||[];
-        // Также смотрим в глобальную базу для имён
-        let globalDB = [];
-        try { globalDB = JSON.parse(localStorage.getItem('citrus_global_users')||'[]'); } catch(e){}
-        const findPeer = id => pc.find(x=>x.id===id) || globalDB.find(x=>String(x.id)===id) || {id,name:id,color:'#888'};
+        let globalDB=[];
+        try{globalDB=JSON.parse(localStorage.getItem('citrus_global_users')||'[]');}catch(e){}
+        const findPeer=id=>pc.find(x=>x.id===id)||globalDB.find(x=>String(x.id)===id)||{id,name:id,color:'#888'};
 
-        if(!this.friends.length)fl.innerHTML='<div style="color:#444;font-size:13px;padding:10px">Пока нет друзей.<br><small style="color:#333">Найди игрока во вкладке выше</small></div>';
+        if(!this.friends.length){
+            fl.innerHTML='<div style="color:#444;font-size:13px;padding:10px;line-height:1.7;">Пока нет друзей.<br><small style="color:#333">Найди игрока и отправь заявку</small></div>';
+            return;
+        }
         this.friends.forEach(fid=>{
             fid=String(fid);
             const p=findPeer(fid);
@@ -1047,27 +1060,105 @@ const app = {
             fl.innerHTML+=`<div class="fr">
                 <div class="fa2" style="background:${p.color||'#888'}22;color:${p.color||'#888'}">${(p.name[0]||'?').toUpperCase()}</div>
                 <div class="fi"><div class="fn">${p.name}</div>
-                <div class="fs ${sc}">${p.tag||p.id} · ${st}</div></div>
-                <div class="fb">
-                    ${inviteBtn}
+                <div class="fs ${sc}">${p.tag||('#'+p.id)} · ${st}</div></div>
+                <div class="fb">${inviteBtn}
                     <button class="bx b-del" onclick="app.removeFriend('${fid}')">✕</button>
                 </div></div>`;
         });
-        const rw=document.getElementById('req-wrap'),rl=document.getElementById('req-list');
-        if(this.friendRequests.length){
-            rw.style.display='block';rl.innerHTML='';
-            this.friendRequests.forEach(fid=>{
-                fid=String(fid);
-                const p=findPeer(fid);
-                rl.innerHTML+=`<div class="fr" style="border-color:rgba(255,64,129,0.2);background:rgba(255,64,129,0.03)">
-                    <div class="fa2" style="background:${p.color||'#FF4081'}22;color:${p.color||'#FF4081'}">${(p.name[0]||'?').toUpperCase()}</div>
-                    <div class="fi"><div class="fn">${p.name}</div><div class="fs">${p.tag||p.id} · хочет дружить</div></div>
-                    <div class="fb">
-                        <button class="bx b-ok" onclick="app.acceptFriend('${fid}')">✓ Принять</button>
-                        <button class="bx b-no" onclick="app.declineFriend('${fid}')">✕</button>
-                    </div></div>`;
-            });
-        }else rw.style.display='none';
+        // Обновляем бейдж на навбаре
+        const cnt=this.friendRequests.length,b=document.getElementById('fr-badge');
+        if(b){b.classList.toggle('hidden',cnt===0);if(cnt>0)b.innerText=cnt;}
+    },
+
+    // ── INBOX (ПОЧТА)
+    _inboxTab: 'in',
+    switchInbox(tab){
+        this._inboxTab=tab;
+        const inBtn=document.getElementById('itab-in');
+        const outBtn=document.getElementById('itab-out');
+        const inDiv=document.getElementById('inbox-in');
+        const outDiv=document.getElementById('inbox-out');
+        if(tab==='in'){
+            inBtn.style.background='rgba(255,64,129,0.15)';inBtn.style.color='var(--c-pink)';inBtn.style.borderColor='rgba(255,64,129,0.25)';
+            outBtn.style.background='#111';outBtn.style.color='#555';outBtn.style.borderColor='#1e1e1e';
+            inDiv.style.display='';outDiv.style.display='none';
+        } else {
+            outBtn.style.background='rgba(0,229,255,0.1)';outBtn.style.color='var(--c-blue)';outBtn.style.borderColor='rgba(0,229,255,0.2)';
+            inBtn.style.background='#111';inBtn.style.color='#555';inBtn.style.borderColor='#1e1e1e';
+            inDiv.style.display='none';outDiv.style.display='';
+        }
+        this.renderInbox();
+    },
+
+    renderInbox(){
+        const pc=this._pc||[];
+        let globalDB=[];
+        try{globalDB=JSON.parse(localStorage.getItem('citrus_global_users')||'[]');}catch(e){}
+        const findPeer=id=>pc.find(x=>x.id===id)||globalDB.find(x=>String(x.id)===id)||{id,name:id,color:'#888'};
+
+        // Бейдж
+        const cnt=this.friendRequests.length;
+        const badge=document.getElementById('inbox-badge');
+        const frBadge=document.getElementById('fr-badge');
+        if(badge){if(cnt>0){badge.style.display='';badge.innerText=cnt;}else badge.style.display='none';}
+        if(frBadge){frBadge.classList.toggle('hidden',cnt===0);if(cnt>0)frBadge.innerText=cnt;}
+
+        // Входящие заявки
+        const inDiv=document.getElementById('inbox-in');
+        if(inDiv){
+            inDiv.innerHTML='';
+            if(!this.friendRequests.length){
+                inDiv.innerHTML='<div style="color:#333;font-size:12px;padding:10px;text-align:center;line-height:1.8;">📭<br>Входящих заявок нет</div>';
+            } else {
+                this.friendRequests.forEach(fid=>{
+                    fid=String(fid);
+                    const p=findPeer(fid);
+                    inDiv.innerHTML+=`<div class="fr" style="border-color:rgba(255,64,129,0.2);background:rgba(255,64,129,0.04);margin-bottom:8px;">
+                        <div class="fa2" style="background:${p.color||'#FF4081'}22;color:${p.color||'#FF4081'}">${(p.name[0]||'?').toUpperCase()}</div>
+                        <div class="fi">
+                            <div class="fn">${p.name}</div>
+                            <div class="fs" style="color:#FF4081;">хочет дружить</div>
+                            <div style="font-size:10px;color:#333;">${p.tag||('#'+p.id)}</div>
+                        </div>
+                        <div class="fb" style="flex-direction:column;gap:5px;">
+                            <button class="bx b-ok" onclick="app.acceptFriend('${fid}')">✓ Принять</button>
+                            <button class="bx b-no" onclick="app.declineFriend('${fid}')">✕ Отклонить</button>
+                        </div></div>`;
+                });
+            }
+        }
+
+        // Исходящие заявки
+        const outDiv=document.getElementById('inbox-out');
+        if(outDiv){
+            outDiv.innerHTML='';
+            if(!this.sentReqs||!this.sentReqs.length){
+                outDiv.innerHTML='<div style="color:#333;font-size:12px;padding:10px;text-align:center;line-height:1.8;">📤<br>Нет исходящих заявок</div>';
+            } else {
+                this.sentReqs.forEach(fid=>{
+                    fid=String(fid);
+                    if(this.friends.includes(fid))return; // уже друг
+                    const p=findPeer(fid);
+                    outDiv.innerHTML+=`<div class="fr" style="border-color:rgba(0,229,255,0.1);background:rgba(0,229,255,0.03);margin-bottom:8px;">
+                        <div class="fa2" style="background:rgba(0,229,255,0.1);color:var(--c-blue)">${(p.name[0]||'?').toUpperCase()}</div>
+                        <div class="fi">
+                            <div class="fn">${p.name}</div>
+                            <div class="fs" style="color:var(--c-blue);">заявка отправлена</div>
+                            <div style="font-size:10px;color:#333;">${p.tag||('#'+p.id)}</div>
+                        </div>
+                        <button class="bx b-del" onclick="app.cancelReq('${fid}')" style="flex-shrink:0;">Отмена</button>
+                    </div>`;
+                });
+            }
+        }
+    },
+
+    cancelReq(fid){
+        fid=String(fid);
+        this.sentReqs=this.sentReqs.filter(x=>x!==fid);
+        this.saveData();
+        this.renderInbox();
+        this.showNotif('↩️','Заявка отменена','');
     },
 
     inviteFriend(fid, name){
@@ -2006,6 +2097,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
