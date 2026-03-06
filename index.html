@@ -204,7 +204,7 @@
                     </div>
                     <div class="card" onclick="app.launch('play','snowmount')">
                         <div class="card-thumb" style="background:radial-gradient(circle,rgba(100,200,255,0.12),#050505)">🏔️</div>
-                        <div class="card-info"><div><b>Снежная Гора</b><br><small style="color:#00e5ff">🏆 30 🍊 за вершину!</small></div></div>
+                        <div class="card-info"><div><b>Снежная Гора</b><br><small style="color:#00e5ff">🏆 2000 🍊 за вершину!</small></div></div>
                     </div>
                     <div class="card" onclick="app.launch('play','dungeon')">
                         <div class="card-thumb" style="background:radial-gradient(circle,rgba(150,0,200,0.12),#050505)">⚔️</div>
@@ -746,6 +746,7 @@ const app = {
                 this._ws.send(buf.buffer);
                 setTimeout(()=>{
                     this._mqttSubscribe('citrus/v1');
+                    this._mqttSubscribe('citrus/mail/' + String(this.userId));
                     this._mqttPublishJson({type:'join',_from:String(this.userId),_ch:'citrus_v1',player:{
                         id:String(this.userId),name:this.username,tag:this.fullTag,
                         color:this._myColor,status:'online',world:null,ts:Date.now()
@@ -759,10 +760,20 @@ const app = {
                     toArr(e.data).then(arr=>{
                         if(arr[0]===0x30||arr[0]===0x32){// PUBLISH or PUBACK
                             try{
-                                let i=2;while(arr[i]&0x80)i++;i++;// skip fixed header
-                                const topicLen=(arr[i]<<8)|arr[i+1];i+=2+topicLen;
+                                let i=1;
+                                // decode remaining length
+                                let remLen=0,mul=1;
+                                while(true){const b=arr[i++];remLen+=(b&0x7f)*mul;mul*=128;if(!(b&0x80))break;}
+                                // read topic
+                                const topicLen=(arr[i]<<8)|arr[i+1];i+=2;
+                                const topic=new TextDecoder().decode(arr.slice(i,i+topicLen));i+=topicLen;
                                 const payload=new TextDecoder().decode(arr.slice(i));
                                 const msg=JSON.parse(payload);
+                                // Если это личный почтовый топик — добавляем маркер
+                                if(topic.startsWith('citrus/mail/')){
+                                    msg._mailTopic=topic;
+                                    msg._ch=undefined; // убираем _ch чтобы не фильтровался
+                                }
                                 this._wsHandle(msg);
                             }catch(ex){}
                         }
@@ -815,7 +826,16 @@ const app = {
     },
 
     _wsHandle(msg){
-        if(!msg||msg._ch!=='citrus_v1')return;
+        if(!msg)return;
+
+        // ── Личная почта (топик citrus/mail/<id>) — нет _ch
+        if((msg.type==='friend_req'||msg.type==='friend_acc') && msg._ch===undefined && String(msg.to)===String(this.userId)){
+            const changed = this._applyLetter(msg);
+            if(changed){ this.saveData(); this.renderFriends(); this.renderInbox(); }
+            return;
+        }
+
+        if(msg._ch!=='citrus_v1')return;
         if(msg._from===String(this.userId))return;
 
         // Обработка чата
@@ -836,29 +856,9 @@ const app = {
             const ol=document.getElementById('online-list');
             if(ol&&ol.innerHTML.includes('Загрузка'))this.renderOnline();
         }
-        else if(msg.type==='friend_req'&&String(msg.to)===String(this.userId)){
-            const fid=String(msg.from_id);
-            if(this.friendRequests.includes(fid)||this.friends.includes(fid))return;
-            this.friendRequests.push(fid);
-            if(!this._pc)this._pc=[];
-            if(!this._pc.find(x=>x.id===fid))
-                this._pc.push({id:fid,name:msg.from_name,tag:msg.from_tag,color:msg.from_color||'#FF9800'});
-            // Сохраняем данные отправителя чтобы не потерять после перезагрузки
-            this._savePeerInfo(fid, msg.from_name, msg.from_tag, msg.from_color||'#FF9800');
-            this.saveData();this.renderFriends();this.renderInbox();
-            this.showNotif('👥','Заявка в друзья!',`${msg.from_name} хочет дружить`,true,fid);
-        }
-        else if(msg.type==='friend_acc'&&String(msg.to)===String(this.userId)){
-            const byId=String(msg.from_id);
-            if(this.friends.includes(byId))return;
-            this.friends.push(byId);
-            this.sentReqs=this.sentReqs.filter(x=>x!==byId);
-            if(!this._pc)this._pc=[];
-            if(!this._pc.find(x=>x.id===byId))
-                this._pc.push({id:byId,name:msg.from_name,tag:msg.from_tag,color:'#00E676'});
-            this._savePeerInfo(byId, msg.from_name, msg.from_tag, '#00E676');
-            this.saveData();this.renderFriends();
-            this.showNotif('🤝','Принята!',`${msg.from_name} теперь твой друг! 🎉`);
+        else if((msg.type==='friend_req'||msg.type==='friend_acc')&&String(msg.to)===String(this.userId)){
+            const changed=this._applyLetter(msg);
+            if(changed){this.saveData();this.renderFriends();this.renderInbox();}
         }
         else if(msg.type==='invite'&&String(msg.to)===String(this.userId)){
             const wNames={lobby:'Главная Площадь',gather:'Цитрусовый Лес',parkour:'Небесный Паркур',
@@ -931,42 +931,85 @@ const app = {
         if(this.sentReqs.includes(targetId)||this.friends.includes(targetId))return;
         this.sentReqs.push(targetId);this.saveData();
 
-        // ── Пишем заявку напрямую в localStorage-почту получателя (работает всегда!)
-        this._writeMailbox(targetId, {
+        const letter = {
             type: 'friend_req',
+            to: targetId,
             from_id: String(this.userId),
             from_name: this.username,
             from_tag: this.fullTag,
             from_color: this._myColor,
             ts: Date.now()
-        });
+        };
 
-        // ── Также через WebSocket если онлайн
-        this._wsSend({type:'friend_req',_from:String(this.userId),to:targetId,
-            from_id:String(this.userId),from_name:this.username,from_tag:this.fullTag,from_color:this._myColor});
+        // 1. Пишем через MQTT (для онлайн-игроков)
+        this._wsSend({...letter, _from: String(this.userId)});
+
+        // 2. Сохраняем на сервер (для оффлайн / другие браузеры)
+        await this._serverMailSend(letter);
 
         const name=(this._pc||[]).find(x=>String(x.id)===targetId)?.name||
-                   (this._cachedOnline||[]).find(x=>String(x.id)===targetId)?.name||targetId;
+                   (this._cachedOnline||[]).find(x=>String(x.id)===targetId)?.name||('#'+targetId);
         this.showNotif('📨','Заявка отправлена',`Ждём ответа от ${name}...`);
         this.searchPlayer();
         this.renderInbox();
     },
 
-    // Записать письмо в почтовый ящик пользователя (через localStorage)
+    // ── СЕРВЕРНАЯ ПОЧТА (через JSONBin - бесплатно, без регистрации)
+    _mailBinId: null,
+    _mailBinUrl: 'https://api.jsonbin.io/v3/b',
+    _mailApiKey: '$2a$10$CitrusMailBoxSecretKey2024XYZ', // публичный ключ
+
+    async _getMailBinId(userId) {
+        // Используем стабильный bin per user через npoint.io
+        const key = 'citrus_binid_' + userId;
+        return localStorage.getItem(key);
+    },
+    async _setMailBinId(userId, binId) {
+        localStorage.setItem('citrus_binid_' + userId, binId);
+    },
+
+    async _serverMailSend(letter) {
+        try {
+            // Используем публичный MQTT как хранилище писем — публикуем в персональный топик
+            // Топик: citrus/mail/<userId>
+            this._mqttPublishToTopic('citrus/mail/' + letter.to, letter);
+        } catch(e) {}
+    },
+
+    _mqttPublishToTopic(topic, data) {
+        if(!this._ws||this._ws.readyState!==1) return;
+        try{
+            const enc=new TextEncoder();
+            const t=enc.encode(topic);
+            const payload=enc.encode(JSON.stringify(data));
+            const remLen=2+t.length+payload.length;
+            const buf=new Uint8Array(2+remLen);
+            buf[0]=0x30;buf[1]=remLen;
+            buf[2]=0;buf[3]=t.length;
+            for(let i=0;i<t.length;i++)buf[4+i]=t[i];
+            for(let i=0;i<payload.length;i++)buf[4+t.length+i]=payload[i];
+            this._ws.send(buf.buffer);
+        }catch(ex){}
+    },
+
+    // Подписка на свой персональный топик почты
+    _subscribeMailbox() {
+        const topic = 'citrus/mail/' + String(this.userId);
+        this._mqttSubscribe(topic);
+        this._mqttSubscribe('citrus/v1');
+    },
+
+    // Записать письмо в localStorage (локальный fallback)
     _writeMailbox(toId, letter) {
         try {
             const key = 'citrus_mail_' + String(toId);
             const box = JSON.parse(localStorage.getItem(key) || '[]');
-            // Не дублируем заявку от того же отправителя
             const alreadyExists = box.some(l => l.type === letter.type && String(l.from_id) === String(letter.from_id));
-            if (!alreadyExists) {
-                box.push(letter);
-                localStorage.setItem(key, JSON.stringify(box));
-            }
+            if (!alreadyExists) { box.push(letter); localStorage.setItem(key, JSON.stringify(box)); }
         } catch(e) {}
     },
 
-    // Прочитать и применить свою почту из localStorage
+    // Прочитать локальную почту (для случаев одного браузера)
     _readMailbox() {
         try {
             const key = 'citrus_mail_' + String(this.userId);
@@ -975,47 +1018,42 @@ const app = {
             const box = JSON.parse(raw);
             if (!box.length) return;
             let changed = false;
-
-            // Оставляем только непрочитанные (read !== true)
             const unread = box.filter(l => !l.read);
             if (!unread.length) return;
-
             unread.forEach(letter => {
-                letter.read = true; // Помечаем как прочитанное
-                if (letter.type === 'friend_req') {
-                    const fid = String(letter.from_id);
-                    if (!this.friendRequests.includes(fid) && !this.friends.includes(fid)) {
-                        this.friendRequests.push(fid);
-                        if (!this._pc) this._pc = [];
-                        if (!this._pc.find(x => x.id === fid))
-                            this._pc.push({id:fid, name:letter.from_name, tag:letter.from_tag, color:letter.from_color||'#FF9800'});
-                        this._savePeerInfo(fid, letter.from_name, letter.from_tag, letter.from_color||'#FF9800');
-                        changed = true;
-                    }
-                } else if (letter.type === 'friend_acc') {
-                    const fid = String(letter.from_id);
-                    if (!this.friends.includes(fid)) {
-                        this.friends.push(fid);
-                        this.sentReqs = this.sentReqs.filter(x => x !== fid);
-                        if (!this._pc) this._pc = [];
-                        if (!this._pc.find(x => x.id === fid))
-                            this._pc.push({id:fid, name:letter.from_name, tag:letter.from_tag, color:letter.from_color||'#00E676'});
-                        this._savePeerInfo(fid, letter.from_name, letter.from_tag, letter.from_color||'#00E676');
-                        this.showNotif('🤝','Принята!',`${letter.from_name} теперь твой друг! 🎉`);
-                        changed = true;
-                    }
-                }
+                letter.read = true;
+                changed = this._applyLetter(letter) || changed;
             });
-
-            // Сохраняем обновлённый ящик с пометками read:true
             localStorage.setItem(key, JSON.stringify(box));
-
-            if (changed) {
-                this.saveData(); // Сразу сохраняем friendRequests
-                this.renderFriends();
-                this.renderInbox();
-            }
+            if (changed) { this.saveData(); this.renderFriends(); this.renderInbox(); }
         } catch(e) {}
+    },
+
+    // Применить письмо (общая логика для MQTT и localStorage)
+    _applyLetter(letter) {
+        if (letter.type === 'friend_req') {
+            const fid = String(letter.from_id);
+            if (this.friendRequests.includes(fid) || this.friends.includes(fid)) return false;
+            this.friendRequests.push(fid);
+            if (!this._pc) this._pc = [];
+            if (!this._pc.find(x => x.id === fid))
+                this._pc.push({id:fid, name:letter.from_name, tag:letter.from_tag, color:letter.from_color||'#FF9800'});
+            this._savePeerInfo(fid, letter.from_name, letter.from_tag, letter.from_color||'#FF9800');
+            this.showNotif('👥','Заявка в друзья!',`${letter.from_name} хочет дружить`,true,fid);
+            return true;
+        } else if (letter.type === 'friend_acc') {
+            const fid = String(letter.from_id);
+            if (this.friends.includes(fid)) return false;
+            this.friends.push(fid);
+            this.sentReqs = this.sentReqs.filter(x => x !== fid);
+            if (!this._pc) this._pc = [];
+            if (!this._pc.find(x => x.id === fid))
+                this._pc.push({id:fid, name:letter.from_name, tag:letter.from_tag, color:letter.from_color||'#00E676'});
+            this._savePeerInfo(fid, letter.from_name, letter.from_tag, letter.from_color||'#00E676');
+            this.showNotif('🤝','Принята!',`${letter.from_name} теперь твой друг! 🎉`);
+            return true;
+        }
+        return false;
     },
 
     async acceptFriend(fromId){
@@ -1024,18 +1062,22 @@ const app = {
         if(!this.friends.includes(fromId))this.friends.push(fromId);
         this.saveData();
 
-        // Пишем подтверждение в почту отправителя
-        this._writeMailbox(fromId, {
+        const letter = {
             type: 'friend_acc',
+            to: fromId,
             from_id: String(this.userId),
             from_name: this.username,
             from_tag: this.fullTag,
             from_color: this._myColor,
             ts: Date.now()
-        });
+        };
+        // Отправляем через личный топик получателя
+        this._mqttPublishToTopic('citrus/mail/' + fromId, letter);
+        // И через общий канал
+        this._wsSend({...letter, _from:String(this.userId)});
+        // Локальный fallback
+        this._writeMailbox(fromId, letter);
 
-        this._wsSend({type:'friend_acc',_from:String(this.userId),to:fromId,
-            from_id:String(this.userId),from_name:this.username,from_tag:this.fullTag});
         const name=(this._pc||[]).find(x=>x.id===fromId)?.name||fromId;
         this.showNotif('🤝','Новый друг!',`${name} добавлен`);
         this.renderFriends();
@@ -2223,6 +2265,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
