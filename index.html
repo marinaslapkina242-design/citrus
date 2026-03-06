@@ -680,31 +680,97 @@ const app = {
     // ── MULTIPLAYER / WEBSOCKET / CHAT
     _wsConnect(){
         if(this._ws&&this._ws.readyState<2)return;
+        // BroadcastChannel для игроков в одном браузере/вкладке
         try{
-            this._ws=new WebSocket('wss://ws.postman-echo.com/raw');
+            if(!this._bc){
+                this._bc=new BroadcastChannel('citrus_v1');
+                this._bc.onmessage=e=>{try{this._wsHandle(e.data);}catch(ex){}};
+            }
+        }catch(ex){}
+        // Публичный WebSocket брокер (HiveMQ)
+        try{
+            this._ws=new WebSocket('wss://broker.hivemq.com:8884/mqtt');
             this._ws.onopen=()=>{
                 this._wsAlive=true;
-                this._wsSend({type:'join',_from:String(this.userId),player:{
-                    id:String(this.userId),name:this.username,tag:this.fullTag,
-                    color:this._myColor,status:'online',world:null,ts:Date.now()
-                }});
-                this._wsTimer=setInterval(()=>this._registerPresence(),20000);
+                // MQTT CONNECT packet
+                const enc=new TextEncoder();
+                const clientId='citrus_'+this.userId;
+                const cid=enc.encode(clientId);
+                const buf=new Uint8Array(10+2+cid.length);
+                buf[0]=0x10;buf[1]=8+2+cid.length;
+                buf[2]=0;buf[3]=4;buf[4]=77;buf[5]=81;buf[6]=84;buf[7]=84;
+                buf[8]=4;buf[9]=2;buf[10]=0;buf[11]=60;
+                buf[12]=0;buf[13]=cid.length;
+                for(let i=0;i<cid.length;i++)buf[14+i]=cid[i];
+                this._ws.send(buf.buffer);
+                setTimeout(()=>{
+                    this._mqttSubscribe('citrus/v1');
+                    this._mqttPublishJson({type:'join',_from:String(this.userId),_ch:'citrus_v1',player:{
+                        id:String(this.userId),name:this.username,tag:this.fullTag,
+                        color:this._myColor,status:'online',world:null,ts:Date.now()
+                    }});
+                    this._wsTimer=setInterval(()=>this._registerPresence(),20000);
+                },400);
             };
             this._ws.onmessage=e=>{
-                try{this._wsHandle(JSON.parse(e.data));}catch(ex){}
+                if(e.data instanceof ArrayBuffer||e.data instanceof Blob){
+                    const toArr=b=>b instanceof Blob?b.arrayBuffer().then(ab=>new Uint8Array(ab)):Promise.resolve(new Uint8Array(b));
+                    toArr(e.data).then(arr=>{
+                        if(arr[0]===0x30||arr[0]===0x32){// PUBLISH or PUBACK
+                            try{
+                                let i=2;while(arr[i]&0x80)i++;i++;// skip fixed header
+                                const topicLen=(arr[i]<<8)|arr[i+1];i+=2+topicLen;
+                                const payload=new TextDecoder().decode(arr.slice(i));
+                                const msg=JSON.parse(payload);
+                                this._wsHandle(msg);
+                            }catch(ex){}
+                        }
+                    });
+                }
             };
             this._ws.onclose=()=>{
                 this._wsAlive=false;
                 clearInterval(this._wsTimer);
-                setTimeout(()=>this._wsConnect(),3000);
+                setTimeout(()=>this._wsConnect(),5000);
             };
-            this._ws.onerror=()=>{};
+            this._ws.onerror=()=>{this._wsAlive=false;};
+        }catch(ex){}
+    },
+
+    _mqttSubscribe(topic){
+        if(!this._ws||this._ws.readyState!==1)return;
+        const enc=new TextEncoder(),t=enc.encode(topic);
+        const buf=new Uint8Array(2+2+2+t.length+2);
+        buf[0]=0x82;buf[1]=2+2+t.length+2;
+        buf[2]=0;buf[3]=1;// packet id
+        buf[4]=0;buf[5]=t.length;
+        for(let i=0;i<t.length;i++)buf[6+i]=t[i];
+        buf[6+t.length]=0;buf[7+t.length]=0;
+        this._ws.send(buf.buffer);
+    },
+
+    _mqttPublishJson(data){
+        // BroadcastChannel сначала (для вкладок того же браузера)
+        try{if(this._bc)this._bc.postMessage(data);}catch(ex){}
+        // Потом MQTT WS
+        if(!this._ws||this._ws.readyState!==1)return;
+        try{
+            const enc=new TextEncoder();
+            const topic=enc.encode('citrus/v1');
+            const payload=enc.encode(JSON.stringify(data));
+            const remLen=2+topic.length+payload.length;
+            const buf=new Uint8Array(2+remLen);
+            buf[0]=0x30;buf[1]=remLen;
+            buf[2]=0;buf[3]=topic.length;
+            for(let i=0;i<topic.length;i++)buf[4+i]=topic[i];
+            for(let i=0;i<payload.length;i++)buf[4+topic.length+i]=payload[i];
+            this._ws.send(buf.buffer);
         }catch(ex){}
     },
 
     _wsSend(data){
         data._ch='citrus_v1';
-        if(this._ws&&this._ws.readyState===1) this._ws.send(JSON.stringify(data));
+        this._mqttPublishJson(data);
     },
 
     _wsHandle(msg){
@@ -749,6 +815,22 @@ const app = {
                 this._pc.push({id:byId,name:msg.from_name,tag:msg.from_tag,color:'#00E676'});
             this.saveData();this.renderFriends();
             this.showNotif('🤝','Принята!',`${msg.from_name} теперь твой друг! 🎉`);
+        }
+        else if(msg.type==='invite'&&String(msg.to)===String(this.userId)){
+            const wNames={lobby:'Главная Площадь',gather:'Цитрусовый Лес',parkour:'Небесный Паркур',
+                volcano:'Остров Вулкана',space:'Космическая База',hideseek:'Прятки',
+                snowmount:'Снежная Гора',dungeon:'Тёмное Подземелье'};
+            const wn=wNames[msg.world]||msg.worldName||msg.world;
+            const n=document.createElement('div');n.className='notif';
+            n.innerHTML=`<div class="nh">🎮 Приглашение в игру</div>
+                <div class="nb">${msg.from_name} зовёт тебя в <b>${wn}</b></div>
+                <div class="nbtns">
+                    <button class="bx b-ok" onclick="app.launch('play','${msg.world}');this.closest('.notif').remove()">▶ Войти</button>
+                    <button class="bx b-no" onclick="this.closest('.notif').remove()">✕</button>
+                </div>`;
+            document.getElementById('notifs').appendChild(n);
+            setTimeout(()=>n.classList.add('show'),50);
+            setTimeout(()=>{n.classList.remove('show');setTimeout(()=>n.remove(),400)},18000);
         }
     },
 
@@ -890,11 +972,13 @@ const app = {
             const on=online.find(x=>x.id===fid);
             const st=on?(on.status==='ingame'?'🎮 '+on.world:'● Онлайн'):'○ Оффлайн';
             const sc=on?(on.status==='ingame'?'ig':'on'):'';
+            const inviteBtn=on?`<button class="bx b-add" onclick="app.inviteFriend('${fid}','${p.name}')" style="font-size:10px">▶ Играть</button>`:'';
             fl.innerHTML+=`<div class="fr">
                 <div class="fa2" style="background:${p.color}22;color:${p.color}">${(p.name[0]||'?').toUpperCase()}</div>
                 <div class="fi"><div class="fn">${p.name}</div>
                 <div class="fs ${sc}">${p.tag||p.id} · ${st}</div></div>
                 <div class="fb">
+                    ${inviteBtn}
                     <button class="bx b-del" onclick="app.removeFriend('${fid}')">✕</button>
                 </div></div>`;
         });
@@ -913,6 +997,15 @@ const app = {
                     </div></div>`;
             });
         }else rw.style.display='none';
+    },
+
+    inviteFriend(fid, name){
+        if(!this.currentMap&&this.mode!=='play'){
+            this.showNotif('❌','Не в игре','Сначала зайди в любой мир!');return;
+        }
+        this._wsSend({type:'invite',_from:String(this.userId),to:String(fid),
+            from_name:this.username,world:this.currentMap,worldName:this._worldName||String(this.currentMap)});
+        this.showNotif('📨','Приглашение отправлено',`${name} получит уведомление`);
     },
 
     async renderOnline(){
@@ -995,6 +1088,156 @@ const app = {
             const bl=new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,1.2),new THREE.MeshStandardMaterial({color:0x00E5FF,emissive:0x00E5FF,emissiveIntensity:1}));
             bl.position.y=0.8;sg.add(bl);sg.position.set(0,-0.8,-0.2);sg.rotation.x=Math.PI/2;rA.add(sg);
         }
+        // ── НОВЫЕ АКСЕССУАРЫ ──
+        if(this.inventory.includes('hat')){
+            // Ковбойская шляпа
+            const brim=new THREE.Mesh(new THREE.CylinderGeometry(0.55,0.55,0.06,12),new THREE.MeshStandardMaterial({color:0x8B6914,roughness:0.8}));
+            brim.position.set(0,0.38,0);headGroup.add(brim);
+            const top=new THREE.Mesh(new THREE.CylinderGeometry(0.28,0.32,0.3,12),new THREE.MeshStandardMaterial({color:0x8B6914,roughness:0.8}));
+            top.position.set(0,0.55,0);headGroup.add(top);
+        }
+        if(this.inventory.includes('mask')){
+            // Золотая маска
+            const mask=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.35,0.08),new THREE.MeshStandardMaterial({color:0xFFD700,metalness:0.9,roughness:0.1}));
+            mask.position.set(0,0.08,0.32);headGroup.add(mask);
+        }
+        if(this.inventory.includes('cape')){
+            // Плащ тьмы
+            const cm=new THREE.MeshStandardMaterial({color:0x1a0030,roughness:0.7,transparent:true,opacity:0.92});
+            const cape=new THREE.Mesh(new THREE.BoxGeometry(1.0,1.4,0.08),cm);
+            cape.position.set(0,-0.1,-0.25);torso.add(cape);
+        }
+        if(this.inventory.includes('headphones')){
+            // Наушники
+            const hm=new THREE.MeshStandardMaterial({color:0x222222,metalness:0.5});
+            const band=new THREE.Mesh(new THREE.TorusGeometry(0.32,0.04,6,16,Math.PI),hm);
+            band.position.set(0,0.35,0);band.rotation.z=Math.PI;headGroup.add(band);
+            [-0.33,0.33].forEach(x=>{
+                const cup=new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.1,0.1,10),new THREE.MeshStandardMaterial({color:0xFF9800,emissive:0xFF5500,emissiveIntensity:0.5}));
+                cup.position.set(x,0.05,0);cup.rotation.z=Math.PI/2;headGroup.add(cup);
+            });
+        }
+        if(this.inventory.includes('medal')){
+            // Медаль чемпиона
+            const med=new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.12,0.04,12),new THREE.MeshStandardMaterial({color:0xFFD700,metalness:0.9,roughness:0.1,emissive:0xFFAA00,emissiveIntensity:0.4}));
+            med.position.set(0,-0.2,0.22);med.rotation.x=Math.PI/2;torso.add(med);
+        }
+        if(this.inventory.includes('flame')){
+            // Огненный ореол
+            const fl=new THREE.Mesh(new THREE.TorusGeometry(0.35,0.06,8,20),new THREE.MeshStandardMaterial({color:0xFF4400,emissive:0xFF2200,emissiveIntensity:1.5}));
+            fl.position.set(0,0.55,0);headGroup.add(fl);
+        }
+        if(this.inventory.includes('ice')){
+            // Ледяная аура
+            const im=new THREE.MeshStandardMaterial({color:0x88DDFF,emissive:0x44AAFF,emissiveIntensity:0.5,transparent:true,opacity:0.5});
+            const ia=new THREE.Mesh(new THREE.SphereGeometry(0.65,10,10),im);
+            ia.position.set(0,0,0);headGroup.add(ia);
+        }
+        if(this.inventory.includes('star')){
+            // Звёздный шлейф — частицы вокруг персонажа
+            for(let i=0;i<6;i++){
+                const a=(i/6)*Math.PI*2;
+                const s=new THREE.Mesh(new THREE.SphereGeometry(0.07,5,5),new THREE.MeshStandardMaterial({color:0xFFFF00,emissive:0xFFDD00,emissiveIntensity:2}));
+                s.position.set(Math.cos(a)*0.5,i*0.25,Math.sin(a)*0.5);group.add(s);
+            }
+        }
+        if(this.inventory.includes('rainbow')){
+            // Радужная полоса над головой
+            const colors=[0xFF0000,0xFF7700,0xFFFF00,0x00FF00,0x0000FF,0x8B00FF];
+            colors.forEach((c,i)=>{
+                const rb=new THREE.Mesh(new THREE.TorusGeometry(0.28+i*0.05,0.025,5,20,Math.PI),
+                    new THREE.MeshStandardMaterial({color:c,emissive:c,emissiveIntensity:0.7}));
+                rb.position.set(0,0.38+i*0.02,0.05);rb.rotation.z=Math.PI;headGroup.add(rb);
+            });
+        }
+        if(this.inventory.includes('robot')){
+            // Робот-маска
+            const rm=new THREE.Mesh(new THREE.BoxGeometry(0.64,0.62,0.1),new THREE.MeshStandardMaterial({color:0x888888,metalness:0.9,roughness:0.1}));
+            rm.position.set(0,0,0.32);headGroup.add(rm);
+            [-0.15,0.15].forEach(x=>{
+                const eye=new THREE.Mesh(new THREE.BoxGeometry(0.12,0.08,0.04),new THREE.MeshStandardMaterial({color:0x00FFFF,emissive:0x00FFFF,emissiveIntensity:2}));
+                eye.position.set(x,0.1,0.36);headGroup.add(eye);
+            });
+        }
+        if(this.inventory.includes('alien')){
+            // Шлем пришельца — стеклянный купол
+            const ah=new THREE.Mesh(new THREE.SphereGeometry(0.4,10,10),new THREE.MeshStandardMaterial({color:0x88FFCC,metalness:0.1,roughness:0,transparent:true,opacity:0.35}));
+            ah.position.set(0,0.05,0);headGroup.add(ah);
+        }
+        if(this.inventory.includes('gem')){
+            // Кристальный посох
+            const staff=new THREE.Group();
+            const stick=new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,1.6),new THREE.MeshStandardMaterial({color:0x9966AA,metalness:0.3}));
+            stick.position.y=0;staff.add(stick);
+            const gem=new THREE.Mesh(new THREE.OctahedronGeometry(0.2),new THREE.MeshStandardMaterial({color:0xAA00FF,emissive:0x7700FF,emissiveIntensity:1.5,transparent:true,opacity:0.9}));
+            gem.position.y=0.95;staff.add(gem);
+            staff.position.set(0,-0.85,-0.1);staff.rotation.x=Math.PI/2;lA.add(staff);
+        }
+        if(this.inventory.includes('shield')){
+            // Щит героя
+            const sh=new THREE.Mesh(new THREE.BoxGeometry(0.6,0.8,0.08),new THREE.MeshStandardMaterial({color:0xCCCCCC,metalness:0.8,roughness:0.2}));
+            sh.position.set(0,-0.5,0.2);lA.add(sh);
+            const cross1=new THREE.Mesh(new THREE.BoxGeometry(0.08,0.5,0.05),new THREE.MeshStandardMaterial({color:0xFF2222}));
+            cross1.position.set(0,-0.5,0.26);lA.add(cross1);
+            const cross2=new THREE.Mesh(new THREE.BoxGeometry(0.35,0.08,0.05),new THREE.MeshStandardMaterial({color:0xFF2222}));
+            cross2.position.set(0,-0.42,0.26);lA.add(cross2);
+        }
+        if(this.inventory.includes('bow')){
+            // Лук эльфа
+            const bowM=new THREE.MeshStandardMaterial({color:0x5D4037,roughness:0.7});
+            const arc=new THREE.Mesh(new THREE.TorusGeometry(0.35,0.04,6,20,Math.PI),bowM);
+            arc.position.set(0,-0.5,0.15);arc.rotation.z=Math.PI/2;lA.add(arc);
+        }
+        if(this.inventory.includes('party')){
+            // Колпак вечеринки
+            const pm=new THREE.MeshStandardMaterial({color:0xFF44AA,roughness:0.6});
+            const pcone=new THREE.Mesh(new THREE.ConeGeometry(0.2,0.5,10),pm);
+            pcone.position.set(0,0.55,0);headGroup.add(pcone);
+            const pstar=new THREE.Mesh(new THREE.SphereGeometry(0.05,6,6),new THREE.MeshStandardMaterial({color:0xFFFF00,emissive:0xFFFF00,emissiveIntensity:2}));
+            pstar.position.set(0,0.83,0);headGroup.add(pstar);
+        }
+        if(this.inventory.includes('detective')){
+            // Шляпа детектива
+            const dm=new THREE.MeshStandardMaterial({color:0x222222,roughness:0.8});
+            const dbrim=new THREE.Mesh(new THREE.CylinderGeometry(0.45,0.45,0.05,12),dm);
+            dbrim.position.set(0,0.36,0.04);headGroup.add(dbrim);
+            const dtop=new THREE.Mesh(new THREE.CylinderGeometry(0.24,0.28,0.28,12),dm);
+            dtop.position.set(0,0.53,0.04);headGroup.add(dtop);
+        }
+        if(this.inventory.includes('santa')){
+            // Шапка санты
+            const sm=new THREE.MeshStandardMaterial({color:0xCC0000,roughness:0.8});
+            const sbase=new THREE.Mesh(new THREE.CylinderGeometry(0.33,0.36,0.1,12),new THREE.MeshStandardMaterial({color:0xFFFFFF,roughness:0.9}));
+            sbase.position.set(0,0.36,0);headGroup.add(sbase);
+            const scone=new THREE.Mesh(new THREE.ConeGeometry(0.26,0.5,12),sm);
+            scone.position.set(-0.05,0.65,0);scone.rotation.z=0.25;headGroup.add(scone);
+            const stip=new THREE.Mesh(new THREE.SphereGeometry(0.07,6,6),new THREE.MeshStandardMaterial({color:0xFFFFFF}));
+            stip.position.set(-0.17,0.9,-0.03);headGroup.add(stip);
+        }
+        if(this.inventory.includes('wizard')){
+            // Шляпа волшебника
+            const wm2=new THREE.MeshStandardMaterial({color:0x220066,roughness:0.7});
+            const wbrim=new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.5,0.06,12),wm2);
+            wbrim.position.set(0,0.36,0);headGroup.add(wbrim);
+            const wcone=new THREE.Mesh(new THREE.ConeGeometry(0.24,0.65,12),wm2);
+            wcone.position.set(0,0.7,0);headGroup.add(wcone);
+            const wstar=new THREE.Mesh(new THREE.SphereGeometry(0.05,5,5),new THREE.MeshStandardMaterial({color:0xFFFF00,emissive:0xFFFF00,emissiveIntensity:2}));
+            wstar.position.set(0,1.06,0);headGroup.add(wstar);
+        }
+        if(this.inventory.includes('devil')){
+            // Рога дьявола
+            const dm2=new THREE.MeshStandardMaterial({color:0xCC0000,roughness:0.5});
+            [-0.25,0.25].forEach(x=>{
+                const horn=new THREE.Mesh(new THREE.ConeGeometry(0.07,0.3,8),dm2);
+                horn.position.set(x,0.42,0);headGroup.add(horn);
+            });
+        }
+        if(this.inventory.includes('halo')){
+            // Ангельский нимб
+            const hl=new THREE.Mesh(new THREE.TorusGeometry(0.26,0.04,8,24),new THREE.MeshStandardMaterial({color:0xFFDD44,emissive:0xFFBB00,emissiveIntensity:1.5,metalness:0.6}));
+            hl.position.set(0,0.55,0);hl.rotation.x=Math.PI/6;headGroup.add(hl);
+            const hlight=new THREE.PointLight(0xFFDD44,0.5,1.5);hlight.position.set(0,0.6,0);headGroup.add(hlight);
+        }
         if(needsRig)this.rig={leftArm:lA,rightArm:rA,leftLeg:lL,rightLeg:rL,torso,head:headGroup};
         return group;
     },
@@ -1036,6 +1279,11 @@ const app = {
     launch(mode,mapId){
         this.mode=mode;this.currentMap=mapId;
         this.velocity.set(0,0,0);this.canJump=false;this.loopFn=null;this.spaceGrav=false;
+        const wNames={lobby:'Главная Площадь',gather:'Цитрусовый Лес',parkour:'Небесный Паркур',
+            volcano:'Остров Вулкана',space:'Космическая База',hideseek:'Прятки',
+            snowmount:'Снежная Гора',dungeon:'Тёмное Подземелье'};
+        this._worldName=wNames[mapId]||'Мир игрока';
+        if(mode==='play')this._updateStatus('ingame',this._worldName);
         
         document.getElementById('ui-hub').classList.add('hidden');
         document.getElementById('engine-view').style.display='block';
@@ -1359,8 +1607,8 @@ const app = {
                     const pl=this.playerGroup;
                     if(pl&&pl.position.distanceTo(new THREE.Vector3(0,79,-60))<7&&!this._mtReached){
                         this._mtReached=true;clearInterval(this._mtInterval);this._mtInterval=null;
-                        this.balance+=2000;this.saveData();
-                        this.showNotif('🏆','ВЕРШИНА ПОКОРЕНА!','Получено 2000 🍊 на баланс!');
+                        this.balance+=30;this.saveData();
+                        this.showNotif('🏆','ВЕРШИНА ПОКОРЕНА!','Получено 30 🍊 на баланс!');
                     }
                 },1000);
                 this.showSnowMountHud();
@@ -1669,6 +1917,7 @@ const app = {
 
     exitGame(){
         this.spaceGrav=false;this.loopFn=null;this.mode='none';
+        this._updateStatus('online',null);
         // Очищаем таймеры мини-игр
         if(this._hsInterval){clearInterval(this._hsInterval);this._hsInterval=null;}this._hsTimer=null;
         if(this._mtInterval){clearInterval(this._mtInterval);this._mtInterval=null;}this._mtSeconds=null;this._mtReached=false;
@@ -1686,3 +1935,5 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
+
