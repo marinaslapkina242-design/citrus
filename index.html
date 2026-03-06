@@ -521,6 +521,14 @@ const app = {
             const d=JSON.parse(s);
             this.username=d.username||'';
             this.userId=d.userId||Math.floor(1000 + Math.random() * 9000);
+            // Проверяем: если есть запись в глобальной БД для этого ника — берём ID оттуда
+            if(this.username){
+                try{
+                    const globalDB=JSON.parse(localStorage.getItem('citrus_global_users')||'[]');
+                    const rec=globalDB.find(u=>u.name.toLowerCase()===this.username.toLowerCase());
+                    if(rec) this.userId=rec.id; // Всегда используем зарегистрированный ID
+                }catch(e){}
+            }
             this.fullTag = this.username ? `${this.username}#${this.userId}` : '';
             this._myColor = d.myColor || COLORS[this.userId % COLORS.length];
             this.balance=d.balance||0;
@@ -561,17 +569,31 @@ const app = {
     // ── AUTH
     login() {
         const v = document.getElementById('username').value.trim();
-        if (v.length < 3) return this.showNotif('ОШИБКА', 'НИК СЛИШКОМ КОРОТКИЙ');
+        if (v.length < 3) return this.showNotif('❌', 'Ник слишком короткий', 'Минимум 3 символа');
         this.username = v;
-        this.userId = Math.floor(1000 + Math.random() * 8999);
-        this.fullTag = `${this.username}#${this.userId}`;
-        
+
+        // Ищем существующий аккаунт с таким ником в глобальной БД
         let globalDB = JSON.parse(localStorage.getItem('citrus_global_users') || '[]');
-        globalDB = globalDB.filter(u => u.id !== this.userId);
+        const existing = globalDB.find(u => u.name.toLowerCase() === v.toLowerCase());
+        if (existing) {
+            // Восстанавливаем старый аккаунт — ID не меняется!
+            this.userId = existing.id;
+            this._myColor = existing.color || this._myColor;
+        } else {
+            // Новый игрок — генерируем ID один раз
+            this.userId = Math.floor(1000 + Math.random() * 8999);
+        }
+
+        this.fullTag = `${this.username}#${this.userId}`;
+
+        // Обновляем запись в глобальной БД
+        globalDB = globalDB.filter(u => String(u.id) !== String(this.userId));
         globalDB.push({name: this.username, id: this.userId, color: this._myColor});
         localStorage.setItem('citrus_global_users', JSON.stringify(globalDB));
-        
-        this.saveData(); 
+
+        this.saveData();
+        // Сразу читаем почту после входа
+        setTimeout(() => { this._readMailbox(); this.renderInbox(); this.renderFriends(); }, 300);
         this.showHub();
         this._wsConnect();
     },
@@ -989,7 +1011,7 @@ const app = {
             localStorage.setItem(key, JSON.stringify(box));
 
             if (changed) {
-                this.saveData();
+                this.saveData(); // Сразу сохраняем friendRequests
                 this.renderFriends();
                 this.renderInbox();
             }
@@ -2201,6 +2223,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
