@@ -470,6 +470,7 @@ const app = {
     // ── INIT
     init(){
         this.loadData();
+        this._loadPeerInfo(); // Восстанавливаем имена друзей из кэша
         // АВТО-ВХОД
         if (this.username && this.username !== '') {
             document.getElementById('ui-login').classList.add('hidden');
@@ -806,6 +807,8 @@ const app = {
             if(!this._pc)this._pc=[];
             if(!this._pc.find(x=>x.id===fid))
                 this._pc.push({id:fid,name:msg.from_name,tag:msg.from_tag,color:msg.from_color||'#FF9800'});
+            // Сохраняем данные отправителя чтобы не потерять после перезагрузки
+            this._savePeerInfo(fid, msg.from_name, msg.from_tag, msg.from_color||'#FF9800');
             this.saveData();this.renderFriends();
             this.showNotif('👥','Заявка в друзья!',`${msg.from_name} хочет дружить`,true,fid);
         }
@@ -817,6 +820,7 @@ const app = {
             if(!this._pc)this._pc=[];
             if(!this._pc.find(x=>x.id===byId))
                 this._pc.push({id:byId,name:msg.from_name,tag:msg.from_tag,color:'#00E676'});
+            this._savePeerInfo(byId, msg.from_name, msg.from_tag, '#00E676');
             this.saveData();this.renderFriends();
             this.showNotif('🤝','Принята!',`${msg.from_name} теперь твой друг! 🎉`);
         }
@@ -1000,7 +1004,26 @@ const app = {
         if (!this._pc) this._pc = [];
         if (!this._pc.find(x => x.id === uidStr))
             this._pc.push({ id: uidStr, name: name, tag: `${name}#${id}`, color: '#FF9800' });
+        this._savePeerInfo(uidStr, name, `${name}#${id}`, '#FF9800');
         this.sendReq(uidStr);
+    },
+
+    // Сохраняем данные игроков в localStorage чтобы имена не терялись после перезагрузки
+    _savePeerInfo(id, name, tag, color) {
+        try {
+            let peers = JSON.parse(localStorage.getItem('citrus_peers') || '{}');
+            peers[String(id)] = { id: String(id), name, tag, color };
+            localStorage.setItem('citrus_peers', JSON.stringify(peers));
+        } catch(e) {}
+    },
+    _loadPeerInfo() {
+        try {
+            const peers = JSON.parse(localStorage.getItem('citrus_peers') || '{}');
+            if (!this._pc) this._pc = [];
+            Object.values(peers).forEach(p => {
+                if (!this._pc.find(x => x.id === p.id)) this._pc.push(p);
+            });
+        } catch(e) {}
     },
 
     renderFriends(){
@@ -1008,16 +1031,21 @@ const app = {
         fl.innerHTML='';
         const pc=this._pc||[];
         const online=this._cachedOnline||[];
+        // Также смотрим в глобальную базу для имён
+        let globalDB = [];
+        try { globalDB = JSON.parse(localStorage.getItem('citrus_global_users')||'[]'); } catch(e){}
+        const findPeer = id => pc.find(x=>x.id===id) || globalDB.find(x=>String(x.id)===id) || {id,name:id,color:'#888'};
+
         if(!this.friends.length)fl.innerHTML='<div style="color:#444;font-size:13px;padding:10px">Пока нет друзей.<br><small style="color:#333">Найди игрока во вкладке выше</small></div>';
         this.friends.forEach(fid=>{
             fid=String(fid);
-            const p=pc.find(x=>x.id===fid)||{id:fid,name:fid,color:'#888'};
+            const p=findPeer(fid);
             const on=online.find(x=>x.id===fid);
             const st=on?(on.status==='ingame'?'🎮 '+on.world:'● Онлайн'):'○ Оффлайн';
             const sc=on?(on.status==='ingame'?'ig':'on'):'';
             const inviteBtn=on?`<button class="bx b-add" onclick="app.inviteFriend('${fid}','${p.name}')" style="font-size:10px">▶ Играть</button>`:'';
             fl.innerHTML+=`<div class="fr">
-                <div class="fa2" style="background:${p.color}22;color:${p.color}">${(p.name[0]||'?').toUpperCase()}</div>
+                <div class="fa2" style="background:${p.color||'#888'}22;color:${p.color||'#888'}">${(p.name[0]||'?').toUpperCase()}</div>
                 <div class="fi"><div class="fn">${p.name}</div>
                 <div class="fs ${sc}">${p.tag||p.id} · ${st}</div></div>
                 <div class="fb">
@@ -1030,9 +1058,9 @@ const app = {
             rw.style.display='block';rl.innerHTML='';
             this.friendRequests.forEach(fid=>{
                 fid=String(fid);
-                const p=pc.find(x=>x.id===fid)||{id:fid,name:fid,color:'#FF4081'};
+                const p=findPeer(fid);
                 rl.innerHTML+=`<div class="fr" style="border-color:rgba(255,64,129,0.2);background:rgba(255,64,129,0.03)">
-                    <div class="fa2" style="background:${p.color}22;color:${p.color}">${(p.name[0]||'?').toUpperCase()}</div>
+                    <div class="fa2" style="background:${p.color||'#FF4081'}22;color:${p.color||'#FF4081'}">${(p.name[0]||'?').toUpperCase()}</div>
                     <div class="fi"><div class="fn">${p.name}</div><div class="fs">${p.tag||p.id} · хочет дружить</div></div>
                     <div class="fb">
                         <button class="bx b-ok" onclick="app.acceptFriend('${fid}')">✓ Принять</button>
@@ -1978,5 +2006,9 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
+
+
+
 
 
