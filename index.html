@@ -246,8 +246,11 @@
                     <div class="fp">
                         <h3>🔍 Найти игрока</h3>
                         <div class="srow">
-                            <input type="text" id="srch" placeholder="Введите ник или оставьте пустым для всех" autocomplete="off" oninput="app.searchPlayer()">
+                            <input type="text" id="srch" placeholder="Ник или Ник#1234..." autocomplete="off" oninput="app.searchPlayer()" onkeydown="if(event.key==='Enter')app.searchPlayer()">
                             <button onclick="app.searchPlayer()">Поиск</button>
+                        </div>
+                        <div style="font-size:11px;color:#333;margin:-6px 0 10px;padding:0 2px;">
+                            Твой тег: <span id="my-tag-hint" style="color:var(--c-main);cursor:pointer;text-decoration:underline dotted" title="Нажми чтобы скопировать" onclick="navigator.clipboard&&navigator.clipboard.writeText(app.fullTag).then(()=>app.showNotif('📋','Скопировано!',app.fullTag))"></span>
                         </div>
                         <div id="srch-res"></div>
                         <div style="margin-top:18px;">
@@ -548,10 +551,9 @@ const app = {
         this.fullTag = `${this.username}#${this.userId}`;
         
         let globalDB = JSON.parse(localStorage.getItem('citrus_global_users') || '[]');
-        if(!globalDB.find(u => u.id === this.userId)) {
-            globalDB.push({name: this.username, id: this.userId});
-            localStorage.setItem('citrus_global_users', JSON.stringify(globalDB));
-        }
+        globalDB = globalDB.filter(u => u.id !== this.userId);
+        globalDB.push({name: this.username, id: this.userId, color: this._myColor});
+        localStorage.setItem('citrus_global_users', JSON.stringify(globalDB));
         
         this.saveData(); 
         this.showHub();
@@ -652,6 +654,8 @@ const app = {
             this.renderFriends();
             this.renderOnline();
             this.searchPlayer(); // Показываем всех при открытии вкладки!
+            const hint=document.getElementById('my-tag-hint');
+            if(hint)hint.innerText=this.fullTag||'войди в игру';
         }
     },
 
@@ -918,29 +922,53 @@ const app = {
 
     // ── SEARCH ALL PLAYERS
     searchPlayer() {
-        const q = document.getElementById('srch').value.trim().toLowerCase();
+        const raw = document.getElementById('srch').value.trim();
+        const q = raw.toLowerCase();
         const res = document.getElementById('srch-res'); res.innerHTML = '';
-        
+
         let db = JSON.parse(localStorage.getItem('citrus_global_users') || '[]');
         let onlinePlayers = this._cachedOnline || [];
-        
+
         // Объединяем локальную базу и онлайн-игроков без дубликатов
         let allUsersMap = new Map();
         db.forEach(u => allUsersMap.set(String(u.id), u));
-        onlinePlayers.forEach(u => allUsersMap.set(String(u.id), { id: String(u.id), name: u.name }));
-        
+        onlinePlayers.forEach(u => allUsersMap.set(String(u.id), { id: String(u.id), name: u.name, color: u.color }));
+
         let allUsers = Array.from(allUsersMap.values());
-        
+
         // Исключаем себя
         let found = allUsers.filter(u => String(u.id) !== String(this.userId));
-        
-        // Если есть запрос, фильтруем. Если пусто — показываем всех!
-        if (q) {
-            found = found.filter(u => u.name.toLowerCase().includes(q));
+
+        // Поддержка поиска по тегу Ник#ID
+        const tagMatch = raw.match(/^(.+)#(\d{4})$/);
+        if (tagMatch) {
+            const [, tName, tId] = tagMatch;
+            found = found.filter(u => String(u.id) === tId && u.name.toLowerCase() === tName.toLowerCase());
+            // Если в базе нет — предлагаем добавить напрямую
+            if (!found.length) {
+                const uidStr = tId;
+                const isFr = this.friends.includes(uidStr);
+                const sent = this.sentReqs.includes(uidStr);
+                res.innerHTML = `<div class="fr" style="border-color:rgba(255,152,0,0.15);background:rgba(255,152,0,0.03)">
+                    <div class="fa2" style="background:#FF980022;color:#FF9800">${tName[0].toUpperCase()}</div>
+                    <div class="fi"><div class="fn">${tName} <small style="color:#666">#${tId}</small></div>
+                    <div class="fs">Добавить по тегу</div></div>
+                    <div class="fb">
+                        ${isFr ? '<span style="color:#00E676;font-size:11px">✓ Уже в друзьях</span>' :
+                          sent ? '<span style="color:var(--c-blue);font-size:11px">✓ Отправлено</span>' :
+                          `<button class="bx b-add" onclick="app.sendReqByTag('${tName}','${tId}')">+ Добавить</button>`}
+                    </div></div>`;
+                return;
+            }
+        } else if (q) {
+            found = found.filter(u => u.name.toLowerCase().includes(q) || String(u.id).includes(q));
         }
 
         if (!found.length) {
-            res.innerHTML = '<div style="color:#555;font-size:12px;padding:5px">Никого не найдено.</div>';
+            res.innerHTML = `<div style="color:#555;font-size:13px;padding:10px;text-align:center;line-height:1.7;">
+                Никого не найдено.<br>
+                <small style="color:#333">Попробуй поиск по тегу: <span style="color:#FF9800">Ник#1234</span></small>
+            </div>`;
             return;
         }
 
@@ -948,16 +976,31 @@ const app = {
             const uidStr = String(u.id);
             const isFr = this.friends.includes(uidStr);
             const sent = this.sentReqs.includes(uidStr);
+            const col = u.color || '#888';
+            const isOnline = (this._cachedOnline||[]).find(x=>String(x.id)===uidStr);
             res.innerHTML += `
                 <div class="fr">
-                    <div class="fi"><span class="fn">${u.name} <small style="color:#666">#${u.id}</small></span></div>
+                    <div class="fa2" style="background:${col}22;color:${col}">${(u.name[0]||'?').toUpperCase()}</div>
+                    <div class="fi"><div class="fn">${u.name} <small style="color:#555">#${u.id}</small></div>
+                    <div class="fs ${isOnline?'on':''}"> ${isOnline ? '● Онлайн' : '○ Не в сети'}</div></div>
                     <div class="fb">
-                        ${isFr ? '<span style="color:gray;font-size:11px">В друзьях</span>' : 
-                          sent ? '<span style="color:var(--c-blue);font-size:11px">Отправлено</span>' :
-                        `<button class="bx b-add" onclick="app.sendReq('${u.id}')">ДОБАВИТЬ</button>`}
+                        ${isFr ? '<span style="color:#00E676;font-size:11px">✓ В друзьях</span>' : 
+                          sent ? '<span style="color:var(--c-blue);font-size:11px">✓ Отправлено</span>' :
+                          `<button class="bx b-add" onclick="app.sendReq('${u.id}')">+ Добавить</button>`}
                     </div>
                 </div>`;
         });
+    },
+
+    // Добавление друга по тегу (когда игрок не в базе)
+    sendReqByTag(name, id) {
+        const uidStr = String(id);
+        if (this.sentReqs.includes(uidStr) || this.friends.includes(uidStr)) return;
+        // Добавляем в кэш игроков чтобы знали имя
+        if (!this._pc) this._pc = [];
+        if (!this._pc.find(x => x.id === uidStr))
+            this._pc.push({ id: uidStr, name: name, tag: `${name}#${id}`, color: '#FF9800' });
+        this.sendReq(uidStr);
     },
 
     renderFriends(){
