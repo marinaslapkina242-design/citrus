@@ -756,6 +756,13 @@ const app = {
         if(this.balance>=price){
             this.balance-=price;this.inventory.push(id); this._questProgress('buys',1);
             this.saveData();this.renderShop();this.updateAvatarPreview();
+            // Обновляем персонажа сразу если в игре
+            if(this.mode==='play' && this.playerGroup && this.scene){
+                this.scene.remove(this.playerGroup);
+                this.playerGroup = this.buildCharacter(true);
+                this.scene.add(this.playerGroup);
+            }
+            const bv2=document.getElementById('balance-val'); if(bv2) bv2.textContent=this.balance;
             const it=SHOP_ITEMS.find(i=>i.id===id);
             this.showNotif(it.icon,'Куплено!',`${it.name} в гардеробе`);
         }else this.showNotif('💸','Мало монет',`Нужно ещё ${price-this.balance} 🍊`);
@@ -1319,7 +1326,10 @@ const app = {
             const on=online.find(x=>x.id===fid);
             const st=on?(on.status==='ingame'?'🎮 '+on.world:'● Онлайн'):'○ Оффлайн';
             const sc=on?(on.status==='ingame'?'ig':'on'):'';
-            const inviteBtn=on?`<button class="bx b-add" onclick="app.inviteFriend('${fid}','${p.name}')" style="font-size:10px">▶ Играть</button>`:'';
+            const friendMap = on && on.status==='ingame' ? on.world : null;
+            const inviteBtn = friendMap
+                ? `<button class="bx b-add" onclick="app.joinFriend('${fid}','${friendMap}')" style="font-size:10px;background:#00E676;color:#000">▶ Войти</button>`
+                : on ? `<button class="bx b-add" onclick="app.inviteFriend('${fid}','${p.name}')" style="font-size:10px">▶ Играть</button>` : '';
             fl.innerHTML+=`<div class="fr">
                 <div class="fa2" style="background:${p.color||'#888'}22;color:${p.color||'#888'}">${(p.name[0]||'?').toUpperCase()}</div>
                 <div class="fi"><div class="fn">${p.name}</div>
@@ -1431,6 +1441,13 @@ const app = {
         this.saveData();
         this.renderInbox();
         this.showNotif('↩️','Заявка отменена','');
+    },
+
+    joinFriend(fid, mapId){
+        // Телепортируемся в мир друга
+        if(!mapId){ this._showToast('Друг не в игре'); return; }
+        this._showToast('🚀 Заходим в мир...');
+        this.launch('play', mapId);
     },
 
     inviteFriend(fid, name){
@@ -2743,6 +2760,9 @@ const app = {
         this._initQuests();
         this.renderQuests();
         this._showToast('🍊 +'+q.reward+' цитрусов получено!');
+        // Обновляем отображение баланса сразу
+        const bv = document.getElementById('balance-val');
+        if(bv) bv.textContent = this.balance;
     },
 
     exitGame(){
@@ -2768,6 +2788,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
