@@ -1481,15 +1481,30 @@ const app = {
                         if(String(msg.map)!==String(this.currentMap)||this.mode!=='play') return;
                         if(!this._others) this._others={};
                         if(!this._others[msg.id]) {
-                            const g=this._buildOtherPlayer(msg.name,msg.color);
+                            const g=this._buildOtherPlayer(msg.name, msg.color, msg.inv||[]);
                             this._others[msg.id]=g;
                             this.scene&&this.scene.add(g);
+                        } else {
+                            // Обновляем аксессуары если изменились
+                            const o=this._others[msg.id];
+                            const newInvKey = (msg.inv||[]).join(',');
+                            if(o._invKey !== newInvKey) {
+                                this.scene&&this.scene.remove(o);
+                                const g=this._buildOtherPlayer(msg.name, msg.color, msg.inv||[]);
+                                g._targetPos = o._targetPos;
+                                g._targetRy = o._targetRy;
+                                g._lastSeen = o._lastSeen;
+                                this._others[msg.id]=g;
+                                this.scene&&this.scene.add(g);
+                            }
                         }
                         const o=this._others[msg.id];
-                        // Сохраняем целевую позицию — плавно интерполируем в engineLoop
                         o._targetPos = new THREE.Vector3(msg.x, msg.y, msg.z);
                         o._targetRy = msg.ry || 0;
                         o._lastSeen = Date.now();
+                        o._moving = msg.moving;
+                        o._jumping = msg.jumping;
+                        o._animT = msg.animT || 0;
                     }
                 }catch(e){}
             };
@@ -1540,8 +1555,8 @@ const app = {
         } catch(e) {}
     },
 
-    // ── Построить модель другого игрока
-    _buildOtherPlayer(name, color) {
+    // ── Построить модель другого игрока (с аксессуарами и ригом)
+    _buildOtherPlayer(name, color, inv=[]) {
         const g = new THREE.Group();
         const c = parseInt((color||'#FF9800').replace('#',''), 16) || 0xFF9800;
         const matShirt = new THREE.MeshStandardMaterial({color:c, roughness:0.7});
@@ -1551,33 +1566,43 @@ const app = {
         const torso = new THREE.Mesh(new THREE.BoxGeometry(0.8,1.2,0.4), matShirt);
         torso.position.y = 1.4; g.add(torso);
         // Голова
-        const head = new THREE.Mesh(new THREE.BoxGeometry(0.6,0.6,0.6), matSkin);
-        head.position.set(0,0.9,0); torso.add(head);
-        // Глаза
+        const headGroup = new THREE.Group();
+        headGroup.position.set(0,0.8,0); torso.add(headGroup);
+        headGroup.add(new THREE.Mesh(new THREE.BoxGeometry(0.6,0.6,0.6), matSkin));
         const em = new THREE.MeshBasicMaterial({color:0x000000});
-        [-0.15,0.15].forEach(x => {
-            const eye = new THREE.Mesh(new THREE.PlaneGeometry(0.1,0.1), em);
-            eye.position.set(x,0.05,0.31); head.add(eye);
-        });
-        // Руки (висят вниз)
-        [-0.6,0.6].forEach(x => {
-            const armG = new THREE.Group();
-            const arm = new THREE.Mesh(new THREE.BoxGeometry(0.35,1.1,0.35), matSkin);
-            arm.position.y = -0.45;
-            armG.add(arm);
-            armG.position.set(x,0.5,0);
-            torso.add(armG);
-        });
-        // Ноги
-        [-0.22,0.22].forEach(x => {
-            const legG = new THREE.Group();
-            const leg = new THREE.Mesh(new THREE.BoxGeometry(0.35,1.1,0.35), matPants);
-            leg.position.y = -0.55;
-            legG.add(leg);
-            legG.position.set(x,-0.6,0);
-            torso.add(legG);
-        });
+        [-0.15,0.15].forEach(x=>{const e=new THREE.Mesh(new THREE.PlaneGeometry(0.1,0.1),em);e.position.set(x,0.05,0.31);headGroup.add(e);});
+        const mo=new THREE.Mesh(new THREE.PlaneGeometry(0.2,0.05),em);mo.position.set(0,-0.15,0.31);headGroup.add(mo);
+        // Руки с ригом
+        const mkLimb=(x,y,mat)=>{
+            const gg=new THREE.Group();
+            const m=new THREE.Mesh(new THREE.BoxGeometry(0.35,1.1,0.35),mat);
+            m.geometry=m.geometry.clone();m.geometry.translate(0,-0.45,0);gg.add(m);
+            gg.position.set(x,y,0);torso.add(gg);return gg;
+        };
+        const lA=mkLimb(-0.6,0.5,matSkin),rA=mkLimb(0.6,0.5,matSkin);
+        const lL=mkLimb(-0.22,-0.6,matPants),rL=mkLimb(0.22,-0.6,matPants);
+        g._rig={lA,rA,lL,rL};
+        g._invKey = inv.join(',');
         g._name = name;
+
+        // Аксессуары (те же что у buildCharacter)
+        if(inv.includes('glasses')){const gg=new THREE.Mesh(new THREE.BoxGeometry(0.65,0.15,0.1),new THREE.MeshStandardMaterial({color:0x111111}));gg.position.set(0,0.05,0.32);headGroup.add(gg);}
+        if(inv.includes('crown')){const cr=new THREE.Mesh(new THREE.CylinderGeometry(0.25,0.2,0.2,8),new THREE.MeshStandardMaterial({color:0xFFD700,metalness:0.8,roughness:0.2}));cr.position.set(0,0.4,0);headGroup.add(cr);}
+        if(inv.includes('wings')){const wm=new THREE.MeshStandardMaterial({color:0xFF9800,emissive:0xFF9800,emissiveIntensity:0.5,transparent:true,opacity:0.8});const wL=new THREE.Mesh(new THREE.BoxGeometry(1.5,0.8,0.1),wm);wL.position.set(-0.8,0.2,-0.3);wL.rotation.y=0.3;torso.add(wL);const wR=new THREE.Mesh(new THREE.BoxGeometry(1.5,0.8,0.1),wm);wR.position.set(0.8,0.2,-0.3);wR.rotation.y=-0.3;torso.add(wR);}
+        if(inv.includes('hat')){const brim=new THREE.Mesh(new THREE.CylinderGeometry(0.55,0.55,0.06,12),new THREE.MeshStandardMaterial({color:0x8B6914,roughness:0.8}));brim.position.set(0,0.38,0);headGroup.add(brim);const top=new THREE.Mesh(new THREE.CylinderGeometry(0.28,0.32,0.3,12),new THREE.MeshStandardMaterial({color:0x8B6914,roughness:0.8}));top.position.set(0,0.55,0);headGroup.add(top);}
+        if(inv.includes('crown')){const cr=new THREE.Mesh(new THREE.CylinderGeometry(0.25,0.2,0.2,8),new THREE.MeshStandardMaterial({color:0xFFD700,metalness:0.8}));cr.position.set(0,0.4,0);headGroup.add(cr);}
+        if(inv.includes('headphones')){const hm=new THREE.MeshStandardMaterial({color:0x222222,metalness:0.5});const band=new THREE.Mesh(new THREE.TorusGeometry(0.32,0.04,6,16,Math.PI),hm);band.position.set(0,0.35,0);band.rotation.z=Math.PI;headGroup.add(band);[-0.33,0.33].forEach(x=>{const cup=new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.1,0.1,10),new THREE.MeshStandardMaterial({color:0xFF9800,emissive:0xFF5500,emissiveIntensity:0.5}));cup.position.set(x,0.05,0);cup.rotation.z=Math.PI/2;headGroup.add(cup);});}
+        if(inv.includes('flame')){const fl=new THREE.Mesh(new THREE.TorusGeometry(0.35,0.06,8,20),new THREE.MeshStandardMaterial({color:0xFF4400,emissive:0xFF2200,emissiveIntensity:1.5}));fl.position.set(0,0.55,0);headGroup.add(fl);}
+        if(inv.includes('halo')){const hl=new THREE.Mesh(new THREE.TorusGeometry(0.26,0.04,8,24),new THREE.MeshStandardMaterial({color:0xFFDD44,emissive:0xFFBB00,emissiveIntensity:1.5,metalness:0.6}));hl.position.set(0,0.55,0);hl.rotation.x=Math.PI/6;headGroup.add(hl);}
+        if(inv.includes('devil')){const dm=new THREE.MeshStandardMaterial({color:0xCC0000,roughness:0.5});[-0.25,0.25].forEach(x=>{const horn=new THREE.Mesh(new THREE.ConeGeometry(0.07,0.3,8),dm);horn.position.set(x,0.42,0);headGroup.add(horn);});}
+        if(inv.includes('cape')){const cape=new THREE.Mesh(new THREE.BoxGeometry(1.0,1.4,0.08),new THREE.MeshStandardMaterial({color:0x1a0030,roughness:0.7,transparent:true,opacity:0.92}));cape.position.set(0,-0.1,-0.25);torso.add(cape);}
+        if(inv.includes('sword')){const sg=new THREE.Group();sg.add(new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,0.4),new THREE.MeshStandardMaterial({color:0x555555})));const bl=new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,1.2),new THREE.MeshStandardMaterial({color:0x00E5FF,emissive:0x00E5FF,emissiveIntensity:1}));bl.position.y=0.8;sg.add(bl);sg.position.set(0,-0.8,-0.2);sg.rotation.x=Math.PI/2;rA.add(sg);}
+        if(inv.includes('wizard')){const wm2=new THREE.MeshStandardMaterial({color:0x220066,roughness:0.7});const wbrim=new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.5,0.06,12),wm2);wbrim.position.set(0,0.36,0);headGroup.add(wbrim);const wcone=new THREE.Mesh(new THREE.ConeGeometry(0.24,0.65,12),wm2);wcone.position.set(0,0.7,0);headGroup.add(wcone);}
+        if(inv.includes('santa')){const sm=new THREE.MeshStandardMaterial({color:0xCC0000,roughness:0.8});const sbase=new THREE.Mesh(new THREE.CylinderGeometry(0.33,0.36,0.1,12),new THREE.MeshStandardMaterial({color:0xFFFFFF,roughness:0.9}));sbase.position.set(0,0.36,0);headGroup.add(sbase);const scone=new THREE.Mesh(new THREE.ConeGeometry(0.26,0.5,12),sm);scone.position.set(-0.05,0.65,0);scone.rotation.z=0.25;headGroup.add(scone);}
+        if(inv.includes('ice')){const im=new THREE.MeshStandardMaterial({color:0x88DDFF,emissive:0x44AAFF,emissiveIntensity:0.5,transparent:true,opacity:0.5});const ia=new THREE.Mesh(new THREE.SphereGeometry(0.65,10,10),im);headGroup.add(ia);}
+        if(inv.includes('rainbow')){const colors=[0xFF0000,0xFF7700,0xFFFF00,0x00FF00,0x0000FF,0x8B00FF];colors.forEach((col,i)=>{const rb=new THREE.Mesh(new THREE.TorusGeometry(0.28+i*0.05,0.025,5,20,Math.PI),new THREE.MeshStandardMaterial({color:col,emissive:col,emissiveIntensity:0.7}));rb.position.set(0,0.38+i*0.02,0.05);rb.rotation.z=Math.PI;headGroup.add(rb);});}
+        if(inv.includes('mask')){const mask=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.35,0.08),new THREE.MeshStandardMaterial({color:0xFFD700,metalness:0.9,roughness:0.1}));mask.position.set(0,0.08,0.32);headGroup.add(mask);}
+
         return g;
     },
 
@@ -2386,7 +2411,11 @@ const app = {
                     y: this.playerGroup.position.y,
                     z: this.playerGroup.position.z,
                     ry: this.playerGroup.rotation.y,
-                    map: String(this.currentMap)
+                    map: String(this.currentMap),
+                    inv: this.inventory,
+                    moving: Object.values(this.keys).some(Boolean),
+                    jumping: !this.canJump,
+                    animT: this.clock ? this.clock.getElapsedTime() : 0
                 };
                 // Через наш WS сервер (быстро и надёжно)
                 if(this._gameWS && this._gameWS.readyState===1) {
@@ -2423,7 +2452,7 @@ const app = {
             if(this.keys['KeyE'])this.camera.position.y+=s;
             if(this.keys['KeyQ'])this.camera.position.y-=s;
         }
-        // Плавно двигаем других игроков к целевой позиции
+        // Плавно двигаем и анимируем других игроков
         if(this._others && this.mode==='play') {
             const now = Date.now();
             for(const id in this._others) {
@@ -2433,11 +2462,25 @@ const app = {
                     delete this._others[id];
                 } else if(o._targetPos) {
                     o.position.lerp(o._targetPos, 0.25);
-                    // Плавный поворот
                     let diff = (o._targetRy||0) - o.rotation.y;
                     while(diff > Math.PI) diff -= Math.PI*2;
                     while(diff < -Math.PI) diff += Math.PI*2;
                     o.rotation.y += diff * 0.2;
+                    // Анимация конечностей
+                    if(o._rig) {
+                        if(o._moving && !o._jumping) {
+                            const s = Math.sin(time * 15) * 0.8;
+                            o._rig.lA.rotation.x = s;
+                            o._rig.rA.rotation.x = -s;
+                            o._rig.lL.rotation.x = -s;
+                            o._rig.rL.rotation.x = s;
+                        } else if(o._jumping) {
+                            o._rig.lA.rotation.x = THREE.MathUtils.lerp(o._rig.lA.rotation.x, -2.5, 0.15);
+                            o._rig.rA.rotation.x = THREE.MathUtils.lerp(o._rig.rA.rotation.x, -2.5, 0.15);
+                        } else {
+                            ['lA','rA','lL','rL'].forEach(k=>o._rig[k].rotation.x=THREE.MathUtils.lerp(o._rig[k].rotation.x,0,0.1));
+                        }
+                    }
                 }
             }
         }
@@ -2543,14 +2586,3 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
