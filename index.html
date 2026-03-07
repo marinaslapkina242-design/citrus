@@ -2663,7 +2663,7 @@ const app = {
             if(d.done) return;
             d.progress = Math.min((d.progress||0)+amount, q.goal);
             if(d.progress >= q.goal){ d.done=true; changed=true;
-                this._showToast('🎯 Задание выполнено: '+q.title+' (+'+q.reward+' 🍋)'); }
+                this._showToast('🎯 Задание выполнено: '+q.title+' (+'+q.reward+' 🍊)'); }
         });
         if(changed){ this.saveData(); this._initQuests(); }
     },
@@ -2697,7 +2697,7 @@ const app = {
                 + '<div style="color:#666;font-size:11px;margin-top:4px">' + (d.progress||0) + ' / ' + q.goal + '</div>'
                 + '</div>'
                 + '<div style="text-align:center;min-width:70px">'
-                + '<div style="color:#FFD700;font-weight:700;font-size:16px">+' + q.reward + ' \uD83C\uDF4B</div>'
+                + '<div style="color:#FFD700;font-weight:700;font-size:16px">+' + q.reward + ' \uD83C\uDF4A</div>'
                 + btnHtml
                 + '</div></div>';
         });
@@ -2715,7 +2715,7 @@ const app = {
         this._updateCoins();
         this._initQuests();
         this.renderQuests();
-        this._showToast('🍋 +'+q.reward+' цитрусов получено!');
+        this._showToast('🍊 +'+q.reward+' цитрусов получено!');
     },
 
     exitGame(){
@@ -2741,6 +2741,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
