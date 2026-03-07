@@ -1449,13 +1449,22 @@ const app = {
         if(!mapId){ this._showToast('Друг не в игре'); return; }
         this._showToast('🚀 Заходим в мир...');
         this.launch('play', mapId);
-        // После загрузки ставим игрока выше земли
-        setTimeout(()=>{
-            if(this.playerGroup){
-                this.playerGroup.position.set(2, 5, 2);
-                this.velocity && this.velocity.set(0,0,0);
-            }
-        }, 500);
+        // Ждём загрузки сцены и ставим выше земли
+        const trySpawn = (attempts) => {
+            if(!this.playerGroup || attempts<=0) return;
+            this.playerGroup.position.set(0, 10, 0);
+            this.velocity && this.velocity.set(0, 0, 0);
+            this.canJump = false;
+            // Проверяем через 200мс что не провалились
+            setTimeout(()=>{
+                if(this.playerGroup && this.playerGroup.position.y < 0){
+                    this.playerGroup.position.set(0, 10, 0);
+                    this.velocity && this.velocity.set(0, 0, 0);
+                }
+            }, 200);
+        };
+        setTimeout(()=>trySpawn(3), 300);
+        setTimeout(()=>trySpawn(2), 800);
     },
 
     inviteFriend(fid, name){
@@ -1926,7 +1935,13 @@ const app = {
 
     // ── LAUNCH
     launch(mode,mapId){
-        this.mode=mode;this.currentMap=mapId;
+        this.mode=mode;
+        // Если это опубликованная карта - используем serverId как общий map ID
+        if(typeof mapId === 'number' && this.customMaps[mapId]?.serverId){
+            this.currentMap = this.customMaps[mapId].serverId;
+        } else {
+            this.currentMap=mapId;
+        }
         // Трекинг посещённых миров
         if(mode==='play'){
             if(!this.visitedMaps) this.visitedMaps=[];
@@ -2716,17 +2731,17 @@ const app = {
             const games=await r.json();
             const g=games.find(x=>x.id===serverId);
             if(!g){ this._showToast('Карта не найдена'); return; }
-            // Сохраняем карту как customMap с временным индексом
-            const tempIdx = this.customMaps.length;
-            // Проверяем не добавили ли уже
+            // Используем serverId как общий идентификатор карты
+            // чтобы все игроки в этой карте были в одном "мире"
             let idx = this.customMaps.findIndex(m=>m.serverId===serverId);
             if(idx===-1){
-                this.customMaps.push({name:g.name, blocks:g.blocks||[], script:g.script||'', serverId});
+                this.customMaps.push({name:g.name, blocks:g.blocks||[], script:g.script||'', serverId, id:serverId});
                 idx = this.customMaps.length-1;
             } else {
                 this.customMaps[idx].blocks = g.blocks||[];
             }
             this._worldName = g.name;
+            this._pubMapId = serverId; // запомним для launch
             this.launch('play', idx);
         }catch(e){
             console.error('launchPublished error:', e);
@@ -2932,4 +2947,5 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
