@@ -1254,7 +1254,9 @@ const app = {
         } catch(e) {}
     },
 
-    renderFriends(){
+    async renderFriends(){
+        // Сначала обновляем онлайн с сервера
+        await this._fetchOnline();
         const fl=document.getElementById('friends-list');if(!fl)return;
         fl.innerHTML='';
         const pc=this._pc||[];
@@ -2323,5 +2325,6 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
