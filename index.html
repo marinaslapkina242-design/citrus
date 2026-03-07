@@ -1935,13 +1935,7 @@ const app = {
 
     // ── LAUNCH
     launch(mode,mapId){
-        this.mode=mode;
-        // Если это опубликованная карта - используем serverId как общий map ID
-        if(typeof mapId === 'number' && this.customMaps[mapId]?.serverId){
-            this.currentMap = this.customMaps[mapId].serverId;
-        } else {
-            this.currentMap=mapId;
-        }
+        this.mode=mode;this.currentMap=mapId;
         // Трекинг посещённых миров
         if(mode==='play'){
             if(!this.visitedMaps) this.visitedMaps=[];
@@ -2947,5 +2941,6 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
