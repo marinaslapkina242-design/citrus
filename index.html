@@ -886,6 +886,30 @@ const app = {
         }
 
         if(msg._ch!=='citrus_v1')return;
+
+        // Движение других игроков — обрабатываем ДО фильтра self
+        if(msg.type==='move') {
+            if(String(msg.id)===String(this.userId)) return;
+            if(msg.map !== this.currentMap || this.mode!=='play') {
+                if(this._others && this._others[msg.id]) {
+                    this.scene && this.scene.remove(this._others[msg.id]);
+                    delete this._others[msg.id];
+                }
+                return;
+            }
+            if(!this._others) this._others = {};
+            if(!this._others[msg.id]) {
+                const g = this._buildOtherPlayer(msg.name, msg.color);
+                this._others[msg.id] = g;
+                this.scene && this.scene.add(g);
+            }
+            const other = this._others[msg.id];
+            other.position.set(msg.x, msg.y, msg.z);
+            other.rotation.y = msg.ry || 0;
+            other._lastSeen = Date.now();
+            return;
+        }
+
         if(msg._from===String(this.userId))return;
 
         // ── Входящие заявки через MQTT (от других устройств/браузеров)
@@ -901,30 +925,6 @@ const app = {
             return;
         }
 
-        // Движение других игроков
-        if(msg.type==='move') {
-            if(String(msg.id)===String(this.userId)) return;
-            if(msg.map !== this.currentMap) {
-                // Игрок в другом мире — убираем его модель
-                if(this._others && this._others[msg.id]) {
-                    this.scene && this.scene.remove(this._others[msg.id]);
-                    delete this._others[msg.id];
-                }
-                return;
-            }
-            if(!this._others) this._others = {};
-            if(!this._others[msg.id]) {
-                // Создаём модель другого игрока
-                const g = this._buildOtherPlayer(msg.name, msg.color);
-                this._others[msg.id] = g;
-                this.scene && this.scene.add(g);
-            }
-            const other = this._others[msg.id];
-            other.position.set(msg.x, msg.y, msg.z);
-            other.rotation.y = msg.ry || 0;
-            other._lastSeen = Date.now();
-            return;
-        }
 
         if(msg.type==='join'||msg.type==='ping'){
             const p=msg.player;
@@ -2398,6 +2398,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
