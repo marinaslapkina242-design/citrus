@@ -718,6 +718,8 @@ const app = {
         document.getElementById('nav-'+id)?.classList.add('active');
         if(id==='avatar')this.updateAvatarPreview();
         if(id==='friends'){
+            // Регистрируем на сервере (на случай если зашли раньше деплоя)
+            try{ fetch(this._API+'/players/'+this.userId,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:String(this.userId),name:this.username,tag:this.fullTag,color:this._myColor})}); }catch(e){}
             this.renderFriends();
             this.renderInbox();
             const hint=document.getElementById('my-tag-hint');
@@ -1136,16 +1138,22 @@ const app = {
         const res = document.getElementById('srch-res');
         if (!q) { res.innerHTML = '<div style="color:#333;font-size:12px;padding:6px;">Введи ник и нажми Поиск</div>'; return; }
 
-        // Источники: localStorage + онлайн игроки + IDB players (все кто когда-либо был онлайн)
+        // Источники: сервер + localStorage + онлайн игроки
         let localDB = [];
         try { localDB = JSON.parse(localStorage.getItem('citrus_global_users') || '[]'); } catch(e) {}
         const onlinePlayers = this._cachedOnline || [];
-        const idbPlayers = await this._idbGetAll('players');
+
+        // Запрашиваем с сервера
+        let serverPlayers = [];
+        try {
+            const r = await fetch(`${this._API}/players/search?q=${encodeURIComponent(raw)}`);
+            if (r.ok) serverPlayers = await r.json();
+        } catch(e) {}
 
         const allUsersMap = new Map();
         localDB.forEach(u => allUsersMap.set(String(u.id), u));
         onlinePlayers.forEach(u => allUsersMap.set(String(u.id), {id:String(u.id), name:u.name, tag:u.tag, color:u.color}));
-        idbPlayers.forEach(u => { if (u.id) allUsersMap.set(String(u.id), u); });
+        serverPlayers.forEach(u => { if (u.id) allUsersMap.set(String(u.id), {id:String(u.id), name:u.name, tag:u.tag||u.name+'#'+u.id, color:u.color||'#FF9800'}); });
 
         let found = Array.from(allUsersMap.values()).filter(u => String(u.id) !== String(this.userId));
 
@@ -2297,33 +2305,4 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
