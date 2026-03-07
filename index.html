@@ -1486,9 +1486,10 @@ const app = {
                             this.scene&&this.scene.add(g);
                         }
                         const o=this._others[msg.id];
-                        o.position.lerp(new THREE.Vector3(msg.x,msg.y,msg.z),0.8);
-                        o.rotation.y=msg.ry||0;
-                        o._lastSeen=Date.now();
+                        // Сохраняем целевую позицию — плавно интерполируем в engineLoop
+                        o._targetPos = new THREE.Vector3(msg.x, msg.y, msg.z);
+                        o._targetRy = msg.ry || 0;
+                        o._lastSeen = Date.now();
                     }
                 }catch(e){}
             };
@@ -2211,8 +2212,11 @@ const app = {
             }
         } catch(e) {}
         const online = this._cachedOnline||[];
-        // Показываем всех друзей — онлайн или нет
+        // Показываем всех друзей — онлайн или нет (без дублей)
+        const shownIds = new Set();
         this.friends.forEach(id => {
+            if(shownIds.has(String(id))) return;
+            shownIds.add(String(id));
             const p = online.find(x=>x.id===String(id));
             const name = (this._pc||[]).find(x=>x.id===String(id))?.name || id;
             if(p) {
@@ -2419,13 +2423,21 @@ const app = {
             if(this.keys['KeyE'])this.camera.position.y+=s;
             if(this.keys['KeyQ'])this.camera.position.y-=s;
         }
-        // Убираем игроков которые давно не присылали позицию (>5 сек)
+        // Плавно двигаем других игроков к целевой позиции
         if(this._others && this.mode==='play') {
             const now = Date.now();
             for(const id in this._others) {
-                if(now - (this._others[id]._lastSeen||0) > 5000) {
-                    this.scene && this.scene.remove(this._others[id]);
+                const o = this._others[id];
+                if(now - (o._lastSeen||0) > 5000) {
+                    this.scene && this.scene.remove(o);
                     delete this._others[id];
+                } else if(o._targetPos) {
+                    o.position.lerp(o._targetPos, 0.25);
+                    // Плавный поворот
+                    let diff = (o._targetRy||0) - o.rotation.y;
+                    while(diff > Math.PI) diff -= Math.PI*2;
+                    while(diff < -Math.PI) diff += Math.PI*2;
+                    o.rotation.y += diff * 0.2;
                 }
             }
         }
@@ -2531,6 +2543,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
