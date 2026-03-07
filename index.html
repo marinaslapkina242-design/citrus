@@ -901,6 +901,31 @@ const app = {
             return;
         }
 
+        // Движение других игроков
+        if(msg.type==='move') {
+            if(String(msg.id)===String(this.userId)) return;
+            if(msg.map !== this.currentMap) {
+                // Игрок в другом мире — убираем его модель
+                if(this._others && this._others[msg.id]) {
+                    this.scene && this.scene.remove(this._others[msg.id]);
+                    delete this._others[msg.id];
+                }
+                return;
+            }
+            if(!this._others) this._others = {};
+            if(!this._others[msg.id]) {
+                // Создаём модель другого игрока
+                const g = this._buildOtherPlayer(msg.name, msg.color);
+                this._others[msg.id] = g;
+                this.scene && this.scene.add(g);
+            }
+            const other = this._others[msg.id];
+            other.position.set(msg.x, msg.y, msg.z);
+            other.rotation.y = msg.ry || 0;
+            other._lastSeen = Date.now();
+            return;
+        }
+
         if(msg.type==='join'||msg.type==='ping'){
             const p=msg.player;
             if(!p||p.id===String(this.userId))return;
@@ -1434,6 +1459,26 @@ const app = {
         c.appendChild(n);
         setTimeout(()=>n.classList.add('show'),50);
         setTimeout(()=>{n.classList.remove('show');setTimeout(()=>n.remove(),400)},hasBtns?12000:3800);
+    },
+
+    // ── Построить модель другого игрока (простая)
+    _buildOtherPlayer(name, color) {
+        const g = new THREE.Group();
+        const c = parseInt((color||'#FF9800').replace('#',''), 16) || 0xFF9800;
+        // Тело
+        const body = new THREE.Mesh(new THREE.BoxGeometry(0.8,1.2,0.4), new THREE.MeshStandardMaterial({color:c}));
+        body.position.y = 1.4; g.add(body);
+        // Голова
+        const head = new THREE.Mesh(new THREE.BoxGeometry(0.6,0.6,0.6), new THREE.MeshStandardMaterial({color:0xffcc99}));
+        head.position.set(0,2.3,0); g.add(head);
+        // Ноги
+        [-0.22,0.22].forEach(x => {
+            const leg = new THREE.Mesh(new THREE.BoxGeometry(0.35,1.1,0.35), new THREE.MeshStandardMaterial({color:0x111133}));
+            leg.position.set(x,0.35,0); g.add(leg);
+        });
+        // Имя над головой
+        g._name = name;
+        return g;
     },
 
     // ── CHARACTER
@@ -2201,6 +2246,23 @@ const app = {
                     }
                 }
             }
+            // Отправляем позицию другим игрокам (каждые ~100мс)
+            if (!this._lastPosSend || Date.now()-this._lastPosSend > 100) {
+                this._lastPosSend = Date.now();
+                this._wsSend({
+                    type:'move',
+                    _from: String(this.userId),
+                    id: String(this.userId),
+                    name: this.username,
+                    color: this._myColor,
+                    x: this.playerGroup.position.x,
+                    y: this.playerGroup.position.y,
+                    z: this.playerGroup.position.z,
+                    ry: this.playerGroup.rotation.y,
+                    map: this.currentMap
+                });
+            }
+
             if(moving&&this.canJump){
                 const s=Math.sin(time*15)*0.8;
                 this.rig.leftArm.rotation.x=s;this.rig.rightArm.rotation.x=-s;
@@ -2225,6 +2287,16 @@ const app = {
             if(this.keys['KeyD'])this.camera.translateX(s);
             if(this.keys['KeyE'])this.camera.position.y+=s;
             if(this.keys['KeyQ'])this.camera.position.y-=s;
+        }
+        // Убираем игроков которые давно не присылали позицию (>5 сек)
+        if(this._others && this.mode==='play') {
+            const now = Date.now();
+            for(const id in this._others) {
+                if(now - (this._others[id]._lastSeen||0) > 5000) {
+                    this.scene && this.scene.remove(this._others[id]);
+                    delete this._others[id];
+                }
+            }
         }
         this.renderer.render(this.scene,this.camera);
     },
@@ -2307,6 +2379,7 @@ const app = {
 
     exitGame(){
         this.spaceGrav=false;this.loopFn=null;this.mode='none';
+        this._others={}; this._lastPosSend=0;
         this._updateStatus('online',null);
         // Очищаем таймеры мини-игр
         if(this._hsInterval){clearInterval(this._hsInterval);this._hsInterval=null;}this._hsTimer=null;
@@ -2325,6 +2398,8 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
+
 
 
 
