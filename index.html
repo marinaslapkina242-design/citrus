@@ -559,7 +559,7 @@ const app = {
             this.inventory=d.inventory||[];
             this.customMaps=d.customMaps||[];
             this.friends=d.friends||[];
-        this.questData=d.questData||{}; this.coins=d.coins||0;
+        this.questData=d.questData||{}; this.coins=d.coins||0; this.visitedMaps=d.visitedMaps||[];
             this.friendRequests=d.friendRequests||[];
             this.sentReqs = d.sentReqs||[];
         } else {
@@ -573,7 +573,7 @@ const app = {
             username:this.username, userId:this.userId, balance:this.balance,
             myColor:this._myColor,
             inventory:this.inventory, customMaps:this.customMaps,
-            friends:this.friends, friendRequests:this.friendRequests, sentReqs:this.sentReqs,
+            friends:this.friends, friendRequests:this.friendRequests, sentReqs:this.sentReqs, visitedMaps:this.visitedMaps||[],
             questData:this.questData, coins:this.coins
         }));
         this.updateUI();
@@ -754,7 +754,7 @@ const app = {
     buyItem(id,price){
         if(this.inventory.includes(id))return;
         if(this.balance>=price){
-            this.balance-=price;this.inventory.push(id);
+            this.balance-=price;this.inventory.push(id); this._questProgress('buys',1);
             this.saveData();this.renderShop();this.updateAvatarPreview();
             const it=SHOP_ITEMS.find(i=>i.id===id);
             this.showNotif(it.icon,'Куплено!',`${it.name} в гардеробе`);
@@ -1163,7 +1163,7 @@ const app = {
     async acceptFriend(fromId) {
         fromId = String(fromId);
         this.friendRequests = this.friendRequests.filter(x=>x!==fromId);
-        if (!this.friends.includes(fromId)) this.friends.push(fromId);
+        if (!this.friends.includes(fromId)){ this.friends.push(fromId); this._questProgress('friends',1); }
         this._questProgress('friends',1);
         this.saveData();
 
@@ -1902,6 +1902,21 @@ const app = {
     // ── LAUNCH
     launch(mode,mapId){
         this.mode=mode;this.currentMap=mapId;
+        // Трекинг посещённых миров
+        if(mode==='play'){
+            if(!this.visitedMaps) this.visitedMaps=[];
+            if(!this.visitedMaps.includes(mapId)){
+                this.visitedMaps.push(mapId);
+                if(!this.questData) this.questData={};
+                if(this._questDefs) this._questDefs.filter(q=>q.type==='maps').forEach(q=>{
+                    const d=this.questData[q.id]||{progress:0};
+                    d.progress=this.visitedMaps.length;
+                    if(d.progress>=q.goal&&!d.done){d.done=true;this._showToast('🎯 Задание выполнено: '+q.title);}
+                    this.questData[q.id]=d;
+                });
+                this.saveData();
+            }
+        }
         this.velocity.set(0,0,0);this.canJump=false;this.loopFn=null;this.spaceGrav=false;
         const wNames={lobby:'Главная Площадь',gather:'Цитрусовый Лес',parkour:'Небесный Паркур',
             volcano:'Остров Вулкана',space:'Космическая База',hideseek:'Прятки',
@@ -2430,7 +2445,7 @@ const app = {
                 this.canJump = true;
             } else this.canJump = false;
             const jumpH = this.spaceGrav ? 10 : 16;
-            if(this.keys['Space'] && this.canJump){this.velocity.y=jumpH; this.canJump=false;}
+            if(this.keys['Space'] && this.canJump){this.velocity.y=jumpH; this.canJump=false; this._questProgress('jumps',1);}
             if(this.playerGroup.position.y < -25){this.playerGroup.position.set(0,5,0); this.velocity.y=0;}
 
             const dist = 5.0; 
@@ -2741,6 +2756,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
