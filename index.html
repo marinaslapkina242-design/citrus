@@ -963,6 +963,15 @@ const app = {
 
     async _registerPresence(){
         if(!this.username||!this.userId)return;
+        // Сохраняем статус на сервере (для друзей)
+        try{
+            fetch(this._API+'/online/'+this.userId, {
+                method:'POST',
+                headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({id:String(this.userId),name:this.username,tag:this.fullTag,
+                    color:this._myColor,status:this._pStatus||'online',world:this._pWorld||null,ts:Date.now()})
+            });
+        }catch(e){}
         if(!this._ws||this._ws.readyState!==1){this._wsConnect();return;}
         this._wsSend({type:'ping',_from:String(this.userId),player:{
             id:String(this.userId),name:this.username,tag:this.fullTag,
@@ -977,6 +986,15 @@ const app = {
 
     async _fetchOnline(){
         const now=Date.now();
+        // Получаем онлайн-список с сервера
+        try {
+            const r = await fetch(this._API+'/online');
+            if (r.ok) {
+                const list = await r.json();
+                if (!this._onlineMap) this._onlineMap = {};
+                list.forEach(p => { if (String(p.id) !== String(this.userId)) this._onlineMap[p.id] = {...p, ts: p.ts||now}; });
+            }
+        } catch(e) {}
         if(this._onlineMap){
             for(const id in this._onlineMap)
                 if(now-(this._onlineMap[id].ts||0)>3*60*1000)delete this._onlineMap[id];
@@ -2305,4 +2323,5 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
