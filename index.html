@@ -2678,7 +2678,7 @@ const app = {
             if(d.done) return;
             d.progress = Math.min((d.progress||0)+amount, q.goal);
             if(d.progress >= q.goal){ d.done=true; changed=true;
-                this._showToast('🎯 Задание выполнено: '+q.title+' (+'+q.reward+' 🍊)'); }
+                this._showToast && this._showToast('🎯 Задание выполнено: '+q.title+'! Забери награду!'); }
         });
         if(changed){ this.saveData(); this._initQuests(); }
     },
@@ -2719,15 +2719,27 @@ const app = {
     },
 
 
+    _showToast(msg){
+        // Показываем уведомление
+        let t = document.getElementById('_toast');
+        if(!t){ t=document.createElement('div'); t.id='_toast';
+            t.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(255,152,0,0.95);color:#000;padding:12px 24px;border-radius:12px;font-weight:700;font-size:14px;z-index:9999;pointer-events:none;transition:opacity 0.5s;';
+            document.body.appendChild(t);
+        }
+        t.textContent=msg; t.style.opacity='1';
+        clearTimeout(t._timer);
+        t._timer=setTimeout(()=>t.style.opacity='0', 3000);
+    },
+
     claimQuest(id){
         const q = this._questDefs.find(q=>q.id===id);
         if(!q) return;
         const d = this.questData[id];
         if(!d.done || d.claimed) return;
         d.claimed = true;
-        this.coins = (this.coins||0) + q.reward;
+        this.balance = (this.balance||0) + q.reward;
         this.saveData();
-        this._updateCoins();
+        this.updateUI();
         this._initQuests();
         this.renderQuests();
         this._showToast('🍊 +'+q.reward+' цитрусов получено!');
@@ -2756,6 +2768,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
