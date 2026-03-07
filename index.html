@@ -280,11 +280,6 @@
 
             <div id="tab-studio" class="hidden">
                 <div class="section-title">Студия создателя</div>
-
-            <div id="tab-quests" class="hidden">
-                <div class="section-title">🎯 Задания</div>
-                <div id="quests-list" style="display:flex;flex-direction:column;gap:12px;"></div>
-            </div>
                 <p style="color:#555;margin:0 0 22px;font-size:14px;line-height:1.7;">Строй миры из блоков, пиши скрипты на JavaScript, публикуй!</p>
                 <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px;">
                     <button class="btn-primary" onclick="app.launch('studio','new')" style="width:auto;padding:13px 26px;font-size:14px;">🔨 Открыть студию</button>
@@ -308,6 +303,11 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
                 </div>
             </div>
 
+            <div id="tab-quests" class="hidden">
+                <div class="section-title">🎯 Задания</div>
+                <div id="quests-list" style="display:flex;flex-direction:column;gap:12px;padding-bottom:20px;"></div>
+            </div>
+
         </div>
     </div>
 </div>
@@ -322,11 +322,9 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
             <button class="btn-st" onclick="app.clearMap()">🗑 Очистить</button>
             <button class="btn-st" onclick="app.openEngScript()">📝 Скрипт</button>
             <button class="btn-publish" onclick="app.publishGame()">📤 Опубликовать</button>
-            <div id="tab-quests" class="hidden">
-                <div class="section-title">🎯 Задания</div>
-                <div id="quests-list" style="display:flex;flex-direction:column;gap:12px;padding-bottom:20px;"></div>
-            </div>
+            
 
+            
         </div>
         <div id="mp-panel" class="hidden">
             <h4>В игре</h4>
@@ -2674,8 +2672,9 @@ const app = {
         if(!this.questData) this.questData = {};
         this._initQuests();
         const list = document.getElementById('quests-list');
-        if(!list) return;
+        if(!list){ console.error('quests-list not found!'); return; }
         list.innerHTML = '';
+        console.log('renderQuests called, defs:', this._questDefs ? this._questDefs.length : 'NONE');
         this._questDefs.forEach(q=>{
             const d = this.questData[q.id];
             const pct = Math.min(100, Math.round((d.progress||0)/q.goal*100));
@@ -2742,6 +2741,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
