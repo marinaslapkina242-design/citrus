@@ -792,7 +792,7 @@ const app = {
                         id:String(this.userId),name:this.username,tag:this.fullTag,
                         color:this._myColor,status:'online',world:null,ts:Date.now()
                     }});
-                    this._wsTimer=setInterval(()=>this._registerPresence(),20000);
+                    this._wsTimer=setInterval(()=>{this._registerPresence();this.renderMpPanel();},20000);
                 },400);
             };
             this._ws.onmessage=e=>{
@@ -1494,22 +1494,39 @@ const app = {
         } catch(e) {}
     },
 
-    // ── Построить модель другого игрока (простая)
+    // ── Построить модель другого игрока
     _buildOtherPlayer(name, color) {
         const g = new THREE.Group();
         const c = parseInt((color||'#FF9800').replace('#',''), 16) || 0xFF9800;
+        const matShirt = new THREE.MeshStandardMaterial({color:c, roughness:0.7});
+        const matSkin  = new THREE.MeshStandardMaterial({color:0xffcc99, roughness:0.4});
+        const matPants = new THREE.MeshStandardMaterial({color:0x111133, roughness:0.8});
         // Тело
-        const body = new THREE.Mesh(new THREE.BoxGeometry(0.8,1.2,0.4), new THREE.MeshStandardMaterial({color:c}));
-        body.position.y = 1.4; g.add(body);
+        const torso = new THREE.Mesh(new THREE.BoxGeometry(0.8,1.2,0.4), matShirt);
+        torso.position.y = 1.4; g.add(torso);
         // Голова
-        const head = new THREE.Mesh(new THREE.BoxGeometry(0.6,0.6,0.6), new THREE.MeshStandardMaterial({color:0xffcc99}));
-        head.position.set(0,2.3,0); g.add(head);
+        const head = new THREE.Mesh(new THREE.BoxGeometry(0.6,0.6,0.6), matSkin);
+        head.position.set(0,0.9,0); torso.add(head);
+        // Глаза
+        const em = new THREE.MeshBasicMaterial({color:0x000000});
+        [-0.15,0.15].forEach(x => {
+            const eye = new THREE.Mesh(new THREE.PlaneGeometry(0.1,0.1), em);
+            eye.position.set(x,0.05,0.31); head.add(eye);
+        });
+        // Руки
+        [-0.6,0.6].forEach(x => {
+            const arm = new THREE.Mesh(new THREE.BoxGeometry(0.35,1.1,0.35), matSkin);
+            arm.geometry = new THREE.BoxGeometry(0.35,1.1,0.35);
+            arm.geometry.translate(0,-0.45,0);
+            arm.position.set(x,0.5,0); torso.add(arm);
+        });
         // Ноги
         [-0.22,0.22].forEach(x => {
-            const leg = new THREE.Mesh(new THREE.BoxGeometry(0.35,1.1,0.35), new THREE.MeshStandardMaterial({color:0x111133}));
-            leg.position.set(x,0.35,0); g.add(leg);
+            const leg = new THREE.Mesh(new THREE.BoxGeometry(0.35,1.1,0.35), matPants);
+            leg.geometry = new THREE.BoxGeometry(0.35,1.1,0.35);
+            leg.geometry.translate(0,-0.55,0);
+            leg.position.set(x,-0.6,0); torso.add(leg);
         });
-        // Имя над головой
         g._name = name;
         return g;
     },
@@ -2127,12 +2144,31 @@ const app = {
         }
     },
 
-    renderMpPanel(){
+    async renderMpPanel(){
         const list=document.getElementById('mp-list');if(!list)return;
-        list.innerHTML=`<div class="mpp"><div class="mpd"></div>${this.username} (ты)</div>`;
-        const online=this._cachedOnline||[];
-        this.friends.map(id=>online.find(p=>p.id===String(id))).filter(p=>p&&p.status==='ingame').slice(0,3)
-            .forEach(p=>{list.innerHTML+=`<div class="mpp"><div class="mpd"></div>${p.name}</div>`;});
+        list.innerHTML=`<div class="mpp"><div class="mpd" style="background:#00E676"></div>${this.username} (ты)</div>`;
+        // Берём актуальный список с сервера
+        try {
+            const r = await fetch(this._API+'/online');
+            if(r.ok) {
+                const onlineList = await r.json();
+                if(!this._onlineMap) this._onlineMap = {};
+                onlineList.forEach(p => { this._onlineMap[p.id] = p; });
+                this._cachedOnline = onlineList;
+            }
+        } catch(e) {}
+        const online = this._cachedOnline||[];
+        // Показываем всех друзей — онлайн или нет
+        this.friends.forEach(id => {
+            const p = online.find(x=>x.id===String(id));
+            const name = (this._pc||[]).find(x=>x.id===String(id))?.name || id;
+            if(p) {
+                const ingame = p.status==='ingame';
+                list.innerHTML+=`<div class="mpp"><div class="mpd" style="background:${ingame?'#00E5FF':'#00E676'}"></div>${p.name} ${ingame?'🎮':''}</div>`;
+            } else {
+                list.innerHTML+=`<div class="mpp"><div class="mpd" style="background:#444;box-shadow:none"></div><span style="color:#555">${name}</span></div>`;
+            }
+        });
     },
 
     // ── СТРОИТЕЛЬСТВО / БЛОКИ
@@ -2437,6 +2473,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
