@@ -729,6 +729,7 @@ const app = {
         document.getElementById('tab-'+id).classList.remove('hidden');
         document.getElementById('nav-'+id)?.classList.add('active');
         if(id==='avatar')this.updateAvatarPreview();
+        if(id==='games')this.renderMyGames();
         if(id==='quests')this.renderQuests();
         else if(this._questCountdownInterval){ clearInterval(this._questCountdownInterval); this._questCountdownInterval=null; }
         if(id==='friends'){
@@ -1445,10 +1446,16 @@ const app = {
     },
 
     joinFriend(fid, mapId){
-        // Телепортируемся в мир друга
         if(!mapId){ this._showToast('Друг не в игре'); return; }
         this._showToast('🚀 Заходим в мир...');
         this.launch('play', mapId);
+        // После загрузки ставим игрока выше земли
+        setTimeout(()=>{
+            if(this.playerGroup){
+                this.playerGroup.position.set(2, 5, 2);
+                this.velocity && this.velocity.set(0,0,0);
+            }
+        }, 500);
     },
 
     inviteFriend(fid, name){
@@ -2629,11 +2636,33 @@ const app = {
         document.getElementById('modal-input').value='';
         document.getElementById('modal').classList.remove('hidden');
         document.exitPointerLock();
-        this.modalCb=name=>{
+        this.modalCb=async name=>{
             const sc=document.getElementById('eng-script-ta')?.value||'';
-            this.customMaps.push({name,blocks:[...this.mapBlocks],script:sc});
+            const mapData={name,blocks:[...this.mapBlocks],script:sc};
+            // Сохраняем локально
+            const localId='custom_'+Date.now();
+            this.customMaps.push({...mapData, id:localId});
             this.saveData();
-            this.showNotif('🗺️','Карта опубликована!',`"${name}" в Мирах игроков`);
+            // Публикуем на сервер
+            try{
+                const r=await fetch(this._API+'/games',{
+                    method:'POST',
+                    headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({
+                        name, author:this.username, authorId:String(this.userId),
+                        authorColor:this._myColor, desc:'Карта игрока '+this.username,
+                        blocks:[...this.mapBlocks], script:sc, localId
+                    })
+                });
+                const d=await r.json();
+                if(d.id){
+                    // Сохраняем серверный id для удаления
+                    const m=this.customMaps.find(m=>m.id===localId);
+                    if(m) m.serverId=d.id;
+                    this.saveData();
+                }
+            }catch(e){ console.log('Publish error',e); }
+            this.showNotif('🗺️','Карта опубликована!','"'+name+'" видна всем игрокам!');
             this.exitGame();
         };
     },
@@ -2641,17 +2670,62 @@ const app = {
     modalOk(){const v=document.getElementById('modal-input').value.trim();if(v&&this.modalCb)this.modalCb(v);document.getElementById('modal').classList.add('hidden');},
     modalClose(){document.getElementById('modal').classList.add('hidden');},
 
-    renderMyGames(){
-        const g=document.getElementById('my-games-grid');if(!g)return;g.innerHTML='';
-        if(!this.customMaps.length){g.innerHTML='<p style="color:#444;grid-column:1/-1;font-size:14px">Нет карт. Создай в Студии!</p>';return;}
-        this.customMaps.forEach((m,i)=>{
-            const hs=m.script&&m.script.trim().length>0;
-            g.innerHTML+=`<div class="card" onclick="app.launch('play',${i})">
+    async renderMyGames(){
+        const g=document.getElementById('my-games-grid');if(!g)return;
+        g.innerHTML='<p style="color:#444;font-size:13px">⏳ Загрузка...</p>';
+
+        // Загружаем с сервера
+        let serverGames=[];
+        try{
+            const r=await fetch(this._API+'/games');
+            if(r.ok) serverGames=await r.json();
+        }catch(e){}
+
+        g.innerHTML='';
+        if(!serverGames.length && !this.customMaps.length){
+            g.innerHTML='<p style="color:#444;grid-column:1/-1;font-size:14px">Нет карт. Создай в Студии!</p>';
+            return;
+        }
+
+        // Показываем игры с сервера
+        serverGames.forEach(m=>{
+            const isOwn=String(m.authorId)===String(this.userId);
+            const deleteBtn=isOwn?`<button onclick="event.stopPropagation();app.deleteGame('${m.id}')" style="position:absolute;top:6px;right:6px;background:rgba(255,50,50,0.8);color:#fff;border:none;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:11px">🗑</button>`:'';
+            g.innerHTML+=`<div class="card" style="position:relative" onclick="app.launchPublished('${m.id}')">
+                ${deleteBtn}
                 <div class="card-thumb" style="background:radial-gradient(circle,rgba(0,229,255,0.07),#050505);font-size:40px;">🛠️</div>
-                <div class="card-info"><div><b>${m.name}</b><br><small style="color:#555">${m.blocks.length} блоков${hs?' · 📝':''}</small></div></div>
+                <div class="card-info"><div><b>${m.name}</b><br>
+                <small style="color:${m.authorColor||'#888'}">${m.author}</small><br>
+                <small style="color:#555">${(m.blocks||[]).length} блоков</small></div></div>
             </div>`;
         });
     },
+
+    async deleteGame(serverId){
+        if(!confirm('Удалить эту карту?')) return;
+        try{
+            await fetch(this._API+'/games/'+serverId+'?authorId='+this.userId,{method:'DELETE'});
+            this._showToast('🗑 Карта удалена');
+            this.renderMyGames();
+        }catch(e){ this._showToast('Ошибка удаления'); }
+    },
+
+    async launchPublished(serverId){
+        // Загружаем карту с сервера и запускаем
+        try{
+            const r=await fetch(this._API+'/games');
+            const games=await r.json();
+            const g=games.find(x=>x.id===serverId);
+            if(!g){ this._showToast('Карта не найдена'); return; }
+            this.mapBlocks=g.blocks||[];
+            this.currentMap='pub_'+serverId;
+            this._worldName=g.name;
+            this.mode='play';
+            this._setupScene();
+        }catch(e){ this._showToast('Ошибка загрузки карты'); }
+    },
+
+
 
     showHideSeekHud(){
         const mins=Math.floor((this._hsTimer||0)/60),secs=(this._hsTimer||0)%60;
@@ -2849,12 +2923,3 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
