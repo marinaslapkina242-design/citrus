@@ -204,7 +204,7 @@
                     </div>
                     <div class="card" onclick="app.launch('play','snowmount')">
                         <div class="card-thumb" style="background:radial-gradient(circle,rgba(100,200,255,0.12),#050505)">🏔️</div>
-                        <div class="card-info"><div><b>Снежная Гора</b><br><small style="color:#00e5ff">🏆 30 🍊 за вершину!</small></div></div>
+                        <div class="card-info"><div><b>Снежная Гора</b><br><small style="color:#00e5ff">🏆 2000 🍊 за вершину!</small></div></div>
                     </div>
                     <div class="card" onclick="app.launch('play','dungeon')">
                         <div class="card-thumb" style="background:radial-gradient(circle,rgba(150,0,200,0.12),#050505)">⚔️</div>
@@ -479,13 +479,27 @@ const app = {
     mode: 'none', currentMap: null, raycaster: new THREE.Raycaster(), selColor: 0xCCCCCC,
     objectsToIntersect: [], mapBlocks: [], collectibles: [], loopFn: null, rig: {}, pAvatar: null,
 
+    // ── Слушаем личный BroadcastChannel-inbox
+    _inboxCh: null,
+    _startInboxListener() {
+        try {
+            if (this._inboxCh) this._inboxCh.close();
+            this._inboxCh = new BroadcastChannel(`citrus_inbox_${this.userId}`);
+            this._inboxCh.onmessage = e => {
+                const letter = e.data;
+                if (!letter || !letter.type) return;
+                const changed = this._applyLetter(letter);
+                if (changed) { this.saveData(); this.renderFriends(); this.renderInbox(); }
+            };
+        } catch(e) {}
+    },
+
     // ── INIT
     init(){
         this.loadData();
         this._loadPeerInfo();
-        // Читаем Firebase почту каждые 6 секунд
         setTimeout(()=>this._readMailbox(), 1000);
-        setInterval(()=>this._readMailbox(), 6000);
+        setInterval(()=>this._readMailbox(), 5000);
         // АВТО-ВХОД
         if (this.username && this.username !== '') {
             document.getElementById('ui-login').classList.add('hidden');
@@ -594,10 +608,26 @@ const app = {
         this.saveData();
         this.showHub();
         this._wsConnect();
-        // Подписка на персональные топики произойдёт в _wsConnect автоматически
+        setTimeout(()=>{
+            try{ fetch(this._API+'/players/'+this.userId,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:String(this.userId),name:this.username,tag:this.fullTag,color:this._myColor})}); }catch(e){}
+            this._readMailbox();
+        }, 1500);
     },
 
     showHub(){
+        // Слушаем личный BroadcastChannel (другие вкладки того же браузера)
+        try {
+            if (this._personalBC) this._personalBC.close();
+            this._personalBC = new BroadcastChannel('ci_' + this.userId);
+            this._personalBC.onmessage = (e) => {
+                const msg = e.data;
+                if (msg && (msg.type==='friend_req'||msg.type==='friend_acc')) {
+                    if (this._applyLetter(msg)) {
+                        this.saveData(); this.renderFriends(); this.renderInbox();
+                    }
+                }
+            };
+        } catch(e) {}
         document.getElementById('ui-login').classList.add('hidden');
         document.getElementById('ui-hub').classList.remove('hidden');
         this.renderMyGames(); this.renderFriends(); this.renderOnline(); this.initAvatarPreview(); this.renderShop();
@@ -724,12 +754,22 @@ const app = {
         try{
             if(!this._bc){
                 this._bc=new BroadcastChannel('citrus_v1');
-                this._bc.onmessage=e=>{try{this._wsHandle(e.data);}catch(ex){}};
+                this._bc.onmessage=e=>{
+                    try{
+                        const msg=e.data;
+                        if(msg && (msg.type==='friend_req'||msg.type==='friend_acc') && !msg._ch) {
+                            const changed=this._applyLetter(msg);
+                            if(changed){this.saveData();this.renderFriends();this.renderInbox();}
+                        } else {
+                            this._wsHandle(msg);
+                        }
+                    }catch(ex){}
+                };
             }
         }catch(ex){}
         // Публичный WebSocket брокер (HiveMQ)
         try{
-            this._ws=new WebSocket('wss://broker.hivemq.com:8884/mqtt');
+            this._ws=new WebSocket('wss://broker.emqx.io:8084/mqtt');
             this._ws.onopen=()=>{
                 this._wsAlive=true;
                 // MQTT CONNECT packet
@@ -739,13 +779,13 @@ const app = {
                 const buf=new Uint8Array(10+2+cid.length);
                 buf[0]=0x10;buf[1]=8+2+cid.length;
                 buf[2]=0;buf[3]=4;buf[4]=77;buf[5]=81;buf[6]=84;buf[7]=84;
-                buf[8]=4;buf[9]=2;buf[10]=0;buf[11]=60;
+                buf[8]=4;buf[9]=0;buf[10]=0;buf[11]=0;// cleanSession=0, keepAlive=0
                 buf[12]=0;buf[13]=cid.length;
                 for(let i=0;i<cid.length;i++)buf[14+i]=cid[i];
                 this._ws.send(buf.buffer);
                 setTimeout(()=>{
                     this._mqttSubscribe('citrus/v1');
-                    this._mqttSubscribe('citrus/fr/mail/' + String(this.userId) + '/+');
+                    this._mqttSubscribe(`citrus/inbox/${this.userId}`);
                     this._mqttPublishJson({type:'join',_from:String(this.userId),_ch:'citrus_v1',player:{
                         id:String(this.userId),name:this.username,tag:this.fullTag,
                         color:this._myColor,status:'online',world:null,ts:Date.now()
@@ -757,18 +797,31 @@ const app = {
                 if(e.data instanceof ArrayBuffer||e.data instanceof Blob){
                     const toArr=b=>b instanceof Blob?b.arrayBuffer().then(ab=>new Uint8Array(ab)):Promise.resolve(new Uint8Array(b));
                     toArr(e.data).then(arr=>{
-                        if(arr[0]===0x30||arr[0]===0x31||arr[0]===0x32){// PUBLISH or PUBLISH+RETAIN or PUBACK
+                        const pktType = arr[0] & 0xF0;
+                        if(pktType === 0x30){ // PUBLISH (any QoS)
                             try{
+                                const qos = (arr[0] >> 1) & 0x03;
                                 let i=1;
+                                // decode remaining length
                                 let remLen=0,mul=1;
                                 while(true){const b=arr[i++];remLen+=(b&0x7f)*mul;mul*=128;if(!(b&0x80))break;}
+                                // topic
                                 const topicLen=(arr[i]<<8)|arr[i+1];i+=2;
                                 const topic=new TextDecoder().decode(arr.slice(i,i+topicLen));i+=topicLen;
+                                // packet id present for QoS > 0
+                                let packetId = 0;
+                                if(qos > 0){ packetId=(arr[i]<<8)|arr[i+1]; i += 2; }
                                 const payloadStr=new TextDecoder().decode(arr.slice(i));
-                                if(!payloadStr.trim())return; // пустой payload = удаление retained
+                                if(!payloadStr.trim()) return;
                                 const msg=JSON.parse(payloadStr);
                                 this._wsHandle(msg, topic);
+                                // Send PUBACK for QoS=1
+                                if(qos===1){
+                                    const puback=new Uint8Array([0x40,0x02,(packetId>>8)&0xff,packetId&0xff]);
+                                    try{this._ws.send(puback.buffer);}catch(e){}
+                                }
                             }catch(ex){}
+                        } else if(arr[0]===0x40){ // PUBACK - ignore
                         }
                     });
                 }
@@ -790,7 +843,7 @@ const app = {
         buf[2]=0;buf[3]=1;// packet id
         buf[4]=0;buf[5]=t.length;
         for(let i=0;i<t.length;i++)buf[6+i]=t[i];
-        buf[6+t.length]=0;buf[7+t.length]=0;
+        buf[6+t.length]=1;buf[7+t.length]=0;// QoS=1 for guaranteed delivery
         this._ws.send(buf.buffer);
     },
 
@@ -821,21 +874,24 @@ const app = {
     _wsHandle(msg, topic){
         if(!msg)return;
 
-        // ── Заявки через персональный MQTT топик (retained messages)
-        if(topic && topic.startsWith('citrus/fr/mail/')){
-            if(msg.type==='friend_req'||msg.type==='friend_acc'){
-                const changed=this._applyLetter(msg);
-                if(changed){
-                    this.saveData();this.renderFriends();this.renderInbox();
-                    // Удаляем retained message (публикуем пустой payload на тот же топик)
-                    setTimeout(()=>this._clearRetained(topic),500);
-                }
+        // ── Личные заявки (из MQTT или BroadcastChannel)
+        if(msg.type==='friend_req' || msg.type==='friend_acc') {
+            if(!msg._ch || String(msg.to)===String(this.userId)) {
+                const changed = this._applyLetter(msg);
+                if(changed){ this.saveData(); this.renderFriends(); this.renderInbox(); }
             }
             return;
         }
 
         if(msg._ch!=='citrus_v1')return;
         if(msg._from===String(this.userId))return;
+
+        // ── Входящие заявки через MQTT (от других устройств/браузеров)
+        if((msg.type==='friend_req'||msg.type==='friend_acc') && String(msg._to)===String(this.userId)){
+            const changed = this._applyLetter(msg);
+            if(changed){ this.saveData(); this.renderFriends(); this.renderInbox(); }
+            return;
+        }
 
         // Обработка чата
         if(msg.type==='chat') {
@@ -852,6 +908,8 @@ const app = {
             if(!this._pc)this._pc=[];
             if(!this._pc.find(x=>x.id===p.id))this._pc.push(p);
             this._cachedOnline=Object.values(this._onlineMap);
+            // Сохраняем в IDB для поиска
+            this._idbPut('players', {id:p.id,name:p.name,tag:p.tag,color:p.color,ts:p.ts}).catch(()=>{});
             const ol=document.getElementById('online-list');
             if(ol&&ol.innerHTML.includes('Загрузка'))this.renderOnline();
         }
@@ -925,164 +983,138 @@ const app = {
         return this._cachedOnline.filter(p=>String(p.id)!==String(this.userId));
     },
 
-    _clearRetained(topic) {
-        // Очищаем retained message публикуя пустой payload
-        if(!this._ws||this._ws.readyState!==1)return;
-        try{
-            const enc=new TextEncoder();
-            const t=enc.encode(topic);
-            const buf=new Uint8Array(2+2+t.length);
-            buf[0]=0x31;buf[1]=2+t.length; // PUBLISH + RETAIN
-            buf[2]=0;buf[3]=t.length;
-            for(let i=0;i<t.length;i++)buf[4+i]=t[i];
-            // payload пустой — удаляет retained
-            this._ws.send(buf.buffer);
-        }catch(e){}
+    // ═══════════════════════════════════════════════════════
+    //  СИСТЕМА ЗАЯВОК В ДРУЗЬЯ — собственный HTTP сервер
+    //  Деплой: отдельный сервис на Render.com (2 минуты)
+    //  Работает между ЛЮБЫМИ браузерами и устройствами!
+    // ═══════════════════════════════════════════════════════
+
+    // После деплоя сервера замени URL ниже на свой
+    _API: 'https://citrus-mail.onrender.com',
+
+    // Отправить письмо на сервер
+    async _post(toId, letter) {
+        try {
+            const r = await fetch(`${this._API}/mail/${toId}`, {
+                method: 'POST',
+                headers: {'Content-Type':'application/json'},
+                body: JSON.stringify(letter)
+            });
+            return r.ok;
+        } catch(e) { return false; }
     },
 
-    async sendReq(targetId){
-        targetId=String(targetId);
-        if(this.sentReqs.includes(targetId)||this.friends.includes(targetId))return;
-        this.sentReqs.push(targetId);this.saveData();
+    // Получить свои письма с сервера
+    async _getMail() {
+        try {
+            const r = await fetch(`${this._API}/mail/${this.userId}`);
+            if (!r.ok) return [];
+            return await r.json();
+        } catch(e) { return []; }
+    },
+
+    // Удалить прочитанные
+    async _delMail() {
+        try {
+            await fetch(`${this._API}/mail/${this.userId}`, {method:'DELETE'});
+        } catch(e) {}
+    },
+
+    // ── Отправить заявку в друзья
+    async sendReq(targetId) {
+        targetId = String(targetId);
+        if (this.sentReqs.includes(targetId) || this.friends.includes(targetId)) return;
+        this.sentReqs.push(targetId);
+        this.saveData();
 
         const letter = {
-            type: 'friend_req',
-            from_id: String(this.userId),
-            from_name: this.username,
-            from_tag: this.fullTag,
+            type:       'friend_req',
+            from_id:    String(this.userId),
+            from_name:  this.username,
+            from_tag:   this.fullTag,
             from_color: this._myColor,
-            ts: Date.now()
+            ts:         Date.now()
         };
 
-        // Публикуем retained message в персональный топик получателя
-        // Топик: citrus/fr/mail/<targetId>/<myId>
-        this._mqttPublishRetained('citrus/fr/mail/' + targetId + '/' + String(this.userId), letter);
+        // Сохраняем на сервере (главный канал)
+        this._post(targetId, letter);
 
-        const name=(this._pc||[]).find(x=>String(x.id)===targetId)?.name||('#'+targetId);
-        this.showNotif('📨','Заявка отправлена',`Ждём ответа от ${name}...`);
+        // BroadcastChannel — мгновенно для другой вкладки того же браузера
+        try { const c=new BroadcastChannel('ci_'+targetId); c.postMessage(letter); c.close(); } catch(e) {}
+
+        const name = (this._pc||[]).find(x=>String(x.id)===targetId)?.name || ('#'+targetId);
+        this.showNotif('📨', 'Заявка отправлена', `Ждём ответа от ${name}...`);
         this.searchPlayer();
         this.renderInbox();
     },
 
-    // ── ХРАНИЛИЩЕ ЗАЯВОК В ДРУЗЬЯ (MQTT Retained Messages)
-    // Retained message хранится в брокере и доставляется сразу при подписке — работает оффлайн!
-
-    async _fbWrite(path, data) {
-        // Путь вида mail/userId/fromId → топик citrus/fr/userId/fromId
-        this._mqttPublishRetained('citrus/fr/' + path, data);
-    },
-
-    _mqttPublishRetained(topic, data) {
-        if(!this._ws||this._ws.readyState!==1) return;
-        try{
-            const enc=new TextEncoder();
-            const t=enc.encode(topic);
-            const payload=enc.encode(JSON.stringify(data));
-            const remLen=2+t.length+payload.length;
-            const buf=new Uint8Array(2+remLen);
-            buf[0]=0x31; // PUBLISH with RETAIN flag
-            buf[1]=remLen;
-            buf[2]=0;buf[3]=t.length;
-            for(let i=0;i<t.length;i++)buf[4+i]=t[i];
-            for(let i=0;i<payload.length;i++)buf[4+t.length+i]=payload[i];
-            this._ws.send(buf.buffer);
-        }catch(ex){}
-    },
-
-    async _fbRead(path) { return null; }, // Данные приходят через подписку
-    async _fbDelete(path) {
-        // Удаляем retained message — публикуем пустой payload
-        if(!this._ws||this._ws.readyState!==1) return;
-        try{
-            const enc=new TextEncoder();
-            const t=enc.encode('citrus/fr/' + path);
-            const buf=new Uint8Array(4+t.length);
-            buf[0]=0x31;buf[1]=2+t.length;
-            buf[2]=0;buf[3]=t.length;
-            for(let i=0;i<t.length;i++)buf[4+i]=t[i];
-            this._ws.send(buf.buffer);
-        }catch(ex){}
-    },
-
-    // _readMailbox теперь работает через подписку на MQTT retained topic
-    _readMailbox() {
-        // Подписываемся на все входящие заявки при подключении (см. _subscribePersonal)
-    },
-
-    // Подписка на персональные топики при MQTT подключении
-    _subscribePersonal() {
-        if(!this._ws||this._ws.readyState!==1||!this.userId)return;
-        // Wildcard подписка: все заявки мне
-        this._mqttSubscribe('citrus/fr/mail/' + String(this.userId) + '/+');
-        this._mqttSubscribe('citrus/fr/users/' + String(this.userId));
-    },
-
-    // Читаем входящие письма из Firebase
+    // ── Читать входящую почту
     async _readMailbox() {
         if (!this.userId) return;
-        try {
-            const box = await this._fbRead('mail/' + String(this.userId));
-            if (!box) return;
-            let changed = false;
-            for (const [fromId, letter] of Object.entries(box)) {
-                if (!letter) continue;
-                const applied = this._applyLetter(letter);
-                if (applied) {
-                    changed = true;
-                    // Удаляем прочитанное письмо
-                    await this._fbDelete('mail/' + String(this.userId) + '/' + fromId);
-                }
-            }
-            if (changed) { this.saveData(); this.renderFriends(); this.renderInbox(); }
-        } catch(e) {}
+
+        // Получаем с сервера
+        const letters = await this._getMail();
+        if (!letters.length) return;
+
+        let changed = false;
+        for (const l of letters) {
+            if (this._applyLetter(l)) changed = true;
+        }
+        if (changed) {
+            await this._delMail();
+            this.saveData();
+            this.renderFriends();
+            this.renderInbox();
+        }
     },
 
-    // Применить письмо
+    // ── Применить письмо
     _applyLetter(letter) {
         if (letter.type === 'friend_req') {
             const fid = String(letter.from_id);
             if (this.friendRequests.includes(fid) || this.friends.includes(fid)) return false;
             this.friendRequests.push(fid);
             if (!this._pc) this._pc = [];
-            if (!this._pc.find(x => x.id === fid))
+            if (!this._pc.find(x=>x.id===fid))
                 this._pc.push({id:fid, name:letter.from_name, tag:letter.from_tag, color:letter.from_color||'#FF9800'});
             this._savePeerInfo(fid, letter.from_name, letter.from_tag, letter.from_color||'#FF9800');
-            this.showNotif('👥','Заявка в друзья!',`${letter.from_name} хочет дружить`,true,fid);
+            this.showNotif('👥', 'Заявка в друзья!', `${letter.from_name} хочет дружить`, true, fid);
             return true;
-        } else if (letter.type === 'friend_acc') {
+        }
+        if (letter.type === 'friend_acc') {
             const fid = String(letter.from_id);
             if (this.friends.includes(fid)) return false;
             this.friends.push(fid);
-            this.sentReqs = this.sentReqs.filter(x => x !== fid);
+            this.sentReqs = this.sentReqs.filter(x=>x!==fid);
             if (!this._pc) this._pc = [];
-            if (!this._pc.find(x => x.id === fid))
+            if (!this._pc.find(x=>x.id===fid))
                 this._pc.push({id:fid, name:letter.from_name, tag:letter.from_tag, color:letter.from_color||'#00E676'});
             this._savePeerInfo(fid, letter.from_name, letter.from_tag, letter.from_color||'#00E676');
-            this.showNotif('🤝','Принята!',`${letter.from_name} теперь твой друг! 🎉`);
+            this.showNotif('🤝', 'Принята!', `${letter.from_name} теперь твой друг! 🎉`);
             return true;
         }
         return false;
     },
 
-    async acceptFriend(fromId){
-        fromId=String(fromId);
-        this.friendRequests=this.friendRequests.filter(x=>x!==fromId);
-        if(!this.friends.includes(fromId))this.friends.push(fromId);
+    // ── Принять заявку
+    async acceptFriend(fromId) {
+        fromId = String(fromId);
+        this.friendRequests = this.friendRequests.filter(x=>x!==fromId);
+        if (!this.friends.includes(fromId)) this.friends.push(fromId);
         this.saveData();
 
-        const letter = {
-            type: 'friend_acc',
-            from_id: String(this.userId),
-            from_name: this.username,
-            from_tag: this.fullTag,
+        this._post(fromId, {
+            type:       'friend_acc',
+            from_id:    String(this.userId),
+            from_name:  this.username,
+            from_tag:   this.fullTag,
             from_color: this._myColor,
-            ts: Date.now()
-        };
-        // Retained message в топик отправителя заявки
-        this._mqttPublishRetained('citrus/fr/mail/' + fromId + '/' + String(this.userId), letter);
+            ts:         Date.now()
+        });
+        try { const c=new BroadcastChannel('ci_'+fromId); c.postMessage({type:'friend_acc',from_id:String(this.userId),from_name:this.username,from_tag:this.fullTag,from_color:this._myColor}); c.close(); } catch(e) {}
 
-        const name=(this._pc||[]).find(x=>x.id===fromId)?.name||fromId;
-        this.showNotif('🤝','Новый друг!',`${name} добавлен`);
+        const name = (this._pc||[]).find(x=>x.id===fromId)?.name || fromId;
+        this.showNotif('🤝', 'Новый друг!', `${name} добавлен`);
         this.renderFriends();
         this.renderInbox();
     },
@@ -1104,11 +1136,16 @@ const app = {
         const res = document.getElementById('srch-res');
         if (!q) { res.innerHTML = '<div style="color:#333;font-size:12px;padding:6px;">Введи ник и нажми Поиск</div>'; return; }
 
-        let db = JSON.parse(localStorage.getItem('citrus_global_users') || '[]');
-        let onlinePlayers = this._cachedOnline || [];
-        let allUsersMap = new Map();
-        db.forEach(u => allUsersMap.set(String(u.id), u));
-        onlinePlayers.forEach(u => allUsersMap.set(String(u.id), {id:String(u.id), name:u.name, color:u.color}));
+        // Источники: localStorage + онлайн игроки + IDB players (все кто когда-либо был онлайн)
+        let localDB = [];
+        try { localDB = JSON.parse(localStorage.getItem('citrus_global_users') || '[]'); } catch(e) {}
+        const onlinePlayers = this._cachedOnline || [];
+        const idbPlayers = await this._idbGetAll('players');
+
+        const allUsersMap = new Map();
+        localDB.forEach(u => allUsersMap.set(String(u.id), u));
+        onlinePlayers.forEach(u => allUsersMap.set(String(u.id), {id:String(u.id), name:u.name, tag:u.tag, color:u.color}));
+        idbPlayers.forEach(u => { if (u.id) allUsersMap.set(String(u.id), u); });
 
         let found = Array.from(allUsersMap.values()).filter(u => String(u.id) !== String(this.userId));
 
@@ -2257,11 +2294,10 @@ const app = {
 };
 
 window.onload = () => app.init();
-
-
 </script>
 </body>
 </html>
+
 
 
 
