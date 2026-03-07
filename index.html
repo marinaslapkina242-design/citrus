@@ -559,7 +559,7 @@ const app = {
             this.inventory=d.inventory||[];
             this.customMaps=d.customMaps||[];
             this.friends=d.friends||[];
-        this.questData=d.questData||{}; this.coins=d.coins||0; this.visitedMaps=d.visitedMaps||[];
+        this.questData=d.questData||{}; this.coins=d.coins||0; this.questRotation=d.questRotation||null; this.visitedMaps=d.visitedMaps||[];
             this.friendRequests=d.friendRequests||[];
             this.sentReqs = d.sentReqs||[];
         } else {
@@ -574,7 +574,7 @@ const app = {
             myColor:this._myColor,
             inventory:this.inventory, customMaps:this.customMaps,
             friends:this.friends, friendRequests:this.friendRequests, sentReqs:this.sentReqs, visitedMaps:this.visitedMaps||[],
-            questData:this.questData, coins:this.coins
+            questData:this.questData, coins:this.coins, questRotation:this.questRotation
         }));
         this.updateUI();
     },
@@ -730,6 +730,7 @@ const app = {
         document.getElementById('nav-'+id)?.classList.add('active');
         if(id==='avatar')this.updateAvatarPreview();
         if(id==='quests')this.renderQuests();
+        else if(this._questCountdownInterval){ clearInterval(this._questCountdownInterval); this._questCountdownInterval=null; }
         if(id==='friends'){
             // Регистрируем на сервере (на случай если зашли раньше деплоя)
             try{ fetch(this._API+'/players/'+this.userId,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:String(this.userId),name:this.username,tag:this.fullTag,color:this._myColor})}); }catch(e){}
@@ -2665,26 +2666,67 @@ const app = {
 
     // ── СИСТЕМА ЗАДАНИЙ ──
     _initQuests(){
-        const defaults = [
-            {id:'play30', title:'Игрок дня',      desc:'Поиграй 30 минут',             reward:50,  type:'playtime', goal:30,   icon:'⏱️'},
-            {id:'play60', title:'Марафонец',       desc:'Поиграй 1 час',                reward:100, type:'playtime', goal:60,   icon:'🕐'},
-            {id:'jump50', title:'Прыгун',          desc:'Прыгни 50 раз',                reward:30,  type:'jumps',    goal:50,   icon:'🦘'},
-            {id:'chat10', title:'Общительный',     desc:'Напиши 10 сообщений в чат',    reward:20,  type:'chats',    goal:10,   icon:'💬'},
-            {id:'maps3',  title:'Путешественник',  desc:'Посети 3 разных мира',         reward:40,  type:'maps',     goal:3,    icon:'🗺️'},
-            {id:'friend1',title:'Найди друга',     desc:'Добавь 1 друга',               reward:25,  type:'friends',  goal:1,    icon:'🤝'},
-            {id:'buy1',   title:'Первая покупка',  desc:'Купи что-нибудь в магазине',   reward:15,  type:'buys',     goal:1,    icon:'🛍️'},
-            {id:'play5d', title:'5 дней подряд',   desc:'Заходи 5 дней подряд',         reward:200, type:'streak',   goal:5,    icon:'🔥'},
+        const ALL_QUESTS = [
+            {id:'play30',  title:'Игрок дня',       desc:'Поиграй 30 минут',           reward:50,  type:'playtime', goal:30,  icon:'⏱️'},
+            {id:'play60',  title:'Марафонец',        desc:'Поиграй 1 час',              reward:100, type:'playtime', goal:60,  icon:'🕐'},
+            {id:'jump50',  title:'Прыгун',           desc:'Прыгни 50 раз',              reward:30,  type:'jumps',    goal:50,  icon:'🦘'},
+            {id:'jump20',  title:'Попрыгунчик',      desc:'Прыгни 20 раз',              reward:15,  type:'jumps',    goal:20,  icon:'🐸'},
+            {id:'chat10',  title:'Общительный',      desc:'Напиши 10 сообщений в чат',  reward:20,  type:'chats',    goal:10,  icon:'💬'},
+            {id:'chat5',   title:'Болтун',           desc:'Напиши 5 сообщений в чат',   reward:10,  type:'chats',    goal:5,   icon:'🗣️'},
+            {id:'maps3',   title:'Путешественник',   desc:'Посети 3 разных мира',        reward:40,  type:'maps',     goal:3,   icon:'🗺️'},
+            {id:'maps2',   title:'Исследователь',    desc:'Посети 2 разных мира',        reward:20,  type:'maps',     goal:2,   icon:'🧭'},
+            {id:'friend1', title:'Найди друга',      desc:'Добавь 1 друга',             reward:25,  type:'friends',  goal:1,   icon:'🤝'},
+            {id:'buy1',    title:'Первая покупка',   desc:'Купи что-нибудь в магазине', reward:15,  type:'buys',     goal:1,   icon:'🛍️'},
+            {id:'play10',  title:'Разминка',         desc:'Поиграй 10 минут',           reward:20,  type:'playtime', goal:10,  icon:'🎮'},
+            {id:'jump100', title:'Акробат',          desc:'Прыгни 100 раз',             reward:60,  type:'jumps',    goal:100, icon:'🤸'},
+            {id:'chat20',  title:'Звезда чата',      desc:'Напиши 20 сообщений',        reward:35,  type:'chats',    goal:20,  icon:'⭐'},
+            {id:'maps5',   title:'Турист',           desc:'Посети 5 разных миров',       reward:70,  type:'maps',     goal:5,   icon:'✈️'},
+            {id:'play5',   title:'Первый шаг',       desc:'Поиграй 5 минут',            reward:10,  type:'playtime', goal:5,   icon:'👟'},
         ];
-        if(!this.questData) this.questData = {};
-        defaults.forEach(q=>{
-            if(!this.questData[q.id]) this.questData[q.id]={progress:0,done:false,claimed:false};
-        });
-        this._questDefs = defaults;
-        // Обновляем бейдж
-        const unclaimed = defaults.filter(q=>this.questData[q.id]?.done && !this.questData[q.id]?.claimed).length;
+
+        const ROTATE_MS = 10 * 60 * 1000; // 10 минут
+        const now = Date.now();
+
+        // Загружаем или создаём слот ротации
+        if(!this.questRotation) this.questRotation = {};
+        const rot = this.questRotation;
+
+        // Если слот пустой или время вышло — выбираем новые 5 заданий
+        if(!rot.nextAt || now >= rot.nextAt) {
+            rot.nextAt = now + ROTATE_MS;
+            // Выбираем 5 случайных непересекающихся заданий
+            const shuffled = [...ALL_QUESTS].sort(()=>Math.random()-0.5);
+            rot.ids = shuffled.slice(0,5).map(q=>q.id);
+            // Сбрасываем прогресс только для новых заданий
+            rot.ids.forEach(id => {
+                if(!this.questData[id] || this.questData[id].rotReset !== rot.nextAt) {
+                    this.questData[id] = {progress:0, done:false, claimed:false, rotReset:rot.nextAt};
+                }
+            });
+            this.saveData();
+        }
+
+        // Активные задания
+        this._questDefs = rot.ids.map(id => ALL_QUESTS.find(q=>q.id===id)).filter(Boolean);
+        this._questRotNextAt = rot.nextAt;
+
+        // Бейдж
+        const unclaimed = this._questDefs.filter(q => this.questData[q.id]?.done && !this.questData[q.id]?.claimed).length;
         const badge = document.getElementById('quest-badge');
         if(badge){ badge.textContent='!'; badge.classList.toggle('hidden', unclaimed===0); }
+
+        // Запускаем таймер обновления
+        if(!this._questTimer) {
+            this._questTimer = setInterval(()=>{
+                this._questTimer = null;
+                this._initQuests();
+                this.renderQuests();
+                this._showToast('🎯 Новые задания доступны!');
+            }, rot.nextAt - Date.now());
+        }
     },
+
+
 
     _questProgress(type, amount=1){
         if(!this._questDefs) return;
@@ -2705,8 +2747,27 @@ const app = {
         this._initQuests();
         const list = document.getElementById('quests-list');
         if(!list){ console.error('quests-list not found!'); return; }
+
+        // Таймер — отдельный элемент над списком
+        let timerEl = document.getElementById('quest-timer');
+        if(!timerEl){
+            timerEl = document.createElement('div');
+            timerEl.id = 'quest-timer';
+            timerEl.style.cssText = 'color:#555;font-size:12px;text-align:right;margin-bottom:12px;padding:0 4px;';
+            list.parentNode.insertBefore(timerEl, list);
+        }
+        if(this._questCountdownInterval) clearInterval(this._questCountdownInterval);
+        const tick = () => {
+            const ms = Math.max(0, (this._questRotNextAt||0) - Date.now());
+            const m = Math.floor(ms/60000);
+            const s = Math.floor((ms%60000)/1000);
+            timerEl.textContent = '🔄 Обновление через ' + m + ':' + String(s).padStart(2,'0');
+            if(ms<=0){ clearInterval(this._questCountdownInterval); this._questCountdownInterval=null; }
+        };
+        tick();
+        this._questCountdownInterval = setInterval(tick, 1000);
+
         list.innerHTML = '';
-        console.log('renderQuests called, defs:', this._questDefs ? this._questDefs.length : 'NONE');
         this._questDefs.forEach(q=>{
             const d = this.questData[q.id];
             const pct = Math.min(100, Math.round((d.progress||0)/q.goal*100));
@@ -2788,6 +2849,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
