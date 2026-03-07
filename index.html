@@ -172,6 +172,7 @@
             <div class="nav-item"        id="nav-shop"    onclick="app.switchTab('shop')">   <i class="fas fa-store"          style="width:16px"></i> Магазин</div>
             <div class="nav-item"        id="nav-friends" onclick="app.switchTab('friends')"><i class="fas fa-users"          style="width:16px"></i> Друзья <span class="nav-badge hidden" id="fr-badge">0</span></div>
             <div class="nav-item"        id="nav-studio"  onclick="app.switchTab('studio')"> <i class="fas fa-cube"           style="width:16px"></i> Студия</div>
+            <div class="nav-item" id="nav-quests" onclick="app.switchTab('quests')"><i class="fas fa-tasks" style="width:16px"></i> Задания <span class="nav-badge hidden" id="quest-badge">!</span></div>
         </div>
         <div class="content-area">
 
@@ -279,6 +280,11 @@
 
             <div id="tab-studio" class="hidden">
                 <div class="section-title">Студия создателя</div>
+
+            <div id="tab-quests" class="hidden">
+                <div class="section-title">🎯 Задания</div>
+                <div id="quests-list" style="display:flex;flex-direction:column;gap:12px;"></div>
+            </div>
                 <p style="color:#555;margin:0 0 22px;font-size:14px;line-height:1.7;">Строй миры из блоков, пиши скрипты на JavaScript, публикуй!</p>
                 <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px;">
                     <button class="btn-primary" onclick="app.launch('studio','new')" style="width:auto;padding:13px 26px;font-size:14px;">🔨 Открыть студию</button>
@@ -316,6 +322,11 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
             <button class="btn-st" onclick="app.clearMap()">🗑 Очистить</button>
             <button class="btn-st" onclick="app.openEngScript()">📝 Скрипт</button>
             <button class="btn-publish" onclick="app.publishGame()">📤 Опубликовать</button>
+            <div id="tab-quests" class="hidden">
+                <div class="section-title">🎯 Задания</div>
+                <div id="quests-list" style="display:flex;flex-direction:column;gap:12px;padding-bottom:20px;"></div>
+            </div>
+
         </div>
         <div id="mp-panel" class="hidden">
             <h4>В игре</h4>
@@ -497,6 +508,7 @@ const app = {
     // ── INIT
     init(){
         this.loadData();
+        this._initQuests();
         this._loadPeerInfo();
         setTimeout(()=>this._readMailbox(), 1000);
         setInterval(()=>this._readMailbox(), 5000);
@@ -549,6 +561,7 @@ const app = {
             this.inventory=d.inventory||[];
             this.customMaps=d.customMaps||[];
             this.friends=d.friends||[];
+        this.questData=d.questData||{}; this.coins=d.coins||0;
             this.friendRequests=d.friendRequests||[];
             this.sentReqs = d.sentReqs||[];
         } else {
@@ -562,7 +575,8 @@ const app = {
             username:this.username, userId:this.userId, balance:this.balance,
             myColor:this._myColor,
             inventory:this.inventory, customMaps:this.customMaps,
-            friends:this.friends, friendRequests:this.friendRequests, sentReqs:this.sentReqs
+            friends:this.friends, friendRequests:this.friendRequests, sentReqs:this.sentReqs,
+            questData:this.questData, coins:this.coins
         }));
         this.updateUI();
     },
@@ -710,13 +724,14 @@ const app = {
 
     // ── TABS
     switchTab(id){
-        ['games','avatar','shop','friends','studio'].forEach(t=>{
+        ['games','avatar','shop','friends','studio','quests'].forEach(t=>{
             document.getElementById('tab-'+t).classList.add('hidden');
             document.getElementById('nav-'+t)?.classList.remove('active');
         });
         document.getElementById('tab-'+id).classList.remove('hidden');
         document.getElementById('nav-'+id)?.classList.add('active');
         if(id==='avatar')this.updateAvatarPreview();
+        if(id==='quests')this.renderQuests();
         if(id==='friends'){
             // Регистрируем на сервере (на случай если зашли раньше деплоя)
             try{ fetch(this._API+'/players/'+this.userId,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:String(this.userId),name:this.username,tag:this.fullTag,color:this._myColor})}); }catch(e){}
@@ -968,8 +983,13 @@ const app = {
         if (e.key === 'Enter') {
             const text = e.target.value.trim();
             if (text) {
-                this._wsSend({type: 'chat', _from: String(this.userId), name: this.username, text: text, color: this._myColor});
-                this.appendChatMessage(this.username, text, this._myColor); // Показываем у себя
+                const chatMsg = {type:'chat', _from:String(this.userId), name:this.username, text:text, color:this._myColor, map:String(this.currentMap)};
+                // Отправляем через WS сервер (надёжно)
+                if(this._gameWS && this._gameWS.readyState===1) {
+                    try{ this._gameWS.send(JSON.stringify(chatMsg)); }catch(e){}
+                }
+                this._wsSend(chatMsg); // MQTT как запасной
+                this.appendChatMessage(this.username, text, this._myColor); this._questProgress('chats',1); // Показываем у себя
                 e.target.value = '';
             }
             e.target.blur(); // Снимаем фокус с поля
@@ -1146,6 +1166,7 @@ const app = {
         fromId = String(fromId);
         this.friendRequests = this.friendRequests.filter(x=>x!==fromId);
         if (!this.friends.includes(fromId)) this.friends.push(fromId);
+        this._questProgress('friends',1);
         this.saveData();
 
         this._post(fromId, {
@@ -1476,6 +1497,12 @@ const app = {
             this._gameWS.onmessage = (e) => {
                 try {
                     const msg = JSON.parse(e.data);
+                    if(msg.type==='chat') {
+                        if(String(msg._from)!==String(this.userId)) {
+                            this.appendChatMessage(msg.name, msg.text, msg.color);
+                        }
+                        return;
+                    }
                     if(msg.type==='move') {
                         if(String(msg.id)===String(this.userId)) return;
                         if(String(msg.map)!==String(this.currentMap)||this.mode!=='play') return;
@@ -2356,6 +2383,9 @@ const app = {
     engineLoop(){
         if(this.mode==='none')return;
         requestAnimationFrame(()=>this.engineLoop());
+        // Считаем время в игре (каждые 60 сек = +1 минута)
+        if(!this._lastMinTick) this._lastMinTick = Date.now();
+        if(Date.now()-this._lastMinTick >= 60000){ this._lastMinTick=Date.now(); this._questProgress('playtime',1); }
         const delta=Math.min(this.clock.getDelta(),0.05);
         const time=this.clock.getElapsedTime();
 
@@ -2602,6 +2632,93 @@ const app = {
         document.getElementById('ingame-balance').innerText=`${this.balance} 🍊 | ⏱ ${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')} | 🏔️ К вершине!`;
     },
 
+
+    // ── СИСТЕМА ЗАДАНИЙ ──
+    _initQuests(){
+        const defaults = [
+            {id:'play30', title:'Игрок дня',      desc:'Поиграй 30 минут',             reward:50,  type:'playtime', goal:30,   icon:'⏱️'},
+            {id:'play60', title:'Марафонец',       desc:'Поиграй 1 час',                reward:100, type:'playtime', goal:60,   icon:'🕐'},
+            {id:'jump50', title:'Прыгун',          desc:'Прыгни 50 раз',                reward:30,  type:'jumps',    goal:50,   icon:'🦘'},
+            {id:'chat10', title:'Общительный',     desc:'Напиши 10 сообщений в чат',    reward:20,  type:'chats',    goal:10,   icon:'💬'},
+            {id:'maps3',  title:'Путешественник',  desc:'Посети 3 разных мира',         reward:40,  type:'maps',     goal:3,    icon:'🗺️'},
+            {id:'friend1',title:'Найди друга',     desc:'Добавь 1 друга',               reward:25,  type:'friends',  goal:1,    icon:'🤝'},
+            {id:'buy1',   title:'Первая покупка',  desc:'Купи что-нибудь в магазине',   reward:15,  type:'buys',     goal:1,    icon:'🛍️'},
+            {id:'play5d', title:'5 дней подряд',   desc:'Заходи 5 дней подряд',         reward:200, type:'streak',   goal:5,    icon:'🔥'},
+        ];
+        if(!this.questData) this.questData = {};
+        defaults.forEach(q=>{
+            if(!this.questData[q.id]) this.questData[q.id]={progress:0,done:false,claimed:false};
+        });
+        this._questDefs = defaults;
+        // Обновляем бейдж
+        const unclaimed = defaults.filter(q=>this.questData[q.id]?.done && !this.questData[q.id]?.claimed).length;
+        const badge = document.getElementById('quest-badge');
+        if(badge){ badge.textContent='!'; badge.classList.toggle('hidden', unclaimed===0); }
+    },
+
+    _questProgress(type, amount=1){
+        if(!this._questDefs) return;
+        let changed = false;
+        this._questDefs.forEach(q=>{
+            if(q.type !== type) return;
+            const d = this.questData[q.id];
+            if(d.done) return;
+            d.progress = Math.min((d.progress||0)+amount, q.goal);
+            if(d.progress >= q.goal){ d.done=true; changed=true;
+                this._showToast('🎯 Задание выполнено: '+q.title+' (+'+q.reward+' 🍋)'); }
+        });
+        if(changed){ this.saveData(); this._initQuests(); }
+    },
+
+    renderQuests(){
+        if(!this.questData) this.questData = {};
+        this._initQuests();
+        const list = document.getElementById('quests-list');
+        if(!list) return;
+        list.innerHTML = '';
+        this._questDefs.forEach(q=>{
+            const d = this.questData[q.id];
+            const pct = Math.min(100, Math.round((d.progress||0)/q.goal*100));
+            const canClaim = d.done && !d.claimed;
+            const claimed  = d.claimed;
+            const border = canClaim ? 'rgba(255,152,0,0.6)' : 'rgba(255,152,0,0.15)';
+            const opacity = claimed ? 'opacity:0.4;' : '';
+            let btnHtml = '';
+            if(canClaim) btnHtml = '<button onclick="app.claimQuest(\'' + q.id + '\')" style="margin-top:6px;background:#FF9800;color:#000;border:none;border-radius:8px;padding:6px 12px;font-weight:700;cursor:pointer;font-size:12px">Получить</button>';
+            else if(claimed) btnHtml = '<div style="color:#444;font-size:12px;margin-top:6px">\u2713 Получено</div>';
+            else btnHtml = '<div style="color:#555;font-size:12px;margin-top:6px">' + pct + '%</div>';
+            const barColor = canClaim ? '#FFD700' : '#FF9800';
+            list.innerHTML += '<div style="background:rgba(255,255,255,0.04);border:1px solid ' + border + ';border-radius:14px;padding:16px 18px;display:flex;align-items:center;gap:14px;' + opacity + '">'
+                + '<div style="font-size:28px">' + q.icon + '</div>'
+                + '<div style="flex:1">'
+                + '<div style="font-weight:700;color:#fff;font-size:15px">' + q.title + '</div>'
+                + '<div style="color:#888;font-size:12px;margin:2px 0 8px">' + q.desc + '</div>'
+                + '<div style="background:rgba(255,255,255,0.08);border-radius:6px;height:6px;overflow:hidden">'
+                + '<div style="background:' + barColor + ';height:100%;width:' + pct + '%;transition:width 0.3s;border-radius:6px"></div></div>'
+                + '<div style="color:#666;font-size:11px;margin-top:4px">' + (d.progress||0) + ' / ' + q.goal + '</div>'
+                + '</div>'
+                + '<div style="text-align:center;min-width:70px">'
+                + '<div style="color:#FFD700;font-weight:700;font-size:16px">+' + q.reward + ' \uD83C\uDF4B</div>'
+                + btnHtml
+                + '</div></div>';
+        });
+    },
+
+
+    claimQuest(id){
+        const q = this._questDefs.find(q=>q.id===id);
+        if(!q) return;
+        const d = this.questData[id];
+        if(!d.done || d.claimed) return;
+        d.claimed = true;
+        this.coins = (this.coins||0) + q.reward;
+        this.saveData();
+        this._updateCoins();
+        this._initQuests();
+        this.renderQuests();
+        this._showToast('🍋 +'+q.reward+' цитрусов получено!');
+    },
+
     exitGame(){
         this.spaceGrav=false;this.loopFn=null;this.mode='none';
         this._others={}; this._lastPosSend=0;
@@ -2625,5 +2742,6 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
