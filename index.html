@@ -2711,18 +2711,27 @@ const app = {
     },
 
     async launchPublished(serverId){
-        // Загружаем карту с сервера и запускаем
         try{
             const r=await fetch(this._API+'/games');
             const games=await r.json();
             const g=games.find(x=>x.id===serverId);
             if(!g){ this._showToast('Карта не найдена'); return; }
-            this.mapBlocks=g.blocks||[];
-            this.currentMap='pub_'+serverId;
-            this._worldName=g.name;
-            this.mode='play';
-            this._setupScene();
-        }catch(e){ this._showToast('Ошибка загрузки карты'); }
+            // Сохраняем карту как customMap с временным индексом
+            const tempIdx = this.customMaps.length;
+            // Проверяем не добавили ли уже
+            let idx = this.customMaps.findIndex(m=>m.serverId===serverId);
+            if(idx===-1){
+                this.customMaps.push({name:g.name, blocks:g.blocks||[], script:g.script||'', serverId});
+                idx = this.customMaps.length-1;
+            } else {
+                this.customMaps[idx].blocks = g.blocks||[];
+            }
+            this._worldName = g.name;
+            this.launch('play', idx);
+        }catch(e){
+            console.error('launchPublished error:', e);
+            this._showToast('Ошибка загрузки карты');
+        }
     },
 
 
@@ -2923,3 +2932,4 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
