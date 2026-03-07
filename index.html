@@ -1513,19 +1513,23 @@ const app = {
             const eye = new THREE.Mesh(new THREE.PlaneGeometry(0.1,0.1), em);
             eye.position.set(x,0.05,0.31); head.add(eye);
         });
-        // Руки
+        // Руки (висят вниз)
         [-0.6,0.6].forEach(x => {
+            const armG = new THREE.Group();
             const arm = new THREE.Mesh(new THREE.BoxGeometry(0.35,1.1,0.35), matSkin);
-            arm.geometry = new THREE.BoxGeometry(0.35,1.1,0.35);
-            arm.geometry.translate(0,-0.45,0);
-            arm.position.set(x,0.5,0); torso.add(arm);
+            arm.position.y = -0.45;
+            armG.add(arm);
+            armG.position.set(x,0.5,0);
+            torso.add(armG);
         });
         // Ноги
         [-0.22,0.22].forEach(x => {
+            const legG = new THREE.Group();
             const leg = new THREE.Mesh(new THREE.BoxGeometry(0.35,1.1,0.35), matPants);
-            leg.geometry = new THREE.BoxGeometry(0.35,1.1,0.35);
-            leg.geometry.translate(0,-0.55,0);
-            leg.position.set(x,-0.6,0); torso.add(leg);
+            leg.position.y = -0.55;
+            legG.add(leg);
+            legG.position.set(x,-0.6,0);
+            torso.add(legG);
         });
         g._name = name;
         return g;
@@ -1768,7 +1772,11 @@ const app = {
             volcano:'Остров Вулкана',space:'Космическая База',hideseek:'Прятки',
             snowmount:'Снежная Гора',dungeon:'Тёмное Подземелье'};
         this._worldName=wNames[mapId]||'Мир игрока';
-        if(mode==='play')this._updateStatus('ingame',this._worldName);
+        if(mode==='play'){
+            this._updateStatus('ingame',this._worldName);
+            // Сразу пушим статус на сервер
+            setTimeout(()=>this.renderMpPanel(), 500);
+        }
         
         document.getElementById('ui-hub').classList.add('hidden');
         document.getElementById('engine-view').style.display='block';
@@ -2164,9 +2172,9 @@ const app = {
             const name = (this._pc||[]).find(x=>x.id===String(id))?.name || id;
             if(p) {
                 const ingame = p.status==='ingame';
-                list.innerHTML+=`<div class="mpp"><div class="mpd" style="background:${ingame?'#00E5FF':'#00E676'}"></div>${p.name} ${ingame?'🎮':''}</div>`;
+                list.innerHTML+=`<div class="mpp"><div class="mpd" style="background:${ingame?'#00E5FF':'#00E676'}"></div><span style="color:${ingame?'#00E5FF':'#aaa'}">${p.name}${ingame?' 🎮':''}</span></div>`;
             } else {
-                list.innerHTML+=`<div class="mpp"><div class="mpd" style="background:#444;box-shadow:none"></div><span style="color:#555">${name}</span></div>`;
+                list.innerHTML+=`<div class="mpp"><div class="mpd" style="background:#333;box-shadow:none"></div><span style="color:#444">${name} ○</span></div>`;
             }
         });
     },
@@ -2473,6 +2481,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
