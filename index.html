@@ -1461,7 +1461,52 @@ const app = {
         setTimeout(()=>{n.classList.remove('show');setTimeout(()=>n.remove(),400)},hasBtns?12000:3800);
     },
 
-    // Опрашиваем позиции всех игроков в этой карте
+    // Подключаемся к WS серверу для позиций в реальном времени
+    _connectGameWS() {
+        if(this._gameWS) { try{this._gameWS.close();}catch(e){} }
+        const wsUrl = this._API.replace('https://','wss://').replace('http://','ws://');
+        try {
+            this._gameWS = new WebSocket(wsUrl);
+            this._gameWS.onopen = () => {
+                this._gameWS.send(JSON.stringify({
+                    type:'join', id:String(this.userId),
+                    name:this.username, map:String(this.currentMap)
+                }));
+            };
+            this._gameWS.onmessage = (e) => {
+                try {
+                    const msg = JSON.parse(e.data);
+                    if(msg.type==='move') {
+                        if(String(msg.id)===String(this.userId)) return;
+                        if(String(msg.map)!==String(this.currentMap)||this.mode!=='play') return;
+                        if(!this._others) this._others={};
+                        if(!this._others[msg.id]) {
+                            const g=this._buildOtherPlayer(msg.name,msg.color);
+                            this._others[msg.id]=g;
+                            this.scene&&this.scene.add(g);
+                        }
+                        const o=this._others[msg.id];
+                        o.position.lerp(new THREE.Vector3(msg.x,msg.y,msg.z),0.8);
+                        o.rotation.y=msg.ry||0;
+                        o._lastSeen=Date.now();
+                    }
+                }catch(e){}
+            };
+            this._gameWS.onclose = () => {
+                // Fallback на HTTP polling если WS не работает
+                if(this.mode==='play') {
+                    if(this._posInterval) clearInterval(this._posInterval);
+                    this._posInterval = setInterval(()=>this._pollPositions(), 100);
+                }
+            };
+        } catch(e) {
+            // WS не поддерживается — используем polling
+            if(this._posInterval) clearInterval(this._posInterval);
+            this._posInterval = setInterval(()=>this._pollPositions(), 100);
+        }
+    },
+
+    // Опрашиваем позиции всех игроков в этой карте (fallback)
     async _pollPositions() {
         if(this.mode !== 'play' || !this.playerGroup) return;
         try {
@@ -1479,7 +1524,7 @@ const app = {
                 }
                 const other = this._others[p.id];
                 // Плавное движение
-                other.position.lerp(new THREE.Vector3(p.x, p.y, p.z), 0.4);
+                other.position.lerp(new THREE.Vector3(p.x, p.y, p.z), 0.8);
                 other.rotation.y = p.ry || 0;
                 other._lastSeen = now;
             });
@@ -1847,7 +1892,7 @@ const app = {
         this.engineLoop();
         // Опрашиваем позиции других игроков с сервера каждые 300мс
         if(this._posInterval) clearInterval(this._posInterval);
-        this._posInterval = setInterval(()=>this._pollPositions(), 300);
+        this._posInterval = setInterval(()=>this._pollPositions(), 50);
     },
 
     // ── WORLDS
@@ -2327,7 +2372,7 @@ const app = {
                 }
             }
             // Отправляем позицию на сервер (каждые 150мс)
-            if (!this._lastPosSend || Date.now()-this._lastPosSend > 150) {
+            if (!this._lastPosSend || Date.now()-this._lastPosSend > 50) {
                 this._lastPosSend = Date.now();
                 const posData = {
                     type:'move', _from: String(this.userId),
@@ -2339,9 +2384,13 @@ const app = {
                     ry: this.playerGroup.rotation.y,
                     map: String(this.currentMap)
                 };
-                // Через сервер (надёжно)
-                try{ fetch(this._API+'/pos/'+this.userId, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(posData)}); }catch(e){}
-                // Через MQTT (быстро если работает)
+                // Через наш WS сервер (быстро и надёжно)
+                if(this._gameWS && this._gameWS.readyState===1) {
+                    try{ this._gameWS.send(JSON.stringify(posData)); }catch(e){}
+                } else {
+                    // Fallback на HTTP
+                    try{ fetch(this._API+'/pos/'+this.userId, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(posData)}); }catch(e){}
+                }
                 this._wsSend(posData);
             }
 
@@ -2463,6 +2512,7 @@ const app = {
         this.spaceGrav=false;this.loopFn=null;this.mode='none';
         this._others={}; this._lastPosSend=0;
         if(this._posInterval){ clearInterval(this._posInterval); this._posInterval=null; }
+        if(this._gameWS){ try{this._gameWS.close();}catch(e){} this._gameWS=null; }
         this._updateStatus('online',null);
         // Очищаем таймеры мини-игр
         if(this._hsInterval){clearInterval(this._hsInterval);this._hsInterval=null;}this._hsTimer=null;
@@ -2481,6 +2531,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
