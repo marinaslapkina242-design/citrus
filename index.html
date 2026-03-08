@@ -1963,11 +1963,23 @@ const app = {
             ctx.fillStyle = 'rgba(0,0,0,0.6)';
             ctx.roundRect(4,4,248,56,12);
             ctx.fill();
-            ctx.fillStyle = this._myColor||'#FF9800';
-            ctx.font = 'bold 28px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(this.username||'', 128, 32);
+            const _devNs=['разраб','admin','citrus'];
+            const _isDev=_devNs.includes((this.username||'').toLowerCase().split('#')[0]);
+            if(_isDev){
+                ctx.font='bold 28px Arial';
+                const _nw=ctx.measureText(this.username||'').width;
+                const _sx=128-(_nw+28)/2;
+                ctx.fillStyle=this._myColor||'#FF9800';
+                ctx.textAlign='left'; ctx.textBaseline='middle';
+                ctx.fillText(this.username||'',_sx,32);
+                ctx.fillStyle='#4fc3f7'; ctx.font='bold 26px Arial';
+                ctx.fillText(' ✔',_sx+_nw,32);
+            } else {
+                ctx.fillStyle=this._myColor||'#FF9800';
+                ctx.font='bold 28px Arial';
+                ctx.textAlign='center'; ctx.textBaseline='middle';
+                ctx.fillText(this.username||'',128,32);
+            }
             const tex = new THREE.CanvasTexture(canvas);
             const sprite = new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true}));
             sprite.scale.set(2.2, 0.55, 1);
@@ -3229,8 +3241,8 @@ const app = {
 window.onload = () => app.init();
 </script>
 </body>
-</html
->
+</html>
+
 
 
 
