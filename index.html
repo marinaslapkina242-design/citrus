@@ -1001,7 +1001,7 @@ const app = {
             }
             const other = this._others[msg.id];
             other.position.set(msg.x, msg.y, msg.z);
-            other.rotation.y = msg.ry || 0;
+            other._targetRy = msg.ry || 0;
             other._lastSeen = Date.now();
             return;
         }
@@ -1525,6 +1525,13 @@ const app = {
         if(!mapId){ this._showToast('Друг не в игре'); return; }
         this._showToast('🚀 Заходим в мир...');
         this.launch('play', mapId);
+        // Ждём загрузки и телепортируемся на безопасную высоту
+        setTimeout(()=>{
+            if(this.playerGroup){
+                this.playerGroup.position.set(0, 15, 0);
+                if(this.velocity) this.velocity.set(0,0,0);
+            }
+        }, 600);
     },
 
     inviteFriend(fid, name){
@@ -2862,23 +2869,36 @@ const app = {
                     delete this._others[id];
                 } else if(o._targetPos) {
                     o.position.lerp(o._targetPos, 0.25);
+                    // Плавный поворот
                     let diff = (o._targetRy||0) - o.rotation.y;
                     while(diff > Math.PI) diff -= Math.PI*2;
                     while(diff < -Math.PI) diff += Math.PI*2;
                     o.rotation.y += diff * 0.2;
                     // Анимация конечностей
                     if(o._rig) {
-                        if(o._moving && !o._jumping) {
+                        const isFalling = (o._velY||0) < -0.05;
+                        if(o._moving && !o._jumping && !isFalling) {
+                            // Бег
                             const s = Math.sin(time * 15) * 0.8;
                             o._rig.lA.rotation.x = s;
                             o._rig.rA.rotation.x = -s;
                             o._rig.lL.rotation.x = -s;
                             o._rig.rL.rotation.x = s;
                         } else if(o._jumping) {
-                            o._rig.lA.rotation.x = THREE.MathUtils.lerp(o._rig.lA.rotation.x, -2.5, 0.15);
-                            o._rig.rA.rotation.x = THREE.MathUtils.lerp(o._rig.rA.rotation.x, -2.5, 0.15);
+                            // Прыжок — руки вверх, ноги согнуты
+                            o._rig.lA.rotation.x = THREE.MathUtils.lerp(o._rig.lA.rotation.x, -1.8, 0.2);
+                            o._rig.rA.rotation.x = THREE.MathUtils.lerp(o._rig.rA.rotation.x, -1.8, 0.2);
+                            o._rig.lL.rotation.x = THREE.MathUtils.lerp(o._rig.lL.rotation.x, 0.5, 0.2);
+                            o._rig.rL.rotation.x = THREE.MathUtils.lerp(o._rig.rL.rotation.x, 0.5, 0.2);
+                        } else if(isFalling) {
+                            // Падение — руки в стороны
+                            o._rig.lA.rotation.x = THREE.MathUtils.lerp(o._rig.lA.rotation.x, -0.8, 0.15);
+                            o._rig.rA.rotation.x = THREE.MathUtils.lerp(o._rig.rA.rotation.x, -0.8, 0.15);
+                            o._rig.lL.rotation.x = THREE.MathUtils.lerp(o._rig.lL.rotation.x, 0.3, 0.15);
+                            o._rig.rL.rotation.x = THREE.MathUtils.lerp(o._rig.rL.rotation.x, 0.3, 0.15);
                         } else {
-                            ['lA','rA','lL','rL'].forEach(k=>o._rig[k].rotation.x=THREE.MathUtils.lerp(o._rig[k].rotation.x,0,0.1));
+                            // Стоит — всё в ноль
+                            ['lA','rA','lL','rL'].forEach(k=>o._rig[k].rotation.x=THREE.MathUtils.lerp(o._rig[k].rotation.x,0,0.12));
                         }
                     }
                 }
@@ -3242,6 +3262,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
