@@ -1373,9 +1373,15 @@ const app = {
         } catch(e) {}
 
         const allUsersMap = new Map();
+        // 1. localDB (база)
         localDB.forEach(u => allUsersMap.set(String(u.id), {...u, inv:u.inv||[]}));
-        onlinePlayers.forEach(u => allUsersMap.set(String(u.id), {id:String(u.id), name:u.name, tag:u.tag, color:u.color}));
+        // 2. Сервер — перезаписывает, включая inv
         serverPlayers.forEach(u => { if (u.id) allUsersMap.set(String(u.id), {id:String(u.id), name:u.name, tag:u.tag||u.name+'#'+u.id, color:u.color||'#FF9800', inv:u.inv||[]}); });
+        // 3. Онлайн — обновляет цвет и inv если свежее
+        onlinePlayers.forEach(u => {
+            const ex = allUsersMap.get(String(u.id));
+            allUsersMap.set(String(u.id), {id:String(u.id), name:u.name, tag:u.tag, color:u.color, inv:u.inv||ex?.inv||[]});
+        });
 
         let found = Array.from(allUsersMap.values()).filter(u => String(u.id) !== String(this.userId));
 
@@ -3406,6 +3412,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
