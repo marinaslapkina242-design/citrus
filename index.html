@@ -376,6 +376,7 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
         </div>
 
         <button class="btn-exit" onclick="app.exitGame()">← В ХАБ</button>
+        <button id="btn-cam" onclick="app.toggleCamera()" style="position:fixed;top:16px;right:16px;z-index:200;background:rgba(0,0,0,0.6);border:1px solid rgba(255,152,0,0.4);color:#FF9800;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:bold;cursor:pointer;backdrop-filter:blur(8px);">👁 1-е лицо</button>
         <div class="controls-hint" id="kb-hint">
             <p><span>WASD</span> — движение</p>
             <p><span>SPACE</span> — прыжок</p>
@@ -1545,8 +1546,16 @@ const app = {
     joinFriend(fid, mapId){
         if(!mapId){ this._showToast('Друг не в игре'); return; }
         this._showToast('🚀 Заходим в мир...');
-        this._joinSpawn = true; // флаг — поставить выше при спавне
+        this._joinSpawn = true;
         this.launch('play', mapId);
+        // Дополнительная страховка — поднять игрока через 1.2с после загрузки
+        clearTimeout(this._joinSpawnTimer);
+        this._joinSpawnTimer = setTimeout(()=>{
+            if(this.playerGroup && this.mode==='play'){
+                this.playerGroup.position.set(0, 15, 0);
+                if(this.velocity) this.velocity.set(0, 0, 0);
+            }
+        }, 1200);
     },
 
     inviteFriend(fid, name){
@@ -2793,15 +2802,26 @@ const app = {
             if(this.keys['Space'] && this.canJump){this.velocity.y=jumpH; this.canJump=false; this._questProgress('jumps',1);}
             if(this.playerGroup.position.y < -25){this.playerGroup.position.set(0,5,0); this.velocity.y=0;}
 
-            const dist = 5.0; 
-            const pitch = this._camPitch || 0.2;
-            const offset = new THREE.Vector3(0, 0, dist);
-            offset.applyEuler(new THREE.Euler(pitch, camYaw, 0, 'YXZ'));
-            
-            const idealCamPos = this.playerGroup.position.clone().add(new THREE.Vector3(0, 1.2, 0)).add(offset);
-            
-            this.camera.position.lerp(idealCamPos, 0.2);
-            this.camera.lookAt(this.playerGroup.position.clone().add(new THREE.Vector3(0, 1.5, 0)));
+            if(this._camMode === 'first') {
+                // Вид от первого лица — камера в голове
+                const head = this.playerGroup.position.clone().add(new THREE.Vector3(0, 1.7, 0));
+                this.camera.position.copy(head);
+                this.camera.rotation.order = 'YXZ';
+                this.camera.rotation.y = camYaw + Math.PI;
+                this.camera.rotation.x = -(this._camPitch || 0.2);
+                // Скрываем своего персонажа
+                this.playerGroup.traverse(c=>{ if(c.isMesh) c.visible=false; });
+            } else {
+                // Вид от третьего лица
+                this.playerGroup.traverse(c=>{ if(c.isMesh) c.visible=true; });
+                const dist = this._camMode === 'far' ? 9.0 : 5.0;
+                const pitch = this._camPitch || 0.2;
+                const offset = new THREE.Vector3(0, 0, dist);
+                offset.applyEuler(new THREE.Euler(pitch, camYaw, 0, 'YXZ'));
+                const idealCamPos = this.playerGroup.position.clone().add(new THREE.Vector3(0, 1.2, 0)).add(offset);
+                this.camera.position.lerp(idealCamPos, 0.2);
+                this.camera.lookAt(this.playerGroup.position.clone().add(new THREE.Vector3(0, 1.5, 0)));
+            }
             
             for(let i=this.collectibles.length-1;i>=0;i--){
                 const c=this.collectibles[i];
@@ -3279,6 +3299,19 @@ const app = {
         if(bv) bv.textContent = this.balance;
     },
 
+    toggleCamera(){
+        const modes = ['third', 'first', 'far'];
+        const labels = {'third':'👁 1-е лицо', 'first':'🔭 Далеко', 'far':'👤 3-е лицо'};
+        const cur = this._camMode || 'third';
+        const next = modes[(modes.indexOf(cur)+1) % modes.length];
+        this._camMode = next;
+        const btn = document.getElementById('btn-cam');
+        if(btn) btn.textContent = labels[next];
+        // Если переключились с первого — сразу показываем персонажа
+        if(next !== 'first' && this.playerGroup)
+            this.playerGroup.traverse(c=>{ if(c.isMesh) c.visible=true; });
+    },
+
     exitGame(){
         this.spaceGrav=false;this.loopFn=null;this.mode='none';
         this._others={}; this._lastPosSend=0;
@@ -3301,8 +3334,8 @@ const app = {
 window.onload = () => app.init();
 </script>
 </body>
-</html
->
+</html>
+
 
 
 
