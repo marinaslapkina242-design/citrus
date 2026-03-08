@@ -1022,7 +1022,7 @@ const app = {
             other._lastSeen = Date.now();
             other._moving = msg.moving || false;
             other._jumping = msg.jumping || false;
-            other._velY = msg.y - (other._prevY !== undefined ? other._prevY : msg.y);
+            other._velY = msg.vy !== undefined ? msg.vy : (msg.y - (other._prevY !== undefined ? other._prevY : msg.y));
             other._prevY = msg.y;
             return;
         }
@@ -1545,14 +1545,8 @@ const app = {
     joinFriend(fid, mapId){
         if(!mapId){ this._showToast('Друг не в игре'); return; }
         this._showToast('🚀 Заходим в мир...');
+        this._joinSpawn = true; // флаг — поставить выше при спавне
         this.launch('play', mapId);
-        // Ждём загрузки и телепортируемся на безопасную высоту
-        setTimeout(()=>{
-            if(this.playerGroup){
-                this.playerGroup.position.set(0, 15, 0);
-                if(this.velocity) this.velocity.set(0,0,0);
-            }
-        }, 600);
     },
 
     inviteFriend(fid, name){
@@ -1680,18 +1674,37 @@ const app = {
             const now = Date.now();
             players.forEach(p => {
                 if(String(p.id) === String(this.userId)) return;
+                // Пересоздаём если аксессуары изменились
+                const newKey = (p.inv||[]).join(',');
                 if(!this._others[p.id]) {
                     const g = this._buildOtherPlayer(p.name, p.color, p.inv||[]);
+                    g._targetPos = new THREE.Vector3(p.x, p.y, p.z);
+                    g.position.set(p.x, p.y, p.z);
                     this._others[p.id] = g;
                     this.scene && this.scene.add(g);
                 }
                 const other = this._others[p.id];
-                // Плавное движение
-                other.position.lerp(new THREE.Vector3(p.x, p.y, p.z), 0.8);
-                other.rotation.y = p.ry || 0;
+                if(other._invKey !== newKey && this.scene) {
+                    this.scene.remove(other);
+                    const ng = this._buildOtherPlayer(p.name, p.color, p.inv||[]);
+                    ng._targetPos = new THREE.Vector3(p.x, p.y, p.z);
+                    ng.position.copy(other.position);
+                    ng._targetRy = p.ry||0;
+                    ng._lastSeen = now;
+                    this._others[p.id] = ng;
+                    this.scene.add(ng);
+                    return;
+                }
+                // Устанавливаем цель — lerp происходит в engineLoop
+                if(!other._targetPos) other._targetPos = new THREE.Vector3(p.x, p.y, p.z);
+                other._velY = p.y - (other._prevY !== undefined ? other._prevY : p.y);
+                other._prevY = p.y;
+                other._targetPos.set(p.x, p.y, p.z);
+                other._targetRy = p.ry || 0;
                 other._lastSeen = now;
+                other._moving = p.moving || false;
+                other._jumping = p.jumping || false;
             });
-            // Убираем игроков которых нет в ответе
             const activeIds = new Set(players.map(p=>String(p.id)));
             for(const id in this._others) {
                 if(!activeIds.has(id)) {
@@ -2128,7 +2141,10 @@ const app = {
             this.playerGroup=this.buildCharacter(true);
             // Спавн выше земли для всех миров
             const spawnY = {parkour:8, march8:5, dungeon:3, volcano:4, space:4, snowmount:4, hideseek:4, gather:3, lobby:3};
-            this.playerGroup.position.set(0, spawnY[this.currentMap]||5, 0);
+            const baseY = this._joinSpawn ? 15 : (spawnY[this.currentMap] || (typeof this.currentMap==='number' ? 12 : 5));
+            this._joinSpawn = false;
+            this.playerGroup.position.set(0, baseY, 0);
+            if(this.velocity) this.velocity.set(0,0,0);
             this.scene.add(this.playerGroup);
             this.renderMpPanel();
 
@@ -2826,10 +2842,10 @@ const app = {
                     z: this.playerGroup.position.z,
                     ry: this.playerGroup.rotation.y,
                     map: String(this.currentMap),
-                    inv: this.inventory,
-                    moving: Object.values(this.keys).some(Boolean),
+                    inv: this.inventory||[],
+                    moving: !!(this.keys&&(this.keys['KeyW']||this.keys['KeyA']||this.keys['KeyS']||this.keys['KeyD'])),
                     jumping: !this.canJump,
-                    animT: this.clock ? this.clock.getElapsedTime() : 0
+                    vy: this.velocity ? this.velocity.y : 0
                 };
                 // Через наш WS сервер (быстро и надёжно)
                 if(this._gameWS && this._gameWS.readyState===1) {
@@ -2889,7 +2905,10 @@ const app = {
                     this.scene && this.scene.remove(o);
                     delete this._others[id];
                 } else if(o._targetPos) {
-                    o.position.lerp(o._targetPos, 0.25);
+                    // Адаптивный lerp — быстрее если далеко
+                    const dist = o.position.distanceTo(o._targetPos);
+                    const lerpSpeed = dist > 3 ? 0.4 : 0.2;
+                    o.position.lerp(o._targetPos, lerpSpeed);
                     // Плавный поворот
                     let diff = (o._targetRy||0) - o.rotation.y;
                     while(diff > Math.PI) diff -= Math.PI*2;
@@ -3282,7 +3301,9 @@ const app = {
 window.onload = () => app.init();
 </script>
 </body>
-</html>
+</html
+>
+
 
 
 
