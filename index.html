@@ -396,6 +396,7 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
             </div>
             <div class="touch-right">
                 <div class="touch-btn jump" id="btn-jump" ontouchstart="app.touchJump()">⬆</div>
+                <div class="touch-btn" id="btn-cam-touch" ontouchstart="app.toggleCamera()" style="margin-top:8px;font-size:16px;background:rgba(0,0,0,0.5);">👁</div>
             </div>
             <div class="touch-place-btn hidden" id="btn-place" ontouchstart="app.placeBlock()">🧱</div>
         <div id="studio-touch-btns" class="hidden" style="position:fixed;bottom:20px;right:16px;display:flex;flex-direction:column;gap:8px;z-index:50;pointer-events:auto;">
@@ -3301,13 +3302,11 @@ const app = {
 
     toggleCamera(){
         const modes = ['third', 'first', 'far'];
-        const labels = {'third':'👁 1-е лицо', 'first':'🔭 Далеко', 'far':'👤 3-е лицо'};
+        const names = {'third':'👤 3-е лицо', 'first':'👁 1-е лицо', 'far':'🔭 Далеко'};
         const cur = this._camMode || 'third';
         const next = modes[(modes.indexOf(cur)+1) % modes.length];
         this._camMode = next;
-        const btn = document.getElementById('btn-cam');
-        if(btn) btn.textContent = labels[next];
-        // Если переключились с первого — сразу показываем персонажа
+        this._showToast(names[next]);
         if(next !== 'first' && this.playerGroup)
             this.playerGroup.traverse(c=>{ if(c.isMesh) c.visible=true; });
     },
@@ -3335,6 +3334,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
