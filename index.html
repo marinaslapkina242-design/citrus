@@ -376,7 +376,6 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
         </div>
 
         <button class="btn-exit" onclick="app.exitGame()">← В ХАБ</button>
-        <button id="btn-cam" onclick="app.toggleCamera()" style="position:fixed;top:16px;left:16px;z-index:200;background:rgba(0,0,0,0.6);border:1px solid rgba(255,152,0,0.4);color:#FF9800;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:bold;cursor:pointer;backdrop-filter:blur(8px);pointer-events:auto;">👁 1-е лицо</button>
         <div class="controls-hint" id="kb-hint">
             <p><span>WASD</span> — движение</p>
             <p><span>SPACE</span> — прыжок</p>
@@ -396,7 +395,6 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
             </div>
             <div class="touch-right">
                 <div class="touch-btn jump" id="btn-jump" ontouchstart="app.touchJump()">⬆</div>
-                <div class="touch-btn" id="btn-cam-touch" ontouchstart="app.toggleCamera()" style="margin-top:8px;font-size:16px;background:rgba(0,0,0,0.5);">👁</div>
             </div>
             <div class="touch-place-btn hidden" id="btn-place" ontouchstart="app.placeBlock()">🧱</div>
         <div id="studio-touch-btns" class="hidden" style="position:fixed;bottom:20px;right:16px;display:flex;flex-direction:column;gap:8px;z-index:50;pointer-events:auto;">
@@ -468,7 +466,13 @@ const SHOP_ITEMS = [
     {id:'santa',      name:'Шапка Санты',         icon:'🎅',  price:300 },
     {id:'wizard',     name:'Шляпа Волшебника',    icon:'🧙',  price:550 },
     {id:'devil',      name:'Рога Дьявола',        icon:'😈',  price:666 },
-    {id:'halo',       name:'Ангельский Нимб',     icon:'😇',  price:888 }
+    {id:'halo',       name:'Ангельский Нимб',     icon:'😇',  price:888 },
+    {id:'hair_short', name:'Короткие волосы',      icon:'💇',  price:120 },
+    {id:'hair_long',  name:'Длинные волосы',       icon:'👱',  price:180 },
+    {id:'hair_spiky', name:'Взъерошенные волосы',  icon:'🦔',  price:250 },
+    {id:'hair_curly', name:'Кудрявые волосы',      icon:'🌀',  price:300 },
+    {id:'hair_bun',   name:'Пучок',                icon:'🎀',  price:150 },
+    {id:'hair_mohawk',name:'Ирокез',               icon:'⚡',  price:400 }
 ];
 const COLORS=[
     {c:0xCCCCCC,n:'Камень'},{c:0xFF9800,n:'Апельсин'},{c:0x4CAF50,n:'Трава'},
@@ -690,7 +694,7 @@ const app = {
         this.showHub();
         this._wsConnect();
         setTimeout(()=>{
-            try{ fetch(this._API+'/players/'+this.userId,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:String(this.userId),name:this.username,tag:this.fullTag,color:this._myColor})}); }catch(e){}
+            try{ fetch(this._API+'/players/'+this.userId,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:String(this.userId),name:this.username,tag:this.fullTag,color:this._myColor,inv:this.inventory||[]})}); }catch(e){}
             this._readMailbox();
         }, 1500);
     },
@@ -810,7 +814,7 @@ const app = {
         else if(this._questCountdownInterval){ clearInterval(this._questCountdownInterval); this._questCountdownInterval=null; }
         if(id==='friends'){
             // Регистрируем на сервере (на случай если зашли раньше деплоя)
-            try{ fetch(this._API+'/players/'+this.userId,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:String(this.userId),name:this.username,tag:this.fullTag,color:this._myColor})}); }catch(e){}
+            try{ fetch(this._API+'/players/'+this.userId,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:String(this.userId),name:this.username,tag:this.fullTag,color:this._myColor,inv:this.inventory||[]})}); }catch(e){}
             this.renderFriends();
             this.renderInbox();
             const hint=document.getElementById('my-tag-hint');
@@ -819,7 +823,43 @@ const app = {
     },
 
     // ── SHOP
-    renderShop(){
+    _drawFaceCanvas(color, inv) {
+        const s = 128;
+        const c = document.createElement('canvas');
+        c.width = s; c.height = s;
+        const ctx = c.getContext('2d');
+        inv = inv || [];
+        const col = color || '#FF9800';
+        ctx.fillStyle = col + '33';
+        ctx.beginPath(); ctx.roundRect(0,0,s,s,20); ctx.fill();
+        if(inv.includes('hair_long')){ ctx.fillStyle='#1a0a00'; ctx.fillRect(30,30,68,72); }
+        ctx.fillStyle='#ffcc99'; ctx.fillRect(52,84,24,20);
+        ctx.fillStyle = col; ctx.fillRect(20,96,88,36);
+        ctx.fillStyle='#ffcc99'; ctx.fillRect(30,28,68,62);
+        ctx.fillStyle='#222'; ctx.fillRect(42,50,12,10); ctx.fillRect(74,50,12,10);
+        ctx.fillStyle='#fff'; ctx.fillRect(43,51,5,5); ctx.fillRect(75,51,5,5);
+        ctx.fillStyle='#c0785a'; ctx.fillRect(50,74,28,6);
+        ctx.fillStyle='#ff9999'; ctx.fillRect(52,74,24,4);
+        ctx.fillStyle='#daa080'; ctx.fillRect(60,64,8,8);
+        if(inv.includes('glasses')){ ctx.strokeStyle='#333'; ctx.lineWidth=3; ctx.strokeRect(36,48,20,14); ctx.strokeRect(70,48,20,14); ctx.beginPath(); ctx.moveTo(56,55); ctx.lineTo(70,55); ctx.stroke(); }
+        if(inv.includes('crown')){ ctx.fillStyle='#FFD700'; ctx.fillRect(28,16,72,14); ctx.fillRect(28,6,10,12); ctx.fillRect(59,4,10,14); ctx.fillRect(90,6,10,12); }
+        if(inv.includes('halo')){ ctx.strokeStyle='#FFD700'; ctx.lineWidth=4; ctx.beginPath(); ctx.ellipse(64,20,26,8,0,0,Math.PI*2); ctx.stroke(); }
+        if(inv.includes('devil')){ ctx.fillStyle='#CC0000'; ctx.beginPath(); ctx.moveTo(36,28); ctx.lineTo(30,10); ctx.lineTo(46,24); ctx.fill(); ctx.beginPath(); ctx.moveTo(92,28); ctx.lineTo(98,10); ctx.lineTo(82,24); ctx.fill(); }
+        if(inv.includes('flame')){ ctx.fillStyle='#FF4400'; ctx.beginPath(); ctx.ellipse(64,18,18,10,0,0,Math.PI*2); ctx.fill(); ctx.fillStyle='#FF8800'; ctx.beginPath(); ctx.ellipse(64,18,10,6,0,0,Math.PI*2); ctx.fill(); }
+        if(inv.includes('hat')){ ctx.fillStyle='#8B6914'; ctx.fillRect(20,26,88,8); ctx.fillRect(34,4,60,24); }
+        if(inv.includes('wizard')){ ctx.fillStyle='#220066'; ctx.fillRect(20,28,88,6); ctx.beginPath(); ctx.moveTo(64,2); ctx.lineTo(34,28); ctx.lineTo(94,28); ctx.fill(); }
+        if(inv.includes('santa')){ ctx.fillStyle='#CC0000'; ctx.fillRect(28,18,72,16); ctx.fillRect(36,4,52,18); ctx.fillStyle='#fff'; ctx.fillRect(26,26,76,6); }
+        if(inv.includes('headphones')){ ctx.fillStyle='#222'; ctx.fillRect(20,44,10,28); ctx.fillRect(98,44,10,28); ctx.strokeStyle='#222'; ctx.lineWidth=6; ctx.beginPath(); ctx.arc(64,42,44,Math.PI,0); ctx.stroke(); ctx.fillStyle='#FF9800'; ctx.fillRect(18,52,14,14); ctx.fillRect(96,52,14,14); }
+        if(inv.includes('mask')){ ctx.fillStyle='#FFD700'; ctx.fillRect(34,46,60,26); ctx.fillStyle='#000'; ctx.fillRect(40,52,16,10); ctx.fillRect(72,52,16,10); }
+        if(inv.includes('hair_short')){ ctx.fillStyle='#3d1c02'; ctx.fillRect(28,24,72,18); ctx.fillRect(28,24,10,32); ctx.fillRect(90,24,10,32); }
+        if(inv.includes('hair_spiky')){ ctx.fillStyle='#111'; ctx.fillRect(28,28,72,10); for(let i=0;i<5;i++){ctx.beginPath();ctx.moveTo(36+i*14,28);ctx.lineTo(42+i*14,6);ctx.lineTo(48+i*14,28);ctx.fill();} }
+        if(inv.includes('hair_curly')){ ctx.fillStyle='#5c2a00'; for(let i=0;i<6;i++){ctx.beginPath();ctx.arc(30+i*16,28,10,Math.PI,0);ctx.fill();} }
+        if(inv.includes('hair_bun')){ ctx.fillStyle='#2a0a00'; ctx.fillRect(28,26,72,10); ctx.beginPath(); ctx.arc(64,20,14,0,Math.PI*2); ctx.fill(); }
+        if(inv.includes('hair_mohawk')){ ctx.fillStyle='#ff2200'; ctx.fillRect(28,28,72,8); ctx.fillRect(56,4,16,26); }
+        return c.toDataURL();
+    },
+
+        renderShop(){
         const g=document.getElementById('shop-grid');if(!g)return;g.innerHTML='';
         SHOP_ITEMS.forEach(it=>{
             const b=this.inventory.includes(it.id);
@@ -834,6 +874,7 @@ const app = {
         if(this.balance>=price){
             this.balance-=price;this.inventory.push(id); this._questProgress('buys',1);
             this.saveData();this.renderShop();this.updateAvatarPreview();
+            try{fetch(this._API+'/players/'+this.userId,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:String(this.userId),name:this.username,tag:this.fullTag,color:this._myColor,inv:this.inventory||[]})});}catch(e){}
             // Обновляем персонажа сразу если в игре
             if(this.mode==='play' && this.playerGroup && this.scene){
                 this.scene.remove(this.playerGroup);
@@ -845,7 +886,8 @@ const app = {
             this.showNotif(it.icon,'Куплено!',`${it.name} в гардеробе`);
         }else this.showNotif('💸','Мало монет',`Нужно ещё ${price-this.balance} 🍊`);
     },
-    resetAvatar(){this.inventory=[];this.saveData();this.renderShop();this.updateAvatarPreview();},
+    resetAvatar(){this.inventory=[];this.saveData();this.renderShop();this.updateAvatarPreview();
+            try{fetch(this._API+'/players/'+this.userId,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:String(this.userId),name:this.username,tag:this.fullTag,color:this._myColor,inv:this.inventory||[]})});}catch(e){}},
 
     // ── MULTIPLAYER / WEBSOCKET / CHAT
     _wsConnect(){
@@ -888,7 +930,7 @@ const app = {
                     this._mqttSubscribe(`citrus/inbox/${this.userId}`);
                     this._mqttPublishJson({type:'join',_from:String(this.userId),_ch:'citrus_v1',player:{
                         id:String(this.userId),name:this.username,tag:this.fullTag,
-                        color:this._myColor,status:'online',world:null,ts:Date.now()
+                        color:this._myColor,inv:this.inventory||[],status:'online',world:null,ts:Date.now()
                     }});
                     this._wsTimer=setInterval(()=>{this._registerPresence();this.renderMpPanel();},20000);
                 },400);
@@ -1052,7 +1094,17 @@ const app = {
             if(!this._onlineMap)this._onlineMap={};
             this._onlineMap[p.id]=p;
             if(!this._pc)this._pc=[];
-            if(!this._pc.find(x=>x.id===p.id))this._pc.push(p);
+            const existPc = this._pc.find(x=>x.id===p.id);
+                    if(!existPc) this._pc.push(p);
+                    else { existPc.inv = p.inv||existPc.inv||[]; existPc.color = p.color||existPc.color; }
+                    // Сохраняем inv в globalDB чтобы было видно офлайн
+                    try {
+                        let gdb = JSON.parse(localStorage.getItem('citrus_global_users')||'[]');
+                        const gi = gdb.findIndex(u=>String(u.id)===String(p.id));
+                        if(gi!==-1){ gdb[gi].inv = p.inv||gdb[gi].inv||[]; gdb[gi].color = p.color||gdb[gi].color; }
+                        else gdb.push({id:p.id, name:p.name, color:p.color, inv:p.inv||[]});
+                        localStorage.setItem('citrus_global_users', JSON.stringify(gdb));
+                    } catch(e){}
             this._cachedOnline=Object.values(this._onlineMap);
             // Сохраняем в IDB для поиска
             this._idbPut('players', {id:p.id,name:p.name,tag:p.tag,color:p.color,ts:p.ts}).catch(()=>{});
@@ -1321,9 +1373,9 @@ const app = {
         } catch(e) {}
 
         const allUsersMap = new Map();
-        localDB.forEach(u => allUsersMap.set(String(u.id), u));
+        localDB.forEach(u => allUsersMap.set(String(u.id), {...u, inv:u.inv||[]}));
         onlinePlayers.forEach(u => allUsersMap.set(String(u.id), {id:String(u.id), name:u.name, tag:u.tag, color:u.color}));
-        serverPlayers.forEach(u => { if (u.id) allUsersMap.set(String(u.id), {id:String(u.id), name:u.name, tag:u.tag||u.name+'#'+u.id, color:u.color||'#FF9800'}); });
+        serverPlayers.forEach(u => { if (u.id) allUsersMap.set(String(u.id), {id:String(u.id), name:u.name, tag:u.tag||u.name+'#'+u.id, color:u.color||'#FF9800', inv:u.inv||[]}); });
 
         let found = Array.from(allUsersMap.values()).filter(u => String(u.id) !== String(this.userId));
 
@@ -1336,7 +1388,7 @@ const app = {
                 const isFr = this.friends.includes(tId);
                 const sent = this.sentReqs.includes(tId);
                 res.innerHTML = `<div class="fr" style="border-color:rgba(255,152,0,0.15);background:rgba(255,152,0,0.03)">
-                    <div class="fa2" style="background:#FF980022;color:#FF9800">${tName[0].toUpperCase()}</div>
+                    <img src="${app._drawFaceCanvas('#FF9800', [])}" style="width:48px;height:48px;border-radius:10px;flex-shrink:0;">
                     <div class="fi"><div class="fn">${tName} <small style="color:#555">#${tId}</small></div>
                     <div class="fs">Отправить заявку по тегу</div></div>
                     <div class="fb">
@@ -1361,10 +1413,12 @@ const app = {
             const isFr = this.friends.includes(uidStr);
             const sent = this.sentReqs.includes(uidStr);
             const col = u.color || '#888';
-            const isOnline = (this._cachedOnline||[]).find(x=>String(x.id)===uidStr);
+            const onlineFresh = (this._cachedOnline||[]).find(x=>String(x.id)===uidStr) || (this._onlineMap&&this._onlineMap[uidStr]);
+            const freshInv = (onlineFresh&&onlineFresh.inv) || u.inv || [];
+            const isOnline = onlineFresh;
             res.innerHTML += `
                 <div class="fr">
-                    <div class="fa2" style="background:${col}22;color:${col}">${(u.name[0]||'?').toUpperCase()}</div>
+                    <img src="${app._drawFaceCanvas(col, freshInv)}" style="width:48px;height:48px;border-radius:10px;flex-shrink:0;">
                     <div class="fi"><div class="fn">${u.name} <small style="color:#555">#${u.id}</small></div>
                     <div class="fs ${isOnline?'on':''}"> ${isOnline ? '● Онлайн' : '○ Не в сети'}</div></div>
                     <div class="fb">
@@ -1432,7 +1486,7 @@ const app = {
                 ? `<button class="bx b-add" onclick="app.joinFriend('${fid}','${friendMap}')" style="font-size:10px;background:#00E676;color:#000">▶ Войти</button>`
                 : on ? `<button class="bx b-add" onclick="app.inviteFriend('${fid}','${p.name}')" style="font-size:10px">▶ Играть</button>` : '';
             fl.innerHTML+=`<div class="fr">
-                <div class="fa2" style="background:${p.color||'#888'}22;color:${p.color||'#888'}">${(p.name[0]||'?').toUpperCase()}</div>
+                <img src="${app._drawFaceCanvas(p.color||'#888', p.inv||[])}" style="width:48px;height:48px;border-radius:10px;flex-shrink:0;">
                 <div class="fi"><div class="fn">${p.name}${['разраб','admin','citrus'].includes((p.name||"").toLowerCase())?' <span style="color:#4fc3f7;font-size:12px">✔</span>':''}</div>
                 <div class="fs ${sc}">${p.tag||('#'+p.id)} · ${st}</div></div>
                 <div class="fb">${inviteBtn}
@@ -1497,7 +1551,7 @@ const app = {
                     fid=String(fid);
                     const p=findPeer(fid);
                     inDiv.innerHTML+=`<div class="fr" style="border-color:rgba(255,64,129,0.2);background:rgba(255,64,129,0.04);margin-bottom:8px;">
-                        <div class="fa2" style="background:${p.color||'#FF4081'}22;color:${p.color||'#FF4081'}">${(p.name[0]||'?').toUpperCase()}</div>
+                        <img src="${app._drawFaceCanvas(p.color||'#FF4081', p.inv||[])}" style="width:48px;height:48px;border-radius:10px;flex-shrink:0;">
                         <div class="fi">
                             <div class="fn">${p.name}${['разраб','admin','citrus'].includes((p.name||"").toLowerCase())?' <span style="color:#4fc3f7;font-size:12px">✔</span>':''}</div>
                             <div class="fs" style="color:#FF4081;">хочет дружить</div>
@@ -1523,7 +1577,7 @@ const app = {
                     if(this.friends.includes(fid))return; // уже друг
                     const p=findPeer(fid);
                     outDiv.innerHTML+=`<div class="fr" style="border-color:rgba(0,229,255,0.1);background:rgba(0,229,255,0.03);margin-bottom:8px;">
-                        <div class="fa2" style="background:rgba(0,229,255,0.1);color:var(--c-blue)">${(p.name[0]||'?').toUpperCase()}</div>
+                        <img src="${app._drawFaceCanvas(p.color||'#00E5FF', p.inv||[])}" style="width:48px;height:48px;border-radius:10px;flex-shrink:0;">
                         <div class="fi">
                             <div class="fn">${p.name}${['разраб','admin','citrus'].includes((p.name||"").toLowerCase())?' <span style="color:#4fc3f7;font-size:12px">✔</span>':''}</div>
                             <div class="fs" style="color:var(--c-blue);">заявка отправлена</div>
@@ -1574,7 +1628,17 @@ const app = {
         const players=await this._fetchOnline();
         this._cachedOnline=players;
         if(!this._pc)this._pc=[];
-        players.forEach(p=>{if(!this._pc.find(x=>x.id===p.id))this._pc.push(p);});
+        players.forEach(p=>{const existPc = this._pc.find(x=>x.id===p.id);
+                    if(!existPc) this._pc.push(p);
+                    else { existPc.inv = p.inv||existPc.inv||[]; existPc.color = p.color||existPc.color; }
+                    // Сохраняем inv в globalDB чтобы было видно офлайн
+                    try {
+                        let gdb = JSON.parse(localStorage.getItem('citrus_global_users')||'[]');
+                        const gi = gdb.findIndex(u=>String(u.id)===String(p.id));
+                        if(gi!==-1){ gdb[gi].inv = p.inv||gdb[gi].inv||[]; gdb[gi].color = p.color||gdb[gi].color; }
+                        else gdb.push({id:p.id, name:p.name, color:p.color, inv:p.inv||[]});
+                        localStorage.setItem('citrus_global_users', JSON.stringify(gdb));
+                    } catch(e){}});
         const list=players.filter(p=>!this.friends.includes(p.id));
         ol.innerHTML='';
         if(!list.length){
@@ -1584,7 +1648,7 @@ const app = {
         list.forEach(p=>{
             const sent=this.sentReqs.includes(String(p.id));
             ol.innerHTML+=`<div class="fr">
-                <div class="fa2" style="background:${p.color||'#888'}22;color:${p.color||'#888'}">${(p.name[0]||'?').toUpperCase()}</div>
+                <img src="${app._drawFaceCanvas(p.color||'#888', p.inv||[])}" style="width:48px;height:48px;border-radius:10px;flex-shrink:0;">
                 <div class="fi"><div class="fn">${p.name}${['разраб','admin','citrus'].includes((p.name||"").toLowerCase())?' <span style="color:#4fc3f7;font-size:12px">✔</span>':''}</div>
                 <div class="fs ${p.status==='ingame'?'ig':'on'}">${p.tag||p.id} · ${p.status==='ingame'?'🎮 '+p.world:'● Онлайн'}</div></div>
                 <button class="bx ${sent?'b-del':'b-add'}" onclick="app.sendReq('${p.id}')">${sent?'✓ Отправлено':'+ Друг'}</button>
@@ -1809,6 +1873,14 @@ const app = {
         if(inv.includes('ice')){const im=new THREE.MeshStandardMaterial({color:0x88DDFF,emissive:0x44AAFF,emissiveIntensity:0.5,transparent:true,opacity:0.5});const ia=new THREE.Mesh(new THREE.SphereGeometry(0.65,10,10),im);headGroup.add(ia);}
         if(inv.includes('rainbow')){const colors=[0xFF0000,0xFF7700,0xFFFF00,0x00FF00,0x0000FF,0x8B00FF];colors.forEach((col,i)=>{const rb=new THREE.Mesh(new THREE.TorusGeometry(0.28+i*0.05,0.025,5,20,Math.PI),new THREE.MeshStandardMaterial({color:col,emissive:col,emissiveIntensity:0.7}));rb.position.set(0,0.38+i*0.02,0.05);rb.rotation.z=Math.PI;headGroup.add(rb);});}
         if(inv.includes('mask')){const mask=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.35,0.08),new THREE.MeshStandardMaterial({color:0xFFD700,metalness:0.9,roughness:0.1}));mask.position.set(0,0.08,0.32);headGroup.add(mask);}
+        // ── Волосы
+        const _hmo=(col)=>new THREE.MeshStandardMaterial({color:col,roughness:0.8});
+        if(inv.includes('hair_short')){const h=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.22,0.62),_hmo(0x3d1c02));h.position.set(0,0.35,0);headGroup.add(h);}
+        if(inv.includes('hair_long')){const h=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.22,0.62),_hmo(0x1a0a00));h.position.set(0,0.35,0);headGroup.add(h);const bk=new THREE.Mesh(new THREE.BoxGeometry(0.55,0.8,0.18),_hmo(0x1a0a00));bk.position.set(0,-0.05,-0.28);headGroup.add(bk);const sL=new THREE.Mesh(new THREE.BoxGeometry(0.18,0.6,0.4),_hmo(0x1a0a00));sL.position.set(-0.32,-0.1,0);headGroup.add(sL);const sR=sL.clone();sR.position.x=0.32;headGroup.add(sR);}
+        if(inv.includes('hair_spiky')){const b=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.18,0.62),_hmo(0x111111));b.position.set(0,0.33,0);headGroup.add(b);[[-0.18,0],[0,0],[0.18,0],[-0.09,0.08],[0.09,0.08]].forEach(([sx,sz])=>{const sp=new THREE.Mesh(new THREE.ConeGeometry(0.07,0.28,5),_hmo(0x111111));sp.position.set(sx,0.55,sz);headGroup.add(sp);});}
+        if(inv.includes('hair_curly')){const b=new THREE.Mesh(new THREE.BoxGeometry(0.64,0.2,0.64),_hmo(0x5c2a00));b.position.set(0,0.34,0);headGroup.add(b);[[-0.22,0.42,0],[0.22,0.42,0],[0,0.42,-0.2],[0,0.42,0.2],[-0.15,0.5,0.15],[0.15,0.5,0.15]].forEach(([x,y,z])=>{const c2=new THREE.Mesh(new THREE.SphereGeometry(0.1,6,6),_hmo(0x5c2a00));c2.position.set(x,y,z);headGroup.add(c2);});}
+        if(inv.includes('hair_bun')){const h=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.18,0.62),_hmo(0x2a0a00));h.position.set(0,0.34,0);headGroup.add(h);const bn=new THREE.Mesh(new THREE.SphereGeometry(0.15,8,8),_hmo(0x2a0a00));bn.position.set(0,0.52,0);headGroup.add(bn);}
+        if(inv.includes('hair_mohawk')){const b=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.15,0.62),_hmo(0xff2200));b.position.set(0,0.33,0);headGroup.add(b);for(let i=0;i<5;i++){const sp=new THREE.Mesh(new THREE.BoxGeometry(0.12,0.3-i*0.02,0.12),_hmo(0xff2200));sp.position.set(0,0.5,0.2-i*0.1);headGroup.add(sp);}}
 
         return g;
     },
@@ -2005,6 +2077,14 @@ const app = {
             hl.position.set(0,0.55,0);hl.rotation.x=Math.PI/6;headGroup.add(hl);
             const hlight=new THREE.PointLight(0xFFDD44,0.5,1.5);hlight.position.set(0,0.6,0);headGroup.add(hlight);
         }
+        // ── Волосы
+        const _hm=(col)=>new THREE.MeshStandardMaterial({color:col,roughness:0.8});
+        if(this.inventory.includes('hair_short')){const h=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.22,0.62),_hm(0x3d1c02));h.position.set(0,0.35,0);headGroup.add(h);}
+        if(this.inventory.includes('hair_long')){const h=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.22,0.62),_hm(0x1a0a00));h.position.set(0,0.35,0);headGroup.add(h);const bk=new THREE.Mesh(new THREE.BoxGeometry(0.55,0.8,0.18),_hm(0x1a0a00));bk.position.set(0,-0.05,-0.28);headGroup.add(bk);const sL=new THREE.Mesh(new THREE.BoxGeometry(0.18,0.6,0.4),_hm(0x1a0a00));sL.position.set(-0.32,-0.1,0);headGroup.add(sL);const sR=sL.clone();sR.position.x=0.32;headGroup.add(sR);}
+        if(this.inventory.includes('hair_spiky')){const b=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.18,0.62),_hm(0x111111));b.position.set(0,0.33,0);headGroup.add(b);[[-0.18,0],[0,0],[0.18,0],[-0.09,0.08],[0.09,0.08]].forEach(([sx,sz])=>{const sp=new THREE.Mesh(new THREE.ConeGeometry(0.07,0.28,5),_hm(0x111111));sp.position.set(sx,0.55,sz);headGroup.add(sp);});}
+        if(this.inventory.includes('hair_curly')){const b=new THREE.Mesh(new THREE.BoxGeometry(0.64,0.2,0.64),_hm(0x5c2a00));b.position.set(0,0.34,0);headGroup.add(b);[[-0.22,0.42,0],[0.22,0.42,0],[0,0.42,-0.2],[0,0.42,0.2],[-0.15,0.5,0.15],[0.15,0.5,0.15]].forEach(([x,y,z])=>{const c2=new THREE.Mesh(new THREE.SphereGeometry(0.1,6,6),_hm(0x5c2a00));c2.position.set(x,y,z);headGroup.add(c2);});}
+        if(this.inventory.includes('hair_bun')){const h=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.18,0.62),_hm(0x2a0a00));h.position.set(0,0.34,0);headGroup.add(h);const bn=new THREE.Mesh(new THREE.SphereGeometry(0.15,8,8),_hm(0x2a0a00));bn.position.set(0,0.52,0);headGroup.add(bn);}
+        if(this.inventory.includes('hair_mohawk')){const b=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.15,0.62),_hm(0xff2200));b.position.set(0,0.33,0);headGroup.add(b);for(let i=0;i<5;i++){const sp=new THREE.Mesh(new THREE.BoxGeometry(0.12,0.3-i*0.02,0.12),_hm(0xff2200));sp.position.set(0,0.5,0.2-i*0.1);headGroup.add(sp);}}
         if(needsRig)this.rig={leftArm:lA,rightArm:rA,leftLeg:lL,rightLeg:rL,torso,head:headGroup};
         // Ник над головой
         try {
@@ -2804,37 +2884,18 @@ const app = {
             if(this.playerGroup.position.y < -25){this.playerGroup.position.set(0,5,0); this.velocity.y=0;}
 
             if(this._camMode === 'first') {
-                // Вид от первого лица — камера в голове, смотрит куда смотришь мышью
+                // Вид от первого лица — камера в голове
                 const head = this.playerGroup.position.clone().add(new THREE.Vector3(0, 1.7, 0));
                 this.camera.position.copy(head);
                 this.camera.rotation.order = 'YXZ';
                 this.camera.rotation.y = camYaw + Math.PI;
-                this.camera.rotation.x = -(this._camPitch || 0);
+                this.camera.rotation.x = -(this._camPitch || 0.2);
                 // Скрываем своего персонажа
                 this.playerGroup.traverse(c=>{ if(c.isMesh) c.visible=false; });
-            } else if(this._camMode === 'far') {
-                // Далёкий вид — камера позади, но смотрит в направлении мыши
-                this.playerGroup.traverse(c=>{ if(c.isMesh) c.visible=true; });
-                const dist = 9.0;
-                const pitch = this._camPitch || 0.2;
-                const offset = new THREE.Vector3(0, 0, dist);
-                offset.applyEuler(new THREE.Euler(pitch, camYaw, 0, 'YXZ'));
-                const idealCamPos = this.playerGroup.position.clone().add(new THREE.Vector3(0, 1.2, 0)).add(offset);
-                this.camera.position.lerp(idealCamPos, 0.15);
-                // Смотрим в точку перед игроком (куда смотрит мышь), не на игрока
-                const lookDist = 20;
-                const lookTarget = this.playerGroup.position.clone()
-                    .add(new THREE.Vector3(0, 1.5, 0))
-                    .add(new THREE.Vector3(
-                        -Math.sin(camYaw + Math.PI) * lookDist,
-                        -Math.sin(pitch) * lookDist,
-                        -Math.cos(camYaw + Math.PI) * lookDist
-                    ));
-                this.camera.lookAt(lookTarget);
             } else {
                 // Вид от третьего лица
                 this.playerGroup.traverse(c=>{ if(c.isMesh) c.visible=true; });
-                const dist = 5.0;
+                const dist = this._camMode === 'far' ? 9.0 : 5.0;
                 const pitch = this._camPitch || 0.2;
                 const offset = new THREE.Vector3(0, 0, dist);
                 offset.applyEuler(new THREE.Euler(pitch, camYaw, 0, 'YXZ'));
@@ -2882,6 +2943,7 @@ const app = {
                     z: this.playerGroup.position.z,
                     ry: this.playerGroup.rotation.y,
                     map: String(this.currentMap),
+                    inv: this.inventory||[],
                     inv: this.inventory||[],
                     moving: !!(this.keys&&(this.keys['KeyW']||this.keys['KeyA']||this.keys['KeyS']||this.keys['KeyD'])),
                     jumping: !this.canJump,
@@ -3319,16 +3381,7 @@ const app = {
         if(bv) bv.textContent = this.balance;
     },
 
-    toggleCamera(){
-        const modes = ['third', 'first', 'far'];
-        const names = {'third':'👤 3-е лицо', 'first':'👁 1-е лицо', 'far':'🔭 Далеко'};
-        const cur = this._camMode || 'third';
-        const next = modes[(modes.indexOf(cur)+1) % modes.length];
-        this._camMode = next;
-        this._showToast(names[next]);
-        if(next !== 'first' && this.playerGroup)
-            this.playerGroup.traverse(c=>{ if(c.isMesh) c.visible=true; });
-    },
+
 
     exitGame(){
         this.spaceGrav=false;this.loopFn=null;this.mode='none';
@@ -3352,6 +3405,7 @@ const app = {
 window.onload = () => app.init();
 </script>
 </body>
-</html> 
+</html>
+
 
 
