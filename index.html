@@ -150,9 +150,39 @@
 <div id="ui-login">
     <div class="login-box">
         <h1 style="color:var(--c-main);margin:0 0 5px;font-size:48px;text-shadow:0 0 30px rgba(255,152,0,0.5);">CITRUS</h1>
-        <p style="color:#555;margin:0 0 26px;font-size:12px;letter-spacing:2px;text-transform:uppercase;">Online · Creator Edition</p>
-        <input type="text" id="username" placeholder="Введи никнейм..." autocomplete="off" maxlength="12" onkeydown="if(event.key==='Enter') app.login()">
-        <button class="btn-primary" onclick="app.login()">⚡ ИГРАТЬ</button>
+        <p style="color:#555;margin:0 0 20px;font-size:12px;letter-spacing:2px;text-transform:uppercase;">Online · Creator Edition</p>
+
+        <!-- Табы -->
+        <div style="display:flex;gap:0;margin-bottom:20px;border-radius:10px;overflow:hidden;border:1px solid #333;">
+            <button id="tab-login-btn" onclick="app.switchAuthTab('login')"
+                style="flex:1;padding:11px;background:rgba(255,152,0,0.2);color:var(--c-main);border:none;font-weight:bold;font-size:14px;cursor:pointer;">
+                🔑 Войти
+            </button>
+            <button id="tab-reg-btn" onclick="app.switchAuthTab('register')"
+                style="flex:1;padding:11px;background:transparent;color:#555;border:none;font-weight:bold;font-size:14px;cursor:pointer;">
+                ✨ Регистрация
+            </button>
+        </div>
+
+        <!-- Форма ВХОДА -->
+        <div id="auth-login-form">
+            <input type="text" id="login-username" placeholder="Никнейм" autocomplete="off" maxlength="16"
+                onkeydown="if(event.key==='Enter')document.getElementById('login-password').focus()">
+            <input type="password" id="login-password" placeholder="Пароль" autocomplete="off"
+                onkeydown="if(event.key==='Enter')app.login()">
+            <button class="btn-primary" onclick="app.login()" style="margin-top:8px;">⚡ ВОЙТИ</button>
+        </div>
+
+        <!-- Форма РЕГИСТРАЦИИ -->
+        <div id="auth-reg-form" style="display:none;">
+            <input type="text" id="reg-username" placeholder="Никнейм (3–16 символов)" autocomplete="off" maxlength="16"
+                onkeydown="if(event.key==='Enter')document.getElementById('reg-password').focus()">
+            <input type="password" id="reg-password" placeholder="Пароль" autocomplete="off"
+                onkeydown="if(event.key==='Enter')document.getElementById('reg-password2').focus()">
+            <input type="password" id="reg-password2" placeholder="Повтори пароль" autocomplete="off"
+                onkeydown="if(event.key==='Enter')app.register()">
+            <button class="btn-primary" onclick="app.register()" style="margin-top:8px;">✨ СОЗДАТЬ АККАУНТ</button>
+        </div>
     </div>
 </div>
 
@@ -210,6 +240,10 @@
                     <div class="card" onclick="app.launch('play','dungeon')">
                         <div class="card-thumb" style="background:radial-gradient(circle,rgba(150,0,200,0.12),#050505)">⚔️</div>
                         <div class="card-info"><div><b>Тёмное Подземелье</b><br><small style="color:#c060ff">Выберись живым</small></div></div>
+                    </div>
+                    <div class="card" onclick="app.launch('play','march8')" style="border:1px solid rgba(255,100,150,0.3)">
+                        <div class="card-thumb" style="background:radial-gradient(circle,rgba(255,100,150,0.15),#050505)">🌸</div>
+                        <div class="card-info"><div><b>🌸 8 Марта</b><br><small style="color:#ff6eb4">Цветы и весна!</small></div></div>
                     </div>
                 </div>
                 <div class="section-title">Миры игроков</div>
@@ -319,7 +353,12 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
         <div id="studio-ui" class="studio-panel hidden">
             <div id="palette" style="display:flex;gap:4px;"></div>
             <div style="width:1px;height:20px;background:#333;"></div>
-            <button class="btn-st" onclick="app.clearMap()">🗑 Очистить</button>
+            <button class="btn-st" id="stmode-place" onclick="app.setStudioMode('place')" style="background:rgba(255,152,0,0.3)">🧱 Ставить</button>
+            <button class="btn-st" id="stmode-move"  onclick="app.setStudioMode('move')">✋ Двигать</button>
+            <button class="btn-st" id="stmode-scale" onclick="app.setStudioMode('scale')">⤡ Размер</button>
+            <button class="btn-st" id="stmode-delete" onclick="app.setStudioMode('delete')">🗑 Удалить</button>
+            <div style="width:1px;height:20px;background:#333;"></div>
+            <button class="btn-st" onclick="app.clearMap()">🗑 Всё</button>
             <button class="btn-st" onclick="app.openEngScript()">📝 Скрипт</button>
             <button class="btn-publish" onclick="app.publishGame()">📤 Опубликовать</button>
             
@@ -358,6 +397,12 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
                 <div class="touch-btn jump" id="btn-jump" ontouchstart="app.touchJump()">⬆</div>
             </div>
             <div class="touch-place-btn hidden" id="btn-place" ontouchstart="app.placeBlock()">🧱</div>
+        <div id="studio-touch-btns" class="hidden" style="position:fixed;bottom:20px;right:16px;display:flex;flex-direction:column;gap:8px;z-index:50;pointer-events:auto;">
+            <button ontouchstart="app.setStudioMode('place')" onclick="app.setStudioMode('place')" style="background:rgba(255,152,0,0.85);border:none;border-radius:12px;color:#000;font-size:18px;width:52px;height:52px;cursor:pointer">🧱</button>
+            <button ontouchstart="app.setStudioMode('move')" onclick="app.setStudioMode('move')" style="background:rgba(0,229,255,0.85);border:none;border-radius:12px;color:#000;font-size:18px;width:52px;height:52px;cursor:pointer">✋</button>
+            <button ontouchstart="app.setStudioMode('scale')" onclick="app.setStudioMode('scale')" style="background:rgba(0,255,100,0.85);border:none;border-radius:12px;color:#000;font-size:18px;width:52px;height:52px;cursor:pointer">⤡</button>
+            <button ontouchstart="app.setStudioMode('delete')" onclick="app.setStudioMode('delete')" style="background:rgba(255,50,50,0.85);border:none;border-radius:12px;color:#fff;font-size:18px;width:52px;height:52px;cursor:pointer">🗑</button>
+        </div>
         </div>
     </div>
     <div id="gl-canvas"></div>
@@ -593,29 +638,51 @@ const app = {
     },
 
     // ── AUTH
+    switchAuthTab(tab){
+        const isLogin = tab==='login';
+        document.getElementById('auth-login-form').style.display = isLogin?'block':'none';
+        document.getElementById('auth-reg-form').style.display   = isLogin?'none':'block';
+        document.getElementById('tab-login-btn').style.background = isLogin?'rgba(255,152,0,0.2)':'transparent';
+        document.getElementById('tab-login-btn').style.color = isLogin?'var(--c-main)':'#555';
+        document.getElementById('tab-reg-btn').style.background = !isLogin?'rgba(255,152,0,0.2)':'transparent';
+        document.getElementById('tab-reg-btn').style.color = !isLogin?'var(--c-main)':'#555';
+    },
+
+    register(){
+        const name = document.getElementById('reg-username').value.trim();
+        const pass  = document.getElementById('reg-password').value;
+        const pass2 = document.getElementById('reg-password2').value;
+        if(name.length < 3) return this.showNotif('❌','Ник слишком короткий','Минимум 3 символа');
+        if(pass.length < 4) return this.showNotif('❌','Пароль слишком короткий','Минимум 4 символа');
+        if(pass !== pass2)  return this.showNotif('❌','Пароли не совпадают','Введи одинаковые пароли');
+        let db = JSON.parse(localStorage.getItem('citrus_global_users')||'[]');
+        if(db.find(u=>u.name.toLowerCase()===name.toLowerCase()))
+            return this.showNotif('❌','Ник занят','Выбери другой никнейм');
+        const id = Math.floor(1000+Math.random()*8999);
+        db.push({name, id, pass, color:this._myColor});
+        localStorage.setItem('citrus_global_users', JSON.stringify(db));
+        this.showNotif('✅','Аккаунт создан!','Теперь войди с паролем');
+        this.switchAuthTab('login');
+        document.getElementById('login-username').value = name;
+        document.getElementById('login-password').focus();
+    },
+
     login() {
-        const v = document.getElementById('username').value.trim();
-        if (v.length < 3) return this.showNotif('❌', 'Ник слишком короткий', 'Минимум 3 символа');
-        this.username = v;
+        const v    = document.getElementById('login-username').value.trim();
+        const pass = document.getElementById('login-password').value;
+        if(v.length < 3) return this.showNotif('❌','Ник слишком короткий','Минимум 3 символа');
+        if(pass.length < 1) return this.showNotif('❌','Введи пароль','Поле пароля пустое');
 
-        // Ищем существующий аккаунт с таким ником в глобальной БД
-        let globalDB = JSON.parse(localStorage.getItem('citrus_global_users') || '[]');
-        const existing = globalDB.find(u => u.name.toLowerCase() === v.toLowerCase());
-        if (existing) {
-            // Восстанавливаем старый аккаунт — ID не меняется!
-            this.userId = existing.id;
-            this._myColor = existing.color || this._myColor;
-        } else {
-            // Новый игрок — генерируем ID один раз
-            this.userId = Math.floor(1000 + Math.random() * 8999);
-        }
+        let db = JSON.parse(localStorage.getItem('citrus_global_users')||'[]');
+        const user = db.find(u=>u.name.toLowerCase()===v.toLowerCase());
 
-        this.fullTag = `${this.username}#${this.userId}`;
+        if(!user) return this.showNotif('❌','Аккаунт не найден','Сначала зарегистрируйся');
+        if(user.pass && user.pass !== pass) return this.showNotif('❌','Неверный пароль','Попробуй ещё раз');
 
-        // Обновляем запись в глобальной БД
-        globalDB = globalDB.filter(u => String(u.id) !== String(this.userId));
-        globalDB.push({name: this.username, id: this.userId, color: this._myColor});
-        localStorage.setItem('citrus_global_users', JSON.stringify(globalDB));
+        this.username   = user.name;
+        this.userId     = user.id;
+        this._myColor   = user.color || this._myColor;
+        this.fullTag    = `${this.username}#${this.userId}`;
 
         this.saveData();
         this.showHub();
@@ -625,6 +692,13 @@ const app = {
             this._readMailbox();
         }, 1500);
     },
+
+    isDev(name){
+        const devs = ['Разраб','разраб','Admin','admin','CITRUS','citrus'];
+        return devs.some(d=>d.toLowerCase()===(name||'').toLowerCase());
+    },
+
+    devBadge(name){ return this.isDev(name) ? ' <span style="color:#4fc3f7;font-size:11px;">✔</span>' : ''; },
 
     showHub(){
         // Слушаем личный BroadcastChannel (другие вкладки того же браузера)
@@ -969,7 +1043,7 @@ const app = {
         else if(msg.type==='invite'&&String(msg.to)===String(this.userId)){
             const wNames={lobby:'Главная Площадь',gather:'Цитрусовый Лес',parkour:'Небесный Паркур',
                 volcano:'Остров Вулкана',space:'Космическая База',hideseek:'Прятки',
-                snowmount:'Снежная Гора',dungeon:'Тёмное Подземелье'};
+                snowmount:'Снежная Гора',dungeon:'Тёмное Подземелье',march8:'🌸 8 Марта'};
             const wn=wNames[msg.world]||msg.worldName||msg.world;
             const n=document.createElement('div');n.className='notif';
             n.innerHTML=`<div class="nh">🎮 Приглашение в игру</div>
@@ -996,7 +1070,7 @@ const app = {
                     try{ this._gameWS.send(JSON.stringify(chatMsg)); }catch(e){}
                 }
                 this._wsSend(chatMsg); // MQTT как запасной
-                this.appendChatMessage(this.username, text, this._myColor); this._questProgress('chats',1); // Показываем у себя
+                this.appendChatMessage(this.username + (this.isDev(this.username)?' ✔':''), text, this._myColor); this._questProgress('chats',1); // Показываем у себя
                 e.target.value = '';
             }
             e.target.blur(); // Снимаем фокус с поля
@@ -1008,7 +1082,9 @@ const app = {
         if(!msgs) return;
         const div = document.createElement('div');
         div.className = 'chat-msg';
-        div.innerHTML = `<b style="color:${color||'#FF9800'}">${name}:</b> ${text}`;
+        const devN=['разраб','admin','citrus'];
+        const isChatDev=devN.includes((name||'').toLowerCase().replace(/#\d+/,''));
+        div.innerHTML = `<b style="color:${color||'#FF9800'}">${name}${isChatDev?' <span style="color:#4fc3f7">✔</span>':''}:</b> ${text}`;
         msgs.appendChild(div);
         msgs.scrollTop = msgs.scrollHeight; // Скролл вниз
     },
@@ -1334,7 +1410,7 @@ const app = {
                 : on ? `<button class="bx b-add" onclick="app.inviteFriend('${fid}','${p.name}')" style="font-size:10px">▶ Играть</button>` : '';
             fl.innerHTML+=`<div class="fr">
                 <div class="fa2" style="background:${p.color||'#888'}22;color:${p.color||'#888'}">${(p.name[0]||'?').toUpperCase()}</div>
-                <div class="fi"><div class="fn">${p.name}</div>
+                <div class="fi"><div class="fn">${p.name}${['разраб','admin','citrus'].includes((p.name||"").toLowerCase())?' <span style="color:#4fc3f7;font-size:12px">✔</span>':''}</div>
                 <div class="fs ${sc}">${p.tag||('#'+p.id)} · ${st}</div></div>
                 <div class="fb">${inviteBtn}
                     <button class="bx b-del" onclick="app.removeFriend('${fid}')">✕</button>
@@ -1400,7 +1476,7 @@ const app = {
                     inDiv.innerHTML+=`<div class="fr" style="border-color:rgba(255,64,129,0.2);background:rgba(255,64,129,0.04);margin-bottom:8px;">
                         <div class="fa2" style="background:${p.color||'#FF4081'}22;color:${p.color||'#FF4081'}">${(p.name[0]||'?').toUpperCase()}</div>
                         <div class="fi">
-                            <div class="fn">${p.name}</div>
+                            <div class="fn">${p.name}${['разраб','admin','citrus'].includes((p.name||"").toLowerCase())?' <span style="color:#4fc3f7;font-size:12px">✔</span>':''}</div>
                             <div class="fs" style="color:#FF4081;">хочет дружить</div>
                             <div style="font-size:10px;color:#333;">${p.tag||('#'+p.id)}</div>
                         </div>
@@ -1426,7 +1502,7 @@ const app = {
                     outDiv.innerHTML+=`<div class="fr" style="border-color:rgba(0,229,255,0.1);background:rgba(0,229,255,0.03);margin-bottom:8px;">
                         <div class="fa2" style="background:rgba(0,229,255,0.1);color:var(--c-blue)">${(p.name[0]||'?').toUpperCase()}</div>
                         <div class="fi">
-                            <div class="fn">${p.name}</div>
+                            <div class="fn">${p.name}${['разраб','admin','citrus'].includes((p.name||"").toLowerCase())?' <span style="color:#4fc3f7;font-size:12px">✔</span>':''}</div>
                             <div class="fs" style="color:var(--c-blue);">заявка отправлена</div>
                             <div style="font-size:10px;color:#333;">${p.tag||('#'+p.id)}</div>
                         </div>
@@ -1449,22 +1525,6 @@ const app = {
         if(!mapId){ this._showToast('Друг не в игре'); return; }
         this._showToast('🚀 Заходим в мир...');
         this.launch('play', mapId);
-        // Ждём загрузки сцены и ставим выше земли
-        const trySpawn = (attempts) => {
-            if(!this.playerGroup || attempts<=0) return;
-            this.playerGroup.position.set(0, 10, 0);
-            this.velocity && this.velocity.set(0, 0, 0);
-            this.canJump = false;
-            // Проверяем через 200мс что не провалились
-            setTimeout(()=>{
-                if(this.playerGroup && this.playerGroup.position.y < 0){
-                    this.playerGroup.position.set(0, 10, 0);
-                    this.velocity && this.velocity.set(0, 0, 0);
-                }
-            }, 200);
-        };
-        setTimeout(()=>trySpawn(3), 300);
-        setTimeout(()=>trySpawn(2), 800);
     },
 
     inviteFriend(fid, name){
@@ -1493,7 +1553,7 @@ const app = {
             const sent=this.sentReqs.includes(String(p.id));
             ol.innerHTML+=`<div class="fr">
                 <div class="fa2" style="background:${p.color||'#888'}22;color:${p.color||'#888'}">${(p.name[0]||'?').toUpperCase()}</div>
-                <div class="fi"><div class="fn">${p.name}</div>
+                <div class="fi"><div class="fn">${p.name}${['разраб','admin','citrus'].includes((p.name||"").toLowerCase())?' <span style="color:#4fc3f7;font-size:12px">✔</span>':''}</div>
                 <div class="fs ${p.status==='ingame'?'ig':'on'}">${p.tag||p.id} · ${p.status==='ingame'?'🎮 '+p.world:'● Онлайн'}</div></div>
                 <button class="bx ${sent?'b-del':'b-add'}" onclick="app.sendReq('${p.id}')">${sent?'✓ Отправлено':'+ Друг'}</button>
             </div>`;
@@ -1656,7 +1716,14 @@ const app = {
             ctx.font = 'bold 28px Arial';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText(name, 128, 32);
+            const devNames=['разраб','admin','citrus'];
+            const isDevLabel=devNames.includes((name||'').toLowerCase().split('#')[0]);
+            ctx.fillText(name, isDevLabel?108:128, 32);
+            if(isDevLabel){
+                ctx.fillStyle='#4fc3f7';
+                ctx.font='bold 24px Arial';
+                ctx.fillText('✔', 226, 32);
+            }
             const tex = new THREE.CanvasTexture(canvas);
             const sprite = new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true}));
             sprite.scale.set(2.2, 0.55, 1);
@@ -1954,7 +2021,7 @@ const app = {
         this.velocity.set(0,0,0);this.canJump=false;this.loopFn=null;this.spaceGrav=false;
         const wNames={lobby:'Главная Площадь',gather:'Цитрусовый Лес',parkour:'Небесный Паркур',
             volcano:'Остров Вулкана',space:'Космическая База',hideseek:'Прятки',
-            snowmount:'Снежная Гора',dungeon:'Тёмное Подземелье'};
+            snowmount:'Снежная Гора',dungeon:'Тёмное Подземелье',march8:'🌸 8 Марта'};
         this._worldName=wNames[mapId]||'Мир игрока';
         if(mode==='play'){
             this._updateStatus('ingame',this._worldName);
@@ -1966,7 +2033,9 @@ const app = {
         document.getElementById('engine-view').style.display='block';
         document.getElementById('crosshair').style.display=mode==='studio'?'block':'none';
         document.getElementById('studio-ui').classList.toggle('hidden',mode!=='studio');
-        document.getElementById('ingame-ui').style.display=(mode==='play'&&(mapId==='gather'||mapId==='hideseek'||mapId==='snowmount'||mapId==='dungeon'))?'flex':'none';
+        const stTouch = document.getElementById('studio-touch-btns');
+        if(stTouch) stTouch.classList.toggle('hidden', mode!=='studio');
+        document.getElementById('ingame-ui').style.display=(mode==='play'&&(mapId==='gather'||mapId==='hideseek'||mapId==='snowmount'||mapId==='dungeon'||mapId==='march8'))?'flex':'none';
         document.getElementById('mp-panel').classList.toggle('hidden',mode!=='play');
         
         // Чат виден только в игре
@@ -1985,7 +2054,7 @@ const app = {
     setupScene(){
         const canvas=document.getElementById('gl-canvas');canvas.innerHTML='';
         this.scene=new THREE.Scene();
-        const bgs={lobby:0x0a0a18,gather:0x0d1f0a,parkour:0x87CEEB,volcano:0x1a0800,space:0x000005,hideseek:0x0d1a0d,snowmount:0x87CEEB,dungeon:0x050508};
+        const bgs={lobby:0x0a0a18,gather:0x0d1f0a,parkour:0x87CEEB,volcano:0x1a0800,space:0x000005,hideseek:0x0d1a0d,snowmount:0x87CEEB,dungeon:0x050508,march8:0x1a0a1a};
         const bg=bgs[this.currentMap]||0x0a0a10;
         this.scene.background=new THREE.Color(bg);
         this.scene.fog=new THREE.FogExp2(bg,0.016);
@@ -2007,11 +2076,13 @@ const app = {
         this.buildWorld();
         if(this.mode==='play'){
             this.playerGroup=this.buildCharacter(true);
-            this.playerGroup.position.set(0,1.1,0);
-            if(this.currentMap==='parkour')this.playerGroup.position.y=5;
+            // Спавн выше земли для всех миров
+            const spawnY = {parkour:8, march8:5, dungeon:3, volcano:4, space:4, snowmount:4, hideseek:4, gather:3, lobby:3};
+            this.playerGroup.position.set(0, spawnY[this.currentMap]||5, 0);
             this.scene.add(this.playerGroup);
             this.renderMpPanel();
-            if(typeof this.currentMap==='number'){
+
+        if(typeof this.currentMap==='number'){
                 const m=this.customMaps[this.currentMap];
                 if(m&&m.script&&m.script.includes('// @loop')){
                     try{
@@ -2059,7 +2130,7 @@ const app = {
             orb.position.y=3;this.scene.add(orb);
             const pl=new THREE.PointLight(0xFF9800,3,12);pl.position.set(0,4,0);this.scene.add(pl);
             const bcs=[0x1a1a3a,0x1a2a1a,0x2a1a1a,0x2a2a1a];
-            for(let i=0;i<8;i++){
+            for(let i=0;i<3;i++){
                 const a=(i/8)*Math.PI*2,h=10+Math.random()*14,w=5+Math.random()*3;
                 const bld=new THREE.Mesh(new THREE.BoxGeometry(w,h,w),new THREE.MeshStandardMaterial({color:bcs[i%4],roughness:0.8}));
                 bld.position.set(Math.cos(a)*30,h/2,Math.sin(a)*30);bld.castShadow=true;
@@ -2071,7 +2142,7 @@ const app = {
                     win.rotation.y=Math.atan2(Math.cos(a),Math.sin(a));this.scene.add(win);
                 }
             }
-            for(let i=0;i<8;i++){
+            for(let i=0;i<3;i++){
                 const a=(i/8)*Math.PI*2;
                 const pole=new THREE.Mesh(new THREE.CylinderGeometry(0.08,0.1,5),new THREE.MeshStandardMaterial({color:0x888888,metalness:0.7}));
                 pole.position.set(Math.cos(a)*16,2.5,Math.sin(a)*16);this.scene.add(pole);this.objectsToIntersect.push(pole);
@@ -2325,6 +2396,93 @@ const app = {
             portal.position.set(0,2.5,-62);portal.rotation.x=Math.PI/2;this.scene.add(portal);
             const portalLight=new THREE.PointLight(0xaa00ff,4,15);portalLight.position.set(0,2,-62);this.scene.add(portalLight);
         }
+
+
+
+        else if(this.currentMap==='march8'){
+            // 🌸 МИР 8 МАРТА
+            this.scene.background = new THREE.Color(0x2d0a2d);
+            this.scene.fog = new THREE.FogExp2(0x2d0a2d, 0.010);
+            addGround(0x6b1a4a);
+            this.scene.add(new THREE.AmbientLight(0xff88cc, 1.4));
+            const pL=new THREE.PointLight(0xFF69B4,3,80); pL.position.set(0,15,0); this.scene.add(pL);
+            const pL2=new THREE.PointLight(0xFFD700,2,60); pL2.position.set(20,12,-20); this.scene.add(pL2);
+            const pL3=new THREE.PointLight(0xff44aa,2,60); pL3.position.set(-20,12,20); this.scene.add(pL3);
+
+            const box=(x,y,z,sx,sy,sz,col)=>{
+                const mesh=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),
+                    new THREE.MeshStandardMaterial({color:col,roughness:0.6}));
+                mesh.position.set(x,y,z); mesh.castShadow=true; mesh.receiveShadow=true;
+                mesh.userData.removable=true;
+                this.scene.add(mesh); this.objectsToIntersect.push(mesh);
+            };
+
+            // ═══ ЦВЕТКИ (20 штук по всему полю) ═══
+            const flower=(fx,fz,petCol)=>{
+                box(fx,3,fz,0.8,6,0.8,0x1a8b1a);          // стебель
+                box(fx-1.2,2.5,fz,2,0.5,0.7,0x22aa22);     // листик лево
+                box(fx+1.2,3.5,fz,2,0.5,0.7,0x22aa22);     // листик право
+                box(fx,6.5,fz,2.2,2.2,2.2,0xFFD700);       // сердцевина
+                [[-2.2,0],[2.2,0],[0,-2.2],[0,2.2],
+                 [-1.6,-1.6],[1.6,-1.6],[-1.6,1.6],[1.6,1.6]].forEach(([dx,dz])=>{
+                    box(fx+dx,6.5,fz+dz,1.8,1.8,1.8,petCol);
+                });
+            };
+
+            const colors=[0xFF69B4,0xFF1493,0xff44aa,0xffaadd,0xff66bb];
+            const positions=[
+                [-10,-8],[ 10,-8],[  0,-16],[-16,-12],[ 16,-12],
+                [ -8,  5],[  8,  5],[  0,  0],[-18,  2],[ 18,  2],
+                [ -5, 14],[  5, 14],[-14, 16],[ 14, 16],[  0, 22],
+                [-20,-22],[ 20,-22],[  0,-28],[-10, 28],[ 10, 28],
+            ];
+            positions.forEach(([fx,fz],i)=> flower(fx,fz,colors[i%colors.length]));
+
+            // ═══ ЦИТРУСОВЫЕ ДЕРЕВЬЯ (как в gather) ═══
+            for(let i=0;i<8;i++){
+                const tx=(Math.random()-0.5)*100, tz=(Math.random()-0.5)*100;
+                if(Math.abs(tx)<12&&Math.abs(tz)<12) continue;
+                const h=3+Math.random()*3;
+                const trunk=new THREE.Mesh(new THREE.CylinderGeometry(0.35,0.5,h),
+                    new THREE.MeshStandardMaterial({color:0x5D3A1A,roughness:0.9}));
+                trunk.position.set(tx,h/2,tz); trunk.castShadow=true;
+                this.scene.add(trunk); this.objectsToIntersect.push(trunk);
+                // Листва — розовая для 8 марта
+                for(let j=0;j<3;j++){
+                    const fol=new THREE.Mesh(new THREE.SphereGeometry(2.2-j*0.4,8,8),
+                        new THREE.MeshStandardMaterial({
+                            color:[0xFF69B4,0xFF1493,0xffaadd][j], roughness:0.8
+                        }));
+                    fol.position.set(tx,h+j*1.4,tz); fol.castShadow=true; this.scene.add(fol);
+                }
+
+            }
+
+            // ═══ АРКА НА ВХОДЕ ═══
+            for(let i=0;i<=12;i++){
+                const a=(i/12)*Math.PI;
+                box(Math.cos(a)*9, Math.sin(a)*8+1, -32,
+                    2,2,2, i%3===0?0xFF69B4:i%3===1?0xFF1493:0xFFD700);
+            }
+
+            // ═══ ПОДИУМ В ЦЕНТРЕ ═══
+            box(0,1,0,  12,2,12, 0x8b2252);
+            box(0,2.1,0,10,0.3,10, 0xff88cc);
+
+            // ═══ СЕРДЕЧКИ ПО ПОЛЮ ═══
+            [[-5,2],[-3,6],[4,3],[8,-5],[-8,-3],[0,8],[6,-10],[-6,10],
+             [12,0],[-12,5],[15,-8],[-15,12],[20,5],[-20,-5],[0,-18]].forEach(([hx,hz],i)=>{
+                box(hx,1,hz,2,2,2,colors[i%colors.length]);
+            });
+
+            // ═══ ЦИТРУСЫ НА ЗЕМЛЕ ДЛЯ СБОРА ═══
+            const cm=new THREE.MeshStandardMaterial({color:0xFF9800,emissive:0xFF5500,emissiveIntensity:0.6});
+            for(let i=0;i<3;i++){
+                const c=new THREE.Mesh(new THREE.SphereGeometry(0.5,12,12),cm);
+                c.position.set((Math.random()-0.5)*100,0.5,(Math.random()-0.5)*100);
+                this.scene.add(c); this.collectibles.push(c);
+            }
+        }
         else if(this.mode==='studio'){
             addGround(0x111118);
             this.scene.add(new THREE.GridHelper(100,50,0x222244,0x111133));
@@ -2338,7 +2496,8 @@ const app = {
 
     async renderMpPanel(){
         const list=document.getElementById('mp-list');if(!list)return;
-        list.innerHTML=`<div class="mpp"><div class="mpd" style="background:#00E676"></div>${this.username} (ты)</div>`;
+        const _devBadge=n=>['разраб','admin','citrus'].includes((n||'').toLowerCase())?'<span style="color:#4fc3f7;font-size:10px"> ✔</span>':'';
+        list.innerHTML=`<div class="mpp"><div class="mpd" style="background:#00E676"></div>${this.username}${_devBadge(this.username)} (ты)</div>`;
         // Берём актуальный список с сервера
         try {
             const r = await fetch(this._API+'/online');
@@ -2359,7 +2518,7 @@ const app = {
             const name = (this._pc||[]).find(x=>x.id===String(id))?.name || id;
             if(p) {
                 const ingame = p.status==='ingame';
-                list.innerHTML+=`<div class="mpp"><div class="mpd" style="background:${ingame?'#00E5FF':'#00E676'}"></div><span style="color:${ingame?'#00E5FF':'#aaa'}">${p.name}${ingame?' 🎮':''}</span></div>`;
+                list.innerHTML+=`<div class="mpp"><div class="mpd" style="background:${ingame?'#00E5FF':'#00E676'}"></div><span style="color:${ingame?'#00E5FF':'#aaa'}">${p.name}${_devBadge(p.name)}${ingame?' 🎮':''}</span></div>`;
             } else {
                 list.innerHTML+=`<div class="mpp"><div class="mpd" style="background:#333;box-shadow:none"></div><span style="color:#444">${name} ○</span></div>`;
             }
@@ -2367,10 +2526,13 @@ const app = {
     },
 
     // ── СТРОИТЕЛЬСТВО / БЛОКИ
-    spawnBlock(x,y,z,color){
-        const b=new THREE.Mesh(new THREE.BoxGeometry(2,2,2),new THREE.MeshStandardMaterial({color}));
+    spawnBlock(x,y,z,color,sx,sy,sz){
+        sx=sx||2; sy=sy||2; sz=sz||2;
+        const b=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),new THREE.MeshStandardMaterial({color}));
         b.position.set(x,y,z);b.castShadow=true;b.receiveShadow=true;b.userData.removable=true;
-        this.scene.add(b);this.objectsToIntersect.push(b);this.mapBlocks.push({x,y,z,color});
+        b.userData.blockData={x,y,z,color,sx,sy,sz};
+        this.scene.add(b);this.objectsToIntersect.push(b);this.mapBlocks.push({x,y,z,color,sx,sy,sz});
+        return b;
     },
     placeBlock(){
         this.raycaster.setFromCamera(new THREE.Vector2(0,0),this.camera);
@@ -2404,11 +2566,94 @@ const app = {
         }
     },
 
+    setStudioMode(m){
+        this._studioMode = m;
+        ['place','move','scale','delete'].forEach(n=>{
+            const b=document.getElementById('stmode-'+n);
+            if(b) b.style.background = n===m ? 'rgba(255,152,0,0.5)' : '';
+        });
+        const hints = {
+            place: '<span>ЛКМ</span> ставить · <span>ПКМ</span> убрать · <span>QE</span> вверх/вниз',
+            move:  '<span>ЛКМ</span> выбрать блок · затем <span>WASD/QE</span> двигать · <span>ПКМ</span> снять',
+            scale: '<span>ЛКМ</span> выбрать блок · затем <span>WASD/QE</span> растягивать · <span>ПКМ</span> снять',
+            delete:'<span>ЛКМ</span> удалить блок'
+        };
+        const he = document.getElementById('hint-eng');
+        if(he) he.innerHTML = hints[m]||hints.place;
+    },
+
     onMouseClick(e) {
         if (this.mode !== 'studio' || !document.pointerLockElement) return;
-        if (e.button === 0) this.placeBlock();
-        else if (e.button === 2) this.removeBlock();
+        const mode = this._studioMode || 'place';
+        if(e.button === 2){
+            // ПКМ всегда снимает выбор или удаляет
+            if(this._selectedBlock){ this._deselectBlock(); return; }
+            this.removeBlock(); return;
+        }
+        if(e.button !== 0) return;
+
+        if(mode==='place'){ this.placeBlock(); return; }
+        if(mode==='delete'){ this.removeBlock(); return; }
+
+        // move / scale — выбираем блок
+        this.raycaster.setFromCamera(new THREE.Vector2(0,0),this.camera);
+        const hit=this.raycaster.intersectObjects(this.objectsToIntersect)[0];
+        if(!hit||!hit.object.userData.removable) return;
+        if(this._selectedBlock && this._selectedBlock===hit.object){ this._deselectBlock(); return; }
+        this._selectBlock(hit.object, mode);
     },
+
+    _selectBlock(obj, mode){
+        this._deselectBlock();
+        this._selectedBlock = obj;
+        this._selectedMode = mode;
+        // Подсветка
+        obj._origColor = obj.material.color.getHex();
+        obj.material = obj.material.clone();
+        obj.material.emissive = new THREE.Color(mode==='move' ? 0x0088ff : 0x00ff44);
+        obj.material.emissiveIntensity = 0.5;
+    },
+
+    _deselectBlock(){
+        if(!this._selectedBlock) return;
+        const obj = this._selectedBlock;
+        if(obj._origColor !== undefined){
+            obj.material.emissive = new THREE.Color(0x000000);
+            obj.material.emissiveIntensity = 0;
+        }
+        this._selectedBlock = null;
+        this._selectedMode = null;
+    },
+
+    _moveSelectedBlock(dx,dy,dz){
+        const obj = this._selectedBlock;
+        if(!obj) return;
+        const mode = this._selectedMode;
+        if(mode==='move'){
+            obj.position.x += dx*2;
+            obj.position.y += dy*2;
+            obj.position.z += dz*2;
+            // Обновляем в mapBlocks
+            const bd = obj.userData.blockData;
+            if(bd){
+                const mb = this.mapBlocks.find(b=>b.x===bd.x&&b.y===bd.y&&b.z===bd.z);
+                if(mb){ mb.x+=dx*2; mb.y+=dy*2; mb.z+=dz*2; bd.x=mb.x; bd.y=mb.y; bd.z=mb.z; }
+            }
+        } else if(mode==='scale'){
+            const bd = obj.userData.blockData;
+            if(!bd) return;
+            bd.sx = Math.max(0.5,(bd.sx||2)+dx*0.5);
+            bd.sy = Math.max(0.5,(bd.sy||2)+dy*0.5);
+            bd.sz = Math.max(0.5,(bd.sz||2)+dz*0.5);
+            // Пересоздаём геометрию
+            obj.geometry.dispose();
+            obj.geometry = new THREE.BoxGeometry(bd.sx, bd.sy, bd.sz);
+            const mb = this.mapBlocks.find(b=>b.x===bd.x&&b.y===bd.y&&b.z===bd.z);
+            if(mb){ mb.sx=bd.sx; mb.sy=bd.sy; mb.sz=bd.sz; }
+        }
+    },
+
+
 
     // ── PHYSICS
     checkGround(pos){
@@ -2516,6 +2761,9 @@ const app = {
                     }
                 }
             }
+
+            // 🌸 Анимация монет и цветов 8 марта
+            if(this.currentMap==='march8' && this._march8Anim) this._march8Anim(time);
             // Отправляем позицию на сервер (каждые 150мс)
             if (!this._lastPosSend || Date.now()-this._lastPosSend > 50) {
                 this._lastPosSend = Date.now();
@@ -2561,12 +2809,26 @@ const app = {
         }
         else if(this.mode==='studio'){
             const s=30*delta;
-            if(this.keys['KeyW'])this.camera.translateZ(-s);
-            if(this.keys['KeyS'])this.camera.translateZ(s);
-            if(this.keys['KeyA'])this.camera.translateX(-s);
-            if(this.keys['KeyD'])this.camera.translateX(s);
-            if(this.keys['KeyE'])this.camera.position.y+=s;
-            if(this.keys['KeyQ'])this.camera.position.y-=s;
+            if(this._selectedBlock){
+                // Двигаем/масштабируем выбранный блок
+                const sm=this._studioMode;
+                if(this.keys['KeyW']) this._moveSelectedBlock(0,0,-1);
+                if(this.keys['KeyS']) this._moveSelectedBlock(0,0,1);
+                if(this.keys['KeyA']) this._moveSelectedBlock(-1,0,0);
+                if(this.keys['KeyD']) this._moveSelectedBlock(1,0,0);
+                if(this.keys['KeyE']) this._moveSelectedBlock(0,1,0);
+                if(this.keys['KeyQ']) this._moveSelectedBlock(0,-1,0);
+                // Блокируем слишком быстрое срабатывание
+                ['KeyW','KeyS','KeyA','KeyD','KeyE','KeyQ'].forEach(k=>this.keys[k]=false);
+            } else {
+                // Двигаем камеру
+                if(this.keys['KeyW'])this.camera.translateZ(-s);
+                if(this.keys['KeyS'])this.camera.translateZ(s);
+                if(this.keys['KeyA'])this.camera.translateX(-s);
+                if(this.keys['KeyD'])this.camera.translateX(s);
+                if(this.keys['KeyE'])this.camera.position.y+=s;
+                if(this.keys['KeyQ'])this.camera.position.y-=s;
+            }
         }
         // Плавно двигаем и анимируем других игроков
         if(this._others && this.mode==='play') {
@@ -2800,6 +3062,10 @@ const app = {
 
         // Активные задания
         this._questDefs = rot.ids.map(id => ALL_QUESTS.find(q=>q.id===id)).filter(Boolean);
+        // Инициализируем данные для каждого задания если нет
+        this._questDefs.forEach(q=>{
+            if(!this.questData[q.id]) this.questData[q.id]={progress:0,done:false,claimed:false};
+        });
         this._questRotNextAt = rot.nextAt;
 
         // Бейдж
@@ -2809,29 +3075,42 @@ const app = {
 
         // Запускаем таймер обновления
         if(!this._questTimer) {
-            this._questTimer = setInterval(()=>{
-                this._questTimer = null;
-                this._initQuests();
-                this.renderQuests();
-                this._showToast('🎯 Новые задания доступны!');
-            }, rot.nextAt - Date.now());
+            const msUntil = rot.nextAt - Date.now();
+            if(msUntil > 0){
+                this._questTimer = setTimeout(()=>{
+                    this._questTimer = null;
+                    this.questRotation = null;
+                    this._initQuests();
+                    this.renderQuests();
+                    this._showToast('🎯 Задания обновились! Забирай новые!');
+                }, msUntil);
+            }
         }
     },
 
 
 
     _questProgress(type, amount=1){
-        if(!this._questDefs) return;
+        if(!this._questDefs || !this.questData) return;
         let changed = false;
         this._questDefs.forEach(q=>{
             if(q.type !== type) return;
+            if(!this.questData[q.id]) this.questData[q.id]={progress:0,done:false,claimed:false};
             const d = this.questData[q.id];
             if(d.done) return;
             d.progress = Math.min((d.progress||0)+amount, q.goal);
-            if(d.progress >= q.goal){ d.done=true; changed=true;
-                this._showToast && this._showToast('🎯 Задание выполнено: '+q.title+'! Забери награду!'); }
+            if(d.progress >= q.goal){
+                d.done=true; changed=true;
+                this._showToast('🎯 Задание выполнено: '+q.title+'! Нажми "Получить"!');
+            }
+            this.saveData();
         });
-        if(changed){ this.saveData(); this._initQuests(); }
+        if(changed){
+            this._initQuests();
+            // Обновляем вкладку если открыта
+            const qt=document.getElementById('tab-quests');
+            if(qt&&!qt.classList.contains('hidden')) this.renderQuests();
+        }
     },
 
     renderQuests(){
@@ -2940,7 +3219,9 @@ const app = {
 window.onload = () => app.init();
 </script>
 </body>
-</html>
+</html
+>
+
 
 
 
