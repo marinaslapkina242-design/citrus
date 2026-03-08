@@ -565,7 +565,7 @@ const app = {
         if (this.username && this.username !== '') {
             document.getElementById('ui-login').classList.add('hidden');
             document.getElementById('ui-hub').classList.remove('hidden');
-            this.renderMyGames(); this.renderFriends(); this.renderOnline(); this.initAvatarPreview(); this.renderShop();
+            if(!this._idb)this._initIDB(); this.renderMyGames(); this.renderFriends(); this.renderOnline(); this.initAvatarPreview(); this.renderShop();
             this.updateUI();
             this._wsConnect();
             setInterval(()=>this.renderOnline(), 30000);
@@ -619,6 +619,32 @@ const app = {
             this.inventory = []; this.customMaps = []; this.friends = []; this.friendRequests = []; this.sentReqs = [];
         }
     },
+
+    // ── IndexedDB для хранения данных игроков
+    _initIDB(){
+        return new Promise(res=>{
+            const req=indexedDB.open('citrus_v1',1);
+            req.onupgradeneeded=e=>{
+                const db=e.target.result;
+                if(!db.objectStoreNames.contains('players'))db.createObjectStore('players',{keyPath:'id'});
+            };
+            req.onsuccess=e=>{this._idb=e.target.result;res();};
+            req.onerror=()=>res();
+        });
+    },
+    _idbPut(store,obj){
+        return new Promise((res,rej)=>{
+            if(!this._idb)return res();
+            try{const tx=this._idb.transaction(store,'readwrite');tx.objectStore(store).put(obj);tx.oncomplete=res;tx.onerror=rej;}catch(e){res();}
+        });
+    },
+    _idbGetAll(store){
+        return new Promise(res=>{
+            if(!this._idb)return res([]);
+            try{const tx=this._idb.transaction(store,'readonly');const req=tx.objectStore(store).getAll();req.onsuccess=()=>res(req.result||[]);req.onerror=()=>res([]);}catch(e){res([]);}
+        });
+    },
+
     saveData(){
         localStorage.setItem('citrus_v5_pro',JSON.stringify({
             username:this.username, userId:this.userId, balance:this.balance,
@@ -722,7 +748,7 @@ const app = {
         } catch(e) {}
         document.getElementById('ui-login').classList.add('hidden');
         document.getElementById('ui-hub').classList.remove('hidden');
-        this.renderMyGames(); this.renderFriends(); this.renderOnline(); this.initAvatarPreview(); this.renderShop();
+        if(!this._idb)this._initIDB(); this.renderMyGames(); this.renderFriends(); this.renderOnline(); this.initAvatarPreview(); this.renderShop();
         this.updateUI();
     },
 
@@ -1107,7 +1133,7 @@ const app = {
                     } catch(e){}
             this._cachedOnline=Object.values(this._onlineMap);
             // Сохраняем в IDB для поиска
-            this._idbPut('players', {id:p.id,name:p.name,tag:p.tag,color:p.color,ts:p.ts}).catch(()=>{});
+            this._idbPut('players', {id:p.id,name:p.name,tag:p.tag,color:p.color,inv:p.inv||[],ts:p.ts}).catch(()=>{});
             const ol=document.getElementById('online-list');
             if(ol&&ol.innerHTML.includes('Загрузка'))this.renderOnline();
         }
@@ -1195,7 +1221,7 @@ const app = {
             if (r.ok) {
                 const list = await r.json();
                 if (!this._onlineMap) this._onlineMap = {};
-                list.forEach(p => { if (String(p.id) !== String(this.userId)) this._onlineMap[p.id] = {...p, ts: p.ts||now}; });
+                list.forEach(p => { if (String(p.id) !== String(this.userId)) { this._onlineMap[p.id] = {...p, ts: p.ts||now}; this._idbPut('players', {id:p.id,name:p.name,tag:p.tag,color:p.color,inv:p.inv||[],ts:p.ts}).catch(()=>{}); } });
             }
         } catch(e) {}
         if(this._onlineMap){
@@ -1360,9 +1386,12 @@ const app = {
         const res = document.getElementById('srch-res');
         if (!q) { res.innerHTML = '<div style="color:#333;font-size:12px;padding:6px;">Введи ник и нажми Поиск</div>'; return; }
 
-        // Источники: сервер + localStorage + онлайн игроки
+        // Источники: IDB + localStorage + сервер + онлайн
         let localDB = [];
         try { localDB = JSON.parse(localStorage.getItem('citrus_global_users') || '[]'); } catch(e) {}
+        // Также берём из IndexedDB (там хранится inv)
+        let idbPlayers = [];
+        try { idbPlayers = await this._idbGetAll('players'); } catch(e) {}
         const onlinePlayers = this._cachedOnline || [];
 
         // Запрашиваем с сервера
@@ -1375,6 +1404,8 @@ const app = {
         const allUsersMap = new Map();
         // 1. localDB (база)
         localDB.forEach(u => allUsersMap.set(String(u.id), {...u, inv:u.inv||[]}));
+        // 2. IndexedDB — там хранится inv
+        idbPlayers.forEach(u => { if(u&&u.id){ const ex=allUsersMap.get(String(u.id)); allUsersMap.set(String(u.id), {...(ex||{}), ...u, inv:u.inv||ex?.inv||[]}); } });
         // 2. Сервер — перезаписывает, включая inv
         serverPlayers.forEach(u => { if (u.id) allUsersMap.set(String(u.id), {id:String(u.id), name:u.name, tag:u.tag||u.name+'#'+u.id, color:u.color||'#FF9800', inv:u.inv||[]}); });
         // 3. Онлайн — обновляет цвет и inv если свежее
@@ -3412,6 +3443,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
