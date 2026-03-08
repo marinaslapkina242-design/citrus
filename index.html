@@ -999,10 +999,31 @@ const app = {
                 this._others[msg.id] = g;
                 this.scene && this.scene.add(g);
             }
-            const other = this._others[msg.id];
-            other.position.set(msg.x, msg.y, msg.z);
+            let other = this._others[msg.id];
+            // Обновляем аксессуары если изменились
+            const newKey = (msg.inv||[]).join(',');
+            if(other._invKey !== newKey && this.scene){
+                this.scene.remove(other);
+                const ng = this._buildOtherPlayer(msg.name, msg.color, msg.inv||[]);
+                ng.position.copy(other.position);
+                ng._targetPos = other._targetPos ? other._targetPos.clone() : other.position.clone();
+                ng._targetRy = msg.ry||0;
+                ng._lastSeen = Date.now();
+                ng._moving = msg.moving||false;
+                ng._jumping = msg.jumping||false;
+                ng._prevY = other._prevY;
+                this._others[msg.id] = ng;
+                this.scene.add(ng);
+                other = ng;
+            }
+            if(!other._targetPos) other._targetPos = other.position.clone();
+            other._targetPos.set(msg.x, msg.y, msg.z);
             other._targetRy = msg.ry || 0;
             other._lastSeen = Date.now();
+            other._moving = msg.moving || false;
+            other._jumping = msg.jumping || false;
+            other._velY = msg.y - (other._prevY !== undefined ? other._prevY : msg.y);
+            other._prevY = msg.y;
             return;
         }
 
@@ -1660,7 +1681,7 @@ const app = {
             players.forEach(p => {
                 if(String(p.id) === String(this.userId)) return;
                 if(!this._others[p.id]) {
-                    const g = this._buildOtherPlayer(p.name, p.color);
+                    const g = this._buildOtherPlayer(p.name, p.color, p.inv||[]);
                     this._others[p.id] = g;
                     this.scene && this.scene.add(g);
                 }
@@ -3262,6 +3283,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
