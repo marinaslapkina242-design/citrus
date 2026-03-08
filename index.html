@@ -376,7 +376,7 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
         </div>
 
         <button class="btn-exit" onclick="app.exitGame()">← В ХАБ</button>
-        <button id="btn-cam" onclick="app.toggleCamera()" style="position:fixed;top:16px;right:16px;z-index:200;background:rgba(0,0,0,0.6);border:1px solid rgba(255,152,0,0.4);color:#FF9800;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:bold;cursor:pointer;backdrop-filter:blur(8px);">👁 1-е лицо</button>
+        <button id="btn-cam" onclick="app.toggleCamera()" style="position:fixed;top:16px;left:16px;z-index:200;background:rgba(0,0,0,0.6);border:1px solid rgba(255,152,0,0.4);color:#FF9800;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:bold;cursor:pointer;backdrop-filter:blur(8px);pointer-events:auto;">👁 1-е лицо</button>
         <div class="controls-hint" id="kb-hint">
             <p><span>WASD</span> — движение</p>
             <p><span>SPACE</span> — прыжок</p>
@@ -2804,18 +2804,37 @@ const app = {
             if(this.playerGroup.position.y < -25){this.playerGroup.position.set(0,5,0); this.velocity.y=0;}
 
             if(this._camMode === 'first') {
-                // Вид от первого лица — камера в голове
+                // Вид от первого лица — камера в голове, смотрит куда смотришь мышью
                 const head = this.playerGroup.position.clone().add(new THREE.Vector3(0, 1.7, 0));
                 this.camera.position.copy(head);
                 this.camera.rotation.order = 'YXZ';
                 this.camera.rotation.y = camYaw + Math.PI;
-                this.camera.rotation.x = -(this._camPitch || 0.2);
+                this.camera.rotation.x = -(this._camPitch || 0);
                 // Скрываем своего персонажа
                 this.playerGroup.traverse(c=>{ if(c.isMesh) c.visible=false; });
+            } else if(this._camMode === 'far') {
+                // Далёкий вид — камера позади, но смотрит в направлении мыши
+                this.playerGroup.traverse(c=>{ if(c.isMesh) c.visible=true; });
+                const dist = 9.0;
+                const pitch = this._camPitch || 0.2;
+                const offset = new THREE.Vector3(0, 0, dist);
+                offset.applyEuler(new THREE.Euler(pitch, camYaw, 0, 'YXZ'));
+                const idealCamPos = this.playerGroup.position.clone().add(new THREE.Vector3(0, 1.2, 0)).add(offset);
+                this.camera.position.lerp(idealCamPos, 0.15);
+                // Смотрим в точку перед игроком (куда смотрит мышь), не на игрока
+                const lookDist = 20;
+                const lookTarget = this.playerGroup.position.clone()
+                    .add(new THREE.Vector3(0, 1.5, 0))
+                    .add(new THREE.Vector3(
+                        -Math.sin(camYaw + Math.PI) * lookDist,
+                        -Math.sin(pitch) * lookDist,
+                        -Math.cos(camYaw + Math.PI) * lookDist
+                    ));
+                this.camera.lookAt(lookTarget);
             } else {
                 // Вид от третьего лица
                 this.playerGroup.traverse(c=>{ if(c.isMesh) c.visible=true; });
-                const dist = this._camMode === 'far' ? 9.0 : 5.0;
+                const dist = 5.0;
                 const pitch = this._camPitch || 0.2;
                 const offset = new THREE.Vector3(0, 0, dist);
                 offset.applyEuler(new THREE.Euler(pitch, camYaw, 0, 'YXZ'));
@@ -3334,3 +3353,4 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
