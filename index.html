@@ -1419,6 +1419,11 @@ const app = {
         const tagMatch = raw.match(/^(.+)#(\d{4})$/);
         if (tagMatch) {
             const [, tName, tId] = tagMatch;
+            // Грузим игрока напрямую с сервера по ID
+            try {
+                const r2 = await fetch(this._API+'/players/'+tId);
+                if(r2.ok){ const sp = await r2.json(); if(sp&&sp.id) allUsersMap.set(String(sp.id),{...sp,inv:sp.inv||[]}); }
+            } catch(e){}
             found = found.filter(u => String(u.id) === tId);
             if (!found.length) {
                 // Не нашли — предлагаем отправить заявку вслепую
