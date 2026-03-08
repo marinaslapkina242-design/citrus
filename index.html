@@ -1370,8 +1370,7 @@ const app = {
         try {
             const r = await fetch(`${this._API}/players/search?q=${encodeURIComponent(raw)}`);
             if (r.ok) serverPlayers = await r.json();
-            console.log('SERVER PLAYERS:', JSON.stringify(serverPlayers));
-        } catch(e) { console.log('SEARCH ERROR:', e); }
+        } catch(e) {}
 
         const allUsersMap = new Map();
         // 1. localDB (база)
@@ -3413,6 +3412,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
