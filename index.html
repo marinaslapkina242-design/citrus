@@ -30,6 +30,7 @@
         .nav-item.active { color: var(--c-main); background: rgba(255,152,0,0.06); border-left-color: var(--c-main); }
         .nav-badge { position: absolute; right: 18px; background: var(--c-pink); color: #fff; font-size: 11px; font-weight: bold; padding: 2px 7px; border-radius: 20px; }
         .content-area { flex: 1; padding: 35px; overflow-y: auto; background: #070707; }
+        #tab-roulette { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 30px; width: 100%; gap: 12px; }
         .content-area::-webkit-scrollbar { width: 3px; }
         .content-area::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
         .section-title { font-size: 12px; font-weight: bold; color: #444; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 16px; }
@@ -203,6 +204,7 @@
             <div class="nav-item"        id="nav-friends" onclick="app.switchTab('friends')"><i class="fas fa-users"          style="width:16px"></i> Друзья <span class="nav-badge hidden" id="fr-badge">0</span></div>
             <div class="nav-item"        id="nav-studio"  onclick="app.switchTab('studio')"> <i class="fas fa-cube"           style="width:16px"></i> Студия</div>
             <div class="nav-item" id="nav-quests" onclick="app.switchTab('quests')"><i class="fas fa-tasks" style="width:16px"></i> Задания <span class="nav-badge hidden" id="quest-badge">!</span></div>
+            <div class="nav-item" id="nav-roulette" onclick="app.switchTab('roulette')"><i class="fas fa-dice" style="width:16px"></i> Рулетка</div>
         </div>
         <div class="content-area">
 
@@ -342,6 +344,24 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
                 <div id="quests-list" style="display:flex;flex-direction:column;gap:12px;padding-bottom:20px;"></div>
             </div>
 
+        </div>
+
+        <div id="tab-roulette" class="hidden">
+                <div style="text-align:center;">
+                    <div style="font-size:26px;font-weight:bold;color:var(--c-orange);letter-spacing:1px;">🎰 РУЛЕТКА</div>
+                    <div style="color:#555;font-size:13px;margin-top:2px;">Первый раз бесплатно • Затем 50 🍊</div>
+                </div>
+                <!-- Стрелка -->
+                <div style="font-size:36px;line-height:1;filter:drop-shadow(0 2px 6px #FF9800);margin-bottom:-16px;">▼</div>
+                <!-- Колесо -->
+                <canvas id="roulette-canvas" width="400" height="400" style="border-radius:50%;display:block;margin:0 auto;"></canvas>
+                <!-- Результат -->
+                <div id="roulette-result" style="text-align:center;min-height:36px;font-size:22px;font-weight:bold;color:#FFD700;"></div>
+                <!-- Кнопка -->
+                <button id="roulette-btn" onclick="app.spinRoulette()" style="padding:14px 48px;background:linear-gradient(135deg,#FF9800,#FF5722);border:none;border-radius:12px;color:#fff;font-size:16px;font-weight:bold;cursor:pointer;letter-spacing:1px;">
+                    🎲 КРУТИТЬ БЕСПЛАТНО
+                </button>
+                <div id="roulette-status" style="text-align:center;color:#555;font-size:12px;"></div>
         </div>
     </div>
 </div>
@@ -610,7 +630,7 @@ const app = {
             this.inventory=d.inventory||[];
             this.customMaps=d.customMaps||[];
             this.friends=d.friends||[];
-        this.questData=d.questData||{}; this.coins=d.coins||0; this.questRotation=d.questRotation||null; this.visitedMaps=d.visitedMaps||[];
+        this.questData=d.questData||{}; this.coins=d.coins||0; this.rouletteUsed=d.rouletteUsed||false; this.questRotation=d.questRotation||null; this.visitedMaps=d.visitedMaps||[];
             this.friendRequests=d.friendRequests||[];
             this.sentReqs = d.sentReqs||[];
         } else {
@@ -618,6 +638,110 @@ const app = {
             this._myColor = COLORS[this.userId % COLORS.length];
             this.inventory = []; this.customMaps = []; this.friends = []; this.friendRequests = []; this.sentReqs = [];
         }
+    },
+
+
+    initRoulette(){
+        const prizes = [5,10,20,30,50,75,100,150,200,15,25,40,60,80,10,35,50,100];
+        const colors = ['#FF4081','#FF9800','#FFD740','#69F0AE','#40C4FF','#E040FB',
+                        '#FF6E40','#00E5FF','#CCFF90','#FF80AB','#82B1FF','#FF9800',
+                        '#FFD740','#69F0AE','#FF4081','#40C4FF','#E040FB','#FF6E40'];
+        const canvas = document.getElementById('roulette-canvas');
+        if(!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const n = prizes.length;
+        const arc = (2*Math.PI)/n;
+        this._roulettePrizes = prizes;
+        this._rouletteColors = colors;
+        this._rouletteAngle = this._rouletteAngle || 0;
+        this._drawRoulette(ctx, this._rouletteAngle);
+        // Update button
+        const used = this.rouletteUsed || false;
+        const btn = document.getElementById('roulette-btn');
+        const status = document.getElementById('roulette-status');
+        if(btn){
+            if(!used){ btn.textContent='🎲 КРУТИТЬ БЕСПЛАТНО'; btn.style.opacity='1'; }
+            else if(this.balance >= 50){ btn.textContent='🎲 КРУТИТЬ ЗА 50 🍊'; btn.style.opacity='1'; }
+            else { btn.textContent='🎲 КРУТИТЬ ЗА 50 🍊'; btn.style.opacity='0.5'; }
+        }
+        if(status) status.textContent = used ? 'Бесплатный спин использован • 50 🍊 за спин' : '✨ У тебя есть бесплатный спин!';
+    },
+
+    _drawRoulette(ctx, angle){
+        const prizes = this._roulettePrizes;
+        const colors = this._rouletteColors;
+        const n = prizes.length;
+        const arc = (2*Math.PI)/n;
+        const cx = 200, cy = 200, r = 188;
+        ctx.clearRect(0,0,400,400);
+        for(let i=0;i<n;i++){
+            const start = angle + i*arc;
+            ctx.beginPath(); ctx.moveTo(cx,cy);
+            ctx.arc(cx,cy,r,start,start+arc);
+            ctx.fillStyle = colors[i]; ctx.fill();
+            ctx.strokeStyle='#111'; ctx.lineWidth=1.5; ctx.stroke();
+            ctx.save(); ctx.translate(cx,cy);
+            ctx.rotate(start + arc/2);
+            ctx.textAlign='right'; ctx.fillStyle='#fff';
+            ctx.font='bold 16px sans-serif';
+            ctx.shadowColor='#000'; ctx.shadowBlur=3;
+            ctx.fillText(prizes[i]+'🍊', r-8, 5);
+            ctx.restore();
+        }
+        // Center circle
+        ctx.beginPath(); ctx.arc(cx,cy,24,0,2*Math.PI);
+        ctx.fillStyle='#111'; ctx.fill();
+        ctx.strokeStyle='#FF9800'; ctx.lineWidth=3; ctx.stroke();
+    },
+
+    spinRoulette(){
+        const used = this.rouletteUsed || false;
+        if(used && this.balance < 50){
+            this.showNotif('💸','Мало монет','Нужно 50 🍊 для спина');
+            return;
+        }
+        if(used){ this.balance -= 50; this.saveData(); const bv=document.getElementById('balance-val'); if(bv)bv.textContent=this.balance; }
+
+        const btn = document.getElementById('roulette-btn');
+        const result = document.getElementById('roulette-result');
+        const canvas = document.getElementById('roulette-canvas');
+        if(!canvas||!btn) return;
+        const ctx = canvas.getContext('2d');
+        btn.disabled = true; btn.style.opacity='0.5';
+        if(result) result.textContent = '';
+
+        const n = this._roulettePrizes.length;
+        const arc = (2*Math.PI)/n;
+        // Pick random prize
+        const winner = Math.floor(Math.random()*n);
+        // Spin at least 5 full rotations + land on winner
+        const targetAngle = this._rouletteAngle + Math.PI*10 + (2*Math.PI - winner*arc - arc/2 - (this._rouletteAngle % (2*Math.PI)));
+        const startAngle = this._rouletteAngle;
+        const duration = 4000;
+        const startTime = Date.now();
+
+        const animate = () => {
+            const elapsed = Date.now() - startTime;
+            const t = Math.min(elapsed/duration, 1);
+            // Ease out cubic
+            const ease = 1 - Math.pow(1-t, 3);
+            this._rouletteAngle = startAngle + (targetAngle - startAngle)*ease;
+            this._drawRoulette(ctx, this._rouletteAngle);
+            if(t < 1){ requestAnimationFrame(animate); }
+            else {
+                // Award prize
+                const prize = this._roulettePrizes[winner];
+                this.balance += prize;
+                this.rouletteUsed = true;
+                this.saveData();
+                const bv=document.getElementById('balance-val'); if(bv)bv.textContent=this.balance;
+                if(result) result.textContent = '🎉 +' + prize + ' 🍊!';
+                btn.disabled = false;
+                this.showNotif('🎰','Рулетка!','Ты выиграл '+prize+' 🍊!');
+                this.initRoulette();
+            }
+        };
+        requestAnimationFrame(animate);
     },
 
     // ── IndexedDB для хранения данных игроков
@@ -676,7 +800,7 @@ const app = {
         localStorage.setItem('citrus_v5_pro',JSON.stringify({
             username:this.username, userId:this.userId, balance:this.balance,
             myColor:this._myColor,
-            inventory:this.inventory, customMaps:this.customMaps,
+            inventory:this.inventory, customMaps:this.customMaps, rouletteUsed:this.rouletteUsed||false,
             friends:this.friends, friendRequests:this.friendRequests, sentReqs:this.sentReqs, visitedMaps:this.visitedMaps||[],
             questData:this.questData, coins:this.coins, questRotation:this.questRotation
         }));
@@ -753,7 +877,7 @@ const app = {
     },
 
     isDev(name){
-        const devs = ['Разраб','разраб','Admin','admin','CITRUS','citrus','Крутой','крутой'];
+        const devs = ['Разраб','разраб','Admin','admin','CITRUS','citrus'];
         return devs.some(d=>d.toLowerCase()===(name||'').toLowerCase());
     },
 
@@ -855,7 +979,7 @@ const app = {
 
     // ── TABS
     switchTab(id){
-        ['games','avatar','shop','friends','studio','quests'].forEach(t=>{
+        ['games','avatar','shop','friends','studio','quests','roulette'].forEach(t=>{
             document.getElementById('tab-'+t).classList.add('hidden');
             document.getElementById('nav-'+t)?.classList.remove('active');
         });
@@ -864,6 +988,7 @@ const app = {
         if(id==='avatar')this.updateAvatarPreview();
         if(id==='games')this.renderMyGames();
         if(id==='quests')this.renderQuests();
+        if(id==='roulette')this.initRoulette();
         else if(this._questCountdownInterval){ clearInterval(this._questCountdownInterval); this._questCountdownInterval=null; }
         if(id==='friends'){
             // Регистрируем на сервере (на случай если зашли раньше деплоя)
@@ -1109,7 +1234,7 @@ const app = {
             const bv2=document.getElementById('balance-val'); if(bv2) bv2.textContent=this.balance;
             const it=SHOP_ITEMS.find(i=>i.id===id);
             this.showNotif(it.icon,'Куплено!',`${it.name} в гардеробе`);
-        }else this.showNotif('😭','Мало цитрусов',`Нужно ещё ${price-this.balance} 🍊`);
+        }else this.showNotif('💸','Мало монет',`Нужно ещё ${price-this.balance} 🍊`);
     },
     resetAvatar(){this.inventory=[];this.saveData();this.renderShop();this.updateAvatarPreview();
             try{fetch(this._API+'/players/'+this.userId,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:String(this.userId),name:this.username,tag:this.fullTag,color:this._myColor,inv:this.inventory||[]})});}catch(e){}},
@@ -1814,7 +1939,7 @@ const app = {
                     inDiv.innerHTML+=`<div class="fr" style="border-color:rgba(255,64,129,0.2);background:rgba(255,64,129,0.04);margin-bottom:8px;">
                         <img src="${app._drawFaceCanvas(p.color||'#FF4081', p.inv||[])}" style="width:48px;height:48px;border-radius:10px;flex-shrink:0;">
                         <div class="fi">
-                            <div class="fn">${p.name}${['разраб','admin','citrus','Крутой'].includes((p.name||"").toLowerCase())?' <span style="color:#4fc3f7;font-size:12px">✔</span>':''}</div>
+                            <div class="fn">${p.name}${['разраб','admin','citrus'].includes((p.name||"").toLowerCase())?' <span style="color:#4fc3f7;font-size:12px">✔</span>':''}</div>
                             <div class="fs" style="color:#FF4081;">хочет дружить</div>
                             <div style="font-size:10px;color:#333;">${p.tag||('#'+p.id)}</div>
                         </div>
@@ -1840,7 +1965,7 @@ const app = {
                     outDiv.innerHTML+=`<div class="fr" style="border-color:rgba(0,229,255,0.1);background:rgba(0,229,255,0.03);margin-bottom:8px;">
                         <img src="${app._drawFaceCanvas(p.color||'#00E5FF', p.inv||[])}" style="width:48px;height:48px;border-radius:10px;flex-shrink:0;">
                         <div class="fi">
-                            <div class="fn">${p.name}${['разраб','admin','citrus','Крутой'].includes((p.name||"").toLowerCase())?' <span style="color:#4fc3f7;font-size:12px">✔</span>':''}</div>
+                            <div class="fn">${p.name}${['разраб','admin','citrus'].includes((p.name||"").toLowerCase())?' <span style="color:#4fc3f7;font-size:12px">✔</span>':''}</div>
                             <div class="fs" style="color:var(--c-blue);">заявка отправлена</div>
                             <div style="font-size:10px;color:#333;">${p.tag||('#'+p.id)}</div>
                         </div>
@@ -2088,7 +2213,7 @@ const app = {
             ctx.fillStyle = 'rgba(0,0,0,0.6)';
             ctx.roundRect(4,4,248,56,12);
             ctx.fill();
-            const devNamesL=['разраб','admin','citrus','Крутой'];
+            const devNamesL=['разраб','admin','citrus'];
             const isDevLabel=devNamesL.includes((name||'').toLowerCase().split('#')[0]);
             if(isDevLabel){
                 // Имя + галочка вместе
@@ -2355,7 +2480,7 @@ const app = {
             ctx.fillStyle = 'rgba(0,0,0,0.6)';
             ctx.roundRect(4,4,248,56,12);
             ctx.fill();
-            const _devNs=['разраб','admin','citrus','крутой'];
+            const _devNs=['разраб','admin','citrus'];
             const _isDev=_devNs.includes((this.username||'').toLowerCase().split('#')[0]);
             if(_isDev){
                 ctx.font='bold 28px Arial';
@@ -3495,7 +3620,7 @@ const app = {
             {id:'play5',   title:'Первый шаг',       desc:'Поиграй 5 минут',            reward:10,  type:'playtime', goal:5,   icon:'👟'},
         ];
 
-        const ROTATE_MS = 90 * 60 * 1000; // 1 час 30 минут
+        const ROTATE_MS = 80 * 60 * 1000; // 1 час 20 минут
         const now = Date.now();
 
         // Загружаем или создаём слот ротации
@@ -3587,9 +3712,11 @@ const app = {
         if(this._questCountdownInterval) clearInterval(this._questCountdownInterval);
         const tick = () => {
             const ms = Math.max(0, (this._questRotNextAt||0) - Date.now());
-            const m = Math.floor(ms/60000);
+            const h = Math.floor(ms/3600000);
+            const m = Math.floor((ms%3600000)/60000);
             const s = Math.floor((ms%60000)/1000);
-            timerEl.textContent = '🔄 Обновление через ' + m + ':' + String(s).padStart(2,'0');
+            const timeStr = h > 0 ? h+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0') : m+':'+String(s).padStart(2,'0');
+            timerEl.textContent = '🔄 Обновление через ' + timeStr;
             if(ms<=0){ clearInterval(this._questCountdownInterval); this._questCountdownInterval=null; }
         };
         tick();
@@ -3679,6 +3806,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
