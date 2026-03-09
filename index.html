@@ -889,8 +889,8 @@ const app = {
             const scene = new THREE.Scene();
             const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
             // Show head + shoulders, slightly from above
-            camera.position.set(0, 0.6, 3.2);
-            camera.lookAt(0, 0.4, 0);
+            camera.position.set(0, 0.9, 3.8);
+            camera.lookAt(0, 0.9, 0);
 
             scene.add(new THREE.AmbientLight(0xffffff, 3.5));
             const dl = new THREE.DirectionalLight(0xffffff, 2.0);
@@ -928,6 +928,12 @@ const app = {
             [-0.42,0.42].forEach(x=>{
                 const arm = new THREE.Mesh(new THREE.BoxGeometry(0.2,0.5,0.25), bodyM);
                 arm.position.set(x, 0.28, 0); g.add(arm);
+            });
+            // Legs
+            const legM = new THREE.MeshStandardMaterial({color:0x222266,roughness:0.8});
+            [-0.17,0.17].forEach(x=>{
+                const leg = new THREE.Mesh(new THREE.BoxGeometry(0.22,0.5,0.28), legM);
+                leg.position.set(x, -0.27, 0); g.add(leg);
             });
 
             // === ACCESSORIES ===
@@ -3660,6 +3666,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
