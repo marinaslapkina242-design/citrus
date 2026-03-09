@@ -645,6 +645,33 @@ const app = {
         });
     },
 
+    // Рисует аватар в <img> тег, загружая inv с сервера если нужно
+    async _setAvatar(img, color, inv, playerId) {
+        // Сначала рисуем сразу что есть
+        img.src = this._drawFaceCanvas(color, inv||[]);
+        // Если inv пустой и есть ID — грузим с сервера
+        if((!inv||inv.length===0) && playerId) {
+            try {
+                const r = await fetch(this._API+'/players/'+playerId);
+                if(r.ok){
+                    const p = await r.json();
+                    if(p && p.inv && p.inv.length > 0) {
+                        // Сохраняем в localStorage
+                        try {
+                            let gdb = JSON.parse(localStorage.getItem('citrus_global_users')||'[]');
+                            const gi = gdb.findIndex(u=>String(u.id)===String(playerId));
+                            if(gi!==-1) gdb[gi].inv = p.inv;
+                            else gdb.push({id:playerId, name:p.name, color:p.color||color, inv:p.inv});
+                            localStorage.setItem('citrus_global_users', JSON.stringify(gdb));
+                        } catch(e){}
+                        // Перерисовываем с реальным inv
+                        img.src = this._drawFaceCanvas(p.color||color, p.inv);
+                    }
+                }
+            } catch(e){}
+        }
+    },
+
     saveData(){
         localStorage.setItem('citrus_v5_pro',JSON.stringify({
             username:this.username, userId:this.userId, balance:this.balance,
@@ -1571,7 +1598,7 @@ const app = {
             const isOnline = onlineFresh;
             res.innerHTML += `
                 <div class="fr">
-                    <img src="${app._drawFaceCanvas(col, freshInv)}" style="width:48px;height:48px;border-radius:10px;flex-shrink:0;">
+                    <img id="av_${uidStr}" src="${app._drawFaceCanvas(col, freshInv)}" style="width:48px;height:48px;border-radius:10px;flex-shrink:0;">
                     <div class="fi"><div class="fn">${u.name} <small style="color:#555">#${u.id}</small></div>
                     <div class="fs ${isOnline?'on':''}"> ${isOnline ? '● Онлайн' : '○ Не в сети'}</div></div>
                     <div class="fb">
@@ -3559,4 +3586,5 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
