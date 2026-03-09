@@ -1336,7 +1336,7 @@ const app = {
                 method:'POST',
                 headers:{'Content-Type':'application/json'},
                 body:JSON.stringify({id:String(this.userId),name:this.username,tag:this.fullTag,
-                    color:this._myColor,status:this._pStatus||'online',world:this._pWorld||null,ts:Date.now()})
+                    color:this._myColor,inv:this.inventory||[],status:this._pStatus||'online',world:this._pWorld||null,ts:Date.now()})
             });
         }catch(e){}
         if(!this._ws||this._ws.readyState!==1){this._wsConnect();return;}
@@ -3586,5 +3586,6 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
