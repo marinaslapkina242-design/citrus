@@ -205,6 +205,7 @@
             <div class="nav-item"        id="nav-studio"  onclick="app.switchTab('studio')"> <i class="fas fa-cube"           style="width:16px"></i> Студия</div>
             <div class="nav-item" id="nav-quests" onclick="app.switchTab('quests')"><i class="fas fa-tasks" style="width:16px"></i> Задания <span class="nav-badge hidden" id="quest-badge">!</span></div>
             <div class="nav-item" id="nav-roulette" onclick="app.switchTab('roulette')"><i class="fas fa-dice" style="width:16px"></i> Рулетка</div>
+            <div class="nav-item" id="nav-credits" onclick="app.switchTab('credits')"><i class="fas fa-hand-holding-usd" style="width:16px"></i> Кредиты</div>
         </div>
         <div class="content-area">
 
@@ -344,6 +345,41 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
                 <div id="quests-list" style="display:flex;flex-direction:column;gap:12px;padding-bottom:20px;"></div>
             </div>
 
+
+        <div id="tab-credits" class="hidden">
+            <div style="width:100%;">
+                <div class="section-title">💳 Кредиты</div>
+
+                <!-- Мой кредит -->
+                <div id="my-credit-section" style="background:#0e0e0e;border:1px solid #1e1e1e;border-radius:12px;padding:16px;margin-bottom:16px;">
+                    <div style="font-size:14px;font-weight:bold;color:#FF9800;margin-bottom:12px;">📤 Выставить кредит</div>
+                    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                        <input id="credit-amount" type="number" min="1000" max="100000" placeholder="Сумма (1000–100000 🍊)" style="flex:1;min-width:160px;padding:10px;background:#111;border:1px solid #2a2a2a;border-radius:8px;color:#fff;font-size:13px;">
+                        <select id="credit-days" style="width:160px;padding:10px;background:#111;border:1px solid #2a2a2a;border-radius:8px;color:#fff;font-size:13px;">
+                            <option value="10">10 минут</option>
+                            <option value="20">20 минут</option>
+                            <option value="30">30 минут</option>
+                            <option value="45">45 минут</option>
+                            <option value="60">1 час</option>
+                        </select>
+                        <button onclick="app.postCredit()" style="padding:10px 20px;background:linear-gradient(135deg,#FF9800,#FF5722);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:bold;cursor:pointer;">Выставить</button>
+                    </div>
+                    <div id="my-active-credit" style="margin-top:12px;"></div>
+                </div>
+
+                <!-- Мой долг -->
+                <div id="my-debt-section" style="background:#0e0e0e;border:1px solid #1e1e1e;border-radius:12px;padding:16px;margin-bottom:16px;display:none;">
+                    <div style="font-size:14px;font-weight:bold;color:#FF4444;margin-bottom:8px;">⚠️ Мой долг</div>
+                    <div id="my-debt-info" style="color:#aaa;font-size:13px;"></div>
+                    <button onclick="app.repayCredit()" style="margin-top:10px;padding:10px 24px;background:linear-gradient(135deg,#4CAF50,#2E7D32);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:bold;cursor:pointer;">💸 Вернуть долг</button>
+                </div>
+
+                <!-- Доступные кредиты -->
+                <div style="font-size:14px;font-weight:bold;color:#FF9800;margin-bottom:10px;">📋 Доступные кредиты</div>
+                <div id="credits-list" style="display:flex;flex-direction:column;gap:8px;">
+                    <div style="color:#444;font-size:13px;">Загрузка...</div>
+                </div>
+            </div>
         </div>
 
         <div id="tab-roulette" class="hidden">
@@ -368,6 +404,7 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
                     </div>
                 </div>
             </div>
+        </div>
         </div>
     </div>
 </div>
@@ -640,6 +677,125 @@ const app = {
             this._myColor = COLORS[this.userId % COLORS.length];
             this.inventory = []; this.customMaps = []; this.friends = []; this.friendRequests = []; this.sentReqs = [];
         }
+    },
+
+
+    async initCredits(){
+        await this._loadCredits();
+    },
+
+    async _loadCredits(){
+        const list = document.getElementById('credits-list');
+        const myDebt = document.getElementById('my-debt-section');
+        const myDebtInfo = document.getElementById('my-debt-info');
+        const myActive = document.getElementById('my-active-credit');
+        try {
+            const res = await fetch(this._API + '/credits');
+            const data = await res.json();
+            const now = Date.now();
+
+            // Check my debt
+            const myBorrow = data.borrows ? data.borrows.find(b => b.borrowerId == this.userId) : null;
+            if(myBorrow){
+                myDebt.style.display = 'block';
+                const daysLeft = Math.max(0, Math.ceil((myBorrow.dueAt - now) / 60000));
+                const overdue = now > myBorrow.dueAt;
+                myDebtInfo.innerHTML = `Ты взял <b style="color:#FFD700">${myBorrow.amount} 🍊</b> у <b>${myBorrow.lenderName}</b> · 
+                    ${overdue ? '<span style="color:#FF4444">⚠️ Просрочено!</span>' : `Осталось <b style="color:#4CAF50">${daysLeft} мин.</b>`}`;
+            } else {
+                myDebt.style.display = 'none';
+            }
+
+            // Check my posted credit
+            const myCredit = data.credits ? data.credits.find(c => c.lenderId == this.userId) : null;
+            if(myCredit){
+                const taken = myCredit.borrowerId ? `<span style="color:#FF9800">Взял: <b>${myCredit.borrowerName}</b></span>` : '<span style="color:#4CAF50">Свободен</span>';
+                myActive.innerHTML = `<div style="background:#111;border-radius:8px;padding:10px;font-size:13px;color:#aaa;">
+                    Твой кредит: <b style="color:#FFD700">${myCredit.amount} 🍊</b> · ${myCredit.days} дн. · ${taken}
+                    <button onclick="app.cancelCredit('${myCredit.id}')" style="margin-left:10px;background:none;border:1px solid #333;color:#555;border-radius:6px;padding:3px 10px;cursor:pointer;font-size:12px;">Отозвать</button>
+                </div>`;
+            } else {
+                myActive.innerHTML = '';
+            }
+
+            // Available credits list
+            const available = (data.credits || []).filter(c => c.lenderId != this.userId && !c.borrowerId);
+            if(!available.length){
+                list.innerHTML = '<div style="color:#444;font-size:13px;padding:12px;">Нет доступных кредитов</div>';
+            } else {
+                list.innerHTML = available.map(c => `
+                    <div style="display:flex;align-items:center;gap:12px;background:#0e0e0e;border:1px solid #1e1e1e;border-radius:10px;padding:12px 16px;">
+                        <div style="flex:1;">
+                            <span style="font-size:15px;font-weight:bold;color:#FFD700;">${c.amount} 🍊</span>
+                            <span style="color:#555;font-size:12px;margin-left:8px;">· ${c.days} мин. · от <b style="color:#aaa">${c.lenderName}</b></span>
+                        </div>
+                        <button onclick="app.borrowCredit('${c.id}')" style="padding:8px 18px;background:linear-gradient(135deg,#FF9800,#FF5722);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:bold;cursor:pointer;">Взять</button>
+                    </div>`).join('');
+            }
+        } catch(e){ if(list) list.innerHTML='<div style="color:#444;font-size:13px;">Ошибка загрузки</div>'; }
+    },
+
+    async postCredit(){
+        const amount = parseInt(document.getElementById('credit-amount').value);
+        const days = parseInt(document.getElementById('credit-days').value);
+        if(!amount || amount < 1000 || amount > 100000){ this.showNotif('❌','Ошибка','Сумма от 1000 до 100000 🍊'); return; }
+        if(!days || days < 10 || days > 60){ this.showNotif('❌','Ошибка','Выбери срок'); return; }
+        try {
+            const res = await fetch(this._API + '/credits', {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({lenderId: this.userId, lenderName: this.username+'#'+this.userId, amount, days})
+            });
+            const d = await res.json();
+            if(d.ok){ this.showNotif('✅','Кредит выставлен!',`${amount} 🍊 на ${days} дней`); this._loadCredits(); }
+            else this.showNotif('❌','Ошибка', d.error||'Попробуй снова');
+        } catch(e){ this.showNotif('❌','Ошибка','Нет связи'); }
+    },
+
+    async borrowCredit(creditId){
+        // Check no existing debt
+        try {
+            const res = await fetch(this._API + '/credits/borrow', {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({creditId, borrowerId: this.userId, borrowerName: this.username+'#'+this.userId})
+            });
+            const d = await res.json();
+            if(d.ok){
+                this.balance += d.amount;
+                this.saveData();
+                document.getElementById('balance-val').textContent = this.balance;
+                this.showNotif('💰','Кредит получен!',`+${d.amount} 🍊 · Верни за ${d.days} мин.`);
+                this._loadCredits();
+            } else this.showNotif('❌','Ошибка', d.error||'Нельзя взять');
+        } catch(e){ this.showNotif('❌','Ошибка','Нет связи'); }
+    },
+
+    async repayCredit(){
+        try {
+            const res = await fetch(this._API + '/credits/repay', {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({borrowerId: this.userId})
+            });
+            const d = await res.json();
+            if(d.ok){
+                this.balance -= d.amount;
+                if(this.balance < 0) this.balance = 0;
+                this.saveData();
+                document.getElementById('balance-val').textContent = this.balance;
+                this.showNotif('✅','Долг погашен!',`Вернул ${d.amount} 🍊`);
+                this._loadCredits();
+            } else this.showNotif('❌','Ошибка', d.error||'Нет долга');
+        } catch(e){ this.showNotif('❌','Ошибка','Нет связи'); }
+    },
+
+    async cancelCredit(creditId){
+        try {
+            await fetch(this._API + '/credits/cancel', {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({creditId, lenderId: this.userId})
+            });
+            this.showNotif('✅','Кредит отозван','');
+            this._loadCredits();
+        } catch(e){}
     },
 
     initRoulette(){
@@ -948,7 +1104,7 @@ const app = {
 
     // ── TABS
     switchTab(id){
-        ['games','avatar','shop','friends','studio','quests','roulette'].forEach(t=>{
+        ['games','avatar','shop','friends','studio','quests','roulette','credits'].forEach(t=>{
             document.getElementById('tab-'+t).classList.add('hidden');
             document.getElementById('nav-'+t)?.classList.remove('active');
         });
@@ -958,6 +1114,7 @@ const app = {
         if(id==='games')this.renderMyGames();
         if(id==='quests')this.renderQuests();
         if(id==='roulette')this.initRoulette();
+        if(id==='credits')this.initCredits();
         else if(this._questCountdownInterval){ clearInterval(this._questCountdownInterval); this._questCountdownInterval=null; }
         if(id==='friends'){
             // Регистрируем на сервере (на случай если зашли раньше деплоя)
@@ -1987,15 +2144,17 @@ const app = {
             [-0.2,0,0.2].forEach((x,i)=>{const spike=new THREE.Mesh(new THREE.ConeGeometry(0.07,0.35,6),hm);spike.position.set(x,0.52,i===1?0.05:0);spike.rotation.z=x*1.5;headGroup.add(spike);});
         }
         if(inv.includes('macaroni')){
-            const pm=new THREE.MeshStandardMaterial({color:0xF4C842,roughness:0.6});
-            [-0.15,0,0.15].forEach((x,i)=>{
-                const mac=new THREE.Mesh(new THREE.TorusGeometry(0.07,0.025,6,12),pm);
-                mac.position.set(x,0.45+i*0.04,0.05);
-                mac.rotation.x=Math.PI/2+i*0.3;
-                headGroup.add(mac);
+            const pm=new THREE.MeshStandardMaterial({color:0xF4C430,roughness:0.7});
+            const plate=new THREE.Mesh(new THREE.CylinderGeometry(0.26,0.26,0.04,14),new THREE.MeshStandardMaterial({color:0xeeeeee,roughness:0.3}));
+            plate.position.set(0,0.36,0); headGroup.add(plate);
+            const positions=[[-0.1,0.42,-0.05],[0.1,0.40,0.0],[0,0.43,0.08],[-0.05,0.41,0.1],[0.12,0.42,-0.08]];
+            const rotations=[[0.4,0,1.2],[-0.3,0.5,-0.8],[0.6,0.2,0.3],[-0.5,0.8,0.9],[0.2,-0.4,-1.0]];
+            positions.forEach(([x,y,z],i)=>{
+                const tube=new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,0.18,8,1,true),pm);
+                tube.position.set(x,y,z);
+                tube.rotation.set(...rotations[i]);
+                headGroup.add(tube);
             });
-            const plate=new THREE.Mesh(new THREE.CylinderGeometry(0.22,0.22,0.04,12),new THREE.MeshStandardMaterial({color:0xffffff,roughness:0.3}));
-            plate.position.set(0,0.38,0);headGroup.add(plate);
         }
         if(inv.includes('devil')){const dm=new THREE.MeshStandardMaterial({color:0xCC0000,roughness:0.5});[-0.25,0.25].forEach(x=>{const horn=new THREE.Mesh(new THREE.ConeGeometry(0.07,0.3,8),dm);horn.position.set(x,0.42,0);headGroup.add(horn);});}
         if(inv.includes('cape')){const cape=new THREE.Mesh(new THREE.BoxGeometry(1.0,1.4,0.08),new THREE.MeshStandardMaterial({color:0x1a0030,roughness:0.7,transparent:true,opacity:0.92}));cape.position.set(0,-0.1,-0.25);torso.add(cape);}
@@ -2219,15 +2378,20 @@ const app = {
             [-0.2,0,0.2].forEach((x,i)=>{const spike=new THREE.Mesh(new THREE.ConeGeometry(0.07,0.35,6),hm);spike.position.set(x,0.52,i===1?0.05:0);spike.rotation.z=x*1.5;headGroup.add(spike);});
         }
         if(this.inventory.includes('macaroni')){
-            const pm=new THREE.MeshStandardMaterial({color:0xF4C842,roughness:0.6});
-            [-0.15,0,0.15].forEach((x,i)=>{
-                const mac=new THREE.Mesh(new THREE.TorusGeometry(0.07,0.025,6,12),pm);
-                mac.position.set(x,0.45+i*0.04,0.05);
-                mac.rotation.x=Math.PI/2+i*0.3;
-                headGroup.add(mac);
+            const pm=new THREE.MeshStandardMaterial({color:0xF4C430,roughness:0.7});
+            // Тарелка
+            const plate=new THREE.Mesh(new THREE.CylinderGeometry(0.26,0.26,0.04,14),new THREE.MeshStandardMaterial({color:0xeeeeee,roughness:0.3}));
+            plate.position.set(0,0.36,0); headGroup.add(plate);
+            // Макарошки-трубочки (CylinderGeometry с дыркой = трубочка через открытые торцы)
+            const positions=[[-0.1,0.42,-0.05],[0.1,0.40,0.0],[0,0.43,0.08],[-0.05,0.41,0.1],[0.12,0.42,-0.08]];
+            const rotations=[[0.4,0,1.2],[-0.3,0.5,-0.8],[0.6,0.2,0.3],[-0.5,0.8,0.9],[0.2,-0.4,-1.0]];
+            positions.forEach(([x,y,z],i)=>{
+                // Трубочка = цилиндр без крышек
+                const tube=new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,0.18,8,1,true),pm);
+                tube.position.set(x,y,z);
+                tube.rotation.set(...rotations[i]);
+                headGroup.add(tube);
             });
-            const plate=new THREE.Mesh(new THREE.CylinderGeometry(0.22,0.22,0.04,12),new THREE.MeshStandardMaterial({color:0xffffff,roughness:0.3}));
-            plate.position.set(0,0.38,0);headGroup.add(plate);
         }
         if(needsRig)this.rig={leftArm:lA,rightArm:rA,leftLeg:lL,rightLeg:rL,torso,head:headGroup};
         // Ник над головой
@@ -3560,5 +3724,6 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
