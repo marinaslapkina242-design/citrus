@@ -398,7 +398,7 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
     </div>
 </div>
 
-<div id="engine-view" ontouchstart="app.onTouchStart(event)" ontouchmove="app.onTouchMove(event)" ontouchend="app.onTouchEnd(event)">
+<div id="engine-view" ontouchstart="app.onTouchStart(event)" ontouchmove="app.onTouchMove(event)" ontouchend="app.onTouchEnd(event)" style="touch-action:none;">
     <div class="hud-overlay">
         <div id="crosshair" class="crosshair"></div>
         <div id="ingame-ui" class="hidden">🍊 <span id="ingame-balance">0</span></div>
@@ -616,6 +616,15 @@ const app = {
         window.addEventListener('keydown', e => {
             if(document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
             this.keys[e.code] = true;
+            // Горячие клавиши студии
+            if(this.mode === 'studio'){
+                if(e.code==='Digit1') this.setStudioMode('place');
+                if(e.code==='Digit2') this.setStudioMode('move');
+                if(e.code==='Digit3') this.setStudioMode('scale');
+                if(e.code==='Digit4') this.setStudioMode('delete');
+                if(e.code==='Escape') this._deselectBlock();
+                e.preventDefault();
+            }
         });
         window.addEventListener('keyup', e => {
             if(document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
@@ -1132,15 +1141,16 @@ const app = {
     },
     onTouchStart(e){
         e.preventDefault();
+        const joyEl = document.getElementById('joystick-base');
+        const jumpEl = document.querySelector('#touch-controls button');
         for(const t of e.changedTouches){
-            const onJoy = document.getElementById('joystick-base')?.contains(e.target);
-            const onJump = t.clientX > window.innerWidth * 0.7 && t.clientY > window.innerHeight * 0.5;
-            const isRight = t.clientX > window.innerWidth * 0.45;
-            if(onJoy){
-                // Джойстик сам обрабатывает через joyStart
-                continue;
-            } else if(isRight && !onJump && !this._touchLook){
-                // Правая сторона — камера (свайп)
+            // Получаем реальный элемент под пальцем
+            const el = document.elementFromPoint(t.clientX, t.clientY);
+            const onJoy  = joyEl  && (joyEl.contains(el)  || el === joyEl);
+            const onJump = jumpEl && (jumpEl.contains(el) || el === jumpEl);
+            if(onJoy || onJump) continue; // джойстик/прыжок сами обрабатывают
+            const isRight = t.clientX > window.innerWidth * 0.5;
+            if(isRight && !this._touchLook){
                 this._touchLook = {id: t.identifier, x: t.clientX, y: t.clientY};
             }
         }
@@ -3108,17 +3118,17 @@ const app = {
             if(b) b.style.background = n===m ? 'rgba(255,152,0,0.5)' : '';
         });
         const hints = {
-            place: '<span>ЛКМ</span> ставить · <span>ПКМ</span> убрать · <span>QE</span> вверх/вниз',
-            move:  '<span>ЛКМ</span> выбрать блок · затем <span>WASD/QE</span> двигать · <span>ПКМ</span> снять',
-            scale: '<span>ЛКМ</span> выбрать блок · затем <span>WASD/QE</span> растягивать · <span>ПКМ</span> снять',
-            delete:'<span>ЛКМ</span> удалить блок'
+            place: '<span>[1]</span> Ставить · <span>ЛКМ</span> поставить · <span>QE</span> вверх/вниз',
+            move:  '<span>[2]</span> Двигать · <span>ЛКМ</span> выбрать · <span>WASD/QE</span> двигать · <span>ПКМ/Esc</span> снять',
+            scale: '<span>[3]</span> Размер · <span>ЛКМ</span> выбрать · <span>WASD/QE</span> растягивать · <span>Esc</span> снять',
+            delete:'<span>[4]</span> Удалить · <span>ЛКМ</span> удалить блок'
         };
         const he = document.getElementById('hint-eng');
         if(he) he.innerHTML = hints[m]||hints.place;
     },
 
     onMouseClick(e) {
-        if (this.mode !== 'studio' || !document.pointerLockElement) return;
+        if (this.mode !== 'studio') return;
         const mode = this._studioMode || 'place';
         if(e.button === 2){
             // ПКМ всегда снимает выбор или удаляет
@@ -3175,14 +3185,11 @@ const app = {
                 if(mb){ mb.x+=dx*2; mb.y+=dy*2; mb.z+=dz*2; bd.x=mb.x; bd.y=mb.y; bd.z=mb.z; }
             }
         } else if(mode==='scale'){
-            const bd = obj.userData.blockData;
-            if(!bd) return;
-            bd.sx = Math.max(0.5,(bd.sx||2)+dx*0.5);
-            bd.sy = Math.max(0.5,(bd.sy||2)+dy*0.5);
-            bd.sz = Math.max(0.5,(bd.sz||2)+dz*0.5);
-            // Пересоздаём геометрию
-            obj.geometry.dispose();
-            obj.geometry = new THREE.BoxGeometry(bd.sx, bd.sy, bd.sz);
+            // Масштабируем через scale (не нужен blockData)
+            obj.scale.x = Math.max(0.5, obj.scale.x + dx*0.25);
+            obj.scale.y = Math.max(0.5, obj.scale.y + dy*0.25);
+            obj.scale.z = Math.max(0.5, obj.scale.z + dz*0.25);
+            if(obj.userData) { obj.userData.scale = obj.scale.x; }
             const mb = this.mapBlocks.find(b=>b.x===bd.x&&b.y===bd.y&&b.z===bd.z);
             if(mb){ mb.sx=bd.sx; mb.sy=bd.sy; mb.sz=bd.sz; }
         }
@@ -3947,6 +3954,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
