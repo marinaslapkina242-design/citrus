@@ -398,7 +398,7 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
     </div>
 </div>
 
-<div id="engine-view" ontouchstart="app.onTouchStart(event)" ontouchmove="app.onTouchMove(event)" ontouchend="app.onTouchEnd(event)" style="touch-action:none;">
+<div id="engine-view" style="touch-action:none;">
     <div class="hud-overlay">
         <div id="crosshair" class="crosshair"></div>
         <div id="ingame-ui" class="hidden">🍊 <span id="ingame-balance">0</span></div>
@@ -476,10 +476,10 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
 <div class="modal-ov hidden" id="modal">
     <div class="modal-bx">
         <h3 id="modal-title">НАЗВАНИЕ</h3>
-        <input type="text" id="modal-input" maxlength="40">
+        <input type="text" id="modal-input" maxlength="40" onkeydown="if(event.key==='Enter')app.modalOk()" style="font-size:16px;">
         <div class="mbtns">
-            <button onclick="app.modalOk()" style="background:var(--c-main);color:#000;">Сохранить</button>
-            <button onclick="app.modalClose()" style="background:#1a1a1a;color:#777;border:1px solid #2a2a2a;">Отмена</button>
+            <button onclick="app.modalOk()" ontouchstart="app.modalOk()" style="background:var(--c-main);color:#000;touch-action:manipulation;padding:14px 24px;font-size:15px;">✅ Опубликовать</button>
+            <button onclick="app.modalClose()" ontouchstart="app.modalClose()" style="background:#1a1a1a;color:#777;border:1px solid #2a2a2a;touch-action:manipulation;padding:14px 24px;">Отмена</button>
         </div>
     </div>
 </div>
@@ -1099,9 +1099,15 @@ const app = {
 
     // ── TOUCH
     _initTouch(){
-        // Touch controls - swipe to look, tap right side to jump
         this._touchLook = null;
-        this._touchJumpId = null;
+        this._touchMove = null;
+        // Регистрируем с passive:false — иначе preventDefault не работает на мобильных
+        const ev = document.getElementById('engine-view');
+        if(!ev) return;
+        ev.addEventListener('touchstart',  e=>this.onTouchStart(e),  {passive:false});
+        ev.addEventListener('touchmove',   e=>this.onTouchMove(e),   {passive:false});
+        ev.addEventListener('touchend',    e=>this.onTouchEnd(e),    {passive:false});
+        ev.addEventListener('touchcancel', e=>this.onTouchEnd(e),    {passive:false});
     },
 
 
@@ -3627,7 +3633,12 @@ const app = {
         };
     },
     clearMap(){this.loopFn=null;this.setupScene();},
-    modalOk(){const v=document.getElementById('modal-input').value.trim();if(v&&this.modalCb)this.modalCb(v);document.getElementById('modal').classList.add('hidden');},
+    modalOk(){
+        if(this._modalLock) return; this._modalLock=true; setTimeout(()=>this._modalLock=false,500);
+        const v=document.getElementById('modal-input').value.trim();
+        document.getElementById('modal').classList.add('hidden');
+        if(v && this.modalCb){ const cb=this.modalCb; this.modalCb=null; cb(v); }
+    },
     modalClose(){document.getElementById('modal').classList.add('hidden');},
 
     async renderMyGames(){
@@ -3954,6 +3965,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
