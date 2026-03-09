@@ -112,16 +112,7 @@
         /* TOUCH CONTROLS */
         #touch-controls { display: none; position: absolute; inset: 0; pointer-events: none; }
         @media (pointer: coarse) { #touch-controls { display: block; } }
-        .joystick-zone { position: absolute; bottom: 24px; right: 24px; width: 130px; height: 130px; pointer-events: auto; }
-        .joystick-base { width: 130px; height: 130px; background: rgba(255,255,255,0.06); border: 2px solid rgba(255,255,255,0.12); border-radius: 50%; position: relative; }
-        .joystick-knob { width: 54px; height: 54px; background: rgba(255,152,0,0.5); border: 2px solid rgba(255,152,0,0.8); border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); transition: background 0.1s; box-shadow: 0 0 12px rgba(255,152,0,0.3); }
         .touch-right { position: absolute; bottom: 24px; left: 24px; display: flex; flex-direction: column; gap: 10px; align-items: flex-end; pointer-events: auto; }
-        .touch-btn { width: 62px; height: 62px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: bold; pointer-events: auto; border: 2px solid rgba(255,255,255,0.15); background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); color: #fff; cursor: pointer; -webkit-tap-highlight-color: transparent; }
-        .touch-btn:active { transform: scale(0.9); background: rgba(255,152,0,0.3); }
-        .touch-btn.jump { background: rgba(255,152,0,0.2); border-color: rgba(255,152,0,0.5); }
-        .touch-cam { position: absolute; bottom: 24px; right: 170px; width: 130px; height: 130px; pointer-events: auto; }
-        .touch-cam-base { width: 130px; height: 130px; background: rgba(0,229,255,0.04); border: 2px solid rgba(0,229,255,0.1); border-radius: 50%; position: relative; }
-        .touch-cam-knob { width: 44px; height: 44px; background: rgba(0,229,255,0.3); border: 2px solid rgba(0,229,255,0.6); border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); }
         .touch-place-btn { position: absolute; top: 50%; right: 16px; transform: translateY(-50%); width: 56px; height: 56px; border-radius: 14px; background: rgba(255,152,0,0.2); border: 2px solid rgba(255,152,0,0.5); display: flex; align-items: center; justify-content: center; font-size: 24px; pointer-events: auto; cursor: pointer; -webkit-tap-highlight-color: transparent; }
         .touch-place-btn:active { background: rgba(255,152,0,0.5); }
         #mp-panel { position: absolute; top: 16px; right: 65px; background: rgba(0,0,0,0.75); border: 1px solid rgba(0,229,255,0.18); border-radius: 10px; padding: 10px 14px; pointer-events: none; min-width: 150px; }
@@ -140,8 +131,6 @@
         @keyframes spin { from{transform:rotate(0deg)}to{transform:rotate(360deg)} }
 
         /* CHAT UI */
-        .chat-msg { background: rgba(0,0,0,0.6); padding: 5px 10px; border-radius: 6px; margin-top: 4px; word-wrap: break-word; line-height: 1.4; }
-        #chat-input:focus { border-color: var(--c-main) !important; background: rgba(0,0,0,0.8) !important; }
     </style>
 </head>
 <body>
@@ -409,7 +398,7 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
     </div>
 </div>
 
-<div id="engine-view">
+<div id="engine-view" ontouchstart="app.onTouchStart(event)" ontouchmove="app.onTouchMove(event)" ontouchend="app.onTouchEnd(event)">
     <div class="hud-overlay">
         <div id="crosshair" class="crosshair"></div>
         <div id="ingame-ui" class="hidden">🍊 <span id="ingame-balance">0</span></div>
@@ -433,9 +422,7 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
             <div id="mp-list"></div>
         </div>
         
-        <div id="chat-container" style="display:none; position:absolute; bottom:20px; left:20px; width:320px; max-height:250px; flex-direction:column; pointer-events:none; z-index:100;">
-            <div id="chat-messages" style="flex:1; overflow-y:auto; color:white; font-size:13px; margin-bottom:10px; pointer-events:auto; text-shadow:1px 1px 2px #000; display:flex; flex-direction:column; justify-content:flex-end;"></div>
-            <input type="text" id="chat-input" placeholder="Чат (Enter)..." autocomplete="off" onkeydown="app.handleChatInput(event)" style="background:rgba(0,0,0,0.5); border:1px solid rgba(255,152,0,0.3); color:white; padding:10px 14px; border-radius:10px; outline:none; font-size:13px; pointer-events:auto; transition:0.2s; box-shadow:0 5px 15px rgba(0,0,0,0.3);">
+
         </div>
 
         <button class="btn-exit" onclick="app.exitGame()">← В ХАБ</button>
@@ -447,20 +434,6 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
         </div>
 
         <div id="touch-controls">
-            <div class="joystick-zone" id="joy-zone">
-                <div class="joystick-base" id="joy-base">
-                    <div class="joystick-knob" id="joy-knob"></div>
-                </div>
-            </div>
-            <div class="touch-cam" id="cam-zone">
-                <div class="touch-cam-base" id="cam-base">
-                    <div class="touch-cam-knob" id="cam-knob"></div>
-                </div>
-            </div>
-            <div class="touch-right">
-                <div class="touch-btn jump" id="btn-jump" ontouchstart="app.touchJump()">⬆</div>
-
-            </div>
             <div class="touch-place-btn hidden" id="btn-place" ontouchstart="app.placeBlock()">🧱</div>
         <div id="studio-touch-btns" class="hidden" style="position:fixed;bottom:20px;right:16px;display:flex;flex-direction:column;gap:8px;z-index:50;pointer-events:auto;">
             <button ontouchstart="app.setStudioMode('place')" onclick="app.setStudioMode('place')" style="background:rgba(255,152,0,0.85);border:none;border-radius:12px;color:#000;font-size:18px;width:52px;height:52px;cursor:pointer">🧱</button>
@@ -1052,67 +1025,62 @@ const app = {
 
     // ── TOUCH
     _initTouch(){
-        const jz=document.getElementById('joy-zone');
-        const jk=document.getElementById('joy-knob');
-        if(!jz)return;
-        let jId=null,jOx=0,jOy=0;
-        const JR=45;
-        jz.addEventListener('touchstart',e=>{
-            e.preventDefault();const t=e.changedTouches[0];
-            jId=t.identifier;jOx=t.clientX;jOy=t.clientY;
-        },{passive:false});
-        jz.addEventListener('touchmove',e=>{
-            e.preventDefault();
-            for(const t of e.changedTouches){
-                if(t.identifier!==jId)continue;
-                let dx=t.clientX-jOx,dy=t.clientY-jOy;
-                const d=Math.sqrt(dx*dx+dy*dy);
-                if(d>JR){dx=dx/d*JR;dy=dy/d*JR;}
-                jk.style.transform=`translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
-                const th=0.25;
-                this.keys['KeyW']=dy<-JR*th;
-                this.keys['KeyS']=dy>JR*th;
-                this.keys['KeyA']=dx<-JR*th;
-                this.keys['KeyD']=dx>JR*th;
-            }
-        },{passive:false});
-        const jEnd=()=>{
-            jId=null;jk.style.transform='translate(-50%,-50%)';
-            ['KeyW','KeyS','KeyA','KeyD'].forEach(k=>this.keys[k]=false);
-        };
-        jz.addEventListener('touchend',jEnd);jz.addEventListener('touchcancel',jEnd);
+        // Touch controls - swipe to look, tap right side to jump
+        this._touchLook = null;
+        this._touchJumpId = null;
+    },
 
-        const cz=document.getElementById('cam-zone');
-        const ck=document.getElementById('cam-knob');
-        if(!cz)return;
-        let cId=null,cOx=0,cOy=0;
-        const CR=45;
-        cz.addEventListener('touchstart',e=>{
-            e.preventDefault();const t=e.changedTouches[0];
-            cId=t.identifier;cOx=t.clientX;cOy=t.clientY;
-        },{passive:false});
-        cz.addEventListener('touchmove',e=>{
-            e.preventDefault();
-            for(const t of e.changedTouches){
-                if(t.identifier!==cId)continue;
-                let dx=t.clientX-cOx,dy=t.clientY-cOy;
-                cOx=t.clientX;cOy=t.clientY;
-                const d=Math.sqrt(dx*dx+dy*dy);
-                if(d>CR*2){continue;}
-                ck.style.transform=`translate(calc(-50% + ${Math.max(-CR,Math.min(CR,t.clientX-cOx+0))}px), calc(-50% + ${Math.max(-CR,Math.min(CR,t.clientY-cOy+0))}px))`;
-                if(this.mode==='play'){
-                    this._camYaw   = (this._camYaw   || Math.PI) - dx * 0.005;
-                    this._camPitch = Math.max(-1.2, Math.min(1.2, (this._camPitch || 0.2) - dy * 0.005));
-                } else if(this.mode==='studio'){
-                    this.camera.rotation.order='YXZ';
-                    this.camera.rotation.y-=dx*0.005;
-                    this.camera.rotation.x-=dy*0.005;
-                    this.camera.rotation.x=Math.max(-Math.PI/2,Math.min(Math.PI/2,this.camera.rotation.x));
-                }
+    onTouchStart(e){
+        e.preventDefault();
+        for(const t of e.changedTouches){
+            const leftThird = t.clientX < window.innerWidth * 0.45;
+            if(leftThird && !this._touchMove){
+                // Левая сторона — движение
+                this._touchMove = {id: t.identifier, startX: t.clientX, startY: t.clientY, x: t.clientX, y: t.clientY};
+            } else if(!this._touchLook){
+                // Правая сторона — камера
+                this._touchLook = {id: t.identifier, x: t.clientX, y: t.clientY};
             }
-        },{passive:false});
-        const cEnd=()=>{cId=null;ck.style.transform='translate(-50%,-50%)';};
-        cz.addEventListener('touchend',cEnd);cz.addEventListener('touchcancel',cEnd);
+        }
+    },
+
+    onTouchMove(e){
+        e.preventDefault();
+        for(const t of e.changedTouches){
+            // Камера — поворот
+            if(this._touchLook && t.identifier === this._touchLook.id){
+                const dx = t.clientX - this._touchLook.x;
+                const dy = t.clientY - this._touchLook.y;
+                if(this.yawObj) this.yawObj.rotation.y -= dx * 0.006;
+                if(this.pitchObj){
+                    this.pitchObj.rotation.x -= dy * 0.006;
+                    this.pitchObj.rotation.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, this.pitchObj.rotation.x));
+                }
+                this._touchLook.x = t.clientX;
+                this._touchLook.y = t.clientY;
+            }
+            // Движение — виртуальный стик без визуала
+            if(this._touchMove && t.identifier === this._touchMove.id){
+                const dx = t.clientX - this._touchMove.startX;
+                const dy = t.clientY - this._touchMove.startY;
+                const dead = 18;
+                this.keys['KeyW'] = dy < -dead;
+                this.keys['KeyS'] = dy > dead;
+                this.keys['KeyA'] = dx < -dead;
+                this.keys['KeyD'] = dx > dead;
+            }
+        }
+    },
+
+    onTouchEnd(e){
+        for(const t of e.changedTouches){
+            if(this._touchLook && t.identifier === this._touchLook.id) this._touchLook = null;
+            if(this._touchMove && t.identifier === this._touchMove.id){
+                this._touchMove = null;
+                this.keys['KeyW'] = false; this.keys['KeyS'] = false;
+                this.keys['KeyA'] = false; this.keys['KeyD'] = false;
+            }
+        }
     },
 
     touchJump(){
@@ -1381,7 +1349,7 @@ const app = {
         }
 
         // Обработка чата
-        if(msg.type==='chat') {
+        if(false && msg.type==='chat') {
             this.appendChatMessage(msg.name, msg.text, msg.color);
             return;
         }
@@ -1423,36 +1391,8 @@ const app = {
         }
     },
 
-    // ── IN-GAME CHAT
-    handleChatInput(e) {
-        e.stopPropagation(); // Не отдаем нажатия движку (W/A/S/D)
-        if (e.key === 'Enter') {
-            const text = e.target.value.trim();
-            if (text) {
-                const chatMsg = {type:'chat', _from:String(this.userId), name:this.username, text:text, color:this._myColor, map:String(this.currentMap)};
-                // Отправляем через WS сервер (надёжно)
-                if(this._gameWS && this._gameWS.readyState===1) {
-                    try{ this._gameWS.send(JSON.stringify(chatMsg)); }catch(e){}
-                }
-                this._wsSend(chatMsg); // MQTT как запасной
-                this.appendChatMessage(this.username + (this.isDev(this.username)?' ✔':''), text, this._myColor); this._questProgress('chats',1); // Показываем у себя
-                e.target.value = '';
-            }
-            e.target.blur(); // Снимаем фокус с поля
-            document.getElementById('gl-canvas').focus();
-        }
-    },
-    appendChatMessage(name, text, color) {
-        const msgs = document.getElementById('chat-messages');
-        if(!msgs) return;
-        const div = document.createElement('div');
-        div.className = 'chat-msg';
-        const devN=['разраб','admin','citrus'];
-        const isChatDev=devN.includes((name||'').toLowerCase().replace(/#\d+/,''));
-        div.innerHTML = `<b style="color:${color||'#FF9800'}">${name}${isChatDev?' <span style="color:#4fc3f7">✔</span>':''}:</b> ${text}`;
-        msgs.appendChild(div);
-        msgs.scrollTop = msgs.scrollHeight; // Скролл вниз
-    },
+
+
 
     async _registerPresence(){
         if(!this.username||!this.userId)return;
@@ -1963,7 +1903,7 @@ const app = {
             this._gameWS.onmessage = (e) => {
                 try {
                     const msg = JSON.parse(e.data);
-                    if(msg.type==='chat') {
+                    if(false && msg.type==='chat') {
                         if(String(msg._from)!==String(this.userId)) {
                             this.appendChatMessage(msg.name, msg.text, msg.color);
                         }
@@ -2517,7 +2457,7 @@ const app = {
         document.getElementById('mp-panel').classList.toggle('hidden',mode!=='play');
         
         // Чат виден только в игре
-        document.getElementById('chat-container').style.display=(mode==='play')?'flex':'none';
+
         
         const placeBtnEl=document.getElementById('btn-place');
         if(placeBtnEl)placeBtnEl.classList.toggle('hidden',mode!=='studio');
@@ -3741,6 +3681,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
