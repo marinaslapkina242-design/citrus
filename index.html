@@ -110,7 +110,7 @@
         .err { color: #ff6b6b !important; }
 
         /* TOUCH CONTROLS */
-        #touch-controls { display: none; position: absolute; inset: 0; pointer-events: none; }
+        #touch-controls { display: none; position: fixed; inset: 0; pointer-events: none; z-index: 20; }
         @media (pointer: coarse) { #touch-controls { display: block; } }
         .touch-right { position: absolute; bottom: 24px; left: 24px; display: flex; flex-direction: column; gap: 10px; align-items: flex-end; pointer-events: auto; }
         .touch-place-btn { position: absolute; top: 50%; right: 16px; transform: translateY(-50%); width: 56px; height: 56px; border-radius: 14px; background: rgba(255,152,0,0.2); border: 2px solid rgba(255,152,0,0.5); display: flex; align-items: center; justify-content: center; font-size: 24px; pointer-events: auto; cursor: pointer; -webkit-tap-highlight-color: transparent; }
@@ -425,7 +425,7 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
 
         </div>
 
-        <button class="btn-exit" onclick="app.exitGame()">← В ХАБ</button>
+        <button class="btn-exit" onclick="app.exitGame()" ontouchstart="app.exitGame()" style="touch-action:manipulation;">← В ХАБ</button>
 
         <div class="controls-hint" id="kb-hint">
             <p><span>WASD</span> — движение</p>
@@ -440,7 +440,7 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
                 <div id="joystick-knob" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:44px;height:44px;background:rgba(255,152,0,0.7);border-radius:50%;"></div>
             </div>
             <!-- Кнопка прыжка -->
-            <button ontouchstart="app.keys.space=true" ontouchend="app.keys.space=false"
+            <button ontouchstart="app.keys['Space']=true;app.touchJump();" ontouchend="app.keys['Space']=false;"
                 style="position:fixed;bottom:80px;right:30px;width:64px;height:64px;background:rgba(255,152,0,0.7);border:none;border-radius:50%;color:#fff;font-size:22px;pointer-events:auto;touch-action:none;">↑</button>
             <div class="touch-place-btn hidden" id="btn-place" ontouchstart="app.placeBlock()">🧱</div>
         <div id="studio-touch-btns" class="hidden" style="position:fixed;bottom:20px;right:16px;display:flex;flex-direction:column;gap:8px;z-index:50;pointer-events:auto;">
@@ -674,6 +674,16 @@ const app = {
             const res = await fetch(this._API + '/credits');
             const data = await res.json();
             const now = Date.now();
+            // Sync balance from server (in case lender received repayment)
+            try {
+                const pr = await fetch(this._API+'/players/'+this.userId);
+                const pd = await pr.json();
+                if(pd && pd.balance !== undefined && pd.balance > this.balance){
+                    this.balance = pd.balance;
+                    this.saveData();
+                    document.getElementById('balance-val').textContent = this.balance;
+                }
+            } catch(e){}
 
             // Check my debt
             const myBorrow = data.borrows ? data.borrows.find(b => b.borrowerId == this.userId) : null;
@@ -759,22 +769,34 @@ const app = {
 
     async repayCredit(){
         try {
+            // First check we have enough
+            const checkRes = await fetch(this._API + '/credits');
+            const checkData = await checkRes.json();
+            const myBorrow = (checkData.borrows||[]).find(b=>String(b.borrowerId)===String(this.userId));
+            if(!myBorrow){ this.showNotif('❌','Ошибка','Нет долга'); return; }
+            if(this.balance < myBorrow.amount){
+                this.showNotif('❌','Мало монет',`Нужно ${myBorrow.amount} 🍊 для погашения`); return;
+            }
+            // Deduct from borrower first
+            this.balance -= myBorrow.amount;
+            this.saveData();
+            document.getElementById('balance-val').textContent = this.balance;
+            // Tell server - repay and give to lender
             const res = await fetch(this._API + '/credits/repay', {
                 method:'POST', headers:{'Content-Type':'application/json'},
-                body: JSON.stringify({borrowerId: this.userId})
+                body: JSON.stringify({borrowerId: this.userId, balance: this.balance})
             });
             const d = await res.json();
             if(d.ok){
-                if(this.balance < d.amount){
-                    this.showNotif('❌','Мало монет',`Нужно ${d.amount} 🍊 для погашения`); return;
-                }
-                // Borrower loses the amount
-                this.balance -= d.amount;
+                this.showNotif('✅','Долг погашен!',`-${myBorrow.amount} 🍊 · Кредитор получил деньги`);
+                this._loadCredits();
+            } else {
+                // Rollback
+                this.balance += myBorrow.amount;
                 this.saveData();
                 document.getElementById('balance-val').textContent = this.balance;
-                this.showNotif('✅','Долг погашен!',`-${d.amount} 🍊 · Кредитор получил деньги`);
-                this._loadCredits();
-            } else this.showNotif('❌','Ошибка', d.error||'Нет долга');
+                this.showNotif('❌','Ошибка', d.error||'Нет долга');
+            }
         } catch(e){ this.showNotif('❌','Ошибка','Нет связи'); }
     },
 
@@ -1061,23 +1083,24 @@ const app = {
         if(knob) knob.style.transform = `translate(calc(-50% + ${kx}px), calc(-50% + ${ky}px))`;
         // Map to keys
         const threshold = 15;
-        this.keys['w'] = ky < -threshold;
-        this.keys['s'] = ky > threshold;
-        this.keys['a'] = kx < -threshold;
-        this.keys['d'] = kx > threshold;
+        this.keys['KeyW'] = ky < -threshold;
+        this.keys['KeyS'] = ky > threshold;
+        this.keys['KeyA'] = kx < -threshold;
+        this.keys['KeyD'] = kx > threshold;
     },
     joyEnd(e){
         e.preventDefault();
         this._joyActive = false;
         const knob = document.getElementById('joystick-knob');
         if(knob) knob.style.transform = 'translate(-50%,-50%)';
-        this.keys['w']=this.keys['s']=this.keys['a']=this.keys['d']=false;
+        this.keys['KeyW']=this.keys['KeyS']=this.keys['KeyA']=this.keys['KeyD']=false;
     },
     onTouchStart(e){
         e.preventDefault();
         for(const t of e.changedTouches){
+            const onJoy = document.getElementById('joystick-base')?.contains(e.target);
             const leftThird = t.clientX < window.innerWidth * 0.45;
-            if(leftThird && !this._touchMove){
+            if(leftThird && !this._touchMove && !onJoy){
                 // Левая сторона — движение
                 this._touchMove = {id: t.identifier, startX: t.clientX, startY: t.clientY, x: t.clientX, y: t.clientY};
             } else if(!this._touchLook){
@@ -3724,6 +3747,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
