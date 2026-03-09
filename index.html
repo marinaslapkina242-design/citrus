@@ -445,10 +445,13 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
                 style="position:fixed;bottom:80px;right:30px;width:64px;height:64px;background:rgba(255,152,0,0.7);border:none;border-radius:50%;color:#fff;font-size:22px;pointer-events:auto;touch-action:none;">↑</button>
             <div class="touch-place-btn hidden" id="btn-place" ontouchstart="app.placeBlock()">🧱</div>
         <div id="studio-touch-btns" class="hidden" style="position:fixed;bottom:20px;right:16px;display:flex;flex-direction:column;gap:8px;z-index:50;pointer-events:auto;">
-            <button ontouchstart="app.setStudioMode('place')" onclick="app.setStudioMode('place')" style="background:rgba(255,152,0,0.85);border:none;border-radius:12px;color:#000;font-size:18px;width:52px;height:52px;cursor:pointer">🧱</button>
-            <button ontouchstart="app.setStudioMode('move')" onclick="app.setStudioMode('move')" style="background:rgba(0,229,255,0.85);border:none;border-radius:12px;color:#000;font-size:18px;width:52px;height:52px;cursor:pointer">✋</button>
-            <button ontouchstart="app.setStudioMode('scale')" onclick="app.setStudioMode('scale')" style="background:rgba(0,255,100,0.85);border:none;border-radius:12px;color:#000;font-size:18px;width:52px;height:52px;cursor:pointer">⤡</button>
-            <button ontouchstart="app.setStudioMode('delete')" onclick="app.setStudioMode('delete')" style="background:rgba(255,50,50,0.85);border:none;border-radius:12px;color:#fff;font-size:18px;width:52px;height:52px;cursor:pointer">🗑</button>
+            <button ontouchstart="app.setStudioMode('place')" onclick="app.setStudioMode('place')" style="background:rgba(255,152,0,0.85);border:none;border-radius:12px;color:#000;font-size:18px;width:52px;height:52px;cursor:pointer;touch-action:manipulation">🧱</button>
+            <button ontouchstart="app.setStudioMode('move')" onclick="app.setStudioMode('move')" style="background:rgba(0,229,255,0.85);border:none;border-radius:12px;color:#000;font-size:18px;width:52px;height:52px;cursor:pointer;touch-action:manipulation">✋</button>
+            <button ontouchstart="app.setStudioMode('scale')" onclick="app.setStudioMode('scale')" style="background:rgba(0,255,100,0.85);border:none;border-radius:12px;color:#000;font-size:18px;width:52px;height:52px;cursor:pointer;touch-action:manipulation">⤡</button>
+            <button ontouchstart="app.setStudioMode('delete')" onclick="app.setStudioMode('delete')" style="background:rgba(255,50,50,0.85);border:none;border-radius:12px;color:#fff;font-size:18px;width:52px;height:52px;cursor:pointer;touch-action:manipulation">🗑</button>
+            <button ontouchstart="app._cycleColor(-1)" onclick="app._cycleColor(-1)" style="background:rgba(80,80,80,0.85);border:none;border-radius:12px;color:#fff;font-size:18px;width:52px;height:52px;cursor:pointer;touch-action:manipulation">◀</button>
+            <button ontouchstart="app._cycleColor(1)" onclick="app._cycleColor(1)" style="background:rgba(80,80,80,0.85);border:none;border-radius:12px;color:#fff;font-size:18px;width:52px;height:52px;cursor:pointer;touch-action:manipulation" id="cur-color-btn">▶</button>
+            <button ontouchstart="app.studioInviteFriend()" onclick="app.studioInviteFriend()" style="background:rgba(30,136,229,0.85);border:none;border-radius:12px;color:#fff;font-size:18px;width:52px;height:52px;cursor:pointer;touch-action:manipulation">👥</button>
         </div>
         </div>
     </div>
@@ -623,6 +626,11 @@ const app = {
                 if(e.code==='Digit3') this.setStudioMode('scale');
                 if(e.code==='Digit4') this.setStudioMode('delete');
                 if(e.code==='Escape') this._deselectBlock();
+                // Z — предыдущий цвет, X — следующий цвет
+                if(e.code==='KeyZ'){ this._cycleColor(-1); e.preventDefault(); }
+                if(e.code==='KeyX'){ this._cycleColor(1);  e.preventDefault(); }
+                // F — позвать друга
+                if(e.code==='KeyF'){ this.studioInviteFriend(); e.preventDefault(); }
                 e.preventDefault();
             }
         });
@@ -1165,27 +1173,21 @@ const app = {
     onTouchMove(e){
         e.preventDefault();
         for(const t of e.changedTouches){
-            // Камера — поворот
             if(this._touchLook && t.identifier === this._touchLook.id){
                 const dx = t.clientX - this._touchLook.x;
                 const dy = t.clientY - this._touchLook.y;
-                if(this.yawObj) this.yawObj.rotation.y -= dx * 0.006;
-                if(this.pitchObj){
-                    this.pitchObj.rotation.x -= dy * 0.006;
-                    this.pitchObj.rotation.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, this.pitchObj.rotation.x));
+                // Камера использует _camYaw/_camPitch (как мышь)
+                if(this._camYaw === undefined){ this._camYaw = Math.PI; this._camPitch = 0.2; }
+                this._camYaw   -= dx * 0.005;
+                this._camPitch  = Math.max(-1.2, Math.min(1.2, this._camPitch - dy * 0.005));
+                // В студии — camera.rotation напрямую
+                if(this.mode === 'studio' && this.camera){
+                    this.camera.rotation.order = 'YXZ';
+                    this.camera.rotation.y -= dx * 0.005;
+                    this.camera.rotation.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, this.camera.rotation.x - dy * 0.005));
                 }
                 this._touchLook.x = t.clientX;
                 this._touchLook.y = t.clientY;
-            }
-            // Движение — виртуальный стик без визуала
-            if(this._touchMove && t.identifier === this._touchMove.id){
-                const dx = t.clientX - this._touchMove.startX;
-                const dy = t.clientY - this._touchMove.startY;
-                const dead = 18;
-                this.keys['KeyW'] = dy < -dead;
-                this.keys['KeyS'] = dy > dead;
-                this.keys['KeyA'] = dx < -dead;
-                this.keys['KeyD'] = dx > dead;
             }
         }
     },
@@ -2542,10 +2544,29 @@ const app = {
             const sw=document.createElement('div');
             sw.className='c-swatch'+(i===0?' sel':'');
             sw.style.background='#'+bc.c.toString(16).padStart(6,'0');
-            sw.title=bc.n;
-            sw.onclick=()=>{this.selColor=bc.c;document.querySelectorAll('.c-swatch').forEach(s=>s.classList.remove('sel'));sw.classList.add('sel');};
+            sw.title=bc.n+' ['+(i+1)+']';
+            sw.onclick=()=>this._selectColor(i);
             pal.appendChild(sw);
         });
+        this._colorIdx = 0;
+        if(!this.selColor) this.selColor = COLORS[0].c;
+    },
+
+    _selectColor(idx){
+        this._colorIdx = ((idx % COLORS.length) + COLORS.length) % COLORS.length;
+        this.selColor = COLORS[this._colorIdx].c;
+        document.querySelectorAll('.c-swatch').forEach((s,i)=>s.classList.toggle('sel', i===this._colorIdx));
+        const nm  = COLORS[this._colorIdx].n;
+        const hex = '#'+COLORS[this._colorIdx].c.toString(16).padStart(6,'0');
+        this._showToast(`🎨 ${nm}`);
+        // Обновляем цвет кнопки на мобиле
+        const cb = document.getElementById('cur-color-btn');
+        if(cb) cb.style.background = hex;
+    },
+
+    _cycleColor(dir){
+        const idx = ((this._colorIdx||0) + dir + COLORS.length) % COLORS.length;
+        this._selectColor(idx);
     },
 
     // ── LAUNCH
@@ -2621,6 +2642,9 @@ const app = {
         sun.shadow.camera.right=sun.shadow.camera.top=60;
         this.scene.add(sun);
         this.objectsToIntersect=[];this.mapBlocks=[];this.collectibles=[];
+        // Переинициализируем touch после запуска сцены
+        this._touchLook = null;
+        this._touchMove = null;
         this.buildWorld();
         if(this.mode==='play'){
             this.playerGroup=this.buildCharacter(true);
@@ -3124,7 +3148,7 @@ const app = {
             if(b) b.style.background = n===m ? 'rgba(255,152,0,0.5)' : '';
         });
         const hints = {
-            place: '<span>[1]</span> Ставить · <span>ЛКМ</span> поставить · <span>QE</span> вверх/вниз',
+            place: '<span>[1]</span> Ставить · <span>ЛКМ</span> · <span>QE</span> высота · <span>Z/X</span> цвет · <span>F</span> позвать друга',
             move:  '<span>[2]</span> Двигать · <span>ЛКМ</span> выбрать · <span>WASD/QE</span> двигать · <span>ПКМ/Esc</span> снять',
             scale: '<span>[3]</span> Размер · <span>ЛКМ</span> выбрать · <span>WASD/QE</span> растягивать · <span>Esc</span> снять',
             delete:'<span>[4]</span> Удалить · <span>ЛКМ</span> удалить блок'
@@ -3965,6 +3989,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
