@@ -740,14 +740,21 @@ const app = {
         const days = parseInt(document.getElementById('credit-days').value);
         if(!amount || amount < 1000 || amount > 100000){ this.showNotif('❌','Ошибка','Сумма от 1000 до 100000 🍊'); return; }
         if(!days || days < 10 || days > 60){ this.showNotif('❌','Ошибка','Выбери срок'); return; }
+        if(this.balance < amount){ this.showNotif('❌','Мало монет',`Нужно ${amount} 🍊`); return; }
         try {
             const res = await fetch(this._API + '/credits', {
                 method:'POST', headers:{'Content-Type':'application/json'},
                 body: JSON.stringify({lenderId: this.userId, lenderName: this.username+'#'+this.userId, amount, days})
             });
             const d = await res.json();
-            if(d.ok){ this.showNotif('✅','Кредит выставлен!',`${amount} 🍊 на ${days} дней`); this._loadCredits(); }
-            else this.showNotif('❌','Ошибка', d.error||'Попробуй снова');
+            if(d.ok){
+                // Deduct from balance
+                this.balance -= amount;
+                this.saveData();
+                document.getElementById('balance-val').textContent = this.balance;
+                this.showNotif('✅','Кредит выставлен!',`-${amount} 🍊 на ${days} мин.`);
+                this._loadCredits();
+            } else this.showNotif('❌','Ошибка', d.error||'Попробуй снова');
         } catch(e){ this.showNotif('❌','Ошибка','Нет связи'); }
     },
 
@@ -777,11 +784,14 @@ const app = {
             });
             const d = await res.json();
             if(d.ok){
+                if(this.balance < d.amount){
+                    this.showNotif('❌','Мало монет',`Нужно ${d.amount} 🍊 для погашения`); return;
+                }
+                // Borrower loses the amount
                 this.balance -= d.amount;
-                if(this.balance < 0) this.balance = 0;
                 this.saveData();
                 document.getElementById('balance-val').textContent = this.balance;
-                this.showNotif('✅','Долг погашен!',`Вернул ${d.amount} 🍊`);
+                this.showNotif('✅','Долг погашен!',`-${d.amount} 🍊 · Кредитор получил деньги`);
                 this._loadCredits();
             } else this.showNotif('❌','Ошибка', d.error||'Нет долга');
         } catch(e){ this.showNotif('❌','Ошибка','Нет связи'); }
@@ -789,12 +799,19 @@ const app = {
 
     async cancelCredit(creditId){
         try {
-            await fetch(this._API + '/credits/cancel', {
+            const res = await fetch(this._API + '/credits/cancel', {
                 method:'POST', headers:{'Content-Type':'application/json'},
                 body: JSON.stringify({creditId, lenderId: this.userId})
             });
-            this.showNotif('✅','Кредит отозван','');
-            this._loadCredits();
+            const d = await res.json();
+            if(d.ok){
+                // Return amount to lender
+                this.balance += d.amount;
+                this.saveData();
+                document.getElementById('balance-val').textContent = this.balance;
+                this.showNotif('✅','Кредит отозван',`+${d.amount} 🍊 возвращено`);
+                this._loadCredits();
+            } else this.showNotif('❌','Ошибка', d.error||'');
         } catch(e){}
     },
 
@@ -3724,6 +3741,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
