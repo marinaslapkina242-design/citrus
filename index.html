@@ -1649,7 +1649,14 @@ const app = {
         const online=this._cachedOnline||[];
         let globalDB=[];
         try{globalDB=JSON.parse(localStorage.getItem('citrus_global_users')||'[]');}catch(e){}
-        const findPeer=id=>pc.find(x=>x.id===id)||globalDB.find(x=>String(x.id)===id)||{id,name:id,color:'#888'};
+        const findPeer=id=>{
+            const om = this._onlineMap&&this._onlineMap[id];
+            const fromPc = pc.find(x=>x.id===id);
+            const fromDb = globalDB.find(x=>String(x.id)===id);
+            const base = om||fromPc||fromDb||{id,name:id,color:'#888'};
+            base.inv = (om&&om.inv)||(fromPc&&fromPc.inv)||(fromDb&&fromDb.inv)||[];
+            return base;
+        };
 
         if(!this.friends.length){
             fl.innerHTML='<div style="color:#444;font-size:13px;padding:10px;line-height:1.7;">Пока нет друзей.<br><small style="color:#333">Найди игрока и отправь заявку</small></div>';
@@ -1666,12 +1673,18 @@ const app = {
                 ? `<button class="bx b-add" onclick="app.joinFriend('${fid}','${friendMap}')" style="font-size:10px;background:#00E676;color:#000">▶ Войти</button>`
                 : on ? `<button class="bx b-add" onclick="app.inviteFriend('${fid}','${p.name}')" style="font-size:10px">▶ Играть</button>` : '';
             fl.innerHTML+=`<div class="fr">
-                <img src="${app._drawFaceCanvas(p.color||'#888', p.inv||[])}" style="width:48px;height:48px;border-radius:10px;flex-shrink:0;">
+                <img id="fr_av_${fid}" src="${app._drawFaceCanvas(p.color||'#888', p.inv||[])}" style="width:48px;height:48px;border-radius:10px;flex-shrink:0;">
                 <div class="fi"><div class="fn">${p.name}${['разраб','admin','citrus'].includes((p.name||"").toLowerCase())?' <span style="color:#4fc3f7;font-size:12px">✔</span>':''}</div>
                 <div class="fs ${sc}">${p.tag||('#'+p.id)} · ${st}</div></div>
                 <div class="fb">${inviteBtn}
                     <button class="bx b-del" onclick="app.removeFriend('${fid}')">✕</button>
                 </div></div>`;
+        });
+
+        // Async загружаем inv для каждого друга
+        this.friends.forEach(fid=>{
+            const img = document.getElementById('fr_av_'+fid);
+            if(img) app._setAvatar(img, null, null, fid);
         });
         // Обновляем бейдж на навбаре
         const cnt=this.friendRequests.length,b=document.getElementById('fr-badge');
@@ -1702,7 +1715,14 @@ const app = {
         const pc=this._pc||[];
         let globalDB=[];
         try{globalDB=JSON.parse(localStorage.getItem('citrus_global_users')||'[]');}catch(e){}
-        const findPeer=id=>pc.find(x=>x.id===id)||globalDB.find(x=>String(x.id)===id)||{id,name:id,color:'#888'};
+        const findPeer=id=>{
+            const om = this._onlineMap&&this._onlineMap[id];
+            const fromPc = pc.find(x=>x.id===id);
+            const fromDb = globalDB.find(x=>String(x.id)===id);
+            const base = om||fromPc||fromDb||{id,name:id,color:'#888'};
+            base.inv = (om&&om.inv)||(fromPc&&fromPc.inv)||(fromDb&&fromDb.inv)||[];
+            return base;
+        };
 
         // Читаем почту при каждом открытии
         this._readMailbox();
@@ -1828,7 +1848,7 @@ const app = {
         list.forEach(p=>{
             const sent=this.sentReqs.includes(String(p.id));
             ol.innerHTML+=`<div class="fr">
-                <img src="${app._drawFaceCanvas(p.color||'#888', p.inv||[])}" style="width:48px;height:48px;border-radius:10px;flex-shrink:0;">
+                <img id="fr_av_${fid}" src="${app._drawFaceCanvas(p.color||'#888', p.inv||[])}" style="width:48px;height:48px;border-radius:10px;flex-shrink:0;">
                 <div class="fi"><div class="fn">${p.name}${['разраб','admin','citrus'].includes((p.name||"").toLowerCase())?' <span style="color:#4fc3f7;font-size:12px">✔</span>':''}</div>
                 <div class="fs ${p.status==='ingame'?'ig':'on'}">${p.tag||p.id} · ${p.status==='ingame'?'🎮 '+p.world:'● Онлайн'}</div></div>
                 <button class="bx ${sent?'b-del':'b-add'}" onclick="app.sendReq('${p.id}')">${sent?'✓ Отправлено':'+ Друг'}</button>
@@ -2304,10 +2324,11 @@ const app = {
     initAvatarPreview(){
         const cont=document.getElementById('avatar-container');if(!cont)return;cont.innerHTML='';
         this.pScene=new THREE.Scene();
-        this.pCam=new THREE.PerspectiveCamera(45,cont.clientWidth/cont.clientHeight,0.1,100);
+        const pw=cont.clientWidth||400, ph=cont.clientHeight||420;
+        this.pCam=new THREE.PerspectiveCamera(45,pw/ph,0.1,100);
         this.pCam.position.set(0,1.5,5);
         this.pRender=new THREE.WebGLRenderer({alpha:true,antialias:true});
-        this.pRender.setSize(cont.clientWidth,cont.clientHeight);
+        this.pRender.setSize(pw,ph);
         cont.appendChild(this.pRender.domElement);
         this.pScene.add(new THREE.AmbientLight(0xffffff,0.8));
         const sl=new THREE.DirectionalLight(0xffffff,0.6);sl.position.set(5,5,5);this.pScene.add(sl);
@@ -3586,6 +3607,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
