@@ -753,7 +753,7 @@ const app = {
     },
 
     isDev(name){
-        const devs = ['Разраб','разраб','Admin','admin','CITRUS','citrus'];
+        const devs = ['Разраб','разраб','Admin','admin','CITRUS','citrus','Крутой','крутой'];
         return devs.some(d=>d.toLowerCase()===(name||'').toLowerCase());
     },
 
@@ -1109,7 +1109,7 @@ const app = {
             const bv2=document.getElementById('balance-val'); if(bv2) bv2.textContent=this.balance;
             const it=SHOP_ITEMS.find(i=>i.id===id);
             this.showNotif(it.icon,'Куплено!',`${it.name} в гардеробе`);
-        }else this.showNotif('💸','Мало монет',`Нужно ещё ${price-this.balance} 🍊`);
+        }else this.showNotif('😭','Мало цитрусов',`Нужно ещё ${price-this.balance} 🍊`);
     },
     resetAvatar(){this.inventory=[];this.saveData();this.renderShop();this.updateAvatarPreview();
             try{fetch(this._API+'/players/'+this.userId,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:String(this.userId),name:this.username,tag:this.fullTag,color:this._myColor,inv:this.inventory||[]})});}catch(e){}},
@@ -2355,7 +2355,7 @@ const app = {
             ctx.fillStyle = 'rgba(0,0,0,0.6)';
             ctx.roundRect(4,4,248,56,12);
             ctx.fill();
-            const _devNs=['разраб','admin','citrus'];
+            const _devNs=['разраб','admin','citrus','крутой'];
             const _isDev=_devNs.includes((this.username||'').toLowerCase().split('#')[0]);
             if(_isDev){
                 ctx.font='bold 28px Arial';
@@ -3679,6 +3679,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
