@@ -30,7 +30,7 @@
         .nav-item.active { color: var(--c-main); background: rgba(255,152,0,0.06); border-left-color: var(--c-main); }
         .nav-badge { position: absolute; right: 18px; background: var(--c-pink); color: #fff; font-size: 11px; font-weight: bold; padding: 2px 7px; border-radius: 20px; }
         .content-area { flex: 1; padding: 35px; overflow-y: auto; background: #070707; }
-        #tab-roulette { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 30px; width: 100%; gap: 12px; }
+        #tab-roulette { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 10px; width: 100%; gap: 4px; }
         .content-area::-webkit-scrollbar { width: 3px; }
         .content-area::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
         .section-title { font-size: 12px; font-weight: bold; color: #444; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 16px; }
@@ -347,21 +347,27 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
         </div>
 
         <div id="tab-roulette" class="hidden">
-                <div style="text-align:center;">
-                    <div style="font-size:26px;font-weight:bold;color:var(--c-orange);letter-spacing:1px;">🎰 РУЛЕТКА</div>
-                    <div style="color:#555;font-size:13px;margin-top:2px;">Первый раз бесплатно • Затем 50 🍊</div>
+            <div style="display:flex;align-items:flex-start;justify-content:center;gap:40px;padding-top:20px;width:100%;">
+                <!-- Левая: колесо -->
+                <div style="display:flex;flex-direction:column;align-items:center;gap:5px;">
+                    <div style="text-align:center;">
+                        <div style="font-size:22px;font-weight:bold;color:var(--c-orange);letter-spacing:1px;">🎰 РУЛЕТКА</div>
+                        <div style="color:#555;font-size:12px;margin-top:2px;">Первый раз бесплатно • Затем 50 🍊</div>
+                    </div>
+                    <div style="font-size:26px;line-height:1;filter:drop-shadow(0 2px 6px #FF9800);">▼</div>
+                    <canvas id="roulette-canvas" width="260" height="260" style="border-radius:50%;display:block;"></canvas>
+                    <div id="roulette-result" style="text-align:center;font-size:20px;font-weight:bold;color:#FFD700;"></div>
+                    <button id="roulette-btn" onclick="app.spinRoulette()" style="padding:12px 40px;background:linear-gradient(135deg,#FF9800,#FF5722);border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:bold;cursor:pointer;letter-spacing:1px;">🎲 КРУТИТЬ БЕСПЛАТНО</button>
+                    <div id="roulette-status" style="text-align:center;color:#555;font-size:12px;"></div>
                 </div>
-                <!-- Стрелка -->
-                <div style="font-size:36px;line-height:1;filter:drop-shadow(0 2px 6px #FF9800);margin-bottom:-16px;">▼</div>
-                <!-- Колесо -->
-                <canvas id="roulette-canvas" width="400" height="400" style="border-radius:50%;display:block;margin:0 auto;"></canvas>
-                <!-- Результат -->
-                <div id="roulette-result" style="text-align:center;min-height:36px;font-size:22px;font-weight:bold;color:#FFD700;"></div>
-                <!-- Кнопка -->
-                <button id="roulette-btn" onclick="app.spinRoulette()" style="padding:14px 48px;background:linear-gradient(135deg,#FF9800,#FF5722);border:none;border-radius:12px;color:#fff;font-size:16px;font-weight:bold;cursor:pointer;letter-spacing:1px;">
-                    🎲 КРУТИТЬ БЕСПЛАТНО
-                </button>
-                <div id="roulette-status" style="text-align:center;color:#555;font-size:12px;"></div>
+                <!-- Правая: таблица -->
+                <div style="width:240px;padding-top:8px;">
+                    <div style="text-align:center;font-size:13px;font-weight:bold;color:#FF9800;margin-bottom:8px;letter-spacing:1px;">🏆 ТОП ВЫИГРЫШЕЙ</div>
+                    <div id="roulette-leaderboard" style="background:#111;border-radius:10px;overflow:hidden;border:1px solid #222;">
+                        <div style="color:#444;text-align:center;padding:12px;font-size:12px;">Загрузка...</div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -396,6 +402,7 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
         </div>
 
         <button class="btn-exit" onclick="app.exitGame()">← В ХАБ</button>
+        <button id="btn-cam" onclick="app.toggleCamera()" style="position:fixed;top:16px;right:16px;z-index:200;background:rgba(0,0,0,0.6);border:1px solid rgba(255,152,0,0.4);color:#FF9800;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:bold;cursor:pointer;backdrop-filter:blur(8px);">👁 1-е лицо</button>
         <div class="controls-hint" id="kb-hint">
             <p><span>WASD</span> — движение</p>
             <p><span>SPACE</span> — прыжок</p>
@@ -415,6 +422,7 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
             </div>
             <div class="touch-right">
                 <div class="touch-btn jump" id="btn-jump" ontouchstart="app.touchJump()">⬆</div>
+                <div class="touch-btn" id="btn-cam-touch" ontouchstart="app.toggleCamera()" style="margin-top:8px;font-size:16px;background:rgba(0,0,0,0.5);">👁</div>
             </div>
             <div class="touch-place-btn hidden" id="btn-place" ontouchstart="app.placeBlock()">🧱</div>
         <div id="studio-touch-btns" class="hidden" style="position:fixed;bottom:20px;right:16px;display:flex;flex-direction:column;gap:8px;z-index:50;pointer-events:auto;">
@@ -486,13 +494,7 @@ const SHOP_ITEMS = [
     {id:'santa',      name:'Шапка Санты',         icon:'🎅',  price:300 },
     {id:'wizard',     name:'Шляпа Волшебника',    icon:'🧙',  price:550 },
     {id:'devil',      name:'Рога Дьявола',        icon:'😈',  price:666 },
-    {id:'halo',       name:'Ангельский Нимб',     icon:'😇',  price:888 },
-    {id:'hair_short', name:'Короткие волосы',      icon:'💇',  price:120 },
-    {id:'hair_long',  name:'Длинные волосы',       icon:'👱',  price:180 },
-    {id:'hair_spiky', name:'Взъерошенные волосы',  icon:'🦔',  price:250 },
-    {id:'hair_curly', name:'Кудрявые волосы',      icon:'🌀',  price:300 },
-    {id:'hair_bun',   name:'Пучок',                icon:'🎀',  price:150 },
-    {id:'hair_mohawk',name:'Ирокез',               icon:'⚡',  price:400 }
+    {id:'halo',       name:'Ангельский Нимб',     icon:'😇',  price:888 }
 ];
 const COLORS=[
     {c:0xCCCCCC,n:'Камень'},{c:0xFF9800,n:'Апельсин'},{c:0x4CAF50,n:'Трава'},
@@ -585,7 +587,7 @@ const app = {
         if (this.username && this.username !== '') {
             document.getElementById('ui-login').classList.add('hidden');
             document.getElementById('ui-hub').classList.remove('hidden');
-            if(!this._idb)this._initIDB(); this.renderMyGames(); this.renderFriends(); this.renderOnline(); this.initAvatarPreview(); this.renderShop();
+            this.renderMyGames(); this.renderFriends(); this.renderOnline(); this.initAvatarPreview(); this.renderShop();
             this.updateUI();
             this._wsConnect();
             setInterval(()=>this.renderOnline(), 30000);
@@ -640,7 +642,6 @@ const app = {
         }
     },
 
-
     initRoulette(){
         const prizes = [5,10,20,30,50,75,100,150,200,15,25,40,60,80,10,35,50,100];
         const colors = ['#FF4081','#FF9800','#FFD740','#69F0AE','#40C4FF','#E040FB',
@@ -649,13 +650,10 @@ const app = {
         const canvas = document.getElementById('roulette-canvas');
         if(!canvas) return;
         const ctx = canvas.getContext('2d');
-        const n = prizes.length;
-        const arc = (2*Math.PI)/n;
         this._roulettePrizes = prizes;
         this._rouletteColors = colors;
         this._rouletteAngle = this._rouletteAngle || 0;
         this._drawRoulette(ctx, this._rouletteAngle);
-        // Update button
         const used = this.rouletteUsed || false;
         const btn = document.getElementById('roulette-btn');
         const status = document.getElementById('roulette-status');
@@ -665,6 +663,7 @@ const app = {
             else { btn.textContent='🎲 КРУТИТЬ ЗА 50 🍊'; btn.style.opacity='0.5'; }
         }
         if(status) status.textContent = used ? 'Бесплатный спин использован • 50 🍊 за спин' : '✨ У тебя есть бесплатный спин!';
+        this._loadRouletteLeaderboard();
     },
 
     _drawRoulette(ctx, angle){
@@ -672,8 +671,8 @@ const app = {
         const colors = this._rouletteColors;
         const n = prizes.length;
         const arc = (2*Math.PI)/n;
-        const cx = 200, cy = 200, r = 188;
-        ctx.clearRect(0,0,400,400);
+        const cx = 130, cy = 130, r = 118;
+        ctx.clearRect(0,0,260,260);
         for(let i=0;i<n;i++){
             const start = angle + i*arc;
             ctx.beginPath(); ctx.moveTo(cx,cy);
@@ -683,25 +682,20 @@ const app = {
             ctx.save(); ctx.translate(cx,cy);
             ctx.rotate(start + arc/2);
             ctx.textAlign='right'; ctx.fillStyle='#fff';
-            ctx.font='bold 16px sans-serif';
+            ctx.font='bold 13px sans-serif';
             ctx.shadowColor='#000'; ctx.shadowBlur=3;
-            ctx.fillText(prizes[i]+'🍊', r-8, 5);
+            ctx.fillText(prizes[i]+'🍊', r-6, 4);
             ctx.restore();
         }
-        // Center circle
-        ctx.beginPath(); ctx.arc(cx,cy,24,0,2*Math.PI);
+        ctx.beginPath(); ctx.arc(cx,cy,14,0,2*Math.PI);
         ctx.fillStyle='#111'; ctx.fill();
         ctx.strokeStyle='#FF9800'; ctx.lineWidth=3; ctx.stroke();
     },
 
     spinRoulette(){
         const used = this.rouletteUsed || false;
-        if(used && this.balance < 50){
-            this.showNotif('💸','Мало монет','Нужно 50 🍊 для спина');
-            return;
-        }
+        if(used && this.balance < 50){ this.showNotif('💸','Мало монет','Нужно 50 🍊 для спина'); return; }
         if(used){ this.balance -= 50; this.saveData(); const bv=document.getElementById('balance-val'); if(bv)bv.textContent=this.balance; }
-
         const btn = document.getElementById('roulette-btn');
         const result = document.getElementById('roulette-result');
         const canvas = document.getElementById('roulette-canvas');
@@ -709,91 +703,66 @@ const app = {
         const ctx = canvas.getContext('2d');
         btn.disabled = true; btn.style.opacity='0.5';
         if(result) result.textContent = '';
-
         const n = this._roulettePrizes.length;
         const arc = (2*Math.PI)/n;
-        // Pick random prize
         const winner = Math.floor(Math.random()*n);
-        // Spin at least 5 full rotations + land on winner
-        const targetAngle = this._rouletteAngle + Math.PI*10 + (2*Math.PI - winner*arc - arc/2 - (this._rouletteAngle % (2*Math.PI)));
+        const spins = Math.PI*2*(5+Math.floor(Math.random()*3));
+        const baseAngle = -Math.PI/2 - winner*arc - arc/2;
         const startAngle = this._rouletteAngle;
+        const totalSpin = spins + ((baseAngle - startAngle % (Math.PI*2) + Math.PI*4) % (Math.PI*2));
+        const targetAngle = startAngle + totalSpin;
         const duration = 4000;
         const startTime = Date.now();
-
         const animate = () => {
             const elapsed = Date.now() - startTime;
             const t = Math.min(elapsed/duration, 1);
-            // Ease out cubic
             const ease = 1 - Math.pow(1-t, 3);
             this._rouletteAngle = startAngle + (targetAngle - startAngle)*ease;
             this._drawRoulette(ctx, this._rouletteAngle);
             if(t < 1){ requestAnimationFrame(animate); }
             else {
-                // Award prize
+                this._rouletteAngle = baseAngle;
+                this._drawRoulette(ctx, baseAngle);
                 const prize = this._roulettePrizes[winner];
                 this.balance += prize;
                 this.rouletteUsed = true;
                 this.saveData();
                 const bv=document.getElementById('balance-val'); if(bv)bv.textContent=this.balance;
                 if(result) result.textContent = '🎉 +' + prize + ' 🍊!';
-                btn.disabled = false;
                 this.showNotif('🎰','Рулетка!','Ты выиграл '+prize+' 🍊!');
+                this._updateRouletteLeaderboard(prize);
+                btn.disabled = false;
                 this.initRoulette();
             }
         };
         requestAnimationFrame(animate);
     },
 
-    // ── IndexedDB для хранения данных игроков
-    _initIDB(){
-        return new Promise(res=>{
-            const req=indexedDB.open('citrus_v1',1);
-            req.onupgradeneeded=e=>{
-                const db=e.target.result;
-                if(!db.objectStoreNames.contains('players'))db.createObjectStore('players',{keyPath:'id'});
-            };
-            req.onsuccess=e=>{this._idb=e.target.result;res();};
-            req.onerror=()=>res();
-        });
-    },
-    _idbPut(store,obj){
-        return new Promise((res,rej)=>{
-            if(!this._idb)return res();
-            try{const tx=this._idb.transaction(store,'readwrite');tx.objectStore(store).put(obj);tx.oncomplete=res;tx.onerror=rej;}catch(e){res();}
-        });
-    },
-    _idbGetAll(store){
-        return new Promise(res=>{
-            if(!this._idb)return res([]);
-            try{const tx=this._idb.transaction(store,'readonly');const req=tx.objectStore(store).getAll();req.onsuccess=()=>res(req.result||[]);req.onerror=()=>res([]);}catch(e){res([]);}
-        });
+    async _loadRouletteLeaderboard(){
+        const el = document.getElementById('roulette-leaderboard');
+        if(!el) return;
+        try {
+            const res = await fetch(this._API + '/roulette-leaderboard');
+            const data = await res.json();
+            if(!data.length){ el.innerHTML='<div style="color:#444;text-align:center;padding:12px;font-size:12px;">Пока никто не играл</div>'; return; }
+            const medals = ['🥇','🥈','🥉'];
+            el.innerHTML = data.slice(0,10).map((p,i)=>`
+                <div style="display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid #1a1a1a;${i===0?'background:#1a1200':''}">
+                    <span style="font-size:15px;width:22px;text-align:center">${medals[i]||'#'+(i+1)}</span>
+                    <span style="flex:1;color:#ccc;font-size:13px">${p.name}</span>
+                    <span style="color:#FFD700;font-weight:bold;font-size:13px">+${p.total} 🍊</span>
+                </div>`).join('');
+        } catch(e){ el.innerHTML='<div style="color:#444;text-align:center;padding:12px;font-size:12px;">Ошибка загрузки</div>'; }
     },
 
-    // Рисует аватар в <img> тег, загружая inv с сервера если нужно
-    async _setAvatar(img, color, inv, playerId) {
-        // Сначала рисуем сразу что есть
-        img.src = this._drawFaceCanvas(color, inv||[]);
-        // Если inv пустой и есть ID — грузим с сервера
-        if((!inv||inv.length===0) && playerId) {
-            try {
-                const r = await fetch(this._API+'/players/'+playerId);
-                if(r.ok){
-                    const p = await r.json();
-                    if(p && p.inv && p.inv.length > 0) {
-                        // Сохраняем в localStorage
-                        try {
-                            let gdb = JSON.parse(localStorage.getItem('citrus_global_users')||'[]');
-                            const gi = gdb.findIndex(u=>String(u.id)===String(playerId));
-                            if(gi!==-1) gdb[gi].inv = p.inv;
-                            else gdb.push({id:playerId, name:p.name, color:p.color||color, inv:p.inv});
-                            localStorage.setItem('citrus_global_users', JSON.stringify(gdb));
-                        } catch(e){}
-                        // Перерисовываем с реальным inv
-                        img.src = this._drawFaceCanvas(p.color||color, p.inv);
-                    }
-                }
-            } catch(e){}
-        }
+    async _updateRouletteLeaderboard(prize){
+        try {
+            await fetch(this._API + '/roulette-leaderboard', {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({id: this.userId, name: this.username+'#'+this.userId, prize})
+            });
+            this._loadRouletteLeaderboard();
+        } catch(e){}
     },
 
     saveData(){
@@ -871,7 +840,7 @@ const app = {
         this.showHub();
         this._wsConnect();
         setTimeout(()=>{
-            try{ fetch(this._API+'/players/'+this.userId,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:String(this.userId),name:this.username,tag:this.fullTag,color:this._myColor,inv:this.inventory||[]})}); }catch(e){}
+            try{ fetch(this._API+'/players/'+this.userId,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:String(this.userId),name:this.username,tag:this.fullTag,color:this._myColor})}); }catch(e){}
             this._readMailbox();
         }, 1500);
     },
@@ -899,7 +868,7 @@ const app = {
         } catch(e) {}
         document.getElementById('ui-login').classList.add('hidden');
         document.getElementById('ui-hub').classList.remove('hidden');
-        if(!this._idb)this._initIDB(); this.renderMyGames(); this.renderFriends(); this.renderOnline(); this.initAvatarPreview(); this.renderShop();
+        this.renderMyGames(); this.renderFriends(); this.renderOnline(); this.initAvatarPreview(); this.renderShop();
         this.updateUI();
     },
 
@@ -992,7 +961,7 @@ const app = {
         else if(this._questCountdownInterval){ clearInterval(this._questCountdownInterval); this._questCountdownInterval=null; }
         if(id==='friends'){
             // Регистрируем на сервере (на случай если зашли раньше деплоя)
-            try{ fetch(this._API+'/players/'+this.userId,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:String(this.userId),name:this.username,tag:this.fullTag,color:this._myColor,inv:this.inventory||[]})}); }catch(e){}
+            try{ fetch(this._API+'/players/'+this.userId,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:String(this.userId),name:this.username,tag:this.fullTag,color:this._myColor})}); }catch(e){}
             this.renderFriends();
             this.renderInbox();
             const hint=document.getElementById('my-tag-hint');
@@ -1001,215 +970,7 @@ const app = {
     },
 
     // ── SHOP
-    _drawFaceCanvas(color, inv) {
-        inv = inv || [];
-        const col = color || '#FF9800';
-        try {
-            const size = 128;
-            const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
-            renderer.setSize(size, size);
-            renderer.setClearColor(0x000000, 0);
-            renderer.shadowMap.enabled = false;
-
-            const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 100);
-            // Show head + shoulders, slightly from above
-            camera.position.set(0, 0.8, 2.8);
-            camera.lookAt(0, 0.8, 0);
-
-            scene.add(new THREE.AmbientLight(0xffffff, 5.0));
-            const dl = new THREE.DirectionalLight(0xffffff, 2.0);
-            dl.position.set(2, 4, 3); scene.add(dl);
-
-            // Build a mini character - reuse same materials as main character
-            const skinM = new THREE.MeshStandardMaterial({color:0xffcc99,roughness:0.8});
-            const bodyM = new THREE.MeshStandardMaterial({color:new THREE.Color(col),roughness:0.8});
-            const eyeM  = new THREE.MeshStandardMaterial({color:0x222222});
-            const whiteM= new THREE.MeshStandardMaterial({color:0xffffff});
-
-            const g = new THREE.Group();
-
-            // Head
-            const head = new THREE.Mesh(new THREE.BoxGeometry(0.7,0.7,0.7), skinM);
-            head.position.y = 0.85; g.add(head);
-
-            // Eyes
-            [-0.15,0.15].forEach(x=>{
-                const eye = new THREE.Mesh(new THREE.BoxGeometry(0.12,0.1,0.05), eyeM);
-                eye.position.set(x, 0.88, 0.36); g.add(eye);
-                const w = new THREE.Mesh(new THREE.BoxGeometry(0.05,0.05,0.06), whiteM);
-                w.position.set(x+0.04, 0.9, 0.36); g.add(w);
-            });
-            // Mouth
-            const mouth = new THREE.Mesh(new THREE.BoxGeometry(0.2,0.06,0.05),
-                new THREE.MeshStandardMaterial({color:0xc0785a}));
-            mouth.position.set(0, 0.72, 0.36); g.add(mouth);
-
-            // Body (shoulders visible)
-            const body = new THREE.Mesh(new THREE.BoxGeometry(0.6,0.55,0.35), bodyM);
-            body.position.y = 0.27; g.add(body);
-
-            // Arms
-            [-0.42,0.42].forEach(x=>{
-                const arm = new THREE.Mesh(new THREE.BoxGeometry(0.2,0.5,0.25), bodyM);
-                arm.position.set(x, 0.28, 0); g.add(arm);
-            });
-            // Legs
-            const legM = new THREE.MeshStandardMaterial({color:0x222266,roughness:0.8});
-            [-0.17,0.17].forEach(x=>{
-                const leg = new THREE.Mesh(new THREE.BoxGeometry(0.22,0.5,0.28), legM);
-                leg.position.set(x, -0.27, 0); g.add(leg);
-            });
-
-            // === ACCESSORIES ===
-            const M = (col,r=0.8)=>new THREE.MeshStandardMaterial({color:col,roughness:r});
-
-            if(inv.includes('glasses')){
-                [-0.15,0.15].forEach(x=>{
-                    const g2=new THREE.Mesh(new THREE.BoxGeometry(0.18,0.12,0.04),M(0x333333));
-                    g2.position.set(x,0.88,0.38); g.add(g2);
-                });
-                const br=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.04,0.04),M(0x333333));
-                br.position.set(0,0.88,0.38); g.add(br);
-            }
-            if(inv.includes('crown')){
-                const cb=new THREE.Mesh(new THREE.BoxGeometry(0.78,0.12,0.78),M(0xFFD700));
-                cb.position.set(0,1.27,0); g.add(cb);
-                [-0.25,0,0.25].forEach((x,i)=>{
-                    const ct=new THREE.Mesh(new THREE.BoxGeometry(0.12,0.18,0.12),M(0xFFD700));
-                    ct.position.set(x,1.38,0); g.add(ct);
-                    const gem=new THREE.Mesh(new THREE.SphereGeometry(0.05),M(i===1?0x0000ff:0xff0000));
-                    gem.position.set(x,1.5,0); g.add(gem);
-                });
-            }
-            if(inv.includes('halo')){
-                const hg=new THREE.Mesh(new THREE.TorusGeometry(0.32,0.04,8,16),M(0xFFD700,0.3));
-                hg.position.set(0,1.42,0); g.add(hg);
-            }
-            if(inv.includes('santa')){
-                const sb=new THREE.Mesh(new THREE.BoxGeometry(0.82,0.1,0.82),M(0xcc0000));
-                sb.position.set(0,1.24,0); g.add(sb);
-                const sc=new THREE.Mesh(new THREE.ConeGeometry(0.36,0.5,8),M(0xcc0000));
-                sc.position.set(0,1.56,0); g.add(sc);
-                const sw=new THREE.Mesh(new THREE.BoxGeometry(0.84,0.08,0.84),M(0xffffff));
-                sw.position.set(0,1.28,0); g.add(sw);
-                const sb2=new THREE.Mesh(new THREE.SphereGeometry(0.06),M(0xffffff));
-                sb2.position.set(0,1.82,0); g.add(sb2);
-            }
-            if(inv.includes('headphones')){
-                const hb=new THREE.Mesh(new THREE.TorusGeometry(0.42,0.05,8,16,Math.PI),M(0x222222));
-                hb.rotation.z=Math.PI/2; hb.position.set(0,1.1,0); g.add(hb);
-                [-0.44,0.44].forEach(x=>{
-                    const hp=new THREE.Mesh(new THREE.BoxGeometry(0.16,0.22,0.12),M(0xFF9800));
-                    hp.position.set(x,0.88,0); g.add(hp);
-                });
-            }
-            if(inv.includes('mask')){
-                const mk=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.28,0.06),M(0xFFD700));
-                mk.position.set(0,0.85,0.38); g.add(mk);
-                [-0.13,0.13].forEach(x=>{
-                    const mh=new THREE.Mesh(new THREE.BoxGeometry(0.14,0.1,0.07),M(0x111111));
-                    mh.position.set(x,0.87,0.38); g.add(mh);
-                });
-            }
-            if(inv.includes('hat')){
-                const hb2=new THREE.Mesh(new THREE.BoxGeometry(0.9,0.08,0.9),M(0x8B6914));
-                hb2.position.set(0,1.22,0); g.add(hb2);
-                const ht=new THREE.Mesh(new THREE.BoxGeometry(0.6,0.32,0.6),M(0x8B6914));
-                ht.position.set(0,1.38,0); g.add(ht);
-            }
-            if(inv.includes('halo')||inv.includes('devil')){
-                if(inv.includes('devil')){
-                    [-0.22,0.22].forEach(x=>{
-                        const dh=new THREE.Mesh(new THREE.ConeGeometry(0.08,0.22,6),M(0xCC0000));
-                        dh.position.set(x,1.28,0); g.add(dh);
-                    });
-                }
-            }
-            if(inv.includes('wings')){
-                [-1,1].forEach(side=>{
-                    const w=new THREE.Mesh(new THREE.BoxGeometry(0.08,0.7,0.5),M(0xFFD700,0.3));
-                    w.position.set(side*0.55,0.4,-0.1); g.add(w);
-                });
-            }
-            if(inv.includes('party')){
-                const pb=new THREE.Mesh(new THREE.ConeGeometry(0.22,0.38,8),M(0xFF4081));
-                pb.position.set(0,1.42,0); g.add(pb);
-                const pw2=new THREE.Mesh(new THREE.BoxGeometry(0.78,0.06,0.78),M(0xffffff));
-                pw2.position.set(0,1.24,0); g.add(pw2);
-            }
-            if(inv.includes('hair_short')){
-                const h=new THREE.Mesh(new THREE.BoxGeometry(0.72,0.2,0.72),M(0x3d1c02));
-                h.position.set(0,1.22,0); g.add(h);
-            }
-            if(inv.includes('hair_long')){
-                const h=new THREE.Mesh(new THREE.BoxGeometry(0.72,0.2,0.72),M(0x1a0a00));
-                h.position.set(0,1.22,0); g.add(h);
-                const hb3=new THREE.Mesh(new THREE.BoxGeometry(0.6,0.7,0.15),M(0x1a0a00));
-                hb3.position.set(0,0.75,-0.3); g.add(hb3);
-            }
-            if(inv.includes('hair_spiky')){
-                const hb4=new THREE.Mesh(new THREE.BoxGeometry(0.72,0.14,0.72),M(0x111111));
-                hb4.position.set(0,1.22,0); g.add(hb4);
-                [-0.2,-0.07,0.07,0.2].forEach(x=>{
-                    const sp=new THREE.Mesh(new THREE.ConeGeometry(0.07,0.28,5),M(0x111111));
-                    sp.position.set(x,1.42,0); g.add(sp);
-                });
-            }
-            if(inv.includes('hair_curly')){
-                const hb5=new THREE.Mesh(new THREE.BoxGeometry(0.72,0.16,0.72),M(0x5c2a00));
-                hb5.position.set(0,1.22,0); g.add(hb5);
-                [-0.25,0,0.25,-0.12,0.12].forEach((x,i)=>{
-                    const c2=new THREE.Mesh(new THREE.SphereGeometry(0.1,6,6),M(0x5c2a00));
-                    c2.position.set(x,1.36,i>2?0.2:-0.1); g.add(c2);
-                });
-            }
-            if(inv.includes('hair_bun')){
-                const hb6=new THREE.Mesh(new THREE.BoxGeometry(0.72,0.16,0.72),M(0x2a0a00));
-                hb6.position.set(0,1.22,0); g.add(hb6);
-                const bn=new THREE.Mesh(new THREE.SphereGeometry(0.16,8,8),M(0x2a0a00));
-                bn.position.set(0,1.4,0); g.add(bn);
-            }
-            if(inv.includes('hair_mohawk')){
-                const hb7=new THREE.Mesh(new THREE.BoxGeometry(0.72,0.12,0.72),M(0xff2200));
-                hb7.position.set(0,1.22,0); g.add(hb7);
-                for(let i=0;i<4;i++){
-                    const sp=new THREE.Mesh(new THREE.BoxGeometry(0.13,0.28,0.13),M(0xff2200));
-                    sp.position.set(0,1.4,0.18-i*0.12); g.add(sp);
-                }
-            }
-            if(inv.includes('cape')){
-                const cp=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.7,0.08),M(0x8B0000));
-                cp.position.set(0,0.2,-0.22); g.add(cp);
-            }
-            if(inv.includes('flame')){
-                [M(0xFF4400),M(0xFF8800)].forEach((m,i)=>{
-                    const f=new THREE.Mesh(new THREE.SphereGeometry(0.18-i*0.06,8,8),m);
-                    f.position.set(0,1.38+i*0.1,0); g.add(f);
-                });
-            }
-
-            // Center group vertically
-            g.position.y = -0.3;
-            scene.add(g);
-            renderer.render(scene, camera);
-            const url = renderer.domElement.toDataURL();
-            renderer.dispose();
-            return url;
-        } catch(e) {
-            // Fallback 2D
-            const s=128, cv=document.createElement('canvas'); cv.width=s; cv.height=s;
-            const ctx=cv.getContext('2d');
-            ctx.fillStyle=col+'44'; ctx.beginPath(); ctx.roundRect(0,0,s,s,20); ctx.fill();
-            ctx.fillStyle='#ffcc99'; ctx.fillRect(34,24,60,56);
-            ctx.fillStyle=col; ctx.fillRect(18,80,92,48);
-            ctx.fillStyle='#222'; ctx.fillRect(44,44,12,10); ctx.fillRect(72,44,12,10);
-            ctx.fillStyle='#c0785a'; ctx.fillRect(52,66,24,6);
-            return cv.toDataURL();
-        }
-    },
-
-        renderShop(){
+    renderShop(){
         const g=document.getElementById('shop-grid');if(!g)return;g.innerHTML='';
         SHOP_ITEMS.forEach(it=>{
             const b=this.inventory.includes(it.id);
@@ -1224,7 +985,6 @@ const app = {
         if(this.balance>=price){
             this.balance-=price;this.inventory.push(id); this._questProgress('buys',1);
             this.saveData();this.renderShop();this.updateAvatarPreview();
-            try{fetch(this._API+'/players/'+this.userId,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:String(this.userId),name:this.username,tag:this.fullTag,color:this._myColor,inv:this.inventory||[]})});}catch(e){}
             // Обновляем персонажа сразу если в игре
             if(this.mode==='play' && this.playerGroup && this.scene){
                 this.scene.remove(this.playerGroup);
@@ -1236,8 +996,7 @@ const app = {
             this.showNotif(it.icon,'Куплено!',`${it.name} в гардеробе`);
         }else this.showNotif('💸','Мало монет',`Нужно ещё ${price-this.balance} 🍊`);
     },
-    resetAvatar(){this.inventory=[];this.saveData();this.renderShop();this.updateAvatarPreview();
-            try{fetch(this._API+'/players/'+this.userId,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:String(this.userId),name:this.username,tag:this.fullTag,color:this._myColor,inv:this.inventory||[]})});}catch(e){}},
+    resetAvatar(){this.inventory=[];this.saveData();this.renderShop();this.updateAvatarPreview();},
 
     // ── MULTIPLAYER / WEBSOCKET / CHAT
     _wsConnect(){
@@ -1280,7 +1039,7 @@ const app = {
                     this._mqttSubscribe(`citrus/inbox/${this.userId}`);
                     this._mqttPublishJson({type:'join',_from:String(this.userId),_ch:'citrus_v1',player:{
                         id:String(this.userId),name:this.username,tag:this.fullTag,
-                        color:this._myColor,inv:this.inventory||[],status:'online',world:null,ts:Date.now()
+                        color:this._myColor,status:'online',world:null,ts:Date.now()
                     }});
                     this._wsTimer=setInterval(()=>{this._registerPresence();this.renderMpPanel();},20000);
                 },400);
@@ -1444,20 +1203,10 @@ const app = {
             if(!this._onlineMap)this._onlineMap={};
             this._onlineMap[p.id]=p;
             if(!this._pc)this._pc=[];
-            const existPc = this._pc.find(x=>x.id===p.id);
-                    if(!existPc) this._pc.push(p);
-                    else { existPc.inv = p.inv||existPc.inv||[]; existPc.color = p.color||existPc.color; }
-                    // Сохраняем inv в globalDB чтобы было видно офлайн
-                    try {
-                        let gdb = JSON.parse(localStorage.getItem('citrus_global_users')||'[]');
-                        const gi = gdb.findIndex(u=>String(u.id)===String(p.id));
-                        if(gi!==-1){ gdb[gi].inv = p.inv||gdb[gi].inv||[]; gdb[gi].color = p.color||gdb[gi].color; }
-                        else gdb.push({id:p.id, name:p.name, color:p.color, inv:p.inv||[]});
-                        localStorage.setItem('citrus_global_users', JSON.stringify(gdb));
-                    } catch(e){}
+            if(!this._pc.find(x=>x.id===p.id))this._pc.push(p);
             this._cachedOnline=Object.values(this._onlineMap);
             // Сохраняем в IDB для поиска
-            this._idbPut('players', {id:p.id,name:p.name,tag:p.tag,color:p.color,inv:p.inv||[],ts:p.ts}).catch(()=>{});
+            this._idbPut('players', {id:p.id,name:p.name,tag:p.tag,color:p.color,ts:p.ts}).catch(()=>{});
             const ol=document.getElementById('online-list');
             if(ol&&ol.innerHTML.includes('Загрузка'))this.renderOnline();
         }
@@ -1522,7 +1271,7 @@ const app = {
                 method:'POST',
                 headers:{'Content-Type':'application/json'},
                 body:JSON.stringify({id:String(this.userId),name:this.username,tag:this.fullTag,
-                    color:this._myColor,inv:this.inventory||[],status:this._pStatus||'online',world:this._pWorld||null,ts:Date.now()})
+                    color:this._myColor,status:this._pStatus||'online',world:this._pWorld||null,ts:Date.now()})
             });
         }catch(e){}
         if(!this._ws||this._ws.readyState!==1){this._wsConnect();return;}
@@ -1545,7 +1294,7 @@ const app = {
             if (r.ok) {
                 const list = await r.json();
                 if (!this._onlineMap) this._onlineMap = {};
-                list.forEach(p => { if (String(p.id) !== String(this.userId)) { this._onlineMap[p.id] = {...p, ts: p.ts||now}; this._idbPut('players', {id:p.id,name:p.name,tag:p.tag,color:p.color,inv:p.inv||[],ts:p.ts}).catch(()=>{}); } });
+                list.forEach(p => { if (String(p.id) !== String(this.userId)) this._onlineMap[p.id] = {...p, ts: p.ts||now}; });
             }
         } catch(e) {}
         if(this._onlineMap){
@@ -1710,12 +1459,9 @@ const app = {
         const res = document.getElementById('srch-res');
         if (!q) { res.innerHTML = '<div style="color:#333;font-size:12px;padding:6px;">Введи ник и нажми Поиск</div>'; return; }
 
-        // Источники: IDB + localStorage + сервер + онлайн
+        // Источники: сервер + localStorage + онлайн игроки
         let localDB = [];
         try { localDB = JSON.parse(localStorage.getItem('citrus_global_users') || '[]'); } catch(e) {}
-        // Также берём из IndexedDB (там хранится inv)
-        let idbPlayers = [];
-        try { idbPlayers = await this._idbGetAll('players'); } catch(e) {}
         const onlinePlayers = this._cachedOnline || [];
 
         // Запрашиваем с сервера
@@ -1726,35 +1472,22 @@ const app = {
         } catch(e) {}
 
         const allUsersMap = new Map();
-        // 1. localDB (база)
-        localDB.forEach(u => allUsersMap.set(String(u.id), {...u, inv:u.inv||[]}));
-        // 2. IndexedDB — там хранится inv
-        idbPlayers.forEach(u => { if(u&&u.id){ const ex=allUsersMap.get(String(u.id)); allUsersMap.set(String(u.id), {...(ex||{}), ...u, inv:u.inv||ex?.inv||[]}); } });
-        // 2. Сервер — перезаписывает, включая inv
-        serverPlayers.forEach(u => { if (u.id) allUsersMap.set(String(u.id), {id:String(u.id), name:u.name, tag:u.tag||u.name+'#'+u.id, color:u.color||'#FF9800', inv:u.inv||[]}); });
-        // 3. Онлайн — обновляет цвет и inv если свежее
-        onlinePlayers.forEach(u => {
-            const ex = allUsersMap.get(String(u.id));
-            allUsersMap.set(String(u.id), {id:String(u.id), name:u.name, tag:u.tag, color:u.color, inv:u.inv||ex?.inv||[]});
-        });
+        localDB.forEach(u => allUsersMap.set(String(u.id), u));
+        onlinePlayers.forEach(u => allUsersMap.set(String(u.id), {id:String(u.id), name:u.name, tag:u.tag, color:u.color}));
+        serverPlayers.forEach(u => { if (u.id) allUsersMap.set(String(u.id), {id:String(u.id), name:u.name, tag:u.tag||u.name+'#'+u.id, color:u.color||'#FF9800'}); });
 
         let found = Array.from(allUsersMap.values()).filter(u => String(u.id) !== String(this.userId));
 
         const tagMatch = raw.match(/^(.+)#(\d{4})$/);
         if (tagMatch) {
             const [, tName, tId] = tagMatch;
-            // Грузим игрока напрямую с сервера по ID
-            try {
-                const r2 = await fetch(this._API+'/players/'+tId);
-                if(r2.ok){ const sp = await r2.json(); if(sp&&sp.id) allUsersMap.set(String(sp.id),{...sp,inv:sp.inv||[]}); }
-            } catch(e){}
             found = found.filter(u => String(u.id) === tId);
             if (!found.length) {
                 // Не нашли — предлагаем отправить заявку вслепую
                 const isFr = this.friends.includes(tId);
                 const sent = this.sentReqs.includes(tId);
                 res.innerHTML = `<div class="fr" style="border-color:rgba(255,152,0,0.15);background:rgba(255,152,0,0.03)">
-                    <img src="${app._drawFaceCanvas('#FF9800', [])}" style="width:48px;height:48px;border-radius:10px;flex-shrink:0;">
+                    <div class="fa2" style="background:#FF980022;color:#FF9800">${tName[0].toUpperCase()}</div>
                     <div class="fi"><div class="fn">${tName} <small style="color:#555">#${tId}</small></div>
                     <div class="fs">Отправить заявку по тегу</div></div>
                     <div class="fb">
@@ -1779,12 +1512,10 @@ const app = {
             const isFr = this.friends.includes(uidStr);
             const sent = this.sentReqs.includes(uidStr);
             const col = u.color || '#888';
-            const onlineFresh = (this._cachedOnline||[]).find(x=>String(x.id)===uidStr) || (this._onlineMap&&this._onlineMap[uidStr]);
-            const freshInv = (onlineFresh&&onlineFresh.inv) || u.inv || [];
-            const isOnline = onlineFresh;
+            const isOnline = (this._cachedOnline||[]).find(x=>String(x.id)===uidStr);
             res.innerHTML += `
                 <div class="fr">
-                    <img id="av_${uidStr}" src="${app._drawFaceCanvas(col, freshInv)}" style="width:48px;height:48px;border-radius:10px;flex-shrink:0;">
+                    <div class="fa2" style="background:${col}22;color:${col}">${(u.name[0]||'?').toUpperCase()}</div>
                     <div class="fi"><div class="fn">${u.name} <small style="color:#555">#${u.id}</small></div>
                     <div class="fs ${isOnline?'on':''}"> ${isOnline ? '● Онлайн' : '○ Не в сети'}</div></div>
                     <div class="fb">
@@ -1835,14 +1566,7 @@ const app = {
         const online=this._cachedOnline||[];
         let globalDB=[];
         try{globalDB=JSON.parse(localStorage.getItem('citrus_global_users')||'[]');}catch(e){}
-        const findPeer=id=>{
-            const om = this._onlineMap&&this._onlineMap[id];
-            const fromPc = pc.find(x=>x.id===id);
-            const fromDb = globalDB.find(x=>String(x.id)===id);
-            const base = om||fromPc||fromDb||{id,name:id,color:'#888'};
-            base.inv = (om&&om.inv)||(fromPc&&fromPc.inv)||(fromDb&&fromDb.inv)||[];
-            return base;
-        };
+        const findPeer=id=>pc.find(x=>x.id===id)||globalDB.find(x=>String(x.id)===id)||{id,name:id,color:'#888'};
 
         if(!this.friends.length){
             fl.innerHTML='<div style="color:#444;font-size:13px;padding:10px;line-height:1.7;">Пока нет друзей.<br><small style="color:#333">Найди игрока и отправь заявку</small></div>';
@@ -1859,18 +1583,12 @@ const app = {
                 ? `<button class="bx b-add" onclick="app.joinFriend('${fid}','${friendMap}')" style="font-size:10px;background:#00E676;color:#000">▶ Войти</button>`
                 : on ? `<button class="bx b-add" onclick="app.inviteFriend('${fid}','${p.name}')" style="font-size:10px">▶ Играть</button>` : '';
             fl.innerHTML+=`<div class="fr">
-                <img id="fr_av_${fid}" src="${app._drawFaceCanvas(p.color||'#888', p.inv||[])}" style="width:48px;height:48px;border-radius:10px;flex-shrink:0;">
+                <div class="fa2" style="background:${p.color||'#888'}22;color:${p.color||'#888'}">${(p.name[0]||'?').toUpperCase()}</div>
                 <div class="fi"><div class="fn">${p.name}${['разраб','admin','citrus'].includes((p.name||"").toLowerCase())?' <span style="color:#4fc3f7;font-size:12px">✔</span>':''}</div>
                 <div class="fs ${sc}">${p.tag||('#'+p.id)} · ${st}</div></div>
                 <div class="fb">${inviteBtn}
                     <button class="bx b-del" onclick="app.removeFriend('${fid}')">✕</button>
                 </div></div>`;
-        });
-
-        // Async загружаем inv для каждого друга
-        this.friends.forEach(fid=>{
-            const img = document.getElementById('fr_av_'+fid);
-            if(img) app._setAvatar(img, null, null, fid);
         });
         // Обновляем бейдж на навбаре
         const cnt=this.friendRequests.length,b=document.getElementById('fr-badge');
@@ -1901,14 +1619,7 @@ const app = {
         const pc=this._pc||[];
         let globalDB=[];
         try{globalDB=JSON.parse(localStorage.getItem('citrus_global_users')||'[]');}catch(e){}
-        const findPeer=id=>{
-            const om = this._onlineMap&&this._onlineMap[id];
-            const fromPc = pc.find(x=>x.id===id);
-            const fromDb = globalDB.find(x=>String(x.id)===id);
-            const base = om||fromPc||fromDb||{id,name:id,color:'#888'};
-            base.inv = (om&&om.inv)||(fromPc&&fromPc.inv)||(fromDb&&fromDb.inv)||[];
-            return base;
-        };
+        const findPeer=id=>pc.find(x=>x.id===id)||globalDB.find(x=>String(x.id)===id)||{id,name:id,color:'#888'};
 
         // Читаем почту при каждом открытии
         this._readMailbox();
@@ -1937,7 +1648,7 @@ const app = {
                     fid=String(fid);
                     const p=findPeer(fid);
                     inDiv.innerHTML+=`<div class="fr" style="border-color:rgba(255,64,129,0.2);background:rgba(255,64,129,0.04);margin-bottom:8px;">
-                        <img src="${app._drawFaceCanvas(p.color||'#FF4081', p.inv||[])}" style="width:48px;height:48px;border-radius:10px;flex-shrink:0;">
+                        <div class="fa2" style="background:${p.color||'#FF4081'}22;color:${p.color||'#FF4081'}">${(p.name[0]||'?').toUpperCase()}</div>
                         <div class="fi">
                             <div class="fn">${p.name}${['разраб','admin','citrus'].includes((p.name||"").toLowerCase())?' <span style="color:#4fc3f7;font-size:12px">✔</span>':''}</div>
                             <div class="fs" style="color:#FF4081;">хочет дружить</div>
@@ -1963,7 +1674,7 @@ const app = {
                     if(this.friends.includes(fid))return; // уже друг
                     const p=findPeer(fid);
                     outDiv.innerHTML+=`<div class="fr" style="border-color:rgba(0,229,255,0.1);background:rgba(0,229,255,0.03);margin-bottom:8px;">
-                        <img src="${app._drawFaceCanvas(p.color||'#00E5FF', p.inv||[])}" style="width:48px;height:48px;border-radius:10px;flex-shrink:0;">
+                        <div class="fa2" style="background:rgba(0,229,255,0.1);color:var(--c-blue)">${(p.name[0]||'?').toUpperCase()}</div>
                         <div class="fi">
                             <div class="fn">${p.name}${['разраб','admin','citrus'].includes((p.name||"").toLowerCase())?' <span style="color:#4fc3f7;font-size:12px">✔</span>':''}</div>
                             <div class="fs" style="color:var(--c-blue);">заявка отправлена</div>
@@ -2014,17 +1725,7 @@ const app = {
         const players=await this._fetchOnline();
         this._cachedOnline=players;
         if(!this._pc)this._pc=[];
-        players.forEach(p=>{const existPc = this._pc.find(x=>x.id===p.id);
-                    if(!existPc) this._pc.push(p);
-                    else { existPc.inv = p.inv||existPc.inv||[]; existPc.color = p.color||existPc.color; }
-                    // Сохраняем inv в globalDB чтобы было видно офлайн
-                    try {
-                        let gdb = JSON.parse(localStorage.getItem('citrus_global_users')||'[]');
-                        const gi = gdb.findIndex(u=>String(u.id)===String(p.id));
-                        if(gi!==-1){ gdb[gi].inv = p.inv||gdb[gi].inv||[]; gdb[gi].color = p.color||gdb[gi].color; }
-                        else gdb.push({id:p.id, name:p.name, color:p.color, inv:p.inv||[]});
-                        localStorage.setItem('citrus_global_users', JSON.stringify(gdb));
-                    } catch(e){}});
+        players.forEach(p=>{if(!this._pc.find(x=>x.id===p.id))this._pc.push(p);});
         const list=players.filter(p=>!this.friends.includes(p.id));
         ol.innerHTML='';
         if(!list.length){
@@ -2034,7 +1735,7 @@ const app = {
         list.forEach(p=>{
             const sent=this.sentReqs.includes(String(p.id));
             ol.innerHTML+=`<div class="fr">
-                <img id="fr_av_${fid}" src="${app._drawFaceCanvas(p.color||'#888', p.inv||[])}" style="width:48px;height:48px;border-radius:10px;flex-shrink:0;">
+                <div class="fa2" style="background:${p.color||'#888'}22;color:${p.color||'#888'}">${(p.name[0]||'?').toUpperCase()}</div>
                 <div class="fi"><div class="fn">${p.name}${['разраб','admin','citrus'].includes((p.name||"").toLowerCase())?' <span style="color:#4fc3f7;font-size:12px">✔</span>':''}</div>
                 <div class="fs ${p.status==='ingame'?'ig':'on'}">${p.tag||p.id} · ${p.status==='ingame'?'🎮 '+p.world:'● Онлайн'}</div></div>
                 <button class="bx ${sent?'b-del':'b-add'}" onclick="app.sendReq('${p.id}')">${sent?'✓ Отправлено':'+ Друг'}</button>
@@ -2259,14 +1960,6 @@ const app = {
         if(inv.includes('ice')){const im=new THREE.MeshStandardMaterial({color:0x88DDFF,emissive:0x44AAFF,emissiveIntensity:0.5,transparent:true,opacity:0.5});const ia=new THREE.Mesh(new THREE.SphereGeometry(0.65,10,10),im);headGroup.add(ia);}
         if(inv.includes('rainbow')){const colors=[0xFF0000,0xFF7700,0xFFFF00,0x00FF00,0x0000FF,0x8B00FF];colors.forEach((col,i)=>{const rb=new THREE.Mesh(new THREE.TorusGeometry(0.28+i*0.05,0.025,5,20,Math.PI),new THREE.MeshStandardMaterial({color:col,emissive:col,emissiveIntensity:0.7}));rb.position.set(0,0.38+i*0.02,0.05);rb.rotation.z=Math.PI;headGroup.add(rb);});}
         if(inv.includes('mask')){const mask=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.35,0.08),new THREE.MeshStandardMaterial({color:0xFFD700,metalness:0.9,roughness:0.1}));mask.position.set(0,0.08,0.32);headGroup.add(mask);}
-        // ── Волосы
-        const _hmo=(col)=>new THREE.MeshStandardMaterial({color:col,roughness:0.8});
-        if(inv.includes('hair_short')){const h=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.22,0.62),_hmo(0x3d1c02));h.position.set(0,0.35,0);headGroup.add(h);}
-        if(inv.includes('hair_long')){const h=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.22,0.62),_hmo(0x1a0a00));h.position.set(0,0.35,0);headGroup.add(h);const bk=new THREE.Mesh(new THREE.BoxGeometry(0.55,0.8,0.18),_hmo(0x1a0a00));bk.position.set(0,-0.05,-0.28);headGroup.add(bk);const sL=new THREE.Mesh(new THREE.BoxGeometry(0.18,0.6,0.4),_hmo(0x1a0a00));sL.position.set(-0.32,-0.1,0);headGroup.add(sL);const sR=sL.clone();sR.position.x=0.32;headGroup.add(sR);}
-        if(inv.includes('hair_spiky')){const b=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.18,0.62),_hmo(0x111111));b.position.set(0,0.33,0);headGroup.add(b);[[-0.18,0],[0,0],[0.18,0],[-0.09,0.08],[0.09,0.08]].forEach(([sx,sz])=>{const sp=new THREE.Mesh(new THREE.ConeGeometry(0.07,0.28,5),_hmo(0x111111));sp.position.set(sx,0.55,sz);headGroup.add(sp);});}
-        if(inv.includes('hair_curly')){const b=new THREE.Mesh(new THREE.BoxGeometry(0.64,0.2,0.64),_hmo(0x5c2a00));b.position.set(0,0.34,0);headGroup.add(b);[[-0.22,0.42,0],[0.22,0.42,0],[0,0.42,-0.2],[0,0.42,0.2],[-0.15,0.5,0.15],[0.15,0.5,0.15]].forEach(([x,y,z])=>{const c2=new THREE.Mesh(new THREE.SphereGeometry(0.1,6,6),_hmo(0x5c2a00));c2.position.set(x,y,z);headGroup.add(c2);});}
-        if(inv.includes('hair_bun')){const h=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.18,0.62),_hmo(0x2a0a00));h.position.set(0,0.34,0);headGroup.add(h);const bn=new THREE.Mesh(new THREE.SphereGeometry(0.15,8,8),_hmo(0x2a0a00));bn.position.set(0,0.52,0);headGroup.add(bn);}
-        if(inv.includes('hair_mohawk')){const b=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.15,0.62),_hmo(0xff2200));b.position.set(0,0.33,0);headGroup.add(b);for(let i=0;i<5;i++){const sp=new THREE.Mesh(new THREE.BoxGeometry(0.12,0.3-i*0.02,0.12),_hmo(0xff2200));sp.position.set(0,0.5,0.2-i*0.1);headGroup.add(sp);}}
 
         return g;
     },
@@ -2463,14 +2156,6 @@ const app = {
             hl.position.set(0,0.55,0);hl.rotation.x=Math.PI/6;headGroup.add(hl);
             const hlight=new THREE.PointLight(0xFFDD44,0.5,1.5);hlight.position.set(0,0.6,0);headGroup.add(hlight);
         }
-        // ── Волосы
-        const _hm=(col)=>new THREE.MeshStandardMaterial({color:col,roughness:0.8});
-        if(this.inventory.includes('hair_short')){const h=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.22,0.62),_hm(0x3d1c02));h.position.set(0,0.35,0);headGroup.add(h);}
-        if(this.inventory.includes('hair_long')){const h=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.22,0.62),_hm(0x1a0a00));h.position.set(0,0.35,0);headGroup.add(h);const bk=new THREE.Mesh(new THREE.BoxGeometry(0.55,0.8,0.18),_hm(0x1a0a00));bk.position.set(0,-0.05,-0.28);headGroup.add(bk);const sL=new THREE.Mesh(new THREE.BoxGeometry(0.18,0.6,0.4),_hm(0x1a0a00));sL.position.set(-0.32,-0.1,0);headGroup.add(sL);const sR=sL.clone();sR.position.x=0.32;headGroup.add(sR);}
-        if(this.inventory.includes('hair_spiky')){const b=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.18,0.62),_hm(0x111111));b.position.set(0,0.33,0);headGroup.add(b);[[-0.18,0],[0,0],[0.18,0],[-0.09,0.08],[0.09,0.08]].forEach(([sx,sz])=>{const sp=new THREE.Mesh(new THREE.ConeGeometry(0.07,0.28,5),_hm(0x111111));sp.position.set(sx,0.55,sz);headGroup.add(sp);});}
-        if(this.inventory.includes('hair_curly')){const b=new THREE.Mesh(new THREE.BoxGeometry(0.64,0.2,0.64),_hm(0x5c2a00));b.position.set(0,0.34,0);headGroup.add(b);[[-0.22,0.42,0],[0.22,0.42,0],[0,0.42,-0.2],[0,0.42,0.2],[-0.15,0.5,0.15],[0.15,0.5,0.15]].forEach(([x,y,z])=>{const c2=new THREE.Mesh(new THREE.SphereGeometry(0.1,6,6),_hm(0x5c2a00));c2.position.set(x,y,z);headGroup.add(c2);});}
-        if(this.inventory.includes('hair_bun')){const h=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.18,0.62),_hm(0x2a0a00));h.position.set(0,0.34,0);headGroup.add(h);const bn=new THREE.Mesh(new THREE.SphereGeometry(0.15,8,8),_hm(0x2a0a00));bn.position.set(0,0.52,0);headGroup.add(bn);}
-        if(this.inventory.includes('hair_mohawk')){const b=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.15,0.62),_hm(0xff2200));b.position.set(0,0.33,0);headGroup.add(b);for(let i=0;i<5;i++){const sp=new THREE.Mesh(new THREE.BoxGeometry(0.12,0.3-i*0.02,0.12),_hm(0xff2200));sp.position.set(0,0.5,0.2-i*0.1);headGroup.add(sp);}}
         if(needsRig)this.rig={leftArm:lA,rightArm:rA,leftLeg:lL,rightLeg:rL,torso,head:headGroup};
         // Ник над головой
         try {
@@ -2510,12 +2195,10 @@ const app = {
     initAvatarPreview(){
         const cont=document.getElementById('avatar-container');if(!cont)return;cont.innerHTML='';
         this.pScene=new THREE.Scene();
-        const pw=cont.clientWidth||400, ph=cont.clientHeight||420;
-        this.pCam=new THREE.PerspectiveCamera(50,pw/ph,0.1,100);
-        this.pCam.position.set(0,1.0,6);
-        this.pCam.lookAt(0,1.0,0);
+        this.pCam=new THREE.PerspectiveCamera(45,cont.clientWidth/cont.clientHeight,0.1,100);
+        this.pCam.position.set(0,1.5,5);
         this.pRender=new THREE.WebGLRenderer({alpha:true,antialias:true});
-        this.pRender.setSize(pw,ph);
+        this.pRender.setSize(cont.clientWidth,cont.clientHeight);
         cont.appendChild(this.pRender.domElement);
         this.pScene.add(new THREE.AmbientLight(0xffffff,0.8));
         const sl=new THREE.DirectionalLight(0xffffff,0.6);sl.position.set(5,5,5);this.pScene.add(sl);
@@ -2525,17 +2208,7 @@ const app = {
     updateAvatarPreview(){
         if(!this.pScene)return;
         if(this.pAvatar)this.pScene.remove(this.pAvatar);
-        this.pAvatar=this.buildCharacter(false);
-        // Центрируем персонажа по bounding box
-        this.pAvatar.updateMatrixWorld(true);
-        const box=new THREE.Box3().setFromObject(this.pAvatar);
-        const center=box.getCenter(new THREE.Vector3());
-        // Двигаем персонажа чтобы его центр был в 0,0,0
-        this.pAvatar.position.x -= center.x;
-        this.pAvatar.position.y -= center.y;
-        this.pCam.position.set(0, 0, 5.5);
-        this.pCam.lookAt(0, 0, 0);
-        this.pScene.add(this.pAvatar);
+        this.pAvatar=this.buildCharacter(false);this.pAvatar.position.y=-1;this.pScene.add(this.pAvatar);
     },
 
     // ── PALETTE
@@ -3342,7 +3015,6 @@ const app = {
                     ry: this.playerGroup.rotation.y,
                     map: String(this.currentMap),
                     inv: this.inventory||[],
-                    inv: this.inventory||[],
                     moving: !!(this.keys&&(this.keys['KeyW']||this.keys['KeyA']||this.keys['KeyS']||this.keys['KeyD'])),
                     jumping: !this.canJump,
                     vy: this.velocity ? this.velocity.y : 0
@@ -3781,7 +3453,16 @@ const app = {
         if(bv) bv.textContent = this.balance;
     },
 
-
+    toggleCamera(){
+        const modes = ['third', 'first', 'far'];
+        const names = {'third':'👤 3-е лицо', 'first':'👁 1-е лицо', 'far':'🔭 Далеко'};
+        const cur = this._camMode || 'third';
+        const next = modes[(modes.indexOf(cur)+1) % modes.length];
+        this._camMode = next;
+        this._showToast(names[next]);
+        if(next !== 'first' && this.playerGroup)
+            this.playerGroup.traverse(c=>{ if(c.isMesh) c.visible=true; });
+    },
 
     exitGame(){
         this.spaceGrav=false;this.loopFn=null;this.mode='none';
@@ -3806,6 +3487,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
