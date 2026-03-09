@@ -889,8 +889,8 @@ const app = {
             const scene = new THREE.Scene();
             const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 100);
             // Show head + shoulders, slightly from above
-            camera.position.set(0, 0.7, 3.0);
-            camera.lookAt(0, 0.7, 0);
+            camera.position.set(0, 0.8, 2.8);
+            camera.lookAt(0, 0.8, 0);
 
             scene.add(new THREE.AmbientLight(0xffffff, 5.0));
             const dl = new THREE.DirectionalLight(0xffffff, 2.0);
@@ -1064,6 +1064,8 @@ const app = {
                 });
             }
 
+            // Center group vertically
+            g.position.y = -0.3;
             scene.add(g);
             renderer.render(scene, camera);
             const url = renderer.domElement.toDataURL();
@@ -3666,6 +3668,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
