@@ -887,12 +887,12 @@ const app = {
             renderer.shadowMap.enabled = false;
 
             const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
+            const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 100);
             // Show head + shoulders, slightly from above
-            camera.position.set(0, 0.9, 3.8);
-            camera.lookAt(0, 0.9, 0);
+            camera.position.set(0, 0.7, 3.0);
+            camera.lookAt(0, 0.7, 0);
 
-            scene.add(new THREE.AmbientLight(0xffffff, 3.5));
+            scene.add(new THREE.AmbientLight(0xffffff, 5.0));
             const dl = new THREE.DirectionalLight(0xffffff, 2.0);
             dl.position.set(2, 4, 3); scene.add(dl);
 
@@ -3666,6 +3666,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
