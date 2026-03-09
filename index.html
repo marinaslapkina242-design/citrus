@@ -2386,8 +2386,9 @@ const app = {
         const cont=document.getElementById('avatar-container');if(!cont)return;cont.innerHTML='';
         this.pScene=new THREE.Scene();
         const pw=cont.clientWidth||400, ph=cont.clientHeight||420;
-        this.pCam=new THREE.PerspectiveCamera(45,pw/ph,0.1,100);
-        this.pCam.position.set(0,1.5,5);
+        this.pCam=new THREE.PerspectiveCamera(50,pw/ph,0.1,100);
+        this.pCam.position.set(0,1.0,6);
+        this.pCam.lookAt(0,1.0,0);
         this.pRender=new THREE.WebGLRenderer({alpha:true,antialias:true});
         this.pRender.setSize(pw,ph);
         cont.appendChild(this.pRender.domElement);
@@ -2399,7 +2400,17 @@ const app = {
     updateAvatarPreview(){
         if(!this.pScene)return;
         if(this.pAvatar)this.pScene.remove(this.pAvatar);
-        this.pAvatar=this.buildCharacter(false);this.pAvatar.position.y=-1;this.pScene.add(this.pAvatar);
+        this.pAvatar=this.buildCharacter(false);
+        // Центрируем персонажа по bounding box
+        this.pAvatar.updateMatrixWorld(true);
+        const box=new THREE.Box3().setFromObject(this.pAvatar);
+        const center=box.getCenter(new THREE.Vector3());
+        // Двигаем персонажа чтобы его центр был в 0,0,0
+        this.pAvatar.position.x -= center.x;
+        this.pAvatar.position.y -= center.y;
+        this.pCam.position.set(0, 0, 5.5);
+        this.pCam.lookAt(0, 0, 0);
+        this.pScene.add(this.pAvatar);
     },
 
     // ── PALETTE
@@ -3484,7 +3495,7 @@ const app = {
             {id:'play5',   title:'Первый шаг',       desc:'Поиграй 5 минут',            reward:10,  type:'playtime', goal:5,   icon:'👟'},
         ];
 
-        const ROTATE_MS = 10 * 60 * 1000; // 10 минут
+        const ROTATE_MS = 90 * 60 * 1000; // 1 час 30 минут
         const now = Date.now();
 
         // Загружаем или создаём слот ротации
@@ -3668,6 +3679,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
