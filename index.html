@@ -1814,7 +1814,7 @@ const app = {
                     inDiv.innerHTML+=`<div class="fr" style="border-color:rgba(255,64,129,0.2);background:rgba(255,64,129,0.04);margin-bottom:8px;">
                         <img src="${app._drawFaceCanvas(p.color||'#FF4081', p.inv||[])}" style="width:48px;height:48px;border-radius:10px;flex-shrink:0;">
                         <div class="fi">
-                            <div class="fn">${p.name}${['разраб','admin','citrus'].includes((p.name||"").toLowerCase())?' <span style="color:#4fc3f7;font-size:12px">✔</span>':''}</div>
+                            <div class="fn">${p.name}${['разраб','admin','citrus','Крутой'].includes((p.name||"").toLowerCase())?' <span style="color:#4fc3f7;font-size:12px">✔</span>':''}</div>
                             <div class="fs" style="color:#FF4081;">хочет дружить</div>
                             <div style="font-size:10px;color:#333;">${p.tag||('#'+p.id)}</div>
                         </div>
@@ -1840,7 +1840,7 @@ const app = {
                     outDiv.innerHTML+=`<div class="fr" style="border-color:rgba(0,229,255,0.1);background:rgba(0,229,255,0.03);margin-bottom:8px;">
                         <img src="${app._drawFaceCanvas(p.color||'#00E5FF', p.inv||[])}" style="width:48px;height:48px;border-radius:10px;flex-shrink:0;">
                         <div class="fi">
-                            <div class="fn">${p.name}${['разраб','admin','citrus'].includes((p.name||"").toLowerCase())?' <span style="color:#4fc3f7;font-size:12px">✔</span>':''}</div>
+                            <div class="fn">${p.name}${['разраб','admin','citrus','Крутой'].includes((p.name||"").toLowerCase())?' <span style="color:#4fc3f7;font-size:12px">✔</span>':''}</div>
                             <div class="fs" style="color:var(--c-blue);">заявка отправлена</div>
                             <div style="font-size:10px;color:#333;">${p.tag||('#'+p.id)}</div>
                         </div>
@@ -2088,7 +2088,7 @@ const app = {
             ctx.fillStyle = 'rgba(0,0,0,0.6)';
             ctx.roundRect(4,4,248,56,12);
             ctx.fill();
-            const devNamesL=['разраб','admin','citrus'];
+            const devNamesL=['разраб','admin','citrus','Крутой'];
             const isDevLabel=devNamesL.includes((name||'').toLowerCase().split('#')[0]);
             if(isDevLabel){
                 // Имя + галочка вместе
@@ -3679,6 +3679,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
