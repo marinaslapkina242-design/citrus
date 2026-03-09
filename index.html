@@ -402,7 +402,7 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
         </div>
 
         <button class="btn-exit" onclick="app.exitGame()">← В ХАБ</button>
-        <button id="btn-cam" onclick="app.toggleCamera()" style="position:fixed;top:16px;right:16px;z-index:200;background:rgba(0,0,0,0.6);border:1px solid rgba(255,152,0,0.4);color:#FF9800;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:bold;cursor:pointer;backdrop-filter:blur(8px);">👁 1-е лицо</button>
+
         <div class="controls-hint" id="kb-hint">
             <p><span>WASD</span> — движение</p>
             <p><span>SPACE</span> — прыжок</p>
@@ -422,7 +422,7 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
             </div>
             <div class="touch-right">
                 <div class="touch-btn jump" id="btn-jump" ontouchstart="app.touchJump()">⬆</div>
-                <div class="touch-btn" id="btn-cam-touch" ontouchstart="app.toggleCamera()" style="margin-top:8px;font-size:16px;background:rgba(0,0,0,0.5);">👁</div>
+
             </div>
             <div class="touch-place-btn hidden" id="btn-place" ontouchstart="app.placeBlock()">🧱</div>
         <div id="studio-touch-btns" class="hidden" style="position:fixed;bottom:20px;right:16px;display:flex;flex-direction:column;gap:8px;z-index:50;pointer-events:auto;">
@@ -643,7 +643,7 @@ const app = {
     },
 
     initRoulette(){
-        const prizes = [5,10,20,30,50,75,100,150,200,15,25,40,60,80,10,35,50,100];
+        const prizes = [5,5,10,10,10,15,15,20,20,25,30,35,40,50,60,75,100,200];
         const colors = ['#FF4081','#FF9800','#FFD740','#69F0AE','#40C4FF','#E040FB',
                         '#FF6E40','#00E5FF','#CCFF90','#FF80AB','#82B1FF','#FF9800',
                         '#FFD740','#69F0AE','#FF4081','#40C4FF','#E040FB','#FF6E40'];
@@ -3487,16 +3487,4 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
 
