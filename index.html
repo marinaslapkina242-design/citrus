@@ -785,7 +785,7 @@ const app = {
                 this.balance -= amount;
                 this.saveData();
                 document.getElementById('balance-val').textContent = this.balance;
-                this.showNotif('✅','Кредит выставлен!',`-${amount} 🍊 на ${days} мин.`);
+                this._questProgress('lend',1); this.showNotif('✅','Кредит выставлен!',`-${amount} 🍊 на ${days} мин.`);
                 this._loadCredits();
             } else this.showNotif('❌','Ошибка', d.error||'Попробуй снова');
         } catch(e){ this.showNotif('❌','Ошибка','Нет связи'); }
@@ -830,7 +830,7 @@ const app = {
             });
             const d = await res.json();
             if(d.ok){
-                this.showNotif('✅','Долг погашен!',`-${myBorrow.amount} 🍊 · Кредитор получил деньги`);
+                this._questProgress('repay',1); this.showNotif('✅','Долг погашен!',`-${myBorrow.amount} 🍊 · Кредитор получил деньги`);
                 this._loadCredits();
             } else {
                 // Rollback
@@ -948,7 +948,7 @@ const app = {
                 const bv=document.getElementById('balance-val'); if(bv)bv.textContent=this.balance;
                 if(result) result.textContent = '🎉 +' + prize + ' 🍊!';
                 this.showNotif('🎰','Рулетка!','Ты выиграл '+prize+' 🍊!');
-                this._updateRouletteLeaderboard(prize);
+                this._questProgress('roulette',1); if(prize>=100) this._questProgress('roulbig',prize); this._updateRouletteLeaderboard(prize);
                 btn.disabled = false;
                 this.initRoulette();
             }
@@ -3652,7 +3652,7 @@ const app = {
                     this.saveData();
                 }
             }catch(e){ console.log('Publish error',e); }
-            this.showNotif('🗺️','Карта опубликована!','"'+name+'" видна всем игрокам!');
+            this._questProgress('publish',1); this.showNotif('🗺️','Карта опубликована!','"'+name+'" видна всем игрокам!');
             this.exitGame();
         };
     },
@@ -3778,20 +3778,41 @@ const app = {
     _initQuests(){
         const ALL_QUESTS = [
             {id:'play30',  title:'Игрок дня',       desc:'Поиграй 30 минут',           reward:50,  type:'playtime', goal:30,  icon:'⏱️'},
-            {id:'play60',  title:'Марафонец',        desc:'Поиграй 1 час',              reward:100, type:'playtime', goal:60,  icon:'🕐'},
-            {id:'jump50',  title:'Прыгун',           desc:'Прыгни 50 раз',              reward:30,  type:'jumps',    goal:50,  icon:'🦘'},
-            {id:'jump20',  title:'Попрыгунчик',      desc:'Прыгни 20 раз',              reward:15,  type:'jumps',    goal:20,  icon:'🐸'},
-            {id:'chat10',  title:'Общительный',      desc:'Напиши 10 сообщений в чат',  reward:20,  type:'chats',    goal:10,  icon:'💬'},
-            {id:'chat5',   title:'Болтун',           desc:'Напиши 5 сообщений в чат',   reward:10,  type:'chats',    goal:5,   icon:'🗣️'},
-            {id:'maps3',   title:'Путешественник',   desc:'Посети 3 разных мира',        reward:40,  type:'maps',     goal:3,   icon:'🗺️'},
-            {id:'maps2',   title:'Исследователь',    desc:'Посети 2 разных мира',        reward:20,  type:'maps',     goal:2,   icon:'🧭'},
-            {id:'friend1', title:'Найди друга',      desc:'Добавь 1 друга',             reward:25,  type:'friends',  goal:1,   icon:'🤝'},
-            {id:'buy1',    title:'Первая покупка',   desc:'Купи что-нибудь в магазине', reward:15,  type:'buys',     goal:1,   icon:'🛍️'},
-            {id:'play10',  title:'Разминка',         desc:'Поиграй 10 минут',           reward:20,  type:'playtime', goal:10,  icon:'🎮'},
-            {id:'jump100', title:'Акробат',          desc:'Прыгни 100 раз',             reward:60,  type:'jumps',    goal:100, icon:'🤸'},
-            {id:'chat20',  title:'Звезда чата',      desc:'Напиши 20 сообщений',        reward:35,  type:'chats',    goal:20,  icon:'⭐'},
-            {id:'maps5',   title:'Турист',           desc:'Посети 5 разных миров',       reward:70,  type:'maps',     goal:5,   icon:'✈️'},
-            {id:'play5',   title:'Первый шаг',       desc:'Поиграй 5 минут',            reward:10,  type:'playtime', goal:5,   icon:'👟'},
+            // ── Время в игре ──
+            {id:'play5',   title:'Первый шаг',       desc:'Поиграй 5 минут',              reward:10,  type:'playtime', goal:5,    icon:'👟'},
+            {id:'play10',  title:'Разминка',          desc:'Поиграй 10 минут',             reward:20,  type:'playtime', goal:10,   icon:'🎮'},
+            {id:'play60',  title:'Марафонец',         desc:'Поиграй 1 час',                reward:100, type:'playtime', goal:60,   icon:'🕐'},
+            {id:'play30',  title:'Завсегдатай',       desc:'Поиграй 30 минут',             reward:50,  type:'playtime', goal:30,   icon:'⏳'},
+            // ── Прыжки ──
+            {id:'jump20',  title:'Попрыгунчик',       desc:'Прыгни 20 раз',                reward:15,  type:'jumps',    goal:20,   icon:'🐸'},
+            {id:'jump50',  title:'Прыгун',            desc:'Прыгни 50 раз',                reward:30,  type:'jumps',    goal:50,   icon:'🦘'},
+            {id:'jump100', title:'Акробат',           desc:'Прыгни 100 раз',               reward:60,  type:'jumps',    goal:100,  icon:'🤸'},
+            {id:'jump200', title:'Батут',             desc:'Прыгни 200 раз',               reward:120, type:'jumps',    goal:200,  icon:'🏀'},
+            // ── Миры ──
+            {id:'maps2',   title:'Исследователь',     desc:'Посети 2 разных мира',          reward:20,  type:'maps',     goal:2,    icon:'🧭'},
+            {id:'maps3',   title:'Путешественник',    desc:'Посети 3 разных мира',          reward:40,  type:'maps',     goal:3,    icon:'🗺️'},
+            {id:'maps5',   title:'Турист',            desc:'Посети 5 разных миров',         reward:70,  type:'maps',     goal:5,    icon:'✈️'},
+            {id:'maps8',   title:'Глобтроттер',       desc:'Посети 8 разных миров',         reward:150, type:'maps',     goal:8,    icon:'🌍'},
+            // ── Друзья ──
+            {id:'friend1', title:'Найди друга',       desc:'Добавь 1 друга',               reward:25,  type:'friends',  goal:1,    icon:'🤝'},
+            {id:'friend3', title:'Компания',          desc:'Добавь 3 друзей',              reward:60,  type:'friends',  goal:3,    icon:'👫'},
+            {id:'friend5', title:'Популярный',        desc:'Добавь 5 друзей',              reward:100, type:'friends',  goal:5,    icon:'🌟'},
+            // ── Магазин ──
+            {id:'buy1',    title:'Первая покупка',    desc:'Купи что-нибудь в магазине',   reward:15,  type:'buys',     goal:1,    icon:'🛍️'},
+            {id:'buy3',    title:'Шопоголик',         desc:'Купи 3 предмета в магазине',   reward:40,  type:'buys',     goal:3,    icon:'🛒'},
+            {id:'buy5',    title:'Коллекционер',      desc:'Купи 5 предметов в магазине',  reward:80,  type:'buys',     goal:5,    icon:'💎'},
+            // ── Студия ──
+            {id:'build10', title:'Строитель',         desc:'Построй 10 блоков',            reward:20,  type:'blocks',   goal:10,   icon:'🧱'},
+            {id:'build50', title:'Архитектор',        desc:'Построй 50 блоков',            reward:60,  type:'blocks',   goal:50,   icon:'🏗️'},
+            {id:'build100',title:'Мастер-строитель',  desc:'Построй 100 блоков',           reward:120, type:'blocks',   goal:100,  icon:'🏛️'},
+            {id:'publish1',title:'Дебют',             desc:'Опубликуй свою первую карту',  reward:50,  type:'publish',  goal:1,    icon:'📤'},
+            {id:'publish3',title:'Разработчик',       desc:'Опубликуй 3 карты',            reward:120, type:'publish',  goal:3,    icon:'🎮'},
+            // ── Рулетка ──
+            {id:'roul1',   title:'Новичок удачи',     desc:'Покрути рулетку 1 раз',        reward:10,  type:'roulette', goal:1,    icon:'🎰'},
+            {id:'roulwin', title:'Джекпот!',          desc:'Выиграй 100+ 🍊 за раз',       reward:50,  type:'roulbig',  goal:100,  icon:'🤑'},
+            // ── Кредиты ──
+            {id:'lend1',   title:'Банкир',            desc:'Выдай кредит игроку',          reward:30,  type:'lend',     goal:1,    icon:'🏦'},
+            {id:'repay1',  title:'Честный заёмщик',   desc:'Верни долг вовремя',           reward:40,  type:'repay',    goal:1,    icon:'✅'},
         ];
 
         const ROTATE_MS = 80 * 60 * 1000; // 1 час 20 минут
@@ -3989,6 +4010,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
