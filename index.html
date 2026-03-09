@@ -472,7 +472,6 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
 // ═══════════════════════════════════
 const SHOP_ITEMS = [
     {id:'glasses',    name:'Крутые Очки',        icon:'🕶️', price:100 },
-    {id:'crown',      name:'Золотая Корона',      icon:'👑',  price:500 },
     {id:'wings',      name:'Неоновые Крылья',     icon:'🪽',  price:1500},
     {id:'sword',      name:'Световой Меч',        icon:'🗡️', price:3000},
     {id:'hat',        name:'Ковбойская Шляпа',    icon:'🤠',  price:200 },
@@ -480,10 +479,7 @@ const SHOP_ITEMS = [
     {id:'cape',       name:'Плащ Тьмы',           icon:'🦇',  price:800 },
     {id:'headphones', name:'Наушники',            icon:'🎧',  price:150 },
     {id:'medal',      name:'Медаль Чемпиона',     icon:'🥇',  price:600 },
-    {id:'flame',      name:'Огненный Ореол',      icon:'🔥',  price:1200},
-    {id:'ice',        name:'Ледяной Аурa',        icon:'❄️',  price:1000},
     {id:'star',       name:'Звёздный Шлейф',      icon:'⭐',  price:750 },
-    {id:'rainbow',    name:'Радужный Эффект',     icon:'🌈',  price:1800},
     {id:'robot',      name:'Робот-Маска',         icon:'🤖',  price:900 },
     {id:'alien',      name:'Шлем Пришельца',      icon:'👽',  price:1100},
     {id:'gem',        name:'Кристальный Посох',   icon:'💎',  price:2500},
@@ -494,7 +490,11 @@ const SHOP_ITEMS = [
     {id:'santa',      name:'Шапка Санты',         icon:'🎅',  price:300 },
     {id:'wizard',     name:'Шляпа Волшебника',    icon:'🧙',  price:550 },
     {id:'devil',      name:'Рога Дьявола',        icon:'😈',  price:666 },
-    {id:'halo',       name:'Ангельский Нимб',     icon:'😇',  price:888 }
+    {id:'halo',       name:'Ангельский Нимб',     icon:'😇',  price:888 },
+    {id:'hair_short',  name:'Короткие Волосы',     icon:'💇',  price:120  },
+    {id:'hair_long',   name:'Длинные Волосы',      icon:'👩',  price:180  },
+    {id:'hair_spiky',  name:'Дыбом Волосы',        icon:'⚡',  price:250  },
+    {id:'macaroni',    name:'Макарошки',            icon:'🍝',  price:10000}
 ];
 const COLORS=[
     {c:0xCCCCCC,n:'Камень'},{c:0xFF9800,n:'Апельсин'},{c:0x4CAF50,n:'Трава'},
@@ -783,7 +783,7 @@ const app = {
         il.innerHTML=this.inventory.length?'':'<li style="color:#444;font-size:13px">Ничего нет</li>';
         this.inventory.forEach(id=>{
             const it=SHOP_ITEMS.find(i=>i.id===id);
-            if(it)il.innerHTML+=`<li style="display:flex;align-items:center;gap:9px;color:#aaa;font-size:13px;padding:7px;background:#111;border-radius:8px;">${it.icon} ${it.name}</li>`;
+            if(it)il.innerHTML+=`<li style="display:flex;align-items:center;gap:9px;color:#aaa;font-size:13px;padding:7px;background:#111;border-radius:8px;"><span>${it.icon} ${it.name}</span><button onclick="app.removeItem('${id}')" style="margin-left:auto;background:none;border:none;color:#444;cursor:pointer;font-size:16px;line-height:1;padding:0 2px;" title="Снять">✕</button></li>`;
         });
         const cnt=this.friendRequests.length,b=document.getElementById('fr-badge');
         b.classList.toggle('hidden',cnt===0);if(cnt>0)b.innerText=cnt;
@@ -995,6 +995,23 @@ const app = {
             const it=SHOP_ITEMS.find(i=>i.id===id);
             this.showNotif(it.icon,'Куплено!',`${it.name} в гардеробе`);
         }else this.showNotif('💸','Мало монет',`Нужно ещё ${price-this.balance} 🍊`);
+    },
+    removeItem(id){
+        this.inventory = this.inventory.filter(i => i !== id);
+        this.saveData();
+        this.buildCharacter(true);
+        this.scene.add(this.playerGroup);
+        const bv2=document.getElementById('balance-val'); if(bv2) bv2.textContent=this.balance;
+        // Re-render inventory list
+        const il=document.getElementById('inventory-list');
+        if(il){
+            il.innerHTML=this.inventory.length?'':"<li style='color:#444;font-size:13px'>Ничего нет</li>";
+            this.inventory.forEach(iid=>{
+                const it=SHOP_ITEMS.find(i=>i.id===iid);
+                if(it)il.innerHTML+=`<li style="display:flex;align-items:center;gap:9px;color:#aaa;font-size:13px;padding:7px;background:#111;border-radius:8px;"><span>${it.icon} ${it.name}</span><button onclick="app.removeItem('${iid}')" style="margin-left:auto;background:none;border:none;color:#444;cursor:pointer;font-size:16px;line-height:1;padding:0 2px;" title="Снять">✕</button></li>`;
+            });
+        }
+        this.updateAvatarPreview();
     },
     resetAvatar(){this.inventory=[];this.saveData();this.renderShop();this.updateAvatarPreview();},
 
@@ -1952,6 +1969,34 @@ const app = {
         if(inv.includes('headphones')){const hm=new THREE.MeshStandardMaterial({color:0x222222,metalness:0.5});const band=new THREE.Mesh(new THREE.TorusGeometry(0.32,0.04,6,16,Math.PI),hm);band.position.set(0,0.35,0);band.rotation.z=Math.PI;headGroup.add(band);[-0.33,0.33].forEach(x=>{const cup=new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.1,0.1,10),new THREE.MeshStandardMaterial({color:0xFF9800,emissive:0xFF5500,emissiveIntensity:0.5}));cup.position.set(x,0.05,0);cup.rotation.z=Math.PI/2;headGroup.add(cup);});}
         if(inv.includes('flame')){const fl=new THREE.Mesh(new THREE.TorusGeometry(0.35,0.06,8,20),new THREE.MeshStandardMaterial({color:0xFF4400,emissive:0xFF2200,emissiveIntensity:1.5}));fl.position.set(0,0.55,0);headGroup.add(fl);}
         if(inv.includes('halo')){const hl=new THREE.Mesh(new THREE.TorusGeometry(0.26,0.04,8,24),new THREE.MeshStandardMaterial({color:0xFFDD44,emissive:0xFFBB00,emissiveIntensity:1.5,metalness:0.6}));hl.position.set(0,0.55,0);hl.rotation.x=Math.PI/6;headGroup.add(hl);}
+        if(inv.includes('hair_short')){
+            const hm=new THREE.MeshStandardMaterial({color:0x8B4513,roughness:0.8});
+            const hair=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.15,0.62),hm);
+            hair.position.set(0,0.35,0);headGroup.add(hair);
+        }
+        if(inv.includes('hair_long')){
+            const hm=new THREE.MeshStandardMaterial({color:0x4a2800,roughness:0.8});
+            const top=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.12,0.62),hm);
+            top.position.set(0,0.35,0);headGroup.add(top);
+            const back=new THREE.Mesh(new THREE.BoxGeometry(0.58,0.9,0.12),hm);
+            back.position.set(0,-0.15,-0.3);headGroup.add(back);
+            [-0.25,0.25].forEach(x=>{const side=new THREE.Mesh(new THREE.BoxGeometry(0.12,0.7,0.2),hm);side.position.set(x,-0.1,0);headGroup.add(side);});
+        }
+        if(inv.includes('hair_spiky')){
+            const hm=new THREE.MeshStandardMaterial({color:0xFFD700,roughness:0.5,emissive:0xCC8800,emissiveIntensity:0.3});
+            [-0.2,0,0.2].forEach((x,i)=>{const spike=new THREE.Mesh(new THREE.ConeGeometry(0.07,0.35,6),hm);spike.position.set(x,0.52,i===1?0.05:0);spike.rotation.z=x*1.5;headGroup.add(spike);});
+        }
+        if(inv.includes('macaroni')){
+            const pm=new THREE.MeshStandardMaterial({color:0xF4C842,roughness:0.6});
+            [-0.15,0,0.15].forEach((x,i)=>{
+                const mac=new THREE.Mesh(new THREE.TorusGeometry(0.07,0.025,6,12),pm);
+                mac.position.set(x,0.45+i*0.04,0.05);
+                mac.rotation.x=Math.PI/2+i*0.3;
+                headGroup.add(mac);
+            });
+            const plate=new THREE.Mesh(new THREE.CylinderGeometry(0.22,0.22,0.04,12),new THREE.MeshStandardMaterial({color:0xffffff,roughness:0.3}));
+            plate.position.set(0,0.38,0);headGroup.add(plate);
+        }
         if(inv.includes('devil')){const dm=new THREE.MeshStandardMaterial({color:0xCC0000,roughness:0.5});[-0.25,0.25].forEach(x=>{const horn=new THREE.Mesh(new THREE.ConeGeometry(0.07,0.3,8),dm);horn.position.set(x,0.42,0);headGroup.add(horn);});}
         if(inv.includes('cape')){const cape=new THREE.Mesh(new THREE.BoxGeometry(1.0,1.4,0.08),new THREE.MeshStandardMaterial({color:0x1a0030,roughness:0.7,transparent:true,opacity:0.92}));cape.position.set(0,-0.1,-0.25);torso.add(cape);}
         if(inv.includes('sword')){const sg=new THREE.Group();sg.add(new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,0.4),new THREE.MeshStandardMaterial({color:0x555555})));const bl=new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,1.2),new THREE.MeshStandardMaterial({color:0x00E5FF,emissive:0x00E5FF,emissiveIntensity:1}));bl.position.y=0.8;sg.add(bl);sg.position.set(0,-0.8,-0.2);sg.rotation.x=Math.PI/2;rA.add(sg);}
@@ -2155,6 +2200,34 @@ const app = {
             const hl=new THREE.Mesh(new THREE.TorusGeometry(0.26,0.04,8,24),new THREE.MeshStandardMaterial({color:0xFFDD44,emissive:0xFFBB00,emissiveIntensity:1.5,metalness:0.6}));
             hl.position.set(0,0.55,0);hl.rotation.x=Math.PI/6;headGroup.add(hl);
             const hlight=new THREE.PointLight(0xFFDD44,0.5,1.5);hlight.position.set(0,0.6,0);headGroup.add(hlight);
+        }
+        if(this.inventory.includes('hair_short')){
+            const hm=new THREE.MeshStandardMaterial({color:0x8B4513,roughness:0.8});
+            const hair=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.15,0.62),hm);
+            hair.position.set(0,0.35,0);headGroup.add(hair);
+        }
+        if(this.inventory.includes('hair_long')){
+            const hm=new THREE.MeshStandardMaterial({color:0x4a2800,roughness:0.8});
+            const top=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.12,0.62),hm);
+            top.position.set(0,0.35,0);headGroup.add(top);
+            const back=new THREE.Mesh(new THREE.BoxGeometry(0.58,0.9,0.12),hm);
+            back.position.set(0,-0.15,-0.3);headGroup.add(back);
+            [-0.25,0.25].forEach(x=>{const side=new THREE.Mesh(new THREE.BoxGeometry(0.12,0.7,0.2),hm);side.position.set(x,-0.1,0);headGroup.add(side);});
+        }
+        if(this.inventory.includes('hair_spiky')){
+            const hm=new THREE.MeshStandardMaterial({color:0xFFD700,roughness:0.5,emissive:0xCC8800,emissiveIntensity:0.3});
+            [-0.2,0,0.2].forEach((x,i)=>{const spike=new THREE.Mesh(new THREE.ConeGeometry(0.07,0.35,6),hm);spike.position.set(x,0.52,i===1?0.05:0);spike.rotation.z=x*1.5;headGroup.add(spike);});
+        }
+        if(this.inventory.includes('macaroni')){
+            const pm=new THREE.MeshStandardMaterial({color:0xF4C842,roughness:0.6});
+            [-0.15,0,0.15].forEach((x,i)=>{
+                const mac=new THREE.Mesh(new THREE.TorusGeometry(0.07,0.025,6,12),pm);
+                mac.position.set(x,0.45+i*0.04,0.05);
+                mac.rotation.x=Math.PI/2+i*0.3;
+                headGroup.add(mac);
+            });
+            const plate=new THREE.Mesh(new THREE.CylinderGeometry(0.22,0.22,0.04,12),new THREE.MeshStandardMaterial({color:0xffffff,roughness:0.3}));
+            plate.position.set(0,0.38,0);headGroup.add(plate);
         }
         if(needsRig)this.rig={leftArm:lA,rightArm:rA,leftLeg:lL,rightLeg:rL,torso,head:headGroup};
         // Ник над головой
@@ -3487,4 +3560,5 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
