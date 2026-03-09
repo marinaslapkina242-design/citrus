@@ -1134,12 +1134,13 @@ const app = {
         e.preventDefault();
         for(const t of e.changedTouches){
             const onJoy = document.getElementById('joystick-base')?.contains(e.target);
-            const leftThird = t.clientX < window.innerWidth * 0.45;
-            if(leftThird && !this._touchMove && !onJoy){
-                // Левая сторона — движение
-                this._touchMove = {id: t.identifier, startX: t.clientX, startY: t.clientY, x: t.clientX, y: t.clientY};
-            } else if(!this._touchLook){
-                // Правая сторона — камера
+            const onJump = t.clientX > window.innerWidth * 0.7 && t.clientY > window.innerHeight * 0.5;
+            const isRight = t.clientX > window.innerWidth * 0.45;
+            if(onJoy){
+                // Джойстик сам обрабатывает через joyStart
+                continue;
+            } else if(isRight && !onJump && !this._touchLook){
+                // Правая сторона — камера (свайп)
                 this._touchLook = {id: t.identifier, x: t.clientX, y: t.clientY};
             }
         }
@@ -3467,14 +3468,23 @@ const app = {
     _studioSessionId: null,
 
     async studioInviteFriend(){
-        // Показываем список друзей
-        const friends = (this.friends||[]).filter(f=>f.status==='accepted');
-        if(!friends.length){ this.showNotif('😢','Нет друзей','Сначала добавь друзей во вкладке Друзья'); return; }
+        // friends — массив ID строк, имена берём из кэша онлайн или сервера
+        const friendIds = (this.friends||[]).map(f=>typeof f==='object'?f.id:f).filter(Boolean);
+        if(!friendIds.length){ this.showNotif('😢','Нет друзей','Сначала добавь друзей во вкладке Друзья'); return; }
+        // Строим список с именами
+        const onlineMap = {};
+        (this._cachedOnline||[]).forEach(p=>{ onlineMap[String(p.id)]=p; });
+        // Пробуем загрузить имена с сервера
+        const playerInfos = await Promise.all(friendIds.map(async id=>{
+            if(onlineMap[String(id)]) return {id, tag:onlineMap[String(id)].tag||onlineMap[String(id)].name};
+            try{ const r=await fetch(this._API+'/players/'+id); const d=await r.json(); return {id, tag:d.name||(d.username+'#'+id)||String(id)}; }catch(e){ return {id, tag:String(id)}; }
+        }));
+        const friends = playerInfos;
         // Создаём sessionId = mapId текущей карты
         const sessionId = 'studio_' + this.userId + '_' + (this.editingMapId ?? 'new');
         this._studioSessionId = sessionId;
         // Показываем выбор друга
-        const names = friends.map((f,i)=>`<button onclick="app._sendStudioInvite('${f.id}','${f.tag||f.name}','${sessionId}');this.closest('.notif').remove()" style="display:block;width:100%;padding:8px;margin:4px 0;background:#1e88e5;border:none;border-radius:8px;color:#fff;font-size:13px;cursor:pointer;">👤 ${f.tag||f.name}</button>`).join('');
+        const names = friends.map((f,i)=>`<button onclick="app._sendStudioInvite('${f.id}','${f.tag}','${sessionId}');this.closest('.notif').remove()" style="display:block;width:100%;padding:8px;margin:4px 0;background:#1e88e5;border:none;border-radius:8px;color:#fff;font-size:13px;cursor:pointer;">👤 ${f.tag||f.name}</button>`).join('');
         const n = document.createElement('div'); n.className='notif';
         n.innerHTML=`<div class="nh">👥 Пригласить в студию</div><div class="nb" style="display:flex;flex-direction:column;">${names}<button onclick="this.closest('.notif').remove()" style="margin-top:6px;background:#333;border:none;border-radius:8px;color:#888;padding:6px;cursor:pointer;">Отмена</button></div>`;
         document.getElementById('notifs').appendChild(n);
@@ -3572,20 +3582,29 @@ const app = {
         document.exitPointerLock();
         this.modalCb=async name=>{
             const sc=document.getElementById('eng-script-ta')?.value||'';
-            const mapData={name,blocks:[...this.mapBlocks],script:sc};
+            const serializedLocal = (this.mapBlocks||[]).map(b=>({
+                px:b.position.x, py:b.position.y, pz:b.position.z,
+                color:b.userData?.color||'#ff9800', scale:b.scale?.x||1
+            }));
+            const mapData={name, blocks:serializedLocal, script:sc};
             // Сохраняем локально
             const localId='custom_'+Date.now();
             this.customMaps.push({...mapData, id:localId});
             this.saveData();
             // Публикуем на сервер
             try{
+                const serializedBlocks = (this.mapBlocks||[]).map(b=>({
+                    px:b.position.x, py:b.position.y, pz:b.position.z,
+                    color:b.userData?.color||'#ff9800',
+                    scale:b.scale?.x||1
+                }));
                 const r=await fetch(this._API+'/games',{
                     method:'POST',
                     headers:{'Content-Type':'application/json'},
                     body:JSON.stringify({
                         name, author:this.username, authorId:String(this.userId),
                         authorColor:this._myColor, desc:'Карта игрока '+this.username,
-                        blocks:[...this.mapBlocks], script:sc, localId
+                        blocks:serializedBlocks, script:sc, localId
                     })
                 });
                 const d=await r.json();
@@ -3624,15 +3643,47 @@ const app = {
         // Показываем игры с сервера
         serverGames.forEach(m=>{
             const isOwn=String(m.authorId)===String(this.userId);
+            const editBtn=isOwn?`<button onclick="event.stopPropagation();app.editPublishedGame('${m.id}')" style="position:absolute;top:6px;left:6px;background:rgba(30,136,229,0.85);border:none;border-radius:6px;color:#fff;font-size:11px;padding:4px 8px;cursor:pointer;">✏️</button>`:'';
             const deleteBtn=isOwn?`<button onclick="event.stopPropagation();app.deleteGame('${m.id}')" style="position:absolute;top:6px;right:6px;background:rgba(255,50,50,0.8);color:#fff;border:none;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:11px">🗑</button>`:'';
             g.innerHTML+=`<div class="card" style="position:relative" onclick="app.launchPublished('${m.id}')">
-                ${deleteBtn}
+                ${editBtn||''}${deleteBtn}
                 <div class="card-thumb" style="background:radial-gradient(circle,rgba(0,229,255,0.07),#050505);font-size:40px;">🛠️</div>
                 <div class="card-info"><div><b>${m.name}</b><br>
                 <small style="color:${m.authorColor||'#888'}">${m.author}</small><br>
                 <small style="color:#555">${(m.blocks||[]).length} блоков</small></div></div>
             </div>`;
         });
+    },
+
+    async editPublishedGame(serverId){
+        try{
+            const r = await fetch(this._API+'/games');
+            const games = await r.json();
+            const game = games.find(g=>g.id===serverId);
+            if(!game){ this.showNotif('❌','Ошибка','Игра не найдена'); return; }
+            // Загружаем карту в студию для редактирования
+            this._editingPublishedId = serverId;
+            this.launch('studio', null);
+            setTimeout(()=>{
+                // Восстанавливаем блоки
+                if(game.blocks && this.scene){
+                    (this.mapBlocks||[]).forEach(b=>this.scene.remove(b));
+                    this.mapBlocks = [];
+                    game.blocks.forEach(b=>{
+                        const geo = new THREE.BoxGeometry(b.scale||1,b.scale||1,b.scale||1);
+                        const mat = new THREE.MeshLambertMaterial({color:b.color||'#ff9800'});
+                        const mesh = new THREE.Mesh(geo,mat);
+                        mesh.position.set(b.px||b.x||0, b.py||b.y||0, b.pz||b.z||0);
+                        mesh.userData = {color:b.color||'#ff9800'};
+                        mesh.castShadow = true; mesh.receiveShadow = true;
+                        this.scene.add(mesh);
+                        this.mapBlocks.push(mesh);
+                        this.objectsToIntersect && this.objectsToIntersect.push(mesh);
+                    });
+                    this.showNotif('✅','Карта загружена!',`Редактируй и опубликуй снова`);
+                }
+            }, 1500);
+        }catch(e){ this.showNotif('❌','Ошибка','Не удалось загрузить карту'); }
     },
 
     async deleteGame(serverId){
@@ -3896,6 +3947,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
