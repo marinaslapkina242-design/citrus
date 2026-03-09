@@ -413,6 +413,7 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
             <button class="btn-st" onclick="app.clearMap()">🗑 Всё</button>
             <button class="btn-st" onclick="app.openEngScript()">📝 Скрипт</button>
             <button class="btn-publish" onclick="app.publishGame()">📤 Опубликовать</button>
+            <button class="btn-publish" onclick="app.studioInviteFriend()" style="background:#1e88e5;margin-left:6px;">👥 Позвать друга</button>
             
 
             
@@ -657,6 +658,30 @@ const app = {
             this.userId = Math.floor(1000 + Math.random() * 9000);
             this._myColor = COLORS[this.userId % COLORS.length];
             this.inventory = []; this.customMaps = []; this.friends = []; this.friendRequests = []; this.sentReqs = [];
+        }
+        // Восстанавливаем с сервера — как друзья, не пропадёт при смене устройства
+        if(this.userId){
+            fetch(this._API+'/players/'+this.userId).then(r=>r.json()).then(srv=>{
+                if(!srv||srv.error) return;
+                // Берём самый большой баланс (защита от перезаписи)
+                if((srv.balance||0) > this.balance){ this.balance=srv.balance; }
+                if(srv.inventory&&srv.inventory.length>this.inventory.length) this.inventory=srv.inventory;
+                if(srv.friends&&srv.friends.length>this.friends.length) this.friends=srv.friends;
+                if(srv.rouletteUsed) this.rouletteUsed=true;
+                if((srv.rouletteTotal||0)>this.rouletteTotal) this.rouletteTotal=srv.rouletteTotal;
+                if(srv.questData&&Object.keys(srv.questData).length>Object.keys(this.questData||{}).length) this.questData=srv.questData;
+                if(srv.customMaps&&srv.customMaps.length>this.customMaps.length) this.customMaps=srv.customMaps;
+                // Сохраняем объединённое в localStorage
+                localStorage.setItem('citrus_v5_pro', JSON.stringify({
+                    username:this.username,userId:this.userId,balance:this.balance,
+                    myColor:this._myColor,inventory:this.inventory,customMaps:this.customMaps,
+                    rouletteUsed:this.rouletteUsed,rouletteTotal:this.rouletteTotal,
+                    friends:this.friends,friendRequests:this.friendRequests,sentReqs:this.sentReqs,
+                    visitedMaps:this.visitedMaps||[],questData:this.questData,
+                    coins:this.coins,questRotation:this.questRotation
+                }));
+                this.updateUI();
+            }).catch(()=>{});
         }
     },
 
@@ -918,6 +943,7 @@ const app = {
         const el = document.getElementById('roulette-leaderboard');
         if(!el) return;
         try {
+            // Грузим из roulette-leaderboard (быстро)
             const res = await fetch(this._API + '/roulette-leaderboard');
             const data = await res.json();
             if(!data.length){ el.innerHTML='<div style="color:#444;text-align:center;padding:12px;font-size:12px;">Пока никто не играл</div>'; return; }
@@ -942,13 +968,22 @@ const app = {
     },
 
     saveData(){
-        localStorage.setItem('citrus_v5_pro',JSON.stringify({
+        const _d={
             username:this.username, userId:this.userId, balance:this.balance,
             myColor:this._myColor,
             inventory:this.inventory, customMaps:this.customMaps, rouletteUsed:this.rouletteUsed||false,
             friends:this.friends, friendRequests:this.friendRequests, sentReqs:this.sentReqs, visitedMaps:this.visitedMaps||[],
-            questData:this.questData, coins:this.coins, questRotation:this.questRotation
-        }));
+            questData:this.questData, coins:this.coins, questRotation:this.questRotation,
+            rouletteTotal:this.rouletteTotal||0
+        };
+        localStorage.setItem('citrus_v5_pro', JSON.stringify(_d));
+        // Синхронизируем с сервером — как друзья, не пропадёт
+        if(this.userId){
+            fetch(this._API+'/players/'+this.userId,{
+                method:'POST',headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({..._d,name:this.username,id:this.userId})
+            }).catch(()=>{});
+        }
         this.updateUI();
     },
     updateUI(){
@@ -1438,6 +1473,18 @@ const app = {
         else if((msg.type==='friend_req'||msg.type==='friend_acc')&&String(msg.to)===String(this.userId)){
             const changed=this._applyLetter(msg);
             if(changed){this.saveData();this.renderFriends();this.renderInbox();}
+        }
+        else if(msg.type==='studio_invite'){
+            const n=document.createElement('div'); n.className='notif';
+            n.innerHTML=`<div class="nh">🎨 Приглашение в студию</div>
+                <div class="nb">${msg.from_name} зовёт тебя делать карту вместе!</div>
+                <div class="nbtns">
+                    <button class="bx b-ok" onclick="app.launch('studio',0);setTimeout(()=>app._studioJoinSession('${msg.sessionId}'),2000);this.closest('.notif').remove()">🎨 Войти</button>
+                    <button class="bx b-no" onclick="this.closest('.notif').remove()">✕</button>
+                </div>`;
+            document.getElementById('notifs').appendChild(n);
+            setTimeout(()=>n.classList.add('show'),50);
+            setTimeout(()=>{n.classList.remove('show');setTimeout(()=>n.remove(),400)},20000);
         }
         else if(msg.type==='invite'&&String(msg.to)===String(this.userId)){
             const wNames={lobby:'Главная Площадь',gather:'Цитрусовый Лес',parkour:'Небесный Паркур',
@@ -3416,6 +3463,108 @@ const app = {
     },
 
     // ── PUBLISH
+    // ── СОВМЕСТНАЯ СТУДИЯ
+    _studioSessionId: null,
+
+    async studioInviteFriend(){
+        // Показываем список друзей
+        const friends = (this.friends||[]).filter(f=>f.status==='accepted');
+        if(!friends.length){ this.showNotif('😢','Нет друзей','Сначала добавь друзей во вкладке Друзья'); return; }
+        // Создаём sessionId = mapId текущей карты
+        const sessionId = 'studio_' + this.userId + '_' + (this.editingMapId ?? 'new');
+        this._studioSessionId = sessionId;
+        // Показываем выбор друга
+        const names = friends.map((f,i)=>`<button onclick="app._sendStudioInvite('${f.id}','${f.tag||f.name}','${sessionId}');this.closest('.notif').remove()" style="display:block;width:100%;padding:8px;margin:4px 0;background:#1e88e5;border:none;border-radius:8px;color:#fff;font-size:13px;cursor:pointer;">👤 ${f.tag||f.name}</button>`).join('');
+        const n = document.createElement('div'); n.className='notif';
+        n.innerHTML=`<div class="nh">👥 Пригласить в студию</div><div class="nb" style="display:flex;flex-direction:column;">${names}<button onclick="this.closest('.notif').remove()" style="margin-top:6px;background:#333;border:none;border-radius:8px;color:#888;padding:6px;cursor:pointer;">Отмена</button></div>`;
+        document.getElementById('notifs').appendChild(n);
+        setTimeout(()=>n.classList.add('show'),50);
+        setTimeout(()=>{n.classList.remove('show');setTimeout(()=>n.remove(),400);},15000);
+    },
+
+    async _sendStudioInvite(toId, toName, sessionId){
+        try{
+            await fetch(this._API+'/studio/invite',{method:'POST',headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({toId, fromId:this.userId, fromName:this.username+'#'+this.userId, sessionId})});
+            this.showNotif('✅','Приглашение отправлено!',`${toName} получит уведомление`);
+            // Start syncing our blocks
+            this._studioSyncStart(sessionId);
+        }catch(e){}
+    },
+
+    _studioSyncInterval: null,
+    _studioSyncStart(sessionId){
+        if(this._studioSyncInterval) clearInterval(this._studioSyncInterval);
+        this._studioSessionId = sessionId;
+        // Join via WS
+        if(this._gameWS&&this._gameWS.readyState===1)
+            this._gameWS.send(JSON.stringify({type:'studio_join',sessionId,userId:String(this.userId)}));
+        // Sync every 3 seconds
+        this._studioSyncInterval = setInterval(()=>this._studioSyncBlocks(sessionId), 3000);
+        console.log('Studio collab started, session:', sessionId);
+    },
+
+    async _studioSyncBlocks(sessionId){
+        if(!this.mapBlocks) return;
+        try{
+            await fetch(this._API+'/studio/sync',{method:'POST',headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({sessionId, blocks:this.mapBlocks.map(b=>({px:b.position.x,py:b.position.y,pz:b.position.z,color:b.userData?.color||'#ff9800',scale:b.scale.x})), author:String(this.userId)})});
+        }catch(e){}
+    },
+
+    async _studioJoinSession(sessionId){
+        this._studioSessionId = sessionId;
+        if(this._gameWS&&this._gameWS.readyState===1)
+            this._gameWS.send(JSON.stringify({type:'studio_join',sessionId,userId:String(this.userId)}));
+        // Load current blocks from session
+        try{
+            const res = await fetch(this._API+'/studio/sync?sessionId='+sessionId);
+            const d = await res.json();
+            if(d.blocks&&d.blocks.length){
+                // Clear and rebuild
+                (this.mapBlocks||[]).forEach(b=>this.scene&&this.scene.remove(b));
+                this.mapBlocks=[];
+                d.blocks.forEach(b=>{
+                    const geo=new THREE.BoxGeometry(b.scale||1,b.scale||1,b.scale||1);
+                    const mat=new THREE.MeshLambertMaterial({color:b.color||'#ff9800'});
+                    const mesh=new THREE.Mesh(geo,mat);
+                    mesh.position.set(b.px,b.py,b.pz);
+                    mesh.userData={color:b.color||'#ff9800'};
+                    mesh.castShadow=true; mesh.receiveShadow=true;
+                    this.scene&&this.scene.add(mesh);
+                    this.mapBlocks.push(mesh);
+                    this.objectsToIntersect&&this.objectsToIntersect.push(mesh);
+                });
+                this.showNotif('✅','Карта загружена!',`${d.blocks.length} блоков от ${d.author}`);
+            }
+        }catch(e){}
+        // Poll for updates every 3 seconds
+        if(this._studioSyncInterval) clearInterval(this._studioSyncInterval);
+        this._studioSyncInterval = setInterval(async()=>{
+            if(!this._studioSessionId) return;
+            try{
+                const res=await fetch(this._API+'/studio/sync?sessionId='+this._studioSessionId);
+                const d=await res.json();
+                if(d.blocks&&String(d.author)!==String(this.userId)){
+                    // Remote update — rebuild blocks
+                    (this.mapBlocks||[]).forEach(b=>this.scene&&this.scene.remove(b));
+                    this.mapBlocks=[];
+                    d.blocks.forEach(b=>{
+                        const geo=new THREE.BoxGeometry(b.scale||1,b.scale||1,b.scale||1);
+                        const mat=new THREE.MeshLambertMaterial({color:b.color||'#ff9800'});
+                        const mesh=new THREE.Mesh(geo,mat);
+                        mesh.position.set(b.px,b.py,b.pz);
+                        mesh.userData={color:b.color||'#ff9800'};
+                        mesh.castShadow=true; mesh.receiveShadow=true;
+                        this.scene&&this.scene.add(mesh);
+                        this.mapBlocks.push(mesh);
+                        this.objectsToIntersect&&this.objectsToIntersect.push(mesh);
+                    });
+                }
+            }catch(e){}
+        }, 3000);
+    },
+
     publishGame(){
         document.getElementById('modal-title').innerText='НАЗВАНИЕ КАРТЫ';
         document.getElementById('modal-input').value='';
@@ -3747,6 +3896,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
