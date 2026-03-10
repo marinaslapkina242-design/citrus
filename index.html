@@ -195,7 +195,7 @@
             <div class="nav-item" id="nav-quests" onclick="app.switchTab('quests')"><i class="fas fa-tasks" style="width:16px"></i> Задания <span class="nav-badge hidden" id="quest-badge">!</span></div>
             <div class="nav-item" id="nav-roulette" onclick="app.switchTab('roulette')"><i class="fas fa-dice" style="width:16px"></i> Рулетка</div>
             <div class="nav-item" id="nav-credits" onclick="app.switchTab('credits')"><i class="fas fa-hand-holding-usd" style="width:16px"></i> Кредиты</div>
-        <div class="nav-item" id="nav-gifts" onclick="app.switchTab('gifts')">🎁<span>Подарки</span></div>
+            <div class="nav-item" id="nav-gifts" onclick="app.switchTab('gifts')"><i class="fas fa-gift" style="width:16px"></i> Подарки</div>
         </div>
         <div class="content-area">
 
@@ -369,6 +369,27 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
                 <div id="credits-list" style="display:flex;flex-direction:column;gap:8px;">
                     <div style="color:#444;font-size:13px;">Загрузка...</div>
                 </div>
+            </div>
+        </div>
+        <div id="tab-gifts" class="hidden">
+            <h3 style="color:var(--c-main);margin:0 0 16px;font-size:15px;letter-spacing:2px;">🎁 ПОДАРКИ</h3>
+
+            <div style="background:#0d0d0d;border:1px solid #222;border-radius:12px;padding:16px;margin-bottom:14px;">
+                <div style="color:#aaa;font-size:13px;margin-bottom:10px;">Отправить подарок другу</div>
+                <div id="gift-friend-list" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;min-height:36px;">
+                    <div style="color:#444;font-size:12px;">Загрузка...</div>
+                </div>
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <input type="number" id="gift-amount" min="1" max="100000" placeholder="Сумма (1–100 000)" style="flex:1;padding:10px;background:#111;border:1px solid #333;border-radius:8px;color:#fff;font-size:14px;outline:none;">
+                    <span style="color:#FF9800;">🍊</span>
+                </div>
+                <div id="gift-selected-friend" style="margin-top:8px;color:#555;font-size:12px;">Выбери друга выше 👆</div>
+                <button onclick="app.sendGift()" style="margin-top:10px;width:100%;padding:12px;background:linear-gradient(135deg,#FF9800,#FF5722);border:none;border-radius:8px;color:#fff;font-size:14px;font-weight:bold;cursor:pointer;touch-action:manipulation;">🎁 Отправить подарок</button>
+            </div>
+
+            <div style="background:#0d0d0d;border:1px solid #222;border-radius:12px;padding:16px;">
+                <div style="color:#aaa;font-size:13px;margin-bottom:10px;">📬 Входящие подарки</div>
+                <div id="gifts-inbox"><div style="color:#444;font-size:12px;">Загрузка...</div></div>
             </div>
         </div>
 
@@ -4132,49 +4153,3 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-    <div id="tab-gifts" class="hidden" style="width:100%;">
-        <h3 style="color:var(--c-main);margin:0 0 14px;font-size:15px;letter-spacing:2px;">🎁 ПОДАРКИ</h3>
-
-        <!-- Отправить подарок -->
-        <div style="background:#0d0d0d;border:1px solid #222;border-radius:12px;padding:16px;margin-bottom:14px;">
-            <div style="color:#aaa;font-size:13px;margin-bottom:10px;">Отправить подарок другу</div>
-            <div id="gift-friend-list" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
-                <div style="color:#444;font-size:12px;">Загрузка...</div>
-            </div>
-            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-                <input type="number" id="gift-amount" min="1" max="100000" placeholder="Сумма (1–100000)" style="flex:1;min-width:140px;padding:10px;background:#111;border:1px solid #333;border-radius:8px;color:#fff;font-size:14px;">
-                <span style="color:#FF9800;font-size:13px;">🍊</span>
-            </div>
-            <div id="gift-selected-friend" style="margin-top:8px;color:#888;font-size:12px;">Выбери друга выше 👆</div>
-            <button onclick="app.sendGift()" style="margin-top:10px;width:100%;padding:12px;background:linear-gradient(135deg,#FF9800,#FF5722);border:none;border-radius:8px;color:#fff;font-size:14px;font-weight:bold;cursor:pointer;touch-action:manipulation;">🎁 Отправить</button>
-        </div>
-
-        <!-- История подарков -->
-        <div style="background:#0d0d0d;border:1px solid #222;border-radius:12px;padding:16px;">
-            <div style="color:#aaa;font-size:13px;margin-bottom:10px;">📬 Входящие подарки</div>
-            <div id="gifts-inbox" style="display:flex;flex-direction:column;gap:8px;">
-                <div style="color:#444;font-size:12px;">Загрузка...</div>
-            </div>
-        </div>
-    </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
