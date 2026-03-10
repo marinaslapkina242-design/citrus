@@ -1350,16 +1350,7 @@
                 <div class="section-title">Официальные миры</div>
                 <div class="grid" style="margin-bottom:32px;">
 
-                    <div class="card world-card" onclick="app.launch('play','lobby')">
-                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,#0d1230,#050510);">
-                            <span class="world-emoji">🌆</span>
-                            <div class="world-glow" style="background:rgba(100,120,255,0.15);"></div>
-                        </div>
-                        <div class="card-info">
-                            <div><b>Главная Площадь</b><br><small class="world-tag" style="color:rgba(150,170,255,0.7)">💬 Общение</small></div>
-                            <div class="world-players-dot"></div>
-                        </div>
-                    </div>
+
 
                     <div class="card world-card featured-world" onclick="app.launch('play','gather')">
                         <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(255,152,0,0.2),#050510);">
@@ -2857,7 +2848,7 @@ const app = {
             setTimeout(()=>{n.classList.remove('show');setTimeout(()=>n.remove(),400)},20000);
         }
         else if(msg.type==='invite'&&String(msg.to)===String(this.userId)){
-            const wNames={lobby:'Главная Площадь',gather:'Цитрусовый Лес',parkour:'Небесный Паркур',
+            const wNames={gather:'Цитрусовый Лес',parkour:'Небесный Паркур',
                 volcano:'Остров Вулкана',space:'Космическая База',hideseek:'Прятки',
                 snowmount:'Снежная Гора',dungeon:'Тёмное Подземелье',march8:'🌸 8 Марта'};
             const wn=wNames[msg.world]||msg.worldName||msg.world;
@@ -3312,6 +3303,7 @@ const app = {
         this._showToast('🚀 Заходим в мир...');
         this._joinSpawn = true;
         this.launch('play', mapId);
+        // Дополнительная страховка — поднять игрока через 1.2с после загрузки
         clearTimeout(this._joinSpawnTimer);
         this._joinSpawnTimer = setTimeout(()=>{
             if(this.playerGroup && this.mode==='play'){
@@ -3319,10 +3311,6 @@ const app = {
                 if(this.velocity) this.velocity.set(0, 0, 0);
             }
         }, 1200);
-        // Подгрузить игроков сразу через poll — даже если они стоят на месте
-        setTimeout(()=>{ if(this.mode==='play') this._pollPositions(); }, 1000);
-        setTimeout(()=>{ if(this.mode==='play') this._pollPositions(); }, 2500);
-        setTimeout(()=>{ if(this.mode==='play') this._pollPositions(); }, 5000);
     },
 
     inviteFriend(fid, name){
@@ -3940,12 +3928,12 @@ const app = {
             }
         }
         this.velocity.set(0,0,0);this.canJump=false;this.loopFn=null;this.spaceGrav=false;
-        const wNames={lobby:'Главная Площадь',gather:'Цитрусовый Лес',parkour:'Небесный Паркур',
+        const wNames={gather:'Цитрусовый Лес',parkour:'Небесный Паркур',
             volcano:'Остров Вулкана',space:'Космическая База',hideseek:'Прятки',
             snowmount:'Снежная Гора',dungeon:'Тёмное Подземелье',march8:'🌸 8 Марта'};
         this._worldName=wNames[mapId]||'Мир игрока';
         if(mode==='play'){
-            this._updateStatus('ingame',this._worldName);
+            this._updateStatus('ingame',mapId);
             // Сразу пушим статус на сервер
             setTimeout(()=>this.renderMpPanel(), 500);
         }
@@ -3975,7 +3963,7 @@ const app = {
     setupScene(){
         const canvas=document.getElementById('gl-canvas');canvas.innerHTML='';
         this.scene=new THREE.Scene();
-        const bgs={lobby:0x0a0a18,gather:0x0d1f0a,parkour:0x87CEEB,volcano:0x1a0800,space:0x000005,hideseek:0x0d1a0d,snowmount:0x87CEEB,dungeon:0x050508,march8:0x1a0a1a};
+        const bgs={gather:0x0d1f0a,parkour:0x87CEEB,volcano:0x1a0800,space:0x000005,hideseek:0x0d1a0d,snowmount:0x87CEEB,dungeon:0x050508,march8:0x1a0a1a};
         const bg=bgs[this.currentMap]||0x0a0a10;
         this.scene.background=new THREE.Color(bg);
         this.scene.fog=new THREE.FogExp2(bg,0.016);
@@ -4001,7 +3989,7 @@ const app = {
         if(this.mode==='play'){
             this.playerGroup=this.buildCharacter(true);
             // Спавн выше земли для всех миров
-            const spawnY = {parkour:8, march8:5, dungeon:3, volcano:4, space:4, snowmount:4, hideseek:4, gather:3, lobby:3};
+            const spawnY = {parkour:8, march8:5, dungeon:3, volcano:4, space:4, snowmount:4, hideseek:4, gather:3};
             const baseY = this._joinSpawn ? 15 : (spawnY[this.currentMap] || (typeof this.currentMap==='number' ? 12 : 5));
             this._joinSpawn = false;
             this.playerGroup.position.set(0, baseY, 0);
@@ -4040,45 +4028,7 @@ const app = {
             this.scene.add(g);this.objectsToIntersect.push(g);return g;
         };
 
-        if(this.currentMap==='lobby'){
-            addGround(0x1a1a2e);
-            for(let x=-10;x<=10;x+=2)for(let z=-10;z<=10;z+=2){
-                const tile=new THREE.Mesh(new THREE.BoxGeometry(1.98,0.15,1.98),
-                    new THREE.MeshStandardMaterial({color:(x+z)%4===0?0x2a2a4a:0x222238,roughness:0.7}));
-                tile.position.set(x,0.075,z);this.scene.add(tile);
-            }
-            const fb=new THREE.Mesh(new THREE.CylinderGeometry(3.5,3.5,0.4,32),new THREE.MeshStandardMaterial({color:0x3a3a5a}));
-            fb.position.y=0.2;this.scene.add(fb);this.objectsToIntersect.push(fb);
-            const fw=new THREE.Mesh(new THREE.CylinderGeometry(3,3,0.2,32),new THREE.MeshStandardMaterial({color:0x00B8D9,transparent:true,opacity:0.85,roughness:0}));
-            fw.position.y=0.5;this.scene.add(fw);
-            const pillar=new THREE.Mesh(new THREE.CylinderGeometry(0.3,0.4,2.5),new THREE.MeshStandardMaterial({color:0xCCBB88,metalness:0.3}));
-            pillar.position.y=1.5;this.scene.add(pillar);
-            const orb=new THREE.Mesh(new THREE.SphereGeometry(0.7,16,16),new THREE.MeshStandardMaterial({color:0xFF9800,emissive:0xFF6600,emissiveIntensity:0.9}));
-            orb.position.y=3;this.scene.add(orb);
-            const pl=new THREE.PointLight(0xFF9800,3,12);pl.position.set(0,4,0);this.scene.add(pl);
-            const bcs=[0x1a1a3a,0x1a2a1a,0x2a1a1a,0x2a2a1a];
-            for(let i=0;i<3;i++){
-                const a=(i/8)*Math.PI*2,h=10+Math.random()*14,w=5+Math.random()*3;
-                const bld=new THREE.Mesh(new THREE.BoxGeometry(w,h,w),new THREE.MeshStandardMaterial({color:bcs[i%4],roughness:0.8}));
-                bld.position.set(Math.cos(a)*30,h/2,Math.sin(a)*30);bld.castShadow=true;
-                this.scene.add(bld);this.objectsToIntersect.push(bld);
-                for(let j=0;j<5;j++)for(let k=-1;k<=1;k+=2){
-                    const win=new THREE.Mesh(new THREE.PlaneGeometry(0.9,0.9),
-                        new THREE.MeshStandardMaterial({emissive:0xFFFF44,emissiveIntensity:Math.random()>0.4?1.2:0,transparent:true,opacity:0.9}));
-                    win.position.set(Math.cos(a)*30+k*(w/3),j*2+2,Math.sin(a)*30+w/2+0.01);
-                    win.rotation.y=Math.atan2(Math.cos(a),Math.sin(a));this.scene.add(win);
-                }
-            }
-            for(let i=0;i<3;i++){
-                const a=(i/8)*Math.PI*2;
-                const pole=new THREE.Mesh(new THREE.CylinderGeometry(0.08,0.1,5),new THREE.MeshStandardMaterial({color:0x888888,metalness:0.7}));
-                pole.position.set(Math.cos(a)*16,2.5,Math.sin(a)*16);this.scene.add(pole);this.objectsToIntersect.push(pole);
-                const lamp=new THREE.PointLight(0xFFE08A,1.5,10);lamp.position.set(Math.cos(a)*16,5.2,Math.sin(a)*16);this.scene.add(lamp);
-                const globe=new THREE.Mesh(new THREE.SphereGeometry(0.25,8,8),new THREE.MeshStandardMaterial({emissive:0xFFD060,emissiveIntensity:2}));
-                globe.position.copy(lamp.position);this.scene.add(globe);
-            }
-        }
-        else if(this.currentMap==='gather'){
+        if(this.currentMap==='gather'){
             addGround(0x1a3010);
             for(let i=0;i<45;i++){
                 const tx=(Math.random()-0.5)*140,tz=(Math.random()-0.5)*140;
@@ -5381,6 +5331,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
