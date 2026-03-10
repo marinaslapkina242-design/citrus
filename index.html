@@ -4031,6 +4031,7 @@ const app = {
         document.body.requestPointerLock = document.body.requestPointerLock || document.body.mozRequestPointerLock;
         if(window.innerWidth > 768) document.body.requestPointerLock();
         
+        this._connectGameWS();
         this.engineLoop();
         // Опрашиваем позиции других игроков с сервера каждые 300мс
         if(this._posInterval) clearInterval(this._posInterval);
@@ -5348,6 +5349,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
