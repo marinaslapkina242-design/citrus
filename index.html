@@ -786,7 +786,7 @@
 
         /* Content fade in */
         #tab-games, #tab-avatar, #tab-shop, #tab-friends,
-        #tab-studio, #tab-quests, #tab-roulette, #tab-credits, #tab-gifts {
+        #tab-studio, #tab-quests, #tab-roulette, #tab-credits, #tab-gifts, #tab-admin {
             animation: fadeInUp 0.3s ease both;
         }
 
@@ -1342,6 +1342,7 @@
             <div class="nav-item" id="nav-roulette" onclick="app.switchTab('roulette')"><div class="nav-icon"><i class="fas fa-dice"></i></div> Рулетка</div>
             <div class="nav-item" id="nav-credits"  onclick="app.switchTab('credits')"> <div class="nav-icon"><i class="fas fa-coins"></i></div> Кредиты</div>
             <div class="nav-item" id="nav-gifts"    onclick="app.switchTab('gifts')">   <div class="nav-icon"><i class="fas fa-gift"></i></div> Подарки</div>
+            <div class="nav-item" id="nav-admin" onclick="app.switchTab('admin')" style="display:none;"> <div class="nav-icon"><i class="fas fa-shield-alt"></i></div> <span style="color:#FFD700;">Баны</span></div>
         </div>
         <div class="content-area">
 
@@ -1590,6 +1591,37 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
                 </div>
             </div>
 
+            <!-- ══════════════════ TAB: ADMIN ══════════════════ -->
+            <div id="tab-admin" class="hidden">
+                <div class="section-title">🛡 Панель управления</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                    <div class="panel-box">
+                        <div class="panel-box-title">🚫 Забанить игрока</div>
+                        <div style="color:rgba(255,255,255,0.4);font-size:12px;margin-bottom:10px;font-family:var(--font-ui);">Введи никнейм или ID:</div>
+                        <input type="text" id="admin-ban-input" placeholder="Игрок#1234" class="styled-input" style="margin-bottom:8px;">
+                        <input type="text" id="admin-ban-reason" placeholder="Причина" class="styled-input" style="margin-bottom:12px;">
+                        <div style="display:flex;gap:8px;">
+                            <button onclick="app.adminBan()" class="btn-orange-full" style="background:rgba(220,50,50,0.15);border-color:rgba(220,50,50,0.3);color:#ff5252;">🚫 Забанить</button>
+                            <button onclick="app.adminUnban()" class="btn-orange-full" style="background:rgba(0,200,100,0.1);border-color:rgba(0,200,100,0.3);color:#00e676;">✓ Разбанить</button>
+                        </div>
+                        <div id="admin-ban-result" style="margin-top:10px;font-size:12px;color:rgba(255,255,255,0.5);font-family:var(--font-ui);min-height:18px;"></div>
+                    </div>
+                    <div class="panel-box">
+                        <div class="panel-box-title">👥 Онлайн игроки</div>
+                        <div id="admin-online-list" style="max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;">
+                            <div style="color:rgba(255,255,255,0.2);font-size:12px;">Загрузка...</div>
+                        </div>
+                        <button onclick="app.adminRefreshOnline()" class="btn-ghost" style="margin-top:10px;width:100%;">🔄 Обновить</button>
+                    </div>
+                    <div class="panel-box" style="grid-column:1/-1;">
+                        <div class="panel-box-title">📋 Список банов</div>
+                        <div id="admin-ban-list" style="max-height:220px;overflow-y:auto;font-size:12px;font-family:var(--font-ui);color:rgba(255,255,255,0.6);">
+                            <div style="color:rgba(255,255,255,0.2);">Загрузка...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- ══════════════════ TAB: ROULETTE ══════════════════ -->
             <div id="tab-roulette" class="hidden">
                 <div style="display:flex;align-items:flex-start;justify-content:center;gap:40px;padding-top:10px;width:100%;">
@@ -1831,6 +1863,11 @@ const app = {
             document.getElementById('ui-login').classList.add('hidden');
             document.getElementById('ui-hub').classList.remove('hidden');
             this.renderMyGames(); this.renderFriends(); this.renderOnline(); this.initAvatarPreview(); this.renderShop();
+            // Показать панель банов только для Разраб
+            if(['разраб','admin'].includes((this.username||'').toLowerCase().split('#')[0])){
+                const navAdmin=document.getElementById('nav-admin');
+                if(navAdmin)navAdmin.style.display='';
+            }
             this.updateUI();
             this._wsConnect();
             setInterval(()=>this.renderOnline(), 30000);
@@ -2412,7 +2449,78 @@ const app = {
         return devs.some(d=>d.toLowerCase()===(name||'').toLowerCase());
     },
 
-    devBadge(name){ return this.isDev(name) ? ' <span style="color:#4fc3f7;font-size:11px;">✔</span>' : ''; },
+
+    // ══ ADMIN PANEL ══
+    isDev(name){
+        return ['разраб','admin','citrus'].includes((name||'').toLowerCase().split('#')[0]);
+    },
+    adminBan(){
+        const target=document.getElementById('admin-ban-input').value.trim();
+        const reason=document.getElementById('admin-ban-reason').value.trim()||'Нарушение правил';
+        const res=document.getElementById('admin-ban-result');
+        if(!target){res.textContent='Введи никнейм';res.style.color='#ff5252';return;}
+        // Сохраняем бан локально + на сервере через credits endpoint как workaround
+        try{
+            const bans=JSON.parse(localStorage.getItem('citrus_bans')||'[]');
+            if(!bans.find(b=>b.name===target)){
+                bans.push({name:target,reason,date:new Date().toLocaleDateString('ru')});
+                localStorage.setItem('citrus_bans',JSON.stringify(bans));
+            }
+            res.textContent='🚫 '+target+' забанен';res.style.color='#ff5252';
+            document.getElementById('admin-ban-input').value='';
+            document.getElementById('admin-ban-reason').value='';
+            this.adminRefreshBanList();
+        }catch(e){res.textContent='Ошибка';res.style.color='#ff5252';}
+    },
+    adminUnban(){
+        const target=document.getElementById('admin-ban-input').value.trim();
+        const res=document.getElementById('admin-ban-result');
+        if(!target){res.textContent='Введи никнейм';res.style.color='#ff5252';return;}
+        try{
+            let bans=JSON.parse(localStorage.getItem('citrus_bans')||'[]');
+            const before=bans.length;
+            bans=bans.filter(b=>b.name!==target);
+            localStorage.setItem('citrus_bans',JSON.stringify(bans));
+            if(bans.length<before){res.textContent='✓ '+target+' разбанен';res.style.color='#00e676';}
+            else{res.textContent='Игрок не в списке банов';res.style.color='#aaa';}
+            document.getElementById('admin-ban-input').value='';
+            this.adminRefreshBanList();
+        }catch(e){}
+    },
+    adminRefreshBanList(){
+        const el=document.getElementById('admin-ban-list');if(!el)return;
+        try{
+            const bans=JSON.parse(localStorage.getItem('citrus_bans')||'[]');
+            if(!bans.length){el.innerHTML='<span style="color:rgba(255,255,255,0.2)">Список пуст</span>';return;}
+            el.innerHTML=bans.map(b=>`
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:rgba(220,50,50,0.08);border-radius:8px;margin-bottom:4px;border:1px solid rgba(220,50,50,0.15);">
+                    <div>
+                        <span style="color:#ff5252;font-weight:600;">${b.name}</span>
+                        <span style="color:rgba(255,255,255,0.3);margin-left:8px;">${b.reason}</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <span style="color:rgba(255,255,255,0.2);font-size:11px;">${b.date||''}</span>
+                        <button onclick="document.getElementById('admin-ban-input').value='${b.name}';app.adminUnban();" style="background:none;border:none;color:#ff5252;cursor:pointer;font-size:14px;">✕</button>
+                    </div>
+                </div>`).join('');
+        }catch(e){el.innerHTML='Ошибка';}
+    },
+    async adminRefreshOnline(){
+        const el=document.getElementById('admin-online-list');if(!el)return;
+        el.innerHTML='<div style="color:rgba(255,255,255,0.2);font-size:12px;">Загрузка...</div>';
+        try{
+            const r=await fetch('https://citrus-mail.onrender.com/players');
+            const data=await r.json();
+            const players=Array.isArray(data)?data:(data.players||[]);
+            if(!players.length){el.innerHTML='<div style="color:rgba(255,255,255,0.2);font-size:12px;">Никого нет онлайн</div>';return;}
+            el.innerHTML=players.map(p=>`
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid rgba(255,255,255,0.06);">
+                    <span style="color:#eee;font-size:13px;">${p.name||p.id||'?'}</span>
+                    <button onclick="document.getElementById('admin-ban-input').value='${p.name||''}';app.switchTab('admin');" style="background:rgba(220,50,50,0.1);border:1px solid rgba(220,50,50,0.25);color:#ff5252;padding:3px 8px;border-radius:6px;cursor:pointer;font-size:11px;">Бан</button>
+                </div>`).join('');
+        }catch(e){el.innerHTML='<div style="color:#ff5252;font-size:12px;">Ошибка загрузки</div>';}
+    },
+    devBadge(name){ return this.isDev(name) ? ' <span style="color:#FFD700;font-size:11px;">✔</span>' : ''; },
 
     showHub(){
         // Слушаем личный BroadcastChannel (другие вкладки того же браузера)
@@ -2543,13 +2651,14 @@ const app = {
 
     // ── TABS
     switchTab(id){
-        ['games','avatar','shop','friends','studio','quests','roulette','credits','gifts'].forEach(t=>{
+        ['games','avatar','shop','friends','studio','quests','roulette','credits','gifts','admin'].forEach(t=>{
             document.getElementById('tab-'+t).classList.add('hidden');
             document.getElementById('nav-'+t)?.classList.remove('active');
         });
         document.getElementById('tab-'+id).classList.remove('hidden');
         document.getElementById('nav-'+id)?.classList.add('active');
         if(id==='avatar')this.updateAvatarPreview();
+        if(id==='admin'){this.adminRefreshBanList();this.adminRefreshOnline();}
         if(id==='games')this.renderMyGames();
         if(id==='quests')this.renderQuests();
         if(id==='roulette')this.initRoulette();
@@ -3383,18 +3492,8 @@ const app = {
                     }
                     if(msg.type==='req_pos') {
                         if(this.mode==='play' && this.playerGroup) {
-                            const posNow = {
-                                type:'move', id:String(this.userId), name:this.username,
-                                color:this._myColor,
-                                x:this.playerGroup.position.x,
-                                y:this.playerGroup.position.y,
-                                z:this.playerGroup.position.z,
-                                ry:this.playerGroup.rotation.y,
-                                map:String(this.currentMap),
-                                inv:this.inventory||[],
-                                moving:false, jumping:false
-                            };
-                            try{ this._gameWS.send(JSON.stringify(posNow)); }catch(e2){}
+                            const posNow = {type:'move',id:String(this.userId),name:this.username,color:this._myColor,x:this.playerGroup.position.x,y:this.playerGroup.position.y,z:this.playerGroup.position.z,ry:this.playerGroup.rotation.y,map:String(this.currentMap),inv:this.inventory||[],moving:false,jumping:false};
+                            try{this._gameWS.send(JSON.stringify(posNow));}catch(e2){}
                         }
                         return;
                     }
@@ -3546,7 +3645,7 @@ const app = {
                 ctx.textAlign = 'left';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(name, startX, 32);
-                ctx.fillStyle = '#4fc3f7';
+                ctx.fillStyle = '#FFD700';
                 ctx.font = 'bold 26px Arial';
                 ctx.fillText(' ✔', startX + nameW, 32);
             } else {
@@ -3857,7 +3956,7 @@ const app = {
                 ctx.fillStyle=this._myColor||'#FF9800';
                 ctx.textAlign='left'; ctx.textBaseline='middle';
                 ctx.fillText(this.username||'',_sx,32);
-                ctx.fillStyle='#4fc3f7'; ctx.font='bold 26px Arial';
+                ctx.fillStyle='#FFD700'; ctx.font='bold 26px Arial';
                 ctx.fillText(' ✔',_sx+_nw,32);
             } else {
                 ctx.fillStyle=this._myColor||'#FF9800';
@@ -3882,16 +3981,36 @@ const app = {
         this.pCam.position.set(0,1.5,5);
         this.pRender=new THREE.WebGLRenderer({alpha:true,antialias:true});
         this.pRender.setSize(cont.clientWidth,cont.clientHeight);
+        this.pRender.shadowMap.enabled=true;
         cont.appendChild(this.pRender.domElement);
-        this.pScene.add(new THREE.AmbientLight(0xffffff,0.8));
-        const sl=new THREE.DirectionalLight(0xffffff,0.6);sl.position.set(5,5,5);this.pScene.add(sl);
+        // Освещение
+        this.pScene.add(new THREE.AmbientLight(0xffffff,0.7));
+        const sl=new THREE.DirectionalLight(0xffffff,1.0);sl.position.set(3,6,4);sl.castShadow=true;this.pScene.add(sl);
+        const sl2=new THREE.DirectionalLight(0xFF9800,0.3);sl2.position.set(-3,2,-2);this.pScene.add(sl2);
+        // Пол — круглая платформа
+        const floorGeo=new THREE.CylinderGeometry(2.2,2.2,0.08,48);
+        const floorMat=new THREE.MeshStandardMaterial({color:0x1a1a2e,roughness:0.6,metalness:0.2});
+        const floor=new THREE.Mesh(floorGeo,floorMat);floor.position.y=-1.04;floor.receiveShadow=true;
+        this.pScene.add(floor);
+        // Свечение под ногами
+        const glowGeo=new THREE.CylinderGeometry(1.5,1.5,0.01,48);
+        const glowMat=new THREE.MeshStandardMaterial({color:0xFF9800,emissive:0xFF6600,emissiveIntensity:0.8,transparent:true,opacity:0.25});
+        const glow=new THREE.Mesh(glowGeo,glowMat);glow.position.y=-1.0;this.pScene.add(glow);
         this.updateAvatarPreview();
-        const loop=()=>{if(this.pAvatar&&this.mode==='none'){this.pAvatar.rotation.y+=0.01;this.pRender.render(this.pScene,this.pCam);}requestAnimationFrame(loop);};loop();
+        const loop=()=>{
+            if(this.pAvatar&&this.mode==='none'){
+                this.pAvatar.rotation.y+=0.008;
+                // Пульсация свечения
+                glow.material.opacity=0.15+0.12*Math.sin(Date.now()*0.003);
+                this.pRender.render(this.pScene,this.pCam);
+            }
+            requestAnimationFrame(loop);
+        };loop();
     },
     updateAvatarPreview(){
         if(!this.pScene)return;
         if(this.pAvatar)this.pScene.remove(this.pAvatar);
-        this.pAvatar=this.buildCharacter(false);this.pAvatar.position.y=-1;this.pScene.add(this.pAvatar);
+        this.pAvatar=this.buildCharacter(false);this.pAvatar.position.y=-1;this.pAvatar.castShadow=true;this.pScene.add(this.pAvatar);
     },
 
     // ── PALETTE
@@ -4391,7 +4510,7 @@ const app = {
 
     async renderMpPanel(){
         const list=document.getElementById('mp-list');if(!list)return;
-        const _devBadge=n=>['разраб','admin','citrus'].includes((n||'').toLowerCase())?'<span style="color:#4fc3f7;font-size:10px"> ✔</span>':'';
+        const _devBadge=n=>['разраб','admin','citrus'].includes((n||'').toLowerCase())?'<span style="color:#FFD700;font-size:10px"> ✔</span>':'';
         list.innerHTML=`<div class="mpp"><div class="mpd" style="background:#00E676"></div>${this.username}${_devBadge(this.username)} (ты)</div>`;
         // Берём актуальный список с сервера
         try {
@@ -5349,6 +5468,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
