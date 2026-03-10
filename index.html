@@ -1342,6 +1342,7 @@
             <div class="nav-item" id="nav-roulette" onclick="app.switchTab('roulette')"><div class="nav-icon"><i class="fas fa-dice"></i></div> Рулетка</div>
             <div class="nav-item" id="nav-credits"  onclick="app.switchTab('credits')"> <div class="nav-icon"><i class="fas fa-coins"></i></div> Кредиты</div>
             <div class="nav-item" id="nav-gifts"    onclick="app.switchTab('gifts')">   <div class="nav-icon"><i class="fas fa-gift"></i></div> Подарки</div>
+            <div class="nav-item hidden" id="nav-admin"   onclick="app.switchTab('admin')">  <div class="nav-icon"><i class="fas fa-shield-alt"></i></div> Управление</div>
         </div>
         <div class="content-area">
 
@@ -1599,7 +1600,40 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
                 </div>
             </div>
 
-            <!-- ══════════════════ TAB: ROULETTE ══════════════════ -->
+            <!-- ══════════════════ TAB: ADMIN ══════════════════ -->
+            <div id="tab-admin" class="hidden">
+                <div class="section-title">🛡️ Панель управления</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+
+                    <!-- Забанить игрока -->
+                    <div class="panel-box">
+                        <div class="panel-box-title">🔨 Забанить игрока</div>
+                        <div style="color:rgba(255,255,255,0.35);font-size:12px;margin-bottom:12px;font-family:var(--font-ui);">Введи ID или тег игрока</div>
+                        <input id="ban-target-id" class="styled-input" placeholder="ID игрока (числовой)" style="margin-bottom:8px;">
+                        <input id="ban-target-name" class="styled-input" placeholder="Ник (для отображения)" style="margin-bottom:8px;">
+                        <input id="ban-reason" class="styled-input" placeholder="Причина бана" style="margin-bottom:12px;">
+                        <button onclick="app.banPlayer()" style="width:100%;padding:11px;background:linear-gradient(135deg,#e53935,#c62828);border:none;border-radius:10px;color:#fff;font-weight:700;font-family:var(--font-body);font-size:14px;cursor:pointer;letter-spacing:0.5px;transition:all 0.2s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">🔨 Выдать бан</button>
+
+                        <div style="margin-top:16px;">
+                            <div class="panel-box-title" style="margin-bottom:10px;">🔍 Забаненные онлайн</div>
+                            <div style="color:rgba(255,255,255,0.25);font-size:12px;margin-bottom:8px;font-family:var(--font-ui);">Выбери игрока из онлайн-списка:</div>
+                            <div id="ban-online-list" style="display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Список банов -->
+                    <div class="panel-box">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+                            <div class="panel-box-title" style="margin:0;">📋 Список банов</div>
+                            <button onclick="app.loadBanList()" style="background:rgba(255,152,0,0.1);border:1px solid rgba(255,152,0,0.2);color:rgba(255,152,0,0.7);border-radius:8px;padding:5px 10px;cursor:pointer;font-size:11px;font-family:var(--font-body);">↻ Обновить</button>
+                        </div>
+                        <div id="ban-list" style="display:flex;flex-direction:column;gap:8px;max-height:380px;overflow-y:auto;">
+                            <div style="color:rgba(255,255,255,0.2);font-size:13px;text-align:center;padding:20px;font-family:var(--font-ui);">Загрузка...</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
             <div id="tab-roulette" class="hidden">
                 <div style="display:flex;align-items:flex-start;justify-content:center;gap:40px;padding-top:10px;width:100%;">
                     <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
@@ -2408,6 +2442,15 @@ const app = {
         this.fullTag    = `${this.username}#${this.userId}`;
 
         this.saveData();
+
+        // Проверяем не забанен ли игрок
+        const banEntry = this._checkIfBanned();
+        if(banEntry){
+            document.getElementById('auth-error').textContent = `🚫 Ты забанен. Причина: ${banEntry.reason||'Нарушение правил'}`;
+            document.getElementById('auth-error').style.display='block';
+            return;
+        }
+
         this.showHub();
         this._wsConnect();
         setTimeout(()=>{
@@ -2430,6 +2473,106 @@ const app = {
 
     canBan(myName){ return this.isOwner(myName); },
 
+    // ══════════ БАН-СИСТЕМА ══════════
+
+    async banPlayer(targetId, targetName){
+        if(!this.canBan(this.username)){ this.showNotif('❌','Нет прав','Только разраб/citrus может банить'); return; }
+        const id   = targetId   || document.getElementById('ban-target-id')?.value?.trim();
+        const name = targetName || document.getElementById('ban-target-name')?.value?.trim() || id;
+        const reason = document.getElementById('ban-reason')?.value?.trim() || 'Нарушение правил';
+        if(!id){ this.showNotif('❌','Ошибка','Введи ID игрока'); return; }
+        const ban = { id: String(id), name, reason, by: this.username, ts: Date.now() };
+        // Сохраняем локально
+        const bans = this._getBans();
+        if(bans.find(b=>b.id===String(id))){ this.showNotif('⚠️','Уже забанен',`${name} уже в бан-листе`); return; }
+        bans.push(ban);
+        this._saveBans(bans);
+        // Пробуем отправить на сервер
+        try {
+            await fetch(this._API+'/bans', {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({
+                    name: name,
+                    id: String(id),
+                    reason: ban.reason,
+                    by: this.username,
+                    adminKey: 'citrus_admin_2025'
+                })
+            });
+        } catch(e){}
+        // Очищаем поля
+        ['ban-target-id','ban-target-name','ban-reason'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+        this.showNotif('🔨','Забанен!',`${name} добавлен в бан-лист`);
+        this.loadBanList();
+    },
+
+    async unbanPlayer(id){
+        if(!this.canBan(this.username)) return;
+        const bans = this._getBans().filter(b=>b.id!==String(id));
+        this._saveBans(bans);
+        try { await fetch(this._API+'/bans/'+id, {method:'DELETE', headers:{'Content-Type':'application/json'}, body:JSON.stringify({adminKey:'citrus_admin_2025'})}); } catch(e){}
+        this.showNotif('✅','Разбанен',`Игрок ${id} разбанен`);
+        this.loadBanList();
+    },
+
+    _getBans(){
+        try{ return JSON.parse(localStorage.getItem('citrus_bans')||'[]'); }catch(e){return [];}
+    },
+    _saveBans(list){
+        localStorage.setItem('citrus_bans', JSON.stringify(list));
+    },
+
+    async loadBanList(){
+        const el = document.getElementById('ban-list'); if(!el) return;
+        // Пробуем загрузить с сервера, fallback — локальный список
+        let bans = this._getBans();
+        try {
+            const r = await fetch(this._API+'/bans');
+            if(r.ok){ const srv = await r.json(); if(srv.length) bans=srv; this._saveBans(bans); }
+        } catch(e){}
+        if(!bans.length){
+            el.innerHTML='<div style="color:rgba(255,255,255,0.2);font-size:13px;text-align:center;padding:20px;font-family:var(--font-ui);">Бан-лист пуст ✅</div>';
+            return;
+        }
+        el.innerHTML = bans.map(b=>`
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,50,50,0.06);border:1px solid rgba(255,50,50,0.15);border-radius:10px;">
+                <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,50,50,0.15);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">🚫</div>
+                <div style="flex:1;min-width:0;">
+                    <div style="font-family:var(--font-body);font-weight:700;color:rgba(255,255,255,0.8);font-size:13px;">${b.name||b.id} <span style="color:rgba(255,255,255,0.3);font-size:11px;">#${b.id}</span></div>
+                    <div style="font-size:11px;color:rgba(255,80,80,0.7);font-family:var(--font-ui);margin-top:2px;">📝 ${b.reason||'Нарушение правил'}</div>
+                    <div style="font-size:10px;color:rgba(255,255,255,0.2);font-family:var(--font-ui);">бан выдан: ${b.by||'?'} · ${b.ts ? new Date(b.ts).toLocaleDateString('ru') : ''}</div>
+                </div>
+                <button onclick="app.unbanPlayer('${b.id}')" style="background:rgba(0,230,118,0.1);border:1px solid rgba(0,230,118,0.2);color:#00E676;border-radius:8px;padding:6px 10px;cursor:pointer;font-size:11px;font-family:var(--font-body);font-weight:700;flex-shrink:0;transition:all 0.2s;" onmouseover="this.style.background='rgba(0,230,118,0.2)'" onmouseout="this.style.background='rgba(0,230,118,0.1)'">✓ Разбанить</button>
+            </div>`).join('');
+    },
+
+    async loadBanOnlineList(){
+        const el = document.getElementById('ban-online-list'); if(!el) return;
+        await this._fetchOnline();
+        const online = (this._cachedOnline||[]).filter(p=>String(p.id)!==String(this.userId));
+        if(!online.length){
+            el.innerHTML='<div style="color:rgba(255,255,255,0.2);font-size:12px;padding:8px;font-family:var(--font-ui);">Никого онлайн</div>';
+            return;
+        }
+        const bans = this._getBans();
+        el.innerHTML = online.map(p=>{
+            const banned = bans.find(b=>b.id===String(p.id));
+            return `<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid rgba(255,255,255,0.05);">
+                <div style="width:28px;height:28px;border-radius:50%;background:${p.color||'#888'}22;color:${p.color||'#888'};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">${(p.name[0]||'?').toUpperCase()}</div>
+                <div style="flex:1;font-family:var(--font-body);font-size:12px;color:rgba(255,255,255,0.6);">${p.name} <span style="color:rgba(255,255,255,0.25);font-size:10px;">${p.tag||''}</span></div>
+                ${banned
+                    ? `<button onclick="app.unbanPlayer('${p.id}')" style="background:rgba(0,230,118,0.1);border:1px solid rgba(0,230,118,0.2);color:#00E676;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:10px;font-family:var(--font-body);">Разбанить</button>`
+                    : `<button onclick="app.banPlayer('${p.id}','${p.name.replace(/'/g,"\\'")}')" style="background:rgba(255,50,50,0.1);border:1px solid rgba(255,50,50,0.2);color:rgba(255,100,100,0.8);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:10px;font-family:var(--font-body);">Забанить</button>`
+                }</div>`;
+        }).join('');
+    },
+
+    // Проверка бана при входе
+    _checkIfBanned(){
+        const bans = this._getBans();
+        return bans.find(b=>String(b.id)===String(this.userId));
+    },
+
     showHub(){
         // Слушаем личный BroadcastChannel (другие вкладки того же браузера)
         try {
@@ -2447,6 +2590,9 @@ const app = {
         document.getElementById('ui-login').classList.add('hidden');
         document.getElementById('ui-hub').classList.remove('hidden');
         this.renderMyGames(); this.renderFriends(); this.renderOnline(); this.initAvatarPreview(); this.renderShop();
+        // Показываем панель управления только разрабу и citrus
+        const adminNav = document.getElementById('nav-admin');
+        if(adminNav) adminNav.classList.toggle('hidden', !this.canBan(this.username));
         this.updateUI();
     },
 
@@ -2559,7 +2705,7 @@ const app = {
 
     // ── TABS
     switchTab(id){
-        ['games','avatar','shop','friends','studio','quests','roulette','credits','gifts'].forEach(t=>{
+        ['games','avatar','shop','friends','studio','quests','roulette','credits','gifts','admin'].forEach(t=>{
             document.getElementById('tab-'+t).classList.add('hidden');
             document.getElementById('nav-'+t)?.classList.remove('active');
         });
@@ -2571,6 +2717,7 @@ const app = {
         if(id==='roulette')this.initRoulette();
         if(id==='credits')this.initCredits();
         if(id==='gifts')this.initGifts();
+        if(id==='admin'){ this.loadBanList(); this.loadBanOnlineList(); }
         else if(this._questCountdownInterval){ clearInterval(this._questCountdownInterval); this._questCountdownInterval=null; }
         if(id==='friends'){
             // Регистрируем на сервере (на случай если зашли раньше деплоя)
@@ -2768,6 +2915,17 @@ const app = {
                 const changed = this._applyLetter(msg);
                 if(changed){ this.saveData(); this.renderFriends(); this.renderInbox(); }
             }
+            return;
+        }
+
+        if(msg.type==='banned'){
+            // Сервер выдал бан в реальном времени — выкидываем игрока
+            const banReason = msg.reason || 'Нарушение правил';
+            this.logout();
+            setTimeout(()=>{
+                document.getElementById('auth-error').textContent = `🚫 Ты забанен. Причина: ${banReason}`;
+                document.getElementById('auth-error').style.display='block';
+            }, 300);
             return;
         }
 
@@ -5387,17 +5545,3 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
