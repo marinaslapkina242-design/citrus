@@ -195,6 +195,7 @@
             <div class="nav-item" id="nav-quests" onclick="app.switchTab('quests')"><i class="fas fa-tasks" style="width:16px"></i> Задания <span class="nav-badge hidden" id="quest-badge">!</span></div>
             <div class="nav-item" id="nav-roulette" onclick="app.switchTab('roulette')"><i class="fas fa-dice" style="width:16px"></i> Рулетка</div>
             <div class="nav-item" id="nav-credits" onclick="app.switchTab('credits')"><i class="fas fa-hand-holding-usd" style="width:16px"></i> Кредиты</div>
+        <div class="nav-item" id="nav-gifts" onclick="app.switchTab('gifts')">🎁<span>Подарки</span></div>
         </div>
         <div class="content-area">
 
@@ -984,6 +985,125 @@ const app = {
         } catch(e){}
     },
 
+    // ══════════════════════════════
+    // 🎁 ПОДАРКИ
+    // ══════════════════════════════
+    _giftSelectedId: null,
+    _giftSelectedName: null,
+
+    async initGifts(){
+        // Рендерим список друзей
+        const box = document.getElementById('gift-friend-list');
+        if(!box) return;
+        const ids = (this.friends||[]).map(f=>typeof f==='object'?f.id:f).filter(Boolean);
+        if(!ids.length){
+            box.innerHTML = '<div style="color:#444;font-size:12px;">Нет друзей. Добавь друзей во вкладке Друзья 👥</div>';
+        } else {
+            box.innerHTML = '';
+            for(const id of ids){
+                let name = String(id);
+                try{ const r=await fetch(this._API+'/players/'+id); const d=await r.json(); if(d.name) name=d.name; }catch(e){}
+                const btn = document.createElement('button');
+                btn.textContent = '👤 '+name;
+                btn.style.cssText = 'padding:8px 14px;background:#1a1a1a;border:1px solid #333;border-radius:20px;color:#aaa;font-size:13px;cursor:pointer;touch-action:manipulation;';
+                btn.onclick = ()=>{
+                    this._giftSelectedId = id;
+                    this._giftSelectedName = name;
+                    document.getElementById('gift-selected-friend').innerHTML = `Получатель: <b style="color:#FF9800">${name}</b>`;
+                    box.querySelectorAll('button').forEach(b=>b.style.borderColor='#333');
+                    btn.style.borderColor = '#FF9800';
+                };
+                box.appendChild(btn);
+            }
+        }
+        // Загружаем входящие подарки из mailbox
+        this._loadGiftsInbox();
+    },
+
+    async _loadGiftsInbox(){
+        const inbox = document.getElementById('gifts-inbox');
+        if(!inbox) return;
+        try{
+            const r = await fetch(this._API+'/mail/'+this.userId);
+            const msgs = await r.json();
+            const gifts = msgs.filter(m=>m.type==='gift');
+            if(!gifts.length){
+                inbox.innerHTML = '<div style="color:#444;font-size:12px;">Нет подарков</div>';
+                return;
+            }
+            inbox.innerHTML = '';
+            let totalNew = 0;
+            for(const g of gifts){
+                totalNew += g.amount||0;
+                const div = document.createElement('div');
+                div.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#111;border-radius:8px;border:1px solid #1a1a1a;';
+                div.innerHTML = `<div><b style="color:#FF9800">+${g.amount} 🍊</b><br><span style="color:#666;font-size:12px;">от ${g.from_name||g.from_id}</span></div>
+                    <button onclick="app._claimGift(${g.amount},'${g.from_id}',this)" style="padding:7px 14px;background:rgba(255,152,0,0.2);border:1px solid #FF9800;border-radius:8px;color:#FF9800;font-size:13px;cursor:pointer;touch-action:manipulation;">Забрать</button>`;
+                inbox.appendChild(div);
+            }
+        }catch(e){
+            inbox.innerHTML = '<div style="color:#444;font-size:12px;">Ошибка загрузки</div>';
+        }
+    },
+
+    async _claimGift(amount, fromId, btn){
+        this.balance += amount;
+        this.saveData();
+        document.getElementById('balance-val').textContent = this.balance;
+        // Удаляем из mailbox
+        try{
+            const r = await fetch(this._API+'/mail/'+this.userId);
+            const msgs = await r.json();
+            const remaining = msgs.filter(m=>!(m.type==='gift'&&String(m.from_id)===String(fromId)&&m.amount===amount));
+            await fetch(this._API+'/mail/'+this.userId, {method:'DELETE'});
+            // Переотправляем оставшиеся
+            for(const m of remaining){
+                await fetch(this._API+'/mail/'+this.userId, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(m)});
+            }
+        }catch(e){}
+        this.showNotif('🎁',`+${amount} 🍊 получено!`,`Подарок от игрока`);
+        btn.closest('div[style]').remove();
+        this._loadGiftsInbox();
+    },
+
+    async sendGift(){
+        const amount = parseInt(document.getElementById('gift-amount')?.value||'0');
+        if(!amount || amount < 1 || amount > 100000){
+            this.showNotif('❌','Ошибка','Сумма от 1 до 100 000 🍊'); return;
+        }
+        if(!this._giftSelectedId){
+            this.showNotif('❌','Выбери друга','Нажми на имя друга выше'); return;
+        }
+        if(this.balance < amount){
+            this.showNotif('❌','Мало монет',`Нужно ${amount} 🍊, у тебя ${this.balance}`); return;
+        }
+        this.balance -= amount;
+        this.saveData();
+        document.getElementById('balance-val').textContent = this.balance;
+        try{
+            await fetch(this._API+'/mail/'+this._giftSelectedId, {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({
+                    type:'gift', from_id:String(this.userId),
+                    from_name:this.username+'#'+this.userId,
+                    amount
+                })
+            });
+            this.showNotif('🎁','Подарок отправлен!',`${amount} 🍊 → ${this._giftSelectedName}`);
+            document.getElementById('gift-amount').value = '';
+            this._giftSelectedId = null;
+            this._giftSelectedName = null;
+            document.getElementById('gift-selected-friend').innerHTML = 'Выбери друга выше 👆';
+            document.querySelectorAll('#gift-friend-list button').forEach(b=>b.style.borderColor='#333');
+        }catch(e){
+            // Если не дошло — вернём деньги
+            this.balance += amount;
+            this.saveData();
+            document.getElementById('balance-val').textContent = this.balance;
+            this.showNotif('❌','Ошибка','Подарок не отправлен, монеты возвращены');
+        }
+    },
+
     saveData(){
         const _d={
             username:this.username, userId:this.userId, balance:this.balance,
@@ -1209,7 +1329,7 @@ const app = {
 
     // ── TABS
     switchTab(id){
-        ['games','avatar','shop','friends','studio','quests','roulette','credits'].forEach(t=>{
+        ['games','avatar','shop','friends','studio','quests','roulette','credits','gifts'].forEach(t=>{
             document.getElementById('tab-'+t).classList.add('hidden');
             document.getElementById('nav-'+t)?.classList.remove('active');
         });
@@ -1220,6 +1340,7 @@ const app = {
         if(id==='quests')this.renderQuests();
         if(id==='roulette')this.initRoulette();
         if(id==='credits')this.initCredits();
+        if(id==='gifts')this.initGifts();
         else if(this._questCountdownInterval){ clearInterval(this._questCountdownInterval); this._questCountdownInterval=null; }
         if(id==='friends'){
             // Регистрируем на сервере (на случай если зашли раньше деплоя)
@@ -3619,49 +3740,50 @@ const app = {
         document.exitPointerLock();
         this.modalCb=async name=>{
             const sc=document.getElementById('eng-script-ta')?.value||'';
-            const serializedLocal = (this.mapBlocks||[]).map(b=>({
-                px:b.position.x, py:b.position.y, pz:b.position.z,
-                color:b.userData?.color||'#ff9800', scale:b.scale?.x||1
+            const blocks = (this.mapBlocks||[]).map(b=>({
+                px:+(b.position.x.toFixed(2)), py:+(b.position.y.toFixed(2)), pz:+(b.position.z.toFixed(2)),
+                color:b.userData?.color||'#ff9800', scale:+(b.scale.x.toFixed(2))
             }));
-            const mapData={name, blocks:serializedLocal, script:sc};
             // Сохраняем локально
             const localId='custom_'+Date.now();
-            this.customMaps.push({...mapData, id:localId});
+            this.customMaps.push({id:localId, name, blocks, script:sc});
             this.saveData();
             // Публикуем на сервер
             try{
-                const serializedBlocks = (this.mapBlocks||[]).map(b=>({
-                    px:b.position.x, py:b.position.y, pz:b.position.z,
-                    color:b.userData?.color||'#ff9800',
-                    scale:b.scale?.x||1
-                }));
+                this.showNotif('⏳','Публикуем...','Подожди немного');
                 const r=await fetch(this._API+'/games',{
                     method:'POST',
                     headers:{'Content-Type':'application/json'},
                     body:JSON.stringify({
-                        name, author:this.username, authorId:String(this.userId),
-                        authorColor:this._myColor, desc:'Карта игрока '+this.username,
-                        blocks:serializedBlocks, script:sc, localId
+                        name, author:this.username+'#'+this.userId,
+                        authorId:String(this.userId),
+                        authorColor:this._myColor,
+                        blocks, script:sc, localId
                     })
                 });
                 const d=await r.json();
-                if(d.id){
-                    // Сохраняем серверный id для удаления
+                if(d.ok || d.id){
                     const m=this.customMaps.find(m=>m.id===localId);
                     if(m) m.serverId=d.id;
                     this.saveData();
+                } else {
+                    this.showNotif('❌','Ошибка публикации', d.error||'Попробуй снова');
+                    return;
                 }
-            }catch(e){ console.log('Publish error',e); }
+            }catch(e){
+                this.showNotif('❌','Нет связи','Карта сохранена локально');
+                return;
+            }
             this._questProgress('publish',1); this.showNotif('🗺️','Карта опубликована!','"'+name+'" видна всем игрокам!');
             this.exitGame();
         };
     },
     clearMap(){this.loopFn=null;this.setupScene();},
     modalOk(){
-        if(this._modalLock) return; this._modalLock=true; setTimeout(()=>this._modalLock=false,500);
         const v=document.getElementById('modal-input').value.trim();
+        if(!v){ document.getElementById('modal-input').style.border='1px solid #f44'; setTimeout(()=>document.getElementById('modal-input').style.border='',800); return; }
         document.getElementById('modal').classList.add('hidden');
-        if(v && this.modalCb){ const cb=this.modalCb; this.modalCb=null; cb(v); }
+        if(this.modalCb){ const cb=this.modalCb; this.modalCb=null; cb(v); }
     },
     modalClose(){document.getElementById('modal').classList.add('hidden');},
 
@@ -4010,6 +4132,39 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
+
+
+
+
+
+
+    <div id="tab-gifts" class="hidden" style="width:100%;">
+        <h3 style="color:var(--c-main);margin:0 0 14px;font-size:15px;letter-spacing:2px;">🎁 ПОДАРКИ</h3>
+
+        <!-- Отправить подарок -->
+        <div style="background:#0d0d0d;border:1px solid #222;border-radius:12px;padding:16px;margin-bottom:14px;">
+            <div style="color:#aaa;font-size:13px;margin-bottom:10px;">Отправить подарок другу</div>
+            <div id="gift-friend-list" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+                <div style="color:#444;font-size:12px;">Загрузка...</div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                <input type="number" id="gift-amount" min="1" max="100000" placeholder="Сумма (1–100000)" style="flex:1;min-width:140px;padding:10px;background:#111;border:1px solid #333;border-radius:8px;color:#fff;font-size:14px;">
+                <span style="color:#FF9800;font-size:13px;">🍊</span>
+            </div>
+            <div id="gift-selected-friend" style="margin-top:8px;color:#888;font-size:12px;">Выбери друга выше 👆</div>
+            <button onclick="app.sendGift()" style="margin-top:10px;width:100%;padding:12px;background:linear-gradient(135deg,#FF9800,#FF5722);border:none;border-radius:8px;color:#fff;font-size:14px;font-weight:bold;cursor:pointer;touch-action:manipulation;">🎁 Отправить</button>
+        </div>
+
+        <!-- История подарков -->
+        <div style="background:#0d0d0d;border:1px solid #222;border-radius:12px;padding:16px;">
+            <div style="color:#aaa;font-size:13px;margin-bottom:10px;">📬 Входящие подарки</div>
+            <div id="gifts-inbox" style="display:flex;flex-direction:column;gap:8px;">
+                <div style="color:#444;font-size:12px;">Загрузка...</div>
+            </div>
+        </div>
+    </div>
+
 
 
 
