@@ -738,16 +738,7 @@ const app = {
             const res = await fetch(this._API + '/credits');
             const data = await res.json();
             const now = Date.now();
-            // Sync balance from server (in case lender received repayment)
-            try {
-                const pr = await fetch(this._API+'/players/'+this.userId);
-                const pd = await pr.json();
-                if(pd && pd.balance !== undefined && pd.balance > this.balance){
-                    this.balance = pd.balance;
-                    this.saveData();
-                    document.getElementById('balance-val').textContent = this.balance;
-                }
-            } catch(e){}
+            // Не синкаем баланс здесь — это перезаписывает только что снятые деньги
 
             // Check my debt
             const myBorrow = data.borrows ? data.borrows.find(b => b.borrowerId == this.userId) : null;
@@ -803,8 +794,7 @@ const app = {
             });
             const d = await res.json();
             if(d.ok){
-                // Deduct from balance
-                this.balance -= amount;
+                this.balance = d.balance !== undefined ? d.balance : this.balance - amount;
                 this.saveData();
                 document.getElementById('balance-val').textContent = this.balance;
                 this._questProgress('lend',1); this.showNotif('✅','Кредит выставлен!',`-${amount} 🍊 на ${days} мин.`);
@@ -872,8 +862,7 @@ const app = {
             });
             const d = await res.json();
             if(d.ok){
-                // Return amount to lender
-                this.balance += d.amount;
+                this.balance = d.balance !== undefined ? d.balance : this.balance + d.amount;
                 this.saveData();
                 document.getElementById('balance-val').textContent = this.balance;
                 this.showNotif('✅','Кредит отозван',`+${d.amount} 🍊 возвращено`);
@@ -3768,10 +3757,14 @@ const app = {
         document.exitPointerLock();
         this.modalCb=async name=>{
             const sc=document.getElementById('eng-script-ta')?.value||'';
-            const blocks = (this.mapBlocks||[]).map(b=>({
-                px:+(b.position.x.toFixed(2)), py:+(b.position.y.toFixed(2)), pz:+(b.position.z.toFixed(2)),
-                color:b.userData?.color||'#ff9800', scale:+(b.scale.x.toFixed(2))
+            const blocks = (this.mapBlocks||[]).filter(b=>b&&b.position).map(b=>({
+                px:+((b.position.x||0).toFixed(2)),
+                py:+((b.position.y||0).toFixed(2)),
+                pz:+((b.position.z||0).toFixed(2)),
+                color:b.userData?.color||'#ff9800',
+                scale:+((b.scale?.x||1).toFixed(2))
             }));
+            console.log('[publish] blocks:', blocks.length, 'map:', this.mapBlocks?.length);
             // Сохраняем локально
             const localId='custom_'+Date.now();
             this.customMaps.push({id:localId, name, blocks, script:sc});
@@ -4160,4 +4153,5 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
