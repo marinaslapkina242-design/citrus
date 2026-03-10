@@ -1620,7 +1620,10 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
                     <div class="panel-box">
                         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
                             <div class="panel-box-title" style="margin:0;">📋 Список банов</div>
-                            <button onclick="app.loadBanList()" style="background:rgba(255,152,0,0.1);border:1px solid rgba(255,152,0,0.2);color:rgba(255,152,0,0.7);border-radius:8px;padding:5px 10px;cursor:pointer;font-size:11px;font-family:var(--font-body);">↻ Обновить</button>
+                            <div style="display:flex;gap:6px;">
+                                <button onclick="app.loadBanList()" style="background:rgba(255,152,0,0.1);border:1px solid rgba(255,152,0,0.2);color:rgba(255,152,0,0.7);border-radius:8px;padding:5px 10px;cursor:pointer;font-size:11px;font-family:var(--font-body);">↻ Обновить</button>
+                                <button onclick="app.clearAllBans()" style="background:rgba(255,50,50,0.1);border:1px solid rgba(255,50,50,0.2);color:rgba(255,100,100,0.7);border-radius:8px;padding:5px 10px;cursor:pointer;font-size:11px;font-family:var(--font-body);">🗑 Очистить всё</button>
+                            </div>
                         </div>
                         <div id="ban-list" style="display:flex;flex-direction:column;gap:8px;max-height:400px;overflow-y:auto;">
                             <div style="color:rgba(255,255,255,0.2);font-size:13px;text-align:center;padding:20px;">Загрузка...</div>
@@ -2500,6 +2503,15 @@ const app = {
 
     _getBans(){ try{ return JSON.parse(localStorage.getItem('citrus_bans')||'[]'); }catch(e){return [];} },
     _saveBans(list){ localStorage.setItem('citrus_bans', JSON.stringify(list)); },
+
+    clearAllBans(){
+        if(!this.canBan(this.username)) return;
+        if(!confirm('Очистить весь бан-лист? Все игроки будут разбанены.')) return;
+        this._saveBans([]);
+        try { fetch(this._API+'/bans/all', {method:'DELETE', headers:{'Content-Type':'application/json'}, body:JSON.stringify({adminKey:'citrus_admin_2025'})}); } catch(e){}
+        this.showNotif('🗑','Бан-лист очищен','Все баны удалены');
+        this.loadBanList(); this.loadBanOnlineList();
+    },
 
     _checkIfBanned(){
         const bans = this._getBans();
