@@ -1350,7 +1350,7 @@
                 <div class="section-title">Официальные миры</div>
                 <div class="grid" style="margin-bottom:32px;">
 
-
+                    
 
                     <div class="card world-card featured-world" onclick="app.launch('play','gather')">
                         <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(255,152,0,0.2),#050510);">
@@ -3381,6 +3381,23 @@ const app = {
                         }
                         return;
                     }
+                    if(msg.type==='req_pos') {
+                        if(this.mode==='play' && this.playerGroup) {
+                            const posNow = {
+                                type:'move', id:String(this.userId), name:this.username,
+                                color:this._myColor,
+                                x:this.playerGroup.position.x,
+                                y:this.playerGroup.position.y,
+                                z:this.playerGroup.position.z,
+                                ry:this.playerGroup.rotation.y,
+                                map:String(this.currentMap),
+                                inv:this.inventory||[],
+                                moving:false, jumping:false
+                            };
+                            try{ this._gameWS.send(JSON.stringify(posNow)); }catch(e2){}
+                        }
+                        return;
+                    }
                     if(msg.type==='move') {
                         if(String(msg.id)===String(this.userId)) return;
                         if(String(msg.map)!==String(this.currentMap)||this.mode!=='play') return;
@@ -5331,6 +5348,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
