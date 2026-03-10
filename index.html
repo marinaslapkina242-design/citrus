@@ -1350,6 +1350,17 @@
                 <div class="section-title">Официальные миры</div>
                 <div class="grid" style="margin-bottom:32px;">
 
+                    <div class="card world-card" onclick="app.launch('play','lobby')">
+                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,#0d1230,#050510);">
+                            <span class="world-emoji">🌆</span>
+                            <div class="world-glow" style="background:rgba(100,120,255,0.15);"></div>
+                        </div>
+                        <div class="card-info">
+                            <div><b>Главная Площадь</b><br><small class="world-tag" style="color:rgba(150,170,255,0.7)">💬 Общение</small></div>
+                            <div class="world-players-dot"></div>
+                        </div>
+                    </div>
+
                     <div class="card world-card featured-world" onclick="app.launch('play','gather')">
                         <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(255,152,0,0.2),#050510);">
                             <span class="world-emoji">🍊</span>
@@ -1983,7 +1994,7 @@ const app = {
         const days = parseInt(document.getElementById('credit-days').value);
         if(!amount || amount < 1000 || amount > 100000){ this.showNotif('❌','Ошибка','Сумма от 1000 до 100000 🍊'); return; }
         if(!days || days < 10 || days > 60){ this.showNotif('❌','Ошибка','Выбери срок'); return; }
-        if(this.balance < amount){ this.showNotif('❌','Мало цитрусов',`Нужно ${amount} 🍊`); return; }
+        if(this.balance < amount){ this.showNotif('❌','Мало монет',`Нужно ${amount} 🍊`); return; }
         try {
             const res = await fetch(this._API + '/credits', {
                 method:'POST', headers:{'Content-Type':'application/json'},
@@ -2026,7 +2037,7 @@ const app = {
             const myBorrow = (checkData.borrows||[]).find(b=>String(b.borrowerId)===String(this.userId));
             if(!myBorrow){ this.showNotif('❌','Ошибка','Нет долга'); return; }
             if(this.balance < myBorrow.amount){
-                this.showNotif('❌','Мало цитрусов',`Нужно ${myBorrow.amount} 🍊 для погашения`); return;
+                this.showNotif('❌','Мало монет',`Нужно ${myBorrow.amount} 🍊 для погашения`); return;
             }
             // Deduct from borrower first
             this.balance -= myBorrow.amount;
@@ -2120,7 +2131,7 @@ const app = {
 
     spinRoulette(){
         const used = this.rouletteUsed || false;
-        if(used && this.balance < 50){ this.showNotif('💸','Мало цитрусов','Нужно 50 🍊 для спина'); return; }
+        if(used && this.balance < 50){ this.showNotif('💸','Мало монет','Нужно 50 🍊 для спина'); return; }
         if(used){ this.balance -= 50; this.saveData(); const bv=document.getElementById('balance-val'); if(bv)bv.textContent=this.balance; }
         const btn = document.getElementById('roulette-btn');
         const result = document.getElementById('roulette-result');
@@ -2129,61 +2140,34 @@ const app = {
         const ctx = canvas.getContext('2d');
         btn.disabled = true; btn.style.opacity='0.5';
         if(result) result.textContent = '';
-
         const n = this._roulettePrizes.length;
-        const arc = (2*Math.PI) / n;
-
-        // Выбираем случайный победный сектор
-        const winner = Math.floor(Math.random() * n);
-
-        // Стрелка смотрит вверх → угол -PI/2
-        // Чтобы середина сектора winner оказалась под стрелкой,
-        // нужно чтобы: finalAngle + winner*arc + arc/2 = -PI/2 (mod 2PI)
-        // => finalAngle = -PI/2 - winner*arc - arc/2
-        // Добавляем несколько полных оборотов для красивой анимации
-        const fullSpins = (5 + Math.floor(Math.random() * 3)) * Math.PI * 2;
-        const targetOffset = -Math.PI/2 - winner * arc - arc/2;
-        // Нормализуем targetOffset в диапазон [0, 2PI)
-        const normalizedTarget = ((targetOffset % (Math.PI*2)) + Math.PI*2) % (Math.PI*2);
+        const arc = (2*Math.PI)/n;
+        const winner = Math.floor(Math.random()*n);
+        const spins = Math.PI*2*(5+Math.floor(Math.random()*3));
+        const baseAngle = -Math.PI/2 - winner*arc - arc/2;
         const startAngle = this._rouletteAngle;
-        // Итоговый угол: startAngle + полные обороты + разница до нужного положения
-        const currentNorm = ((startAngle % (Math.PI*2)) + Math.PI*2) % (Math.PI*2);
-        let delta = normalizedTarget - currentNorm;
-        if(delta < 0) delta += Math.PI*2;
-        const targetAngle = startAngle + fullSpins + delta;
-
-        const duration = 4500;
+        const totalSpin = spins + ((baseAngle - startAngle % (Math.PI*2) + Math.PI*4) % (Math.PI*2));
+        const targetAngle = startAngle + totalSpin;
+        const duration = 4000;
         const startTime = Date.now();
         const animate = () => {
             const elapsed = Date.now() - startTime;
-            const t = Math.min(elapsed / duration, 1);
-            // Плавное замедление (ease-out cubic)
-            const ease = 1 - Math.pow(1 - t, 3);
-            this._rouletteAngle = startAngle + (targetAngle - startAngle) * ease;
+            const t = Math.min(elapsed/duration, 1);
+            const ease = 1 - Math.pow(1-t, 3);
+            this._rouletteAngle = startAngle + (targetAngle - startAngle)*ease;
             this._drawRoulette(ctx, this._rouletteAngle);
-            if(t < 1){
-                requestAnimationFrame(animate);
-            } else {
-                // Фиксируем точный финальный угол
-                this._rouletteAngle = targetAngle;
-                this._drawRoulette(ctx, targetAngle);
-
-                // Победитель — тот сектор что под стрелкой (угол -PI/2)
-                // Находим какой сектор сейчас смотрит вверх
-                const finalNorm = ((targetAngle % (Math.PI*2)) + Math.PI*2) % (Math.PI*2);
-                const arrowAngle = (-Math.PI/2 - finalNorm + Math.PI*2*100) % (Math.PI*2);
-                const actualWinner = Math.floor(arrowAngle / arc) % n;
-
-                const prize = this._roulettePrizes[actualWinner];
+            if(t < 1){ requestAnimationFrame(animate); }
+            else {
+                this._rouletteAngle = baseAngle;
+                this._drawRoulette(ctx, baseAngle);
+                const prize = this._roulettePrizes[winner];
                 this.balance += prize;
                 this.rouletteUsed = true;
                 this.saveData();
-                const bv=document.getElementById('balance-val'); if(bv) bv.textContent=this.balance;
+                const bv=document.getElementById('balance-val'); if(bv)bv.textContent=this.balance;
                 if(result) result.textContent = '🎉 +' + prize + ' 🍊!';
                 this.showNotif('🎰','Рулетка!','Ты выиграл '+prize+' 🍊!');
-                this._questProgress('roulette',1);
-                if(prize>=100) this._questProgress('roulbig',prize);
-                this._updateRouletteLeaderboard(prize);
+                this._questProgress('roulette',1); if(prize>=100) this._questProgress('roulbig',prize); this._updateRouletteLeaderboard(prize);
                 btn.disabled = false;
                 this.initRoulette();
             }
@@ -2316,7 +2300,7 @@ const app = {
             this.showNotif('❌','Выбери друга','Нажми на имя друга выше'); return;
         }
         if(this.balance < amount){
-            this.showNotif('❌','Мало цитрусов',`Нужно ${amount} 🍊, у тебя ${this.balance}`); return;
+            this.showNotif('❌','Мало монет',`Нужно ${amount} 🍊, у тебя ${this.balance}`); return;
         }
         this.balance -= amount;
         this.saveData();
@@ -2341,7 +2325,7 @@ const app = {
             this.balance += amount;
             this.saveData();
             document.getElementById('balance-val').textContent = this.balance;
-            this.showNotif('❌','Ошибка','Подарок не отправлен, цитрусы возвращены');
+            this.showNotif('❌','Ошибка','Подарок не отправлен, монеты возвращены');
         }
     },
 
@@ -2621,7 +2605,7 @@ const app = {
             const bv2=document.getElementById('balance-val'); if(bv2) bv2.textContent=this.balance;
             const it=SHOP_ITEMS.find(i=>i.id===id);
             this.showNotif(it.icon,'Куплено!',`${it.name} в гардеробе`);
-        }else this.showNotif('💸','Мало цитрусов',`Нужно ещё ${price-this.balance} 🍊`);
+        }else this.showNotif('💸','Мало монет',`Нужно ещё ${price-this.balance} 🍊`);
     },
     removeItem(id){
         this.inventory = this.inventory.filter(i => i !== id);
@@ -3206,15 +3190,11 @@ const app = {
             fid=String(fid);
             const p=findPeer(fid);
             const on=online.find(x=>x.id===fid);
-            const wNames={lobby:'Главная Площадь',gather:'Цитрусовый Лес',parkour:'Небесный Паркур',
-                volcano:'Остров Вулкана',space:'Космическая База',hideseek:'Прятки',
-                snowmount:'Снежная Гора',dungeon:'Тёмное Подземелье'};
-            const friendMapId = on && on.status==='ingame' ? on.world : null;
-            const friendMapName = friendMapId ? (wNames[friendMapId] || friendMapId) : null;
-            const st=on?(on.status==='ingame'?'🎮 '+(friendMapName||friendMapId):'● Онлайн'):'○ Оффлайн';
+            const st=on?(on.status==='ingame'?'🎮 '+on.world:'● Онлайн'):'○ Оффлайн';
             const sc=on?(on.status==='ingame'?'ig':'on'):'';
-            const inviteBtn = friendMapId
-                ? `<button class="bx b-add" onclick="app.joinFriend('${fid}','${friendMapId}')" style="font-size:10px;background:#00E676;color:#000">▶ Войти</button>`
+            const friendMap = on && on.status==='ingame' ? on.world : null;
+            const inviteBtn = friendMap
+                ? `<button class="bx b-add" onclick="app.joinFriend('${fid}','${friendMap}')" style="font-size:10px;background:#00E676;color:#000">▶ Войти</button>`
                 : on ? `<button class="bx b-add" onclick="app.inviteFriend('${fid}','${p.name}')" style="font-size:10px">▶ Играть</button>` : '';
             fl.innerHTML+=`<div class="fr">
                 <div class="fa2" style="background:${p.color||'#888'}22;color:${p.color||'#888'}">${(p.name[0]||'?').toUpperCase()}</div>
@@ -3340,6 +3320,14 @@ const app = {
                 if(this.velocity) this.velocity.set(0, 0, 0);
             }
         }, 1200);
+        // Через 1.5с сразу сделать poll позиций — получить друга даже если он стоит на месте
+        setTimeout(()=>{
+            if(this.mode==='play') this._pollPositions();
+        }, 1500);
+        // И ещё раз через 3с на случай медленного соединения
+        setTimeout(()=>{
+            if(this.mode==='play') this._pollPositions();
+        }, 3000);
     },
 
     inviteFriend(fid, name){
@@ -3957,12 +3945,12 @@ const app = {
             }
         }
         this.velocity.set(0,0,0);this.canJump=false;this.loopFn=null;this.spaceGrav=false;
-        const wNames={gather:'Цитрусовый Лес',parkour:'Небесный Паркур',
+        const wNames={lobby:'Главная Площадь',gather:'Цитрусовый Лес',parkour:'Небесный Паркур',
             volcano:'Остров Вулкана',space:'Космическая База',hideseek:'Прятки',
             snowmount:'Снежная Гора',dungeon:'Тёмное Подземелье',march8:'🌸 8 Марта'};
         this._worldName=wNames[mapId]||'Мир игрока';
         if(mode==='play'){
-            this._updateStatus('ingame', mapId);  // передаём mapId, а не worldName — иначе joinFriend не может зайти
+            this._updateStatus('ingame',this._worldName);
             // Сразу пушим статус на сервер
             setTimeout(()=>this.renderMpPanel(), 500);
         }
@@ -3973,7 +3961,7 @@ const app = {
         document.getElementById('studio-ui').classList.toggle('hidden',mode!=='studio');
         const stTouch = document.getElementById('studio-touch-btns');
         if(stTouch) stTouch.classList.toggle('hidden', mode!=='studio');
-        document.getElementById('ingame-ui').style.display=(mode==='play'&&(mapId==='gather'||mapId==='hideseek'||mapId==='snowmount'||mapId==='dungeon'))?'flex':'none';
+        document.getElementById('ingame-ui').style.display=(mode==='play'&&(mapId==='gather'||mapId==='hideseek'||mapId==='snowmount'||mapId==='dungeon'||mapId==='march8'))?'flex':'none';
         document.getElementById('mp-panel').classList.toggle('hidden',mode!=='play');
         
         // Чат виден только в игре
@@ -3992,7 +3980,7 @@ const app = {
     setupScene(){
         const canvas=document.getElementById('gl-canvas');canvas.innerHTML='';
         this.scene=new THREE.Scene();
-        const bgs={gather:0x0d1f0a,parkour:0x87CEEB,volcano:0x1a0800,space:0x000005,hideseek:0x0d1a0d,snowmount:0x87CEEB,dungeon:0x050508,march8:0x1a0a1a};
+        const bgs={lobby:0x0a0a18,gather:0x0d1f0a,parkour:0x87CEEB,volcano:0x1a0800,space:0x000005,hideseek:0x0d1a0d,snowmount:0x87CEEB,dungeon:0x050508,march8:0x1a0a1a};
         const bg=bgs[this.currentMap]||0x0a0a10;
         this.scene.background=new THREE.Color(bg);
         this.scene.fog=new THREE.FogExp2(bg,0.016);
@@ -4018,7 +4006,7 @@ const app = {
         if(this.mode==='play'){
             this.playerGroup=this.buildCharacter(true);
             // Спавн выше земли для всех миров
-            const spawnY = {parkour:8, march8:5, dungeon:3, volcano:4, space:4, snowmount:4, hideseek:4, gather:3};
+            const spawnY = {parkour:8, march8:5, dungeon:3, volcano:4, space:4, snowmount:4, hideseek:4, gather:3, lobby:3};
             const baseY = this._joinSpawn ? 15 : (spawnY[this.currentMap] || (typeof this.currentMap==='number' ? 12 : 5));
             this._joinSpawn = false;
             this.playerGroup.position.set(0, baseY, 0);
@@ -5398,6 +5386,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
