@@ -786,7 +786,7 @@
 
         /* Content fade in */
         #tab-games, #tab-avatar, #tab-shop, #tab-friends,
-        #tab-studio, #tab-quests, #tab-roulette, #tab-credits, #tab-gifts, #tab-admin {
+        #tab-studio, #tab-quests, #tab-roulette, #tab-credits, #tab-gifts {
             animation: fadeInUp 0.3s ease both;
         }
 
@@ -1342,7 +1342,6 @@
             <div class="nav-item" id="nav-roulette" onclick="app.switchTab('roulette')"><div class="nav-icon"><i class="fas fa-dice"></i></div> Рулетка</div>
             <div class="nav-item" id="nav-credits"  onclick="app.switchTab('credits')"> <div class="nav-icon"><i class="fas fa-coins"></i></div> Кредиты</div>
             <div class="nav-item" id="nav-gifts"    onclick="app.switchTab('gifts')">   <div class="nav-icon"><i class="fas fa-gift"></i></div> Подарки</div>
-            <div class="nav-item" id="nav-admin" onclick="app.switchTab('admin')" style="display:none;"> <div class="nav-icon"><i class="fas fa-shield-alt"></i></div> <span style="color:#FFD700;">Баны</span></div>
         </div>
         <div class="content-area">
 
@@ -1351,7 +1350,16 @@
                 <div class="section-title">Официальные миры</div>
                 <div class="grid" style="margin-bottom:32px;">
 
-                    
+                    <div class="card world-card" onclick="app.launch('play','lobby')">
+                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,#0d1230,#050510);">
+                            <span class="world-emoji">🌆</span>
+                            <div class="world-glow" style="background:rgba(100,120,255,0.15);"></div>
+                        </div>
+                        <div class="card-info">
+                            <div><b>Главная Площадь</b><br><small class="world-tag" style="color:rgba(150,170,255,0.7)">💬 Общение</small></div>
+                            <div class="world-players-dot"></div>
+                        </div>
+                    </div>
 
                     <div class="card world-card featured-world" onclick="app.launch('play','gather')">
                         <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(255,152,0,0.2),#050510);">
@@ -1587,37 +1595,6 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
                     <div class="panel-box">
                         <div class="panel-box-title">📬 Входящие подарки</div>
                         <div id="gifts-inbox"><div style="color:rgba(255,255,255,0.2);font-size:12px;text-align:center;padding:20px;">Загрузка...</div></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ══════════════════ TAB: ADMIN ══════════════════ -->
-            <div id="tab-admin" class="hidden">
-                <div class="section-title">🛡 Панель управления</div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-                    <div class="panel-box">
-                        <div class="panel-box-title">🚫 Забанить игрока</div>
-                        <div style="color:rgba(255,255,255,0.4);font-size:12px;margin-bottom:10px;font-family:var(--font-ui);">Введи никнейм или ID:</div>
-                        <input type="text" id="admin-ban-input" placeholder="Имя игрока (без #тега)" class="styled-input" style="margin-bottom:8px;">
-                        <input type="text" id="admin-ban-reason" placeholder="Причина" class="styled-input" style="margin-bottom:12px;">
-                        <div style="display:flex;gap:8px;">
-                            <button onclick="app.adminBan()" class="btn-orange-full" style="background:rgba(220,50,50,0.15);border-color:rgba(220,50,50,0.3);color:#ff5252;">🚫 Забанить</button>
-                            <button onclick="app.adminUnban()" class="btn-orange-full" style="background:rgba(0,200,100,0.1);border-color:rgba(0,200,100,0.3);color:#00e676;">✓ Разбанить</button>
-                        </div>
-                        <div id="admin-ban-result" style="margin-top:10px;font-size:12px;color:rgba(255,255,255,0.5);font-family:var(--font-ui);min-height:18px;"></div>
-                    </div>
-                    <div class="panel-box">
-                        <div class="panel-box-title">👥 Онлайн игроки</div>
-                        <div id="admin-online-list" style="max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;">
-                            <div style="color:rgba(255,255,255,0.2);font-size:12px;">Загрузка...</div>
-                        </div>
-                        <button onclick="app.adminRefreshOnline()" class="btn-ghost" style="margin-top:10px;width:100%;">🔄 Обновить</button>
-                    </div>
-                    <div class="panel-box" style="grid-column:1/-1;">
-                        <div class="panel-box-title">📋 Список банов</div>
-                        <div id="admin-ban-list" style="max-height:220px;overflow-y:auto;font-size:12px;font-family:var(--font-ui);color:rgba(255,255,255,0.6);">
-                            <div style="color:rgba(255,255,255,0.2);">Загрузка...</div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -1863,13 +1840,6 @@ const app = {
             document.getElementById('ui-login').classList.add('hidden');
             document.getElementById('ui-hub').classList.remove('hidden');
             this.renderMyGames(); this.renderFriends(); this.renderOnline(); this.initAvatarPreview(); this.renderShop();
-            // Проверка бана при входе
-            this._checkBan();
-            // Показать панель банов только для Разраб
-            if(['разраб','admin'].includes((this.username||'').toLowerCase().split('#')[0])){
-                const navAdmin=document.getElementById('nav-admin');
-                if(navAdmin)navAdmin.style.display='';
-            }
             this.updateUI();
             this._wsConnect();
             setInterval(()=>this.renderOnline(), 30000);
@@ -2446,109 +2416,19 @@ const app = {
         }, 1500);
     },
 
-    isDev(name){
-        const devs = ['Разраб','разраб','Admin','admin','CITRUS','citrus'];
-        return devs.some(d=>d.toLowerCase()===(name||'').toLowerCase());
+    isAdmin(name){ const n=(name||'').toLowerCase().trim(); return n==='admin'; },
+    isCitrus(name){ const n=(name||'').toLowerCase().trim(); return n==='citrus'; },
+    isDev(name){ const n=(name||'').toLowerCase().trim(); return n==='разраб'; },
+    isOwner(name){ return this.isCitrus(name) || this.isDev(name); },
+    isStaff(name){ return this.isAdmin(name) || this.isOwner(name); },
+
+    devBadge(name){
+        if(this.isOwner(name)) return ' <span style="color:#FFD700;font-size:11px;" title="Владелец">✔</span>';
+        if(this.isAdmin(name))  return ' <span style="color:#4fc3f7;font-size:11px;" title="Администратор">✔</span>';
+        return '';
     },
 
-
-    // ══ ADMIN PANEL ══
-    isDev(name){
-        return ['разраб','admin','citrus'].includes((name||'').toLowerCase().split('#')[0]);
-    },
-    async _checkBan(){
-        try{
-            const nameKey=encodeURIComponent((this.username||'').toLowerCase());
-            const r=await fetch('https://citrus-mail.onrender.com/checkban/'+nameKey);
-            const d=await r.json();
-            if(d.banned){
-                // Показать экран бана и заблокировать интерфейс
-                document.body.innerHTML=`
-                <div style="position:fixed;inset:0;background:#0a0008;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:99999;font-family:sans-serif;">
-                    <div style="font-size:72px;margin-bottom:24px;">🚫</div>
-                    <div style="font-size:28px;font-weight:bold;color:#ff5252;margin-bottom:12px;">Аккаунт заблокирован</div>
-                    <div style="font-size:15px;color:rgba(255,255,255,0.5);margin-bottom:8px;">Причина: <span style="color:#fff;">${d.reason||'Нарушение правил'}</span></div>
-                    <div style="font-size:13px;color:rgba(255,255,255,0.3);">Заблокировал: ${d.by||'Администрация'} · ${d.date||''}</div>
-                    <div style="margin-top:32px;font-size:12px;color:rgba(255,255,255,0.2);">Если вы считаете что это ошибка — обратитесь к администратору</div>
-                </div>`;
-            }
-        }catch(e){}
-    },
-    async adminBan(){
-        const raw=document.getElementById('admin-ban-input').value.trim();
-        const target=raw.includes('#')?raw.split('#')[0]:raw;
-        const reason=document.getElementById('admin-ban-reason').value.trim()||'Нарушение правил';
-        const res=document.getElementById('admin-ban-result');
-        if(!target){res.textContent='Введи никнейм';res.style.color='#ff5252';return;}
-        res.textContent='Отправка...';res.style.color='#aaa';
-        try{
-            const r=await fetch('https://citrus-mail.onrender.com/bans',{
-                method:'POST',headers:{'Content-Type':'application/json'},
-                body:JSON.stringify({name:target,reason,by:this.username,adminKey:'citrus_admin_2025'})
-            });
-            const d=await r.json();
-            if(d.ok){
-                res.textContent='🚫 '+target+' забанен';res.style.color='#ff5252';
-                document.getElementById('admin-ban-input').value='';
-                document.getElementById('admin-ban-reason').value='';
-                this.adminRefreshBanList();
-            } else {
-                res.textContent='Ошибка: '+(d.error||'неизвестно');res.style.color='#ff5252';
-            }
-        }catch(e){res.textContent='Ошибка соединения';res.style.color='#ff5252';}
-    },
-    async adminUnban(){
-        const raw=document.getElementById('admin-ban-input').value.trim();
-        const target=raw.includes('#')?raw.split('#')[0]:raw;
-        const res=document.getElementById('admin-ban-result');
-        if(!target){res.textContent='Введи никнейм';res.style.color='#ff5252';return;}
-        try{
-            const r=await fetch('https://citrus-mail.onrender.com/bans/'+encodeURIComponent(target.toLowerCase()),{
-                method:'DELETE',headers:{'Content-Type':'application/json'},
-                body:JSON.stringify({adminKey:'citrus_admin_2025'})
-            });
-            const d=await r.json();
-            if(d.ok){res.textContent='✓ '+target+' разбанен';res.style.color='#00e676';}
-            else{res.textContent='Не найден в банах';res.style.color='#aaa';}
-            document.getElementById('admin-ban-input').value='';
-            this.adminRefreshBanList();
-        }catch(e){res.textContent='Ошибка соединения';res.style.color='#ff5252';}
-    },
-    async adminRefreshBanList(){
-        const el=document.getElementById('admin-ban-list');if(!el)return;
-        try{
-            const r=await fetch('https://citrus-mail.onrender.com/bans');
-            const bans=await r.json();
-            if(!bans.length){el.innerHTML='<span style="color:rgba(255,255,255,0.2)">Список пуст</span>';return;}
-            el.innerHTML=bans.map(b=>`
-                <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:rgba(220,50,50,0.08);border-radius:8px;margin-bottom:4px;border:1px solid rgba(220,50,50,0.15);">
-                    <div>
-                        <span style="color:#ff5252;font-weight:600;">${b.name}</span>
-                        <span style="color:rgba(255,255,255,0.3);margin-left:8px;">${b.reason}</span>
-                    </div>
-                    <div style="display:flex;align-items:center;gap:8px;">
-                        <span style="color:rgba(255,255,255,0.2);font-size:11px;">${b.date||''}</span>
-                        <button onclick="document.getElementById('admin-ban-input').value='${b.name}';app.adminUnban();" style="background:none;border:none;color:#ff5252;cursor:pointer;font-size:14px;">✕</button>
-                    </div>
-                </div>`).join('');
-        }catch(e){el.innerHTML='Ошибка загрузки';}
-    },
-    async adminRefreshOnline(){
-        const el=document.getElementById('admin-online-list');if(!el)return;
-        el.innerHTML='<div style="color:rgba(255,255,255,0.2);font-size:12px;">Загрузка...</div>';
-        try{
-            const r=await fetch('https://citrus-mail.onrender.com/players');
-            const data=await r.json();
-            const players=Array.isArray(data)?data:(data.players||[]);
-            if(!players.length){el.innerHTML='<div style="color:rgba(255,255,255,0.2);font-size:12px;">Никого нет онлайн</div>';return;}
-            el.innerHTML=players.map(p=>`
-                <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid rgba(255,255,255,0.06);">
-                    <span style="color:#eee;font-size:13px;">${p.name||p.id||'?'}</span>
-                    <button onclick="document.getElementById('admin-ban-input').value='${p.name||''}';app.switchTab('admin');" style="background:rgba(220,50,50,0.1);border:1px solid rgba(220,50,50,0.25);color:#ff5252;padding:3px 8px;border-radius:6px;cursor:pointer;font-size:11px;">Бан</button>
-                </div>`).join('');
-        }catch(e){el.innerHTML='<div style="color:#ff5252;font-size:12px;">Ошибка загрузки</div>';}
-    },
-    devBadge(name){ if(!this.isDev(name))return ''; const bc=(name||'').toLowerCase().split('#')[0]==='разраб'?'#FFD700':'#4fc3f7'; return ' <span style="color:'+bc+';font-size:11px;">✔</span>'; },
+    canBan(myName){ return this.isOwner(myName); },
 
     showHub(){
         // Слушаем личный BroadcastChannel (другие вкладки того же браузера)
@@ -2679,14 +2559,13 @@ const app = {
 
     // ── TABS
     switchTab(id){
-        ['games','avatar','shop','friends','studio','quests','roulette','credits','gifts','admin'].forEach(t=>{
+        ['games','avatar','shop','friends','studio','quests','roulette','credits','gifts'].forEach(t=>{
             document.getElementById('tab-'+t).classList.add('hidden');
             document.getElementById('nav-'+t)?.classList.remove('active');
         });
         document.getElementById('tab-'+id).classList.remove('hidden');
         document.getElementById('nav-'+id)?.classList.add('active');
         if(id==='avatar')this.updateAvatarPreview();
-        if(id==='admin'){this.adminRefreshBanList();this.adminRefreshOnline();}
         if(id==='games')this.renderMyGames();
         if(id==='quests')this.renderQuests();
         if(id==='roulette')this.initRoulette();
@@ -2985,7 +2864,7 @@ const app = {
             setTimeout(()=>{n.classList.remove('show');setTimeout(()=>n.remove(),400)},20000);
         }
         else if(msg.type==='invite'&&String(msg.to)===String(this.userId)){
-            const wNames={gather:'Цитрусовый Лес',parkour:'Небесный Паркур',
+            const wNames={lobby:'Главная Площадь',gather:'Цитрусовый Лес',parkour:'Небесный Паркур',
                 volcano:'Остров Вулкана',space:'Космическая База',hideseek:'Прятки',
                 snowmount:'Снежная Гора',dungeon:'Тёмное Подземелье',march8:'🌸 8 Марта'};
             const wn=wNames[msg.world]||msg.worldName||msg.world;
@@ -3326,7 +3205,7 @@ const app = {
                 : on ? `<button class="bx b-add" onclick="app.inviteFriend('${fid}','${p.name}')" style="font-size:10px">▶ Играть</button>` : '';
             fl.innerHTML+=`<div class="fr">
                 <div class="fa2" style="background:${p.color||'#888'}22;color:${p.color||'#888'}">${(p.name[0]||'?').toUpperCase()}</div>
-                <div class="fi"><div class="fn">${p.name}${['разраб','admin','citrus'].includes((p.name||"").toLowerCase())?' <span style="color:'+(((p.name||'').toLowerCase().split('#')[0]==='разраб')?'#FFD700':'#4fc3f7')+';font-size:12px">✔</span>':''}</div>
+                <div class="fi"><div class="fn">${p.name}${app.devBadge(p.name)}</div>
                 <div class="fs ${sc}">${p.tag||('#'+p.id)} · ${st}</div></div>
                 <div class="fb">${inviteBtn}
                     <button class="bx b-del" onclick="app.removeFriend('${fid}')">✕</button>
@@ -3390,7 +3269,7 @@ const app = {
                     inDiv.innerHTML+=`<div class="fr" style="border-color:rgba(255,64,129,0.2);background:rgba(255,64,129,0.04);margin-bottom:8px;">
                         <div class="fa2" style="background:${p.color||'#FF4081'}22;color:${p.color||'#FF4081'}">${(p.name[0]||'?').toUpperCase()}</div>
                         <div class="fi">
-                            <div class="fn">${p.name}${['разраб','admin','citrus'].includes((p.name||"").toLowerCase())?' <span style="color:'+(((p.name||'').toLowerCase().split('#')[0]==='разраб')?'#FFD700':'#4fc3f7')+';font-size:12px">✔</span>':''}</div>
+                            <div class="fn">${p.name}${app.devBadge(p.name)}</div>
                             <div class="fs" style="color:#FF4081;">хочет дружить</div>
                             <div style="font-size:10px;color:#333;">${p.tag||('#'+p.id)}</div>
                         </div>
@@ -3416,7 +3295,7 @@ const app = {
                     outDiv.innerHTML+=`<div class="fr" style="border-color:rgba(0,229,255,0.1);background:rgba(0,229,255,0.03);margin-bottom:8px;">
                         <div class="fa2" style="background:rgba(0,229,255,0.1);color:var(--c-blue)">${(p.name[0]||'?').toUpperCase()}</div>
                         <div class="fi">
-                            <div class="fn">${p.name}${['разраб','admin','citrus'].includes((p.name||"").toLowerCase())?' <span style="color:'+(((p.name||'').toLowerCase().split('#')[0]==='разраб')?'#FFD700':'#4fc3f7')+';font-size:12px">✔</span>':''}</div>
+                            <div class="fn">${p.name}${app.devBadge(p.name)}</div>
                             <div class="fs" style="color:var(--c-blue);">заявка отправлена</div>
                             <div style="font-size:10px;color:#333;">${p.tag||('#'+p.id)}</div>
                         </div>
@@ -3476,7 +3355,7 @@ const app = {
             const sent=this.sentReqs.includes(String(p.id));
             ol.innerHTML+=`<div class="fr">
                 <div class="fa2" style="background:${p.color||'#888'}22;color:${p.color||'#888'}">${(p.name[0]||'?').toUpperCase()}</div>
-                <div class="fi"><div class="fn">${p.name}${['разраб','admin','citrus'].includes((p.name||"").toLowerCase())?' <span style="color:'+(((p.name||'').toLowerCase().split('#')[0]==='разраб')?'#FFD700':'#4fc3f7')+';font-size:12px">✔</span>':''}</div>
+                <div class="fi"><div class="fn">${p.name}${app.devBadge(p.name)}</div>
                 <div class="fs ${p.status==='ingame'?'ig':'on'}">${p.tag||p.id} · ${p.status==='ingame'?'🎮 '+p.world:'● Онлайн'}</div></div>
                 <button class="bx ${sent?'b-del':'b-add'}" onclick="app.sendReq('${p.id}')">${sent?'✓ Отправлено':'+ Друг'}</button>
             </div>`;
@@ -3515,24 +3394,6 @@ const app = {
                     if(false && msg.type==='chat') {
                         if(String(msg._from)!==String(this.userId)) {
                             this.appendChatMessage(msg.name, msg.text, msg.color);
-                        }
-                        return;
-                    }
-                    if(msg.type==='banned') {
-                        document.body.innerHTML=`
-                        <div style="position:fixed;inset:0;background:#0a0008;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:99999;font-family:sans-serif;">
-                            <div style="font-size:72px;margin-bottom:24px;">🚫</div>
-                            <div style="font-size:28px;font-weight:bold;color:#ff5252;margin-bottom:12px;">Аккаунт заблокирован</div>
-                            <div style="font-size:15px;color:rgba(255,255,255,0.5);margin-bottom:8px;">Причина: <span style="color:#fff;">${msg.reason||'Нарушение правил'}</span></div>
-                            <div style="font-size:13px;color:rgba(255,255,255,0.3);">Заблокировал: ${msg.by||'Администрация'}</div>
-                            <div style="margin-top:32px;font-size:12px;color:rgba(255,255,255,0.2);">Если вы считаете что это ошибка — обратитесь к администратору</div>
-                        </div>`;
-                        return;
-                    }
-                    if(msg.type==='req_pos') {
-                        if(this.mode==='play' && this.playerGroup) {
-                            const posNow = {type:'move',id:String(this.userId),name:this.username,color:this._myColor,x:this.playerGroup.position.x,y:this.playerGroup.position.y,z:this.playerGroup.position.z,ry:this.playerGroup.rotation.y,map:String(this.currentMap),inv:this.inventory||[],moving:false,jumping:false};
-                            try{this._gameWS.send(JSON.stringify(posNow));}catch(e2){}
                         }
                         return;
                     }
@@ -3672,10 +3533,10 @@ const app = {
             ctx.fillStyle = 'rgba(0,0,0,0.6)';
             ctx.roundRect(4,4,248,56,12);
             ctx.fill();
-            const devNamesL=['разраб','admin','citrus'];
-            const isDevLabel=devNamesL.includes((name||'').toLowerCase().split('#')[0]);
-            if(isDevLabel){
-                // Имя + галочка вместе
+            const nameBase = (name||'').toLowerCase().split('#')[0];
+            const isOwnerLabel = ['разраб','citrus'].includes(nameBase);
+            const isAdminLabel = nameBase === 'admin';
+            if(isOwnerLabel || isAdminLabel){
                 ctx.font = 'bold 28px Arial';
                 const nameW = ctx.measureText(name).width;
                 const totalW = nameW + 28;
@@ -3684,7 +3545,7 @@ const app = {
                 ctx.textAlign = 'left';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(name, startX, 32);
-                ctx.fillStyle = (name||'').toLowerCase().split('#')[0]==='разраб'?'#FFD700':'#4fc3f7';
+                ctx.fillStyle = isOwnerLabel ? '#FFD700' : '#4fc3f7';
                 ctx.font = 'bold 26px Arial';
                 ctx.fillText(' ✔', startX + nameW, 32);
             } else {
@@ -3986,16 +3847,18 @@ const app = {
             ctx.fillStyle = 'rgba(0,0,0,0.6)';
             ctx.roundRect(4,4,248,56,12);
             ctx.fill();
-            const _devNs=['разраб','admin','citrus'];
-            const _isDev=_devNs.includes((this.username||'').toLowerCase().split('#')[0]);
-            if(_isDev){
+            const _myBase=(this.username||'').toLowerCase().split('#')[0];
+            const _isOwner=['разраб','citrus'].includes(_myBase);
+            const _isAdmin=_myBase==='admin';
+            if(_isOwner||_isAdmin){
                 ctx.font='bold 28px Arial';
                 const _nw=ctx.measureText(this.username||'').width;
                 const _sx=128-(_nw+28)/2;
                 ctx.fillStyle=this._myColor||'#FF9800';
                 ctx.textAlign='left'; ctx.textBaseline='middle';
                 ctx.fillText(this.username||'',_sx,32);
-                ctx.fillStyle=(this.username||'').toLowerCase().split('#')[0]==='разраб'?'#FFD700':'#4fc3f7'; ctx.font='bold 26px Arial';
+                ctx.fillStyle=_isOwner?'#FFD700':'#4fc3f7';
+                ctx.font='bold 26px Arial';
                 ctx.fillText(' ✔',_sx+_nw,32);
             } else {
                 ctx.fillStyle=this._myColor||'#FF9800';
@@ -4020,36 +3883,16 @@ const app = {
         this.pCam.position.set(0,1.5,5);
         this.pRender=new THREE.WebGLRenderer({alpha:true,antialias:true});
         this.pRender.setSize(cont.clientWidth,cont.clientHeight);
-        this.pRender.shadowMap.enabled=true;
         cont.appendChild(this.pRender.domElement);
-        // Освещение
-        this.pScene.add(new THREE.AmbientLight(0xffffff,0.7));
-        const sl=new THREE.DirectionalLight(0xffffff,1.0);sl.position.set(3,6,4);sl.castShadow=true;this.pScene.add(sl);
-        const sl2=new THREE.DirectionalLight(0xFF9800,0.3);sl2.position.set(-3,2,-2);this.pScene.add(sl2);
-        // Пол — круглая платформа
-        const floorGeo=new THREE.CylinderGeometry(2.2,2.2,0.08,48);
-        const floorMat=new THREE.MeshStandardMaterial({color:0x1a1a2e,roughness:0.6,metalness:0.2});
-        const floor=new THREE.Mesh(floorGeo,floorMat);floor.position.y=-1.04;floor.receiveShadow=true;
-        this.pScene.add(floor);
-        // Свечение под ногами
-        const glowGeo=new THREE.CylinderGeometry(1.5,1.5,0.01,48);
-        const glowMat=new THREE.MeshStandardMaterial({color:0xFF9800,emissive:0xFF6600,emissiveIntensity:0.8,transparent:true,opacity:0.25});
-        const glow=new THREE.Mesh(glowGeo,glowMat);glow.position.y=-1.0;this.pScene.add(glow);
+        this.pScene.add(new THREE.AmbientLight(0xffffff,0.8));
+        const sl=new THREE.DirectionalLight(0xffffff,0.6);sl.position.set(5,5,5);this.pScene.add(sl);
         this.updateAvatarPreview();
-        const loop=()=>{
-            if(this.pAvatar&&this.mode==='none'){
-                this.pAvatar.rotation.y+=0.008;
-                // Пульсация свечения
-                glow.material.opacity=0.15+0.12*Math.sin(Date.now()*0.003);
-                this.pRender.render(this.pScene,this.pCam);
-            }
-            requestAnimationFrame(loop);
-        };loop();
+        const loop=()=>{if(this.pAvatar&&this.mode==='none'){this.pAvatar.rotation.y+=0.01;this.pRender.render(this.pScene,this.pCam);}requestAnimationFrame(loop);};loop();
     },
     updateAvatarPreview(){
         if(!this.pScene)return;
         if(this.pAvatar)this.pScene.remove(this.pAvatar);
-        this.pAvatar=this.buildCharacter(false);this.pAvatar.position.y=-1;this.pAvatar.castShadow=true;this.pScene.add(this.pAvatar);
+        this.pAvatar=this.buildCharacter(false);this.pAvatar.position.y=-1;this.pScene.add(this.pAvatar);
     },
 
     // ── PALETTE
@@ -4103,12 +3946,12 @@ const app = {
             }
         }
         this.velocity.set(0,0,0);this.canJump=false;this.loopFn=null;this.spaceGrav=false;
-        const wNames={gather:'Цитрусовый Лес',parkour:'Небесный Паркур',
+        const wNames={lobby:'Главная Площадь',gather:'Цитрусовый Лес',parkour:'Небесный Паркур',
             volcano:'Остров Вулкана',space:'Космическая База',hideseek:'Прятки',
             snowmount:'Снежная Гора',dungeon:'Тёмное Подземелье',march8:'🌸 8 Марта'};
         this._worldName=wNames[mapId]||'Мир игрока';
         if(mode==='play'){
-            this._updateStatus('ingame',mapId);
+            this._updateStatus('ingame',this._worldName);
             // Сразу пушим статус на сервер
             setTimeout(()=>this.renderMpPanel(), 500);
         }
@@ -4138,7 +3981,7 @@ const app = {
     setupScene(){
         const canvas=document.getElementById('gl-canvas');canvas.innerHTML='';
         this.scene=new THREE.Scene();
-        const bgs={gather:0x0d1f0a,parkour:0x87CEEB,volcano:0x1a0800,space:0x000005,hideseek:0x0d1a0d,snowmount:0x87CEEB,dungeon:0x050508,march8:0x1a0a1a};
+        const bgs={lobby:0x0a0a18,gather:0x0d1f0a,parkour:0x87CEEB,volcano:0x1a0800,space:0x000005,hideseek:0x0d1a0d,snowmount:0x87CEEB,dungeon:0x050508,march8:0x1a0a1a};
         const bg=bgs[this.currentMap]||0x0a0a10;
         this.scene.background=new THREE.Color(bg);
         this.scene.fog=new THREE.FogExp2(bg,0.016);
@@ -4164,7 +4007,7 @@ const app = {
         if(this.mode==='play'){
             this.playerGroup=this.buildCharacter(true);
             // Спавн выше земли для всех миров
-            const spawnY = {parkour:8, march8:5, dungeon:3, volcano:4, space:4, snowmount:4, hideseek:4, gather:3};
+            const spawnY = {parkour:8, march8:5, dungeon:3, volcano:4, space:4, snowmount:4, hideseek:4, gather:3, lobby:3};
             const baseY = this._joinSpawn ? 15 : (spawnY[this.currentMap] || (typeof this.currentMap==='number' ? 12 : 5));
             this._joinSpawn = false;
             this.playerGroup.position.set(0, baseY, 0);
@@ -4189,8 +4032,6 @@ const app = {
         document.body.requestPointerLock = document.body.requestPointerLock || document.body.mozRequestPointerLock;
         if(window.innerWidth > 768) document.body.requestPointerLock();
         
-        this._checkBan();
-        this._connectGameWS();
         this.engineLoop();
         // Опрашиваем позиции других игроков с сервера каждые 300мс
         if(this._posInterval) clearInterval(this._posInterval);
@@ -4205,7 +4046,45 @@ const app = {
             this.scene.add(g);this.objectsToIntersect.push(g);return g;
         };
 
-        if(this.currentMap==='gather'){
+        if(this.currentMap==='lobby'){
+            addGround(0x1a1a2e);
+            for(let x=-10;x<=10;x+=2)for(let z=-10;z<=10;z+=2){
+                const tile=new THREE.Mesh(new THREE.BoxGeometry(1.98,0.15,1.98),
+                    new THREE.MeshStandardMaterial({color:(x+z)%4===0?0x2a2a4a:0x222238,roughness:0.7}));
+                tile.position.set(x,0.075,z);this.scene.add(tile);
+            }
+            const fb=new THREE.Mesh(new THREE.CylinderGeometry(3.5,3.5,0.4,32),new THREE.MeshStandardMaterial({color:0x3a3a5a}));
+            fb.position.y=0.2;this.scene.add(fb);this.objectsToIntersect.push(fb);
+            const fw=new THREE.Mesh(new THREE.CylinderGeometry(3,3,0.2,32),new THREE.MeshStandardMaterial({color:0x00B8D9,transparent:true,opacity:0.85,roughness:0}));
+            fw.position.y=0.5;this.scene.add(fw);
+            const pillar=new THREE.Mesh(new THREE.CylinderGeometry(0.3,0.4,2.5),new THREE.MeshStandardMaterial({color:0xCCBB88,metalness:0.3}));
+            pillar.position.y=1.5;this.scene.add(pillar);
+            const orb=new THREE.Mesh(new THREE.SphereGeometry(0.7,16,16),new THREE.MeshStandardMaterial({color:0xFF9800,emissive:0xFF6600,emissiveIntensity:0.9}));
+            orb.position.y=3;this.scene.add(orb);
+            const pl=new THREE.PointLight(0xFF9800,3,12);pl.position.set(0,4,0);this.scene.add(pl);
+            const bcs=[0x1a1a3a,0x1a2a1a,0x2a1a1a,0x2a2a1a];
+            for(let i=0;i<3;i++){
+                const a=(i/8)*Math.PI*2,h=10+Math.random()*14,w=5+Math.random()*3;
+                const bld=new THREE.Mesh(new THREE.BoxGeometry(w,h,w),new THREE.MeshStandardMaterial({color:bcs[i%4],roughness:0.8}));
+                bld.position.set(Math.cos(a)*30,h/2,Math.sin(a)*30);bld.castShadow=true;
+                this.scene.add(bld);this.objectsToIntersect.push(bld);
+                for(let j=0;j<5;j++)for(let k=-1;k<=1;k+=2){
+                    const win=new THREE.Mesh(new THREE.PlaneGeometry(0.9,0.9),
+                        new THREE.MeshStandardMaterial({emissive:0xFFFF44,emissiveIntensity:Math.random()>0.4?1.2:0,transparent:true,opacity:0.9}));
+                    win.position.set(Math.cos(a)*30+k*(w/3),j*2+2,Math.sin(a)*30+w/2+0.01);
+                    win.rotation.y=Math.atan2(Math.cos(a),Math.sin(a));this.scene.add(win);
+                }
+            }
+            for(let i=0;i<3;i++){
+                const a=(i/8)*Math.PI*2;
+                const pole=new THREE.Mesh(new THREE.CylinderGeometry(0.08,0.1,5),new THREE.MeshStandardMaterial({color:0x888888,metalness:0.7}));
+                pole.position.set(Math.cos(a)*16,2.5,Math.sin(a)*16);this.scene.add(pole);this.objectsToIntersect.push(pole);
+                const lamp=new THREE.PointLight(0xFFE08A,1.5,10);lamp.position.set(Math.cos(a)*16,5.2,Math.sin(a)*16);this.scene.add(lamp);
+                const globe=new THREE.Mesh(new THREE.SphereGeometry(0.25,8,8),new THREE.MeshStandardMaterial({emissive:0xFFD060,emissiveIntensity:2}));
+                globe.position.copy(lamp.position);this.scene.add(globe);
+            }
+        }
+        else if(this.currentMap==='gather'){
             addGround(0x1a3010);
             for(let i=0;i<45;i++){
                 const tx=(Math.random()-0.5)*140,tz=(Math.random()-0.5)*140;
@@ -4550,7 +4429,7 @@ const app = {
 
     async renderMpPanel(){
         const list=document.getElementById('mp-list');if(!list)return;
-        const _devBadge=n=>{if(!['разраб','admin','citrus'].includes((n||'').toLowerCase()))return '';const bc=(n||'').toLowerCase()==='разраб'?'#FFD700':'#4fc3f7';return '<span style="color:'+bc+';font-size:10px"> ✔</span>';};
+        const _devBadge=n=>{const b=(n||'').toLowerCase().split('#')[0];if(['разраб','citrus'].includes(b))return'<span style="color:#FFD700;font-size:10px"> ✔</span>';if(b==='admin')return'<span style="color:#4fc3f7;font-size:10px"> ✔</span>';return'';}
         list.innerHTML=`<div class="mpp"><div class="mpd" style="background:#00E676"></div>${this.username}${_devBadge(this.username)} (ты)</div>`;
         // Берём актуальный список с сервера
         try {
@@ -5508,6 +5387,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
