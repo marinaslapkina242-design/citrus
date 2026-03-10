@@ -4,133 +4,1278 @@
     <meta charset="UTF-8">
     <title>CITRUS | ONLINE</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;600;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-        :root { --c-main: #FF9800; --c-glow: #FFB74D; --c-bg: #050505; --c-blue: #00E5FF; --c-green: #00E676; --c-pink: #FF4081; }
+        /* ═══════════════════════════════════════════════════
+           CITRUS ONLINE — ULTRA REDESIGN v2.0
+           ═══════════════════════════════════════════════════ */
+        :root {
+            --c-main: #FF9800;
+            --c-glow: #FFB74D;
+            --c-deep: #E65100;
+            --c-bg: #03030A;
+            --c-surface: #080814;
+            --c-surface2: #0D0D1E;
+            --c-border: rgba(255,152,0,0.12);
+            --c-border2: rgba(255,152,0,0.25);
+            --c-blue: #00E5FF;
+            --c-green: #00E676;
+            --c-pink: #FF4081;
+            --c-purple: #9C27B0;
+            --font-head: 'Orbitron', sans-serif;
+            --font-body: 'Rajdhani', sans-serif;
+            --font-ui: 'Inter', sans-serif;
+            --shadow-glow: 0 0 40px rgba(255,152,0,0.2), 0 0 80px rgba(255,152,0,0.08);
+            --shadow-card: 0 4px 24px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.04) inset;
+        }
+
         * { box-sizing: border-box; user-select: none; }
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--c-bg); color: #fff; overflow: hidden; }
+
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            font-family: var(--font-ui);
+            background: var(--c-bg);
+            color: #fff;
+            overflow: hidden;
+        }
+
+        /* Animated background grain */
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none; z-index: 9999; opacity: 0.4;
+        }
+
         .hidden { display: none !important; }
-        button { cursor: pointer; border: none; outline: none; transition: 0.2s; font-family: inherit; font-weight: bold; }
-        button:active { transform: scale(0.95); }
 
-        /* LOGIN */
-        #ui-login { position: fixed; inset: 0; background: radial-gradient(circle at 50% 40%, #1a0800, #000); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-        .login-box { background: rgba(0,0,0,0.9); backdrop-filter: blur(20px); padding: 45px; border-radius: 20px; border: 1px solid var(--c-main); text-align: center; width: 400px; box-shadow: 0 0 60px rgba(255,152,0,0.15); }
-        .login-box input { width: 100%; padding: 15px; margin: 12px 0; background: rgba(255,255,255,0.05); border: 1px solid #333; color: white; border-radius: 10px; font-size: 16px; outline: none; transition: 0.3s; }
-        .login-box input:focus { border-color: var(--c-main); }
-        .btn-primary { background: linear-gradient(45deg, var(--c-main), var(--c-glow)); color: #000; padding: 15px; border-radius: 10px; width: 100%; font-size: 16px; text-transform: uppercase; box-shadow: 0 0 20px rgba(255,152,0,0.4); letter-spacing: 2px; }
-        .btn-primary:hover { box-shadow: 0 0 30px rgba(255,152,0,0.7); }
+        button {
+            cursor: pointer; border: none; outline: none;
+            transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1);
+            font-family: var(--font-body); font-weight: 700;
+        }
+        button:active { transform: scale(0.93); }
 
-        /* HUB */
+        /* ═══════════════════════════════════════════════════
+           LOGIN SCREEN — PART 1
+           ═══════════════════════════════════════════════════ */
+        #ui-login {
+            position: fixed; inset: 0; z-index: 1000;
+            display: flex; justify-content: center; align-items: center;
+            background: var(--c-bg);
+            overflow: hidden;
+        }
+
+        /* Animated login background */
+        #ui-login::before {
+            content: '';
+            position: absolute; inset: 0;
+            background:
+                radial-gradient(ellipse 80% 60% at 50% 0%, rgba(255,152,0,0.12) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 40% at 20% 80%, rgba(255,80,0,0.08) 0%, transparent 50%),
+                radial-gradient(ellipse 40% 30% at 80% 60%, rgba(0,229,255,0.04) 0%, transparent 50%);
+            animation: bgPulse 8s ease-in-out infinite alternate;
+        }
+        #ui-login::after {
+            content: '';
+            position: absolute; inset: 0;
+            background-image:
+                linear-gradient(rgba(255,152,0,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,152,0,0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black, transparent);
+        }
+
+        @keyframes bgPulse {
+            0% { opacity: 0.7; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.05); }
+        }
+
+        .login-box {
+            position: relative; z-index: 2;
+            background: rgba(8,8,20,0.95);
+            backdrop-filter: blur(40px) saturate(150%);
+            padding: 50px 48px;
+            border-radius: 28px;
+            border: 1px solid rgba(255,152,0,0.2);
+            text-align: center;
+            width: 420px;
+            box-shadow:
+                0 0 0 1px rgba(255,255,255,0.03) inset,
+                0 40px 80px rgba(0,0,0,0.8),
+                0 0 60px rgba(255,152,0,0.08),
+                0 0 120px rgba(255,152,0,0.04);
+            animation: loginAppear 0.6s cubic-bezier(0.34,1.56,0.64,1) both;
+        }
+
+        @keyframes loginAppear {
+            from { opacity: 0; transform: translateY(30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* Glowing top edge of login box */
+        .login-box::before {
+            content: '';
+            position: absolute; top: 0; left: 10%; right: 10%; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,152,0,0.6), rgba(255,183,77,0.8), rgba(255,152,0,0.6), transparent);
+            border-radius: 1px;
+        }
+
+        .login-logo {
+            font-family: var(--font-head);
+            font-size: 52px; font-weight: 900;
+            margin: 0 0 4px;
+            background: linear-gradient(135deg, #FF9800 0%, #FFD54F 40%, #FF6D00 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 30px rgba(255,152,0,0.4));
+            letter-spacing: 6px;
+            position: relative;
+        }
+
+        .login-sub {
+            color: rgba(255,152,0,0.45);
+            margin: 0 0 28px;
+            font-size: 10px;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            font-family: var(--font-body);
+            font-weight: 600;
+        }
+
+        /* Auth tabs */
+        .auth-tabs {
+            display: flex; gap: 0;
+            margin-bottom: 24px;
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid rgba(255,152,0,0.15);
+            background: rgba(0,0,0,0.3);
+            padding: 4px;
+            gap: 4px;
+        }
+        .auth-tab-btn {
+            flex: 1; padding: 11px 0;
+            border-radius: 10px;
+            font-size: 13px; font-weight: 700;
+            letter-spacing: 0.5px;
+            transition: all 0.25s;
+            font-family: var(--font-body);
+        }
+        .auth-tab-btn.active-tab {
+            background: linear-gradient(135deg, rgba(255,152,0,0.25), rgba(255,152,0,0.12));
+            color: var(--c-main);
+            box-shadow: 0 0 20px rgba(255,152,0,0.15), 0 0 0 1px rgba(255,152,0,0.2) inset;
+        }
+        .auth-tab-btn:not(.active-tab) {
+            background: transparent; color: rgba(255,255,255,0.3);
+        }
+        .auth-tab-btn:not(.active-tab):hover { color: rgba(255,255,255,0.6); }
+
+        .login-box input {
+            width: 100%; padding: 15px 18px;
+            margin: 8px 0;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: white;
+            border-radius: 12px;
+            font-size: 15px;
+            outline: none;
+            transition: all 0.25s;
+            font-family: var(--font-ui);
+        }
+        .login-box input:focus {
+            border-color: rgba(255,152,0,0.5);
+            background: rgba(255,152,0,0.04);
+            box-shadow: 0 0 0 3px rgba(255,152,0,0.08), 0 0 20px rgba(255,152,0,0.06);
+        }
+        .login-box input::placeholder { color: rgba(255,255,255,0.2); }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #FF8F00, #FF6D00);
+            color: #fff;
+            padding: 16px;
+            border-radius: 14px;
+            width: 100%;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-weight: 800;
+            font-family: var(--font-head);
+            margin-top: 10px;
+            box-shadow: 0 4px 20px rgba(255,109,0,0.4), 0 0 0 1px rgba(255,183,77,0.2) inset;
+            position: relative; overflow: hidden;
+        }
+        .btn-primary::before {
+            content: '';
+            position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            transition: left 0.5s;
+        }
+        .btn-primary:hover { box-shadow: 0 6px 30px rgba(255,109,0,0.6), 0 0 0 1px rgba(255,183,77,0.3) inset; transform: translateY(-1px); }
+        .btn-primary:hover::before { left: 100%; }
+
+        /* ═══════════════════════════════════════════════════
+           HUB LAYOUT — PART 1
+           ═══════════════════════════════════════════════════ */
         #ui-hub { display: flex; flex-direction: column; height: 100vh; }
-        .hub-header { height: 70px; background: rgba(8,8,8,0.98); display: flex; align-items: center; padding: 0 35px; border-bottom: 1px solid #1a1a1a; }
+
+        /* HEADER */
+        .hub-header {
+            height: 68px;
+            background: rgba(5,5,16,0.97);
+            display: flex; align-items: center;
+            padding: 0 28px;
+            border-bottom: 1px solid rgba(255,152,0,0.1);
+            position: relative; z-index: 10;
+            backdrop-filter: blur(20px);
+        }
+        .hub-header::after {
+            content: '';
+            position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,152,0,0.4), rgba(255,183,77,0.6), rgba(255,152,0,0.4), transparent);
+        }
+
+        .header-logo {
+            font-family: var(--font-head);
+            font-size: 22px; font-weight: 900;
+            letter-spacing: 5px;
+            background: linear-gradient(135deg, #FF9800, #FFD54F);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 12px rgba(255,152,0,0.5));
+            position: relative;
+        }
+        .header-logo::after {
+            content: 'ONLINE';
+            position: absolute; bottom: -10px; left: 0;
+            font-size: 8px; letter-spacing: 4px;
+            color: rgba(255,152,0,0.4);
+            -webkit-text-fill-color: rgba(255,152,0,0.4);
+            filter: none;
+        }
+
+        .header-divider {
+            width: 1px; height: 32px;
+            background: linear-gradient(180deg, transparent, rgba(255,152,0,0.2), transparent);
+            margin: 0 20px;
+        }
+
+        .header-right {
+            margin-left: auto; display: flex; align-items: center; gap: 14px;
+        }
+
+        .header-username {
+            font-weight: 600; font-size: 14px; color: rgba(255,255,255,0.8);
+            font-family: var(--font-body); letter-spacing: 0.5px;
+        }
+
+        .balance-chip {
+            display: flex; align-items: center; gap: 8px;
+            background: linear-gradient(135deg, rgba(255,152,0,0.12), rgba(255,152,0,0.06));
+            border: 1px solid rgba(255,152,0,0.25);
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-family: var(--font-head);
+            font-size: 13px; font-weight: 700;
+            color: var(--c-main);
+            box-shadow: 0 0 20px rgba(255,152,0,0.08), 0 0 0 1px rgba(255,183,77,0.1) inset;
+            transition: all 0.2s;
+        }
+        .balance-chip:hover {
+            border-color: rgba(255,152,0,0.45);
+            box-shadow: 0 0 30px rgba(255,152,0,0.15);
+        }
+
+        .btn-logout {
+            background: rgba(255,60,60,0.08);
+            color: rgba(255,100,100,0.7);
+            font-size: 11px;
+            border: 1px solid rgba(255,60,60,0.2);
+            padding: 7px 14px;
+            border-radius: 8px;
+            font-family: var(--font-ui);
+            letter-spacing: 0.3px;
+        }
+        .btn-logout:hover {
+            background: rgba(255,60,60,0.15);
+            color: #ff6b6b;
+            border-color: rgba(255,60,60,0.35);
+        }
+
+        /* HUB BODY */
         .hub-body { display: flex; flex: 1; overflow: hidden; }
-        .sidebar { width: 250px; background: rgba(5,5,5,0.95); border-right: 1px solid #1a1a1a; padding: 20px 0; }
-        .nav-item { padding: 14px 28px; color: #666; cursor: pointer; display: flex; align-items: center; gap: 14px; transition: 0.25s; border-left: 3px solid transparent; font-size: 15px; position: relative; }
-        .nav-item:hover { color: #aaa; background: rgba(255,255,255,0.02); }
-        .nav-item.active { color: var(--c-main); background: rgba(255,152,0,0.06); border-left-color: var(--c-main); }
-        .nav-badge { position: absolute; right: 18px; background: var(--c-pink); color: #fff; font-size: 11px; font-weight: bold; padding: 2px 7px; border-radius: 20px; }
-        .content-area { flex: 1; padding: 35px; overflow-y: auto; background: #070707; }
+
+        /* ═══════════════════════════════════════════════════
+           SIDEBAR — PART 1
+           ═══════════════════════════════════════════════════ */
+        .sidebar {
+            width: 240px;
+            background: rgba(5,5,16,0.98);
+            border-right: 1px solid rgba(255,152,0,0.08);
+            padding: 16px 0;
+            display: flex; flex-direction: column;
+            position: relative; overflow: hidden;
+        }
+        .sidebar::before {
+            content: '';
+            position: absolute; top: 0; right: 0; width: 1px; height: 100%;
+            background: linear-gradient(180deg, transparent, rgba(255,152,0,0.3) 30%, rgba(255,152,0,0.3) 70%, transparent);
+        }
+        /* Subtle ambient glow on sidebar */
+        .sidebar::after {
+            content: '';
+            position: absolute; bottom: 0; left: 0; right: 0; height: 200px;
+            background: radial-gradient(ellipse at 50% 100%, rgba(255,152,0,0.04), transparent 70%);
+            pointer-events: none;
+        }
+
+        .sidebar-label {
+            font-size: 9px; font-weight: 700;
+            color: rgba(255,152,0,0.3);
+            text-transform: uppercase; letter-spacing: 3px;
+            padding: 0 22px 8px;
+            font-family: var(--font-head);
+            margin-top: 6px;
+        }
+
+        .nav-item {
+            padding: 12px 22px;
+            color: rgba(255,255,255,0.35);
+            cursor: pointer;
+            display: flex; align-items: center; gap: 13px;
+            transition: all 0.2s;
+            border-left: 2px solid transparent;
+            font-size: 13px; font-weight: 600;
+            position: relative;
+            font-family: var(--font-body);
+            letter-spacing: 0.3px;
+            margin: 1px 10px;
+            border-radius: 0 10px 10px 0;
+            border-left-width: 2px;
+        }
+        .nav-item:hover {
+            color: rgba(255,255,255,0.7);
+            background: rgba(255,255,255,0.03);
+        }
+        .nav-item .nav-icon {
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(255,255,255,0.04);
+            font-size: 13px;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .nav-item:hover .nav-icon {
+            background: rgba(255,152,0,0.08);
+            color: rgba(255,152,0,0.7);
+        }
+        .nav-item.active {
+            color: var(--c-main);
+            background: linear-gradient(90deg, rgba(255,152,0,0.1), rgba(255,152,0,0.04));
+            border-left-color: var(--c-main);
+            margin-left: 0; border-radius: 0 12px 12px 0; padding-left: 20px;
+        }
+        .nav-item.active .nav-icon {
+            background: linear-gradient(135deg, rgba(255,152,0,0.2), rgba(255,152,0,0.1));
+            color: var(--c-main);
+            box-shadow: 0 0 12px rgba(255,152,0,0.2);
+        }
+        .nav-item.active::after {
+            content: '';
+            position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+            width: 4px; height: 4px; border-radius: 50%;
+            background: var(--c-main);
+            box-shadow: 0 0 8px var(--c-main);
+        }
+
+        .nav-badge {
+            position: absolute; right: 28px;
+            background: linear-gradient(135deg, var(--c-pink), #E91E63);
+            color: #fff; font-size: 10px; font-weight: 800;
+            padding: 2px 7px; border-radius: 20px;
+            font-family: var(--font-head);
+            box-shadow: 0 0 10px rgba(255,64,129,0.4);
+        }
+
+        /* ═══════════════════════════════════════════════════
+           CONTENT AREA — PART 1
+           ═══════════════════════════════════════════════════ */
+        .content-area {
+            flex: 1; padding: 32px 36px;
+            overflow-y: auto;
+            background: var(--c-surface);
+            position: relative;
+        }
+        .content-area::before {
+            content: '';
+            position: fixed; top: 68px; right: 0; bottom: 0; left: 240px;
+            background:
+                radial-gradient(ellipse 60% 40% at 70% 0%, rgba(255,152,0,0.03), transparent),
+                radial-gradient(ellipse 40% 50% at 0% 80%, rgba(0,229,255,0.02), transparent);
+            pointer-events: none; z-index: 0;
+        }
         #tab-roulette { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 10px; width: 100%; gap: 4px; }
-        .content-area::-webkit-scrollbar { width: 3px; }
-        .content-area::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
-        .section-title { font-size: 12px; font-weight: bold; color: #444; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 16px; }
+        .content-area::-webkit-scrollbar { width: 4px; }
+        .content-area::-webkit-scrollbar-track { background: transparent; }
+        .content-area::-webkit-scrollbar-thumb { background: rgba(255,152,0,0.2); border-radius: 4px; }
+        .content-area::-webkit-scrollbar-thumb:hover { background: rgba(255,152,0,0.4); }
 
-        /* CARDS */
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 18px; }
-        .card { background: #0e0e0e; border-radius: 14px; border: 1px solid #1e1e1e; overflow: hidden; cursor: pointer; transition: 0.25s; }
-        .card:hover { border-color: var(--c-main); transform: translateY(-4px); box-shadow: 0 8px 30px rgba(255,152,0,0.1); }
-        .card-thumb { height: 130px; display: flex; justify-content: center; align-items: center; font-size: 55px; background: #0a0a0a; }
-        .card-info { padding: 16px 18px; display: flex; justify-content: space-between; align-items: center; }
-        .price-tag { background: rgba(255,152,0,0.15); color: var(--c-main); padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: bold; }
+        .section-title {
+            font-size: 10px; font-weight: 800;
+            color: rgba(255,152,0,0.5);
+            text-transform: uppercase; letter-spacing: 3px;
+            margin: 0 0 18px;
+            font-family: var(--font-head);
+            display: flex; align-items: center; gap: 10px;
+        }
+        .section-title::after {
+            content: '';
+            flex: 1; height: 1px;
+            background: linear-gradient(90deg, rgba(255,152,0,0.2), transparent);
+        }
 
-        /* AVATAR */
-        #avatar-container { width: 100%; height: 420px; background: radial-gradient(circle, #181818, #060606); border-radius: 16px; border: 1px solid #1e1e1e; }
+        /* ═══════════════════════════════════════════════════
+           CARDS — PART 1
+           ═══════════════════════════════════════════════════ */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
 
-        /* ENGINE */
+        .card {
+            background: var(--c-surface2);
+            border-radius: 18px;
+            border: 1px solid rgba(255,255,255,0.06);
+            overflow: hidden; cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34,1.2,0.64,1);
+            box-shadow: var(--shadow-card);
+            position: relative;
+        }
+        .card::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, transparent 50%);
+            pointer-events: none; z-index: 1;
+        }
+        .card:hover {
+            border-color: rgba(255,152,0,0.3);
+            transform: translateY(-6px) scale(1.01);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.7), 0 0 30px rgba(255,152,0,0.1), 0 0 0 1px rgba(255,152,0,0.15);
+        }
+        .card-thumb {
+            height: 130px;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 52px; position: relative;
+            overflow: hidden;
+        }
+        .card-thumb::after {
+            content: '';
+            position: absolute; bottom: 0; left: 0; right: 0; height: 40px;
+            background: linear-gradient(transparent, rgba(13,13,30,0.8));
+        }
+        .card-info {
+            padding: 14px 16px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .card-info b { font-family: var(--font-body); font-size: 14px; font-weight: 700; letter-spacing: 0.3px; }
+
+        .price-tag {
+            background: linear-gradient(135deg, rgba(255,152,0,0.15), rgba(255,152,0,0.08));
+            color: var(--c-main);
+            padding: 4px 10px; border-radius: 8px;
+            font-size: 12px; font-weight: 800;
+            border: 1px solid rgba(255,152,0,0.2);
+            font-family: var(--font-head);
+        }
+
+        /* ═══════════════════════════════════════════════════
+           AVATAR — PART 1
+           ═══════════════════════════════════════════════════ */
+        #avatar-container {
+            width: 100%; height: 420px;
+            background: radial-gradient(ellipse at 50% 40%, rgba(255,152,0,0.06) 0%, #060612 60%);
+            border-radius: 20px;
+            border: 1px solid rgba(255,152,0,0.12);
+            box-shadow: 0 0 0 1px rgba(255,255,255,0.03) inset;
+            position: relative; overflow: hidden;
+        }
+        #avatar-container::before {
+            content: '';
+            position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+            width: 200px; height: 60px;
+            background: radial-gradient(ellipse, rgba(255,152,0,0.15), transparent 70%);
+        }
+
+        /* ═══════════════════════════════════════════════════
+           ENGINE VIEW — PART 1
+           ═══════════════════════════════════════════════════ */
         #engine-view { position: fixed; inset: 0; display: none; z-index: 50; }
         .hud-overlay { position: absolute; inset: 0; pointer-events: none; }
         .crosshair { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 16px; height: 16px; display: none; }
         .crosshair::before, .crosshair::after { content: ''; position: absolute; background: rgba(255,255,255,0.9); }
         .crosshair::before { width: 100%; height: 2px; top: 7px; }
         .crosshair::after { width: 2px; height: 100%; left: 7px; }
-        .studio-panel { position: absolute; top: 16px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.85); padding: 11px 18px; border-radius: 30px; border: 1px solid var(--c-main); pointer-events: auto; display: flex; gap: 8px; align-items: center; backdrop-filter: blur(10px); flex-wrap: wrap; max-width: 90vw; }
-        .btn-st { background: #1e1e1e; color: #aaa; padding: 8px 14px; border-radius: 7px; font-size: 12px; border: 1px solid #2a2a2a; }
-        .btn-st:hover { background: #2a2a2a; color: #fff; }
-        .btn-publish { background: var(--c-main); color: #000; padding: 8px 16px; border-radius: 7px; font-size: 13px; }
-        .btn-exit { position: absolute; top: 16px; right: 16px; background: rgba(255,50,50,0.12); color: #ff6b6b; padding: 9px 18px; border-radius: 8px; pointer-events: auto; font-weight: bold; border: 1px solid rgba(255,50,50,0.25); }
-        .btn-exit:hover { background: rgba(255,50,50,0.25); }
-        #ingame-ui { position: absolute; top: 16px; left: 16px; background: rgba(0,0,0,0.75); padding: 10px 18px; border-radius: 12px; border: 1px solid var(--c-main); font-size: 20px; font-weight: bold; }
-        .c-swatch { width: 22px; height: 22px; border-radius: 5px; cursor: pointer; border: 2px solid transparent; transition: 0.15s; display: inline-block; }
-        .c-swatch:hover, .c-swatch.sel { border-color: #fff; transform: scale(1.2); }
-        .controls-hint { position: absolute; bottom: 16px; right: 16px; background: rgba(0,0,0,0.7); border: 1px solid #1a1a1a; border-radius: 10px; padding: 12px 16px; pointer-events: none; text-align: right; }
-        .controls-hint p { font-size: 12px; color: #555; margin: 2px 0; }
-        .controls-hint span { color: #888; }
 
-        /* FRIENDS */
+        .studio-panel {
+            position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
+            background: rgba(5,5,16,0.92);
+            padding: 10px 16px; border-radius: 50px;
+            border: 1px solid rgba(255,152,0,0.25);
+            pointer-events: auto;
+            display: flex; gap: 8px; align-items: center;
+            backdrop-filter: blur(20px);
+            flex-wrap: wrap; max-width: 90vw;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.6), 0 0 20px rgba(255,152,0,0.08);
+        }
+        .btn-st {
+            background: rgba(255,255,255,0.06);
+            color: rgba(255,255,255,0.6);
+            padding: 7px 14px; border-radius: 8px;
+            font-size: 12px; border: 1px solid rgba(255,255,255,0.08);
+            font-family: var(--font-body); font-weight: 600;
+        }
+        .btn-st:hover { background: rgba(255,255,255,0.1); color: #fff; }
+        .btn-publish {
+            background: linear-gradient(135deg, var(--c-main), var(--c-deep));
+            color: #fff; padding: 7px 16px; border-radius: 8px;
+            font-size: 12px; font-family: var(--font-head);
+            box-shadow: 0 0 15px rgba(255,152,0,0.3);
+        }
+        .btn-exit {
+            position: absolute; top: 16px; right: 16px;
+            background: rgba(255,50,50,0.1); color: #ff6b6b;
+            padding: 8px 18px; border-radius: 10px;
+            pointer-events: auto; font-weight: 700;
+            border: 1px solid rgba(255,50,50,0.2);
+            font-family: var(--font-body);
+        }
+        .btn-exit:hover { background: rgba(255,50,50,0.2); box-shadow: 0 0 15px rgba(255,50,50,0.2); }
+        #ingame-ui {
+            position: absolute; top: 16px; left: 16px;
+            background: rgba(5,5,16,0.85);
+            padding: 10px 18px; border-radius: 14px;
+            border: 1px solid rgba(255,152,0,0.25);
+            font-size: 20px; font-weight: 800;
+            font-family: var(--font-head);
+            box-shadow: 0 0 20px rgba(255,152,0,0.1);
+        }
+        .c-swatch { width: 22px; height: 22px; border-radius: 6px; cursor: pointer; border: 2px solid transparent; transition: 0.15s; display: inline-block; }
+        .c-swatch:hover, .c-swatch.sel { border-color: #fff; transform: scale(1.2); box-shadow: 0 0 8px rgba(255,255,255,0.3); }
+        .controls-hint {
+            position: absolute; bottom: 16px; right: 16px;
+            background: rgba(5,5,16,0.8); border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px; padding: 12px 16px; pointer-events: none; text-align: right;
+        }
+        .controls-hint p { font-size: 12px; color: rgba(255,255,255,0.3); margin: 2px 0; }
+        .controls-hint span { color: rgba(255,255,255,0.6); }
+
+        /* ═══════════════════════════════════════════════════
+           FRIENDS — PART 1
+           ═══════════════════════════════════════════════════ */
         .friends-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-        .fp { background: #0e0e0e; border: 1px solid #1e1e1e; border-radius: 14px; padding: 20px; max-height: 80vh; overflow-y: auto; }
+
+        .fp {
+            background: var(--c-surface2);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 18px; padding: 20px;
+            max-height: 80vh; overflow-y: auto;
+            box-shadow: var(--shadow-card);
+        }
         .fp::-webkit-scrollbar { width: 3px; }
-        .fp::-webkit-scrollbar-thumb { background: #333; }
-        .fp h3 { font-size: 11px; color: #444; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 14px; }
-        .fr { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.02); border: 1px solid transparent; margin-bottom: 7px; }
-        .fr:hover { border-color: #2a2a2a; }
-        .fa2 { width: 38px; height: 38px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; flex-shrink: 0; }
+        .fp::-webkit-scrollbar-thumb { background: rgba(255,152,0,0.2); border-radius: 3px; }
+
+        .fp h3 {
+            font-size: 10px; color: rgba(255,152,0,0.4);
+            text-transform: uppercase; letter-spacing: 3px;
+            margin: 0 0 16px;
+            font-family: var(--font-head);
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .fr {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 12px; border-radius: 12px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid transparent;
+            margin-bottom: 6px; transition: all 0.2s;
+        }
+        .fr:hover { border-color: rgba(255,152,0,0.12); background: rgba(255,152,0,0.03); }
+        .fa2 {
+            width: 38px; height: 38px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 15px; font-weight: 800; flex-shrink: 0;
+        }
         .fi { flex: 1; min-width: 0; }
-        .fn { font-size: 13px; font-weight: bold; }
-        .fs { font-size: 11px; color: #555; margin-top: 2px; }
+        .fn { font-size: 13px; font-weight: 700; font-family: var(--font-body); letter-spacing: 0.3px; }
+        .fs { font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 2px; }
         .fs.on { color: var(--c-green); }
         .fs.ig { color: var(--c-blue); }
         .fb { display: flex; gap: 5px; flex-shrink: 0; }
-        .bx { padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; border: none; }
-        .b-ok  { background: rgba(0,230,118,0.15); color: var(--c-green); }
-        .b-no  { background: rgba(255,64,129,0.1);  color: var(--c-pink); }
-        .b-add { background: rgba(0,229,255,0.1);   color: var(--c-blue); }
-        .b-del { background: rgba(255,255,255,0.04);color: #555; }
+        .bx { padding: 5px 10px; border-radius: 7px; font-size: 11px; font-weight: 700; cursor: pointer; border: none; font-family: var(--font-body); }
+        .b-ok  { background: rgba(0,230,118,0.12); color: var(--c-green); border: 1px solid rgba(0,230,118,0.2); }
+        .b-no  { background: rgba(255,64,129,0.1);  color: var(--c-pink); border: 1px solid rgba(255,64,129,0.2); }
+        .b-add { background: rgba(0,229,255,0.08); color: var(--c-blue); border: 1px solid rgba(0,229,255,0.2); }
+        .b-del { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.06); }
         .b-del:hover { background: rgba(255,64,129,0.1); color: var(--c-pink); }
-        .srow { display: flex; gap: 7px; margin-bottom: 12px; }
-        .srow input { flex: 1; background: rgba(255,255,255,0.04); border: 1px solid #222; color: #fff; padding: 9px 13px; border-radius: 8px; font-size: 13px; outline: none; }
-        .srow input:focus { border-color: var(--c-main); }
-        .srow input::placeholder { color: #333; }
-        .srow button { background: var(--c-main); color: #000; padding: 9px 14px; border-radius: 8px; font-size: 12px; }
 
-        /* NOTIFS */
-        #notifs { position: fixed; top: 75px; right: 14px; z-index: 999; display: flex; flex-direction: column; gap: 9px; pointer-events: none; }
-        .notif { background: rgba(8,8,12,0.97); border: 1px solid rgba(255,152,0,0.3); border-radius: 12px; padding: 13px 16px; max-width: 290px; transform: translateX(120%); transition: 0.35s cubic-bezier(.34,1.56,.64,1); pointer-events: auto; }
+        .srow { display: flex; gap: 7px; margin-bottom: 14px; }
+        .srow input {
+            flex: 1;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #fff; padding: 10px 14px;
+            border-radius: 10px; font-size: 13px; outline: none;
+            font-family: var(--font-ui);
+            transition: all 0.2s;
+        }
+        .srow input:focus { border-color: rgba(255,152,0,0.4); box-shadow: 0 0 0 3px rgba(255,152,0,0.06); }
+        .srow input::placeholder { color: rgba(255,255,255,0.18); }
+        .srow button {
+            background: linear-gradient(135deg, var(--c-main), var(--c-deep));
+            color: #fff; padding: 10px 16px;
+            border-radius: 10px; font-size: 12px;
+            font-family: var(--font-body);
+            box-shadow: 0 0 14px rgba(255,152,0,0.25);
+        }
+
+        /* ═══════════════════════════════════════════════════
+           NOTIFICATIONS — PART 1
+           ═══════════════════════════════════════════════════ */
+        #notifs {
+            position: fixed; top: 80px; right: 16px;
+            z-index: 999; display: flex; flex-direction: column; gap: 10px;
+            pointer-events: none;
+        }
+        .notif {
+            background: rgba(8,8,20,0.97);
+            border: 1px solid rgba(255,152,0,0.2);
+            border-radius: 16px; padding: 14px 18px;
+            max-width: 300px;
+            transform: translateX(120%);
+            transition: 0.4s cubic-bezier(.34,1.56,.64,1);
+            pointer-events: auto;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.03) inset;
+        }
+        .notif::before {
+            content: '';
+            position: absolute; top: 0; left: 12px; right: 12px; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,152,0,0.4), transparent);
+        }
         .notif.show { transform: translateX(0); }
-        .nh { font-size: 13px; font-weight: bold; color: var(--c-main); margin-bottom: 5px; }
-        .nb { font-size: 12px; color: #777; }
-        .nbtns { display: flex; gap: 7px; margin-top: 9px; }
+        .nh { font-size: 13px; font-weight: 700; color: var(--c-main); margin-bottom: 5px; font-family: var(--font-body); letter-spacing: 0.5px; }
+        .nb { font-size: 12px; color: rgba(255,255,255,0.45); line-height: 1.5; }
+        .nbtns { display: flex; gap: 8px; margin-top: 10px; }
 
-        /* SCRIPT EDITOR */
-        .etb { display: flex; gap: 7px; align-items: center; padding: 0 0 12px; border-bottom: 1px solid #1a1a1a; margin-bottom: 12px; flex-wrap: wrap; }
-        .etb button { padding: 6px 12px; border-radius: 7px; font-size: 12px; }
-        #script-ta, #eng-script-ta { flex: 1; background: #070709; border: 1px solid #1a1a1a; color: #d4d4d4; font-family: 'Consolas','Courier New',monospace; font-size: 13px; line-height: 1.6; padding: 14px; border-radius: 10px; resize: none; outline: none; }
-        .sout { height: 90px; background: #050505; border: 1px solid #1a1a1a; border-radius: 8px; padding: 9px 13px; font-family: monospace; font-size: 12px; color: #777; overflow-y: auto; margin-top: 9px; }
-        .ok { color: #00E676 !important; }
+        /* ═══════════════════════════════════════════════════
+           SCRIPT EDITOR — PART 1
+           ═══════════════════════════════════════════════════ */
+        .etb {
+            display: flex; gap: 7px; align-items: center;
+            padding: 0 0 14px; border-bottom: 1px solid rgba(255,255,255,0.06);
+            margin-bottom: 14px; flex-wrap: wrap;
+        }
+        .etb button { padding: 7px 13px; border-radius: 8px; font-size: 12px; }
+
+        #script-ta, #eng-script-ta {
+            flex: 1;
+            background: rgba(3,3,10,0.9);
+            border: 1px solid rgba(255,255,255,0.06);
+            color: #d4d4d4;
+            font-family: 'Consolas','Courier New',monospace;
+            font-size: 13px; line-height: 1.7;
+            padding: 16px 18px;
+            border-radius: 14px; resize: none; outline: none;
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.4) inset;
+        }
+        #script-ta:focus, #eng-script-ta:focus {
+            border-color: rgba(255,152,0,0.2);
+            box-shadow: 0 0 0 3px rgba(255,152,0,0.04);
+        }
+
+        .sout {
+            height: 90px;
+            background: rgba(2,2,8,0.95);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 10px; padding: 10px 14px;
+            font-family: monospace; font-size: 12px;
+            color: rgba(255,255,255,0.35);
+            overflow-y: auto; margin-top: 10px;
+            line-height: 1.6;
+        }
+        .ok { color: var(--c-green) !important; }
         .err { color: #ff6b6b !important; }
 
-        /* TOUCH CONTROLS */
+        /* ═══════════════════════════════════════════════════
+           TOUCH CONTROLS — PART 1
+           ═══════════════════════════════════════════════════ */
         #touch-controls { display: none; position: fixed; inset: 0; pointer-events: none; z-index: 20; }
         @media (pointer: coarse) { #touch-controls { display: block; } }
         .touch-right { position: absolute; bottom: 24px; left: 24px; display: flex; flex-direction: column; gap: 10px; align-items: flex-end; pointer-events: auto; }
-        .touch-place-btn { position: absolute; top: 50%; right: 16px; transform: translateY(-50%); width: 56px; height: 56px; border-radius: 14px; background: rgba(255,152,0,0.2); border: 2px solid rgba(255,152,0,0.5); display: flex; align-items: center; justify-content: center; font-size: 24px; pointer-events: auto; cursor: pointer; -webkit-tap-highlight-color: transparent; }
-        .touch-place-btn:active { background: rgba(255,152,0,0.5); }
-        #mp-panel { position: absolute; top: 16px; right: 65px; background: rgba(0,0,0,0.75); border: 1px solid rgba(0,229,255,0.18); border-radius: 10px; padding: 10px 14px; pointer-events: none; min-width: 150px; }
-        #mp-panel h4 { font-size: 10px; color: var(--c-blue); text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 8px; }
-        .mpp { display: flex; align-items: center; gap: 7px; font-size: 12px; color: #aaa; margin-bottom: 4px; }
-        .mpd { width: 6px; height: 6px; background: var(--c-green); border-radius: 50%; box-shadow: 0 0 5px var(--c-green); }
+        .touch-place-btn {
+            position: absolute; top: 50%; right: 16px; transform: translateY(-50%);
+            width: 56px; height: 56px; border-radius: 16px;
+            background: rgba(255,152,0,0.15);
+            border: 2px solid rgba(255,152,0,0.4);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; pointer-events: auto; cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            backdrop-filter: blur(10px);
+        }
+        .touch-place-btn:active { background: rgba(255,152,0,0.4); }
+        #mp-panel {
+            position: absolute; top: 16px; right: 65px;
+            background: rgba(5,5,16,0.85);
+            border: 1px solid rgba(0,229,255,0.15);
+            border-radius: 12px; padding: 10px 14px;
+            pointer-events: none; min-width: 150px;
+            backdrop-filter: blur(12px);
+        }
+        #mp-panel h4 { font-size: 9px; color: rgba(0,229,255,0.6); text-transform: uppercase; letter-spacing: 2px; margin: 0 0 8px; font-family: var(--font-head); }
+        .mpp { display: flex; align-items: center; gap: 7px; font-size: 12px; color: rgba(255,255,255,0.5); margin-bottom: 4px; }
+        .mpd { width: 6px; height: 6px; background: var(--c-green); border-radius: 50%; box-shadow: 0 0 6px var(--c-green); }
 
-        /* MODAL */
-        .modal-ov { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 400; display: flex; align-items: center; justify-content: center; }
-        .modal-bx { background: #0d0d0d; border: 1px solid rgba(255,152,0,0.3); border-radius: 16px; padding: 28px; width: 380px; max-width: 90vw; }
-        .modal-bx h3 { margin: 0 0 14px; color: var(--c-main); font-size: 15px; }
-        .modal-bx input { width: 100%; background: rgba(255,255,255,0.04); border: 1px solid #222; color: #fff; padding: 11px 13px; border-radius: 8px; font-size: 14px; outline: none; margin-bottom: 12px; }
-        .modal-bx input:focus { border-color: var(--c-main); }
-        .mbtns { display: flex; gap: 9px; }
-        .mbtns button { flex: 1; padding: 11px; border-radius: 8px; font-size: 14px; font-weight: bold; }
+        /* ═══════════════════════════════════════════════════
+           MODAL — PART 1
+           ═══════════════════════════════════════════════════ */
+        .modal-ov {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(8px);
+            z-index: 400;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .modal-bx {
+            background: rgba(8,8,20,0.98);
+            border: 1px solid rgba(255,152,0,0.2);
+            border-radius: 20px; padding: 32px;
+            width: 390px; max-width: 90vw;
+            box-shadow: 0 0 0 1px rgba(255,255,255,0.03) inset, 0 40px 80px rgba(0,0,0,0.8);
+            backdrop-filter: blur(20px);
+        }
+        .modal-bx::before {
+            content: '';
+            position: absolute; top: 0; left: 10%; right: 10%; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,152,0,0.5), transparent);
+        }
+        .modal-bx h3 { margin: 0 0 16px; color: var(--c-main); font-size: 14px; font-family: var(--font-head); letter-spacing: 1px; }
+        .modal-bx input {
+            width: 100%;
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+            color: #fff; padding: 12px 14px; border-radius: 10px;
+            font-size: 14px; outline: none; margin-bottom: 12px;
+            font-family: var(--font-ui); transition: all 0.2s;
+        }
+        .modal-bx input:focus { border-color: rgba(255,152,0,0.4); }
+        .mbtns { display: flex; gap: 10px; }
+        .mbtns button { flex: 1; padding: 12px; border-radius: 10px; font-size: 13px; font-weight: 700; font-family: var(--font-body); }
+
         @keyframes spin { from{transform:rotate(0deg)}to{transform:rotate(360deg)} }
 
+        /* ═══════════════════════════════════════════════════
+           ANIMATIONS — PART 1
+           ═══════════════════════════════════════════════════ */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(255,152,0,0.1); }
+            50% { box-shadow: 0 0 35px rgba(255,152,0,0.25); }
+        }
+
+        /* Content fade in */
+        #tab-games, #tab-avatar, #tab-shop, #tab-friends,
+        #tab-studio, #tab-quests, #tab-roulette, #tab-credits, #tab-gifts {
+            animation: fadeInUp 0.3s ease both;
+        }
+
         /* CHAT UI */
+
+        /* ═══════════════════════════════════════════════════
+           PART 2 — CONTENT STYLES
+           ═══════════════════════════════════════════════════ */
+
+        /* World Cards */
+        .world-card { position: relative; }
+        .world-emoji {
+            font-size: 52px; z-index: 2; position: relative;
+            filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));
+            transition: transform 0.3s;
+        }
+        .world-card:hover .world-emoji { transform: scale(1.15) translateY(-4px); }
+        .world-glow {
+            position: absolute; inset: 0;
+            transition: opacity 0.3s;
+            opacity: 0.6;
+        }
+        .world-card:hover .world-glow { opacity: 1; }
+        .world-tag { font-family: var(--font-body); font-size: 12px; font-weight: 600; letter-spacing: 0.3px; }
+        .world-players-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--c-green);
+            box-shadow: 0 0 8px var(--c-green);
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+        @keyframes pulse-dot {
+            0%,100% { box-shadow: 0 0 6px var(--c-green); opacity: 1; }
+            50% { box-shadow: 0 0 14px var(--c-green); opacity: 0.7; }
+        }
+
+        .featured-world {
+            border-color: rgba(255,152,0,0.3) !important;
+            box-shadow: 0 0 0 1px rgba(255,152,0,0.1), var(--shadow-card);
+        }
+
+        .hot-badge {
+            background: linear-gradient(135deg, #FF6D00, #FF9800);
+            color: #fff; font-size: 10px; font-weight: 900;
+            padding: 3px 8px; border-radius: 6px;
+            font-family: var(--font-head); letter-spacing: 1px;
+            box-shadow: 0 0 12px rgba(255,109,0,0.4);
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+        .new-badge {
+            background: linear-gradient(135deg, #E91E63, #FF4081);
+            color: #fff; font-size: 10px; font-weight: 900;
+            padding: 3px 8px; border-radius: 6px;
+            font-family: var(--font-head); letter-spacing: 1px;
+            box-shadow: 0 0 12px rgba(233,30,99,0.4);
+        }
+
+        /* Panel Box (reusable card panel) */
+        .panel-box {
+            background: var(--c-surface2);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 18px;
+            padding: 20px 22px;
+            box-shadow: var(--shadow-card);
+        }
+        .panel-box-title {
+            font-size: 12px; font-weight: 800;
+            color: rgba(255,255,255,0.5);
+            text-transform: uppercase; letter-spacing: 2px;
+            margin-bottom: 14px;
+            font-family: var(--font-head);
+        }
+
+        /* Buttons */
+        .btn-ghost {
+            background: rgba(255,255,255,0.04);
+            color: rgba(255,255,255,0.35);
+            border: 1px solid rgba(255,255,255,0.07);
+            padding: 11px; border-radius: 12px;
+            font-size: 13px; font-family: var(--font-body);
+            transition: all 0.2s;
+        }
+        .btn-ghost:hover { background: rgba(255,60,60,0.08); color: #ff6b6b; border-color: rgba(255,60,60,0.2); }
+
+        .btn-cyan {
+            background: rgba(0,229,255,0.08);
+            color: var(--c-blue);
+            border: 1px solid rgba(0,229,255,0.18);
+            padding: 12px 24px; border-radius: 12px;
+            font-size: 13px; font-family: var(--font-body); font-weight: 700;
+        }
+        .btn-cyan:hover { background: rgba(0,229,255,0.14); box-shadow: 0 0 16px rgba(0,229,255,0.1); }
+
+        .btn-orange-full {
+            width: 100%; padding: 13px;
+            background: linear-gradient(135deg, #FF8F00, #FF5722);
+            color: #fff; border-radius: 12px;
+            font-size: 14px; font-weight: 700;
+            font-family: var(--font-body); letter-spacing: 0.5px;
+            box-shadow: 0 4px 16px rgba(255,87,34,0.3);
+            transition: all 0.2s;
+        }
+        .btn-orange-full:hover { box-shadow: 0 6px 24px rgba(255,87,34,0.5); transform: translateY(-1px); }
+
+        /* Hint tag */
+        .hint-tag {
+            font-size: 12px; color: rgba(255,255,255,0.25);
+            font-family: var(--font-ui);
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            padding: 6px 12px; border-radius: 8px;
+        }
+
+        /* Studio hero */
+        .studio-hero {
+            display: flex; align-items: center; gap: 18px;
+            background: linear-gradient(135deg, rgba(255,152,0,0.07), rgba(255,152,0,0.02));
+            border: 1px solid rgba(255,152,0,0.15);
+            border-radius: 18px; padding: 22px 24px;
+            margin-bottom: 20px;
+        }
+        .studio-hero-icon {
+            width: 52px; height: 52px; border-radius: 14px;
+            background: linear-gradient(135deg, rgba(255,152,0,0.2), rgba(255,152,0,0.08));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 26px; flex-shrink: 0;
+            box-shadow: 0 0 20px rgba(255,152,0,0.15);
+            border: 1px solid rgba(255,152,0,0.2);
+        }
+
+        /* Inbox tabs */
+        .inbox-tab {
+            flex: 1; padding: 8px;
+            border-radius: 9px; font-size: 11px; font-weight: 700;
+            background: rgba(255,255,255,0.04);
+            color: rgba(255,255,255,0.3);
+            border: 1px solid rgba(255,255,255,0.07);
+            font-family: var(--font-body); letter-spacing: 0.3px;
+            transition: all 0.2s;
+        }
+        .inbox-tab-active {
+            background: rgba(255,64,129,0.12) !important;
+            color: var(--c-pink) !important;
+            border-color: rgba(255,64,129,0.2) !important;
+            box-shadow: 0 0 12px rgba(255,64,129,0.1);
+        }
+
+        /* Small refresh button */
+        .btn-mini-refresh {
+            margin-left: auto;
+            background: rgba(255,255,255,0.05);
+            color: rgba(255,255,255,0.35);
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 4px 10px; border-radius: 7px;
+            font-size: 13px; cursor: pointer;
+        }
+        .btn-mini-refresh:hover { color: #fff; background: rgba(255,255,255,0.1); }
+
+        /* Styled inputs */
+        .styled-input {
+            width: 100%; padding: 12px 14px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #fff; border-radius: 11px;
+            font-size: 13px; outline: none;
+            font-family: var(--font-ui);
+            transition: all 0.2s;
+        }
+        .styled-input:focus {
+            border-color: rgba(255,152,0,0.4);
+            box-shadow: 0 0 0 3px rgba(255,152,0,0.06);
+        }
+        .styled-input::placeholder { color: rgba(255,255,255,0.2); }
+
+        .styled-select {
+            width: 100%; padding: 12px 14px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #fff; border-radius: 11px;
+            font-size: 13px; outline: none;
+            font-family: var(--font-ui); cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(255,152,0,0.5)' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+        }
+        .styled-select option { background: #0d0d1e; color: #fff; }
+
+        /* Roulette */
+        .roulette-title {
+            font-family: var(--font-head);
+            font-size: 22px; font-weight: 900;
+            letter-spacing: 3px;
+            background: linear-gradient(135deg, #FF9800, #FFD54F);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 16px rgba(255,152,0,0.4));
+        }
+        .roulette-arrow {
+            font-size: 24px; line-height: 1;
+            color: var(--c-main);
+            filter: drop-shadow(0 0 10px rgba(255,152,0,0.7));
+            animation: arrow-bounce 1s ease-in-out infinite;
+        }
+        @keyframes arrow-bounce {
+            0%,100% { transform: translateY(0); }
+            50% { transform: translateY(4px); }
+        }
+        .roulette-ring {
+            position: relative;
+            padding: 6px;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, rgba(255,152,0,0.3), rgba(255,183,77,0.1), rgba(255,152,0,0.3), rgba(255,109,0,0.2), rgba(255,152,0,0.3));
+            box-shadow: 0 0 30px rgba(255,152,0,0.2), 0 0 60px rgba(255,152,0,0.08);
+            animation: ring-spin 8s linear infinite;
+        }
+        @keyframes ring-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .roulette-ring canvas { border-radius: 50%; }
+
+        .roulette-result {
+            text-align: center; font-size: 22px; font-weight: 900;
+            color: #FFD700; min-height: 32px;
+            font-family: var(--font-head);
+            filter: drop-shadow(0 0 16px rgba(255,215,0,0.5));
+        }
+        .btn-spin {
+            padding: 14px 44px;
+            background: linear-gradient(135deg, #FF8F00, #E65100);
+            border: none; border-radius: 50px;
+            color: #fff; font-size: 15px; font-weight: 900;
+            letter-spacing: 2px; cursor: pointer;
+            font-family: var(--font-head);
+            box-shadow: 0 6px 24px rgba(255,109,0,0.4), 0 0 0 1px rgba(255,183,77,0.2) inset;
+            transition: all 0.25s;
+            position: relative; overflow: hidden;
+        }
+        .btn-spin::before {
+            content: '';
+            position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        .btn-spin:hover { box-shadow: 0 8px 32px rgba(255,109,0,0.6); transform: translateY(-2px); }
+        .btn-spin:hover::before { left: 100%; }
+
+        .leaderboard-panel {
+            background: var(--c-surface2);
+            border-radius: 14px; overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.06);
+            box-shadow: var(--shadow-card);
+        }
+
+        /* ═══════════════════════════════════════════════════
+           PART 3 — FINAL POLISH
+           ═══════════════════════════════════════════════════ */
+
+        /* Quest cards (JS-rendered) */
+        #quests-list > div {
+            transition: transform 0.2s, box-shadow 0.2s !important;
+        }
+        #quests-list > div:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5) !important;
+        }
+
+        /* Credits list items (JS-rendered) */
+        #credits-list > div {
+            transition: all 0.2s;
+        }
+        #credits-list > div:hover {
+            border-color: rgba(255,152,0,0.2) !important;
+        }
+
+        /* Roulette leaderboard rows */
+        #roulette-leaderboard > div {
+            transition: background 0.15s;
+        }
+        #roulette-leaderboard > div:hover {
+            background: rgba(255,255,255,0.03) !important;
+        }
+
+        /* Friend request items (JS-rendered) */
+        #srch-res .fr, #inbox-in .fr, #inbox-out .fr {
+            animation: fadeInUp 0.25s ease both;
+        }
+
+        /* Gift friend pills */
+        #gift-friend-list button {
+            background: rgba(255,255,255,0.05) !important;
+            border: 1px solid rgba(255,255,255,0.08) !important;
+            color: rgba(255,255,255,0.6) !important;
+            border-radius: 50px !important;
+            padding: 6px 14px !important;
+            font-size: 12px !important;
+            font-family: var(--font-body) !important;
+            font-weight: 600 !important;
+            transition: all 0.2s !important;
+        }
+        #gift-friend-list button:hover,
+        #gift-friend-list button.sel {
+            background: rgba(255,152,0,0.15) !important;
+            border-color: rgba(255,152,0,0.3) !important;
+            color: var(--c-main) !important;
+            box-shadow: 0 0 12px rgba(255,152,0,0.1) !important;
+        }
+
+        /* Inbox mail items */
+        #inbox-in > div, #inbox-out > div {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-bottom: 8px;
+            transition: all 0.2s;
+            font-size: 13px;
+            font-family: var(--font-ui);
+            line-height: 1.5;
+        }
+        #inbox-in > div:hover, #inbox-out > div:hover {
+            border-color: rgba(255,152,0,0.15);
+            background: rgba(255,152,0,0.02);
+        }
+
+        /* Search results */
+        #srch-res .fr {
+            cursor: pointer;
+        }
+
+        /* Active credit / debt display */
+        #my-active-credit > div, #my-debt-info {
+            font-family: var(--font-ui);
+            font-size: 13px;
+            color: rgba(255,255,255,0.5);
+            line-height: 1.6;
+        }
+
+        /* Quests badge glow */
+        #quest-badge:not(.hidden) {
+            animation: pulse-badge 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse-badge {
+            0%,100% { box-shadow: 0 0 8px rgba(255,64,129,0.4); }
+            50% { box-shadow: 0 0 16px rgba(255,64,129,0.7); }
+        }
+
+        /* HUB content fade in per tab */
+        #tab-games   { animation: fadeInUp 0.3s ease both; }
+        #tab-avatar  { animation: fadeInUp 0.3s ease both; }
+        #tab-shop    { animation: fadeInUp 0.3s ease both; }
+        #tab-friends { animation: fadeInUp 0.3s ease both; }
+        #tab-studio  { animation: fadeInUp 0.3s ease both; }
+        #tab-quests  { animation: fadeInUp 0.3s ease both; }
+        #tab-roulette{ animation: fadeInUp 0.3s ease both; }
+        #tab-credits { animation: fadeInUp 0.3s ease both; }
+        #tab-gifts   { animation: fadeInUp 0.3s ease both; }
+
+        /* Inventory list polish */
+        #inventory-list li {
+            transition: all 0.2s;
+        }
+        #inventory-list li:hover {
+            border-color: rgba(255,152,0,0.2) !important;
+            background: rgba(255,152,0,0.04) !important;
+        }
+
+        /* Avatar panel side */
+        #tab-avatar > div > div:last-child .panel-box {
+            animation: fadeInUp 0.35s 0.1s ease both;
+        }
+
+        /* Multiplayer panel */
+        #mp-panel {
+            animation: fadeInUp 0.3s ease both;
+        }
+
+        /* Studio script editor glow on focus */
+        #hub-script {
+            animation: fadeInUp 0.25s ease both;
+        }
+
+        /* In-game balance display */
+        #ingame-ui {
+            animation: fadeInUp 0.3s ease both;
+        }
+
+        /* Scrollbar global polish */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,152,0,0.2) transparent;
+        }
+        *::-webkit-scrollbar { width: 4px; height: 4px; }
+        *::-webkit-scrollbar-track { background: transparent; }
+        *::-webkit-scrollbar-thumb { background: rgba(255,152,0,0.2); border-radius: 4px; }
+        *::-webkit-scrollbar-thumb:hover { background: rgba(255,152,0,0.4); }
+
+        /* Card stagger animation on load */
+        .grid .card:nth-child(1) { animation-delay: 0.02s; }
+        .grid .card:nth-child(2) { animation-delay: 0.04s; }
+        .grid .card:nth-child(3) { animation-delay: 0.06s; }
+        .grid .card:nth-child(4) { animation-delay: 0.08s; }
+        .grid .card:nth-child(5) { animation-delay: 0.10s; }
+        .grid .card:nth-child(6) { animation-delay: 0.12s; }
+        .grid .card:nth-child(7) { animation-delay: 0.14s; }
+        .grid .card:nth-child(8) { animation-delay: 0.16s; }
+        .grid .card:nth-child(9) { animation-delay: 0.18s; }
+        .grid .card { animation: fadeInUp 0.4s ease both; }
+
+        /* Sidebar nav stagger */
+        .nav-item:nth-child(1) { animation: fadeInUp 0.3s 0.05s ease both; }
+        .nav-item:nth-child(2) { animation: fadeInUp 0.3s 0.08s ease both; }
+        .nav-item:nth-child(3) { animation: fadeInUp 0.3s 0.11s ease both; }
+        .nav-item:nth-child(4) { animation: fadeInUp 0.3s 0.14s ease both; }
+        .nav-item:nth-child(5) { animation: fadeInUp 0.3s 0.17s ease both; }
+        .nav-item:nth-child(6) { animation: fadeInUp 0.3s 0.20s ease both; }
+        .nav-item:nth-child(7) { animation: fadeInUp 0.3s 0.23s ease both; }
+        .nav-item:nth-child(8) { animation: fadeInUp 0.3s 0.26s ease both; }
+        .nav-item:nth-child(9) { animation: fadeInUp 0.3s 0.29s ease both; }
+
+        /* Panel box stagger in friends/credits/gifts */
+        .fp { animation: fadeInUp 0.35s ease both; }
+        .panel-box { animation: fadeInUp 0.35s ease both; }
+
+        /* Focus ring for inputs */
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+        }
+
+        /* Notif border colors by type */
+        .notif[data-type="success"] { border-color: rgba(0,230,118,0.3); }
+        .notif[data-type="error"] { border-color: rgba(255,107,107,0.3); }
+
+        /* Roulette spinning state */
+        #roulette-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* Header logo animation on hub load */
+        .header-logo {
+            animation: fadeInUp 0.5s ease both;
+        }
+        .balance-chip {
+            animation: fadeInUp 0.5s 0.1s ease both;
+        }
+
+        /* Tooltip-like tag hint */
+        #my-tag-hint:hover {
+            color: var(--c-glow) !important;
+        }
+
+        /* Studio hero border glow on hover */
+        .studio-hero:hover {
+            border-color: rgba(255,152,0,0.25);
+            box-shadow: 0 0 30px rgba(255,152,0,0.06);
+        }
+
+        /* Quests timer bar */
+        #quests-list > div .quest-timer {
+            font-size: 11px;
+            color: rgba(255,152,0,0.5);
+            font-family: var(--font-head);
+            letter-spacing: 0.5px;
+        }
+
+        /* Empty state styling */
+        .empty-state {
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 40px 20px; gap: 12px;
+            color: rgba(255,255,255,0.2);
+            font-family: var(--font-ui); font-size: 13px;
+            text-align: center;
+        }
+        .empty-state-icon { font-size: 36px; opacity: 0.4; }
+
+        /* Mobile tweaks */
+        @media (max-width: 768px) {
+            .sidebar { width: 200px; }
+            .content-area { padding: 20px; }
+            .login-box { width: 340px; padding: 36px 28px; }
+            .login-logo { font-size: 40px; }
+        }
+        @media (max-width: 500px) {
+            .sidebar { width: 60px; }
+            .nav-item span:not(.nav-badge) { display: none; }
+            .sidebar-label { display: none; }
+            .nav-item { justify-content: center; padding: 14px; }
+            .nav-item .nav-icon { margin: 0; }
+        }
     </style>
 </head>
 <body>
@@ -139,17 +1284,15 @@
 
 <div id="ui-login">
     <div class="login-box">
-        <h1 style="color:var(--c-main);margin:0 0 5px;font-size:48px;text-shadow:0 0 30px rgba(255,152,0,0.5);">CITRUS</h1>
-        <p style="color:#555;margin:0 0 20px;font-size:12px;letter-spacing:2px;text-transform:uppercase;">Online · Creator Edition</p>
+        <div class="login-logo">CITRUS</div>
+        <p class="login-sub">Online · Creator Edition</p>
 
         <!-- Табы -->
-        <div style="display:flex;gap:0;margin-bottom:20px;border-radius:10px;overflow:hidden;border:1px solid #333;">
-            <button id="tab-login-btn" onclick="app.switchAuthTab('login')"
-                style="flex:1;padding:11px;background:rgba(255,152,0,0.2);color:var(--c-main);border:none;font-weight:bold;font-size:14px;cursor:pointer;">
+        <div class="auth-tabs">
+            <button id="tab-login-btn" onclick="app.switchAuthTab('login')" class="auth-tab-btn active-tab">
                 🔑 Войти
             </button>
-            <button id="tab-reg-btn" onclick="app.switchAuthTab('register')"
-                style="flex:1;padding:11px;background:transparent;color:#555;border:none;font-weight:bold;font-size:14px;cursor:pointer;">
+            <button id="tab-reg-btn" onclick="app.switchAuthTab('register')" class="auth-tab-btn">
                 ✨ Регистрация
             </button>
         </div>
@@ -178,149 +1321,210 @@
 
 <div id="ui-hub" class="hidden">
     <div class="hub-header">
-        <h2 style="color:var(--c-main);margin:0;font-size:26px;text-shadow:0 0 15px rgba(255,152,0,0.4);letter-spacing:3px;">CITRUS</h2>
-        <div style="margin-left:auto;display:flex;align-items:center;gap:22px;">
-            <span id="display-name" style="font-weight:bold;font-size:15px;color:#ccc;"></span>
-            <span style="color:var(--c-main);font-weight:bold;font-size:15px;background:rgba(255,152,0,0.1);padding:7px 14px;border-radius:12px;border:1px solid rgba(255,152,0,0.2);">🍊 <span id="balance-val">0</span></span>
-            <button onclick="app.logout()" style="background:transparent; color:#ff6b6b; font-size:12px; border: 1px solid #ff6b6b; padding: 5px 10px; border-radius: 5px;">Сменить аккаунт</button>
+        <div class="header-logo">CITRUS</div>
+        <div class="header-divider"></div>
+        <div class="header-right">
+            <span id="display-name" class="header-username"></span>
+            <div class="balance-chip">🍊 <span id="balance-val">0</span></div>
+            <button onclick="app.logout()" class="btn-logout">Сменить аккаунт</button>
         </div>
     </div>
     <div class="hub-body">
         <div class="sidebar">
-            <div class="nav-item active" id="nav-games"   onclick="app.switchTab('games')">  <i class="fas fa-gamepad"       style="width:16px"></i> Миры</div>
-            <div class="nav-item"        id="nav-avatar"  onclick="app.switchTab('avatar')"> <i class="fas fa-user-astronaut" style="width:16px"></i> Аватар</div>
-            <div class="nav-item"        id="nav-shop"    onclick="app.switchTab('shop')">   <i class="fas fa-store"          style="width:16px"></i> Магазин</div>
-            <div class="nav-item"        id="nav-friends" onclick="app.switchTab('friends')"><i class="fas fa-users"          style="width:16px"></i> Друзья <span class="nav-badge hidden" id="fr-badge">0</span></div>
-            <div class="nav-item"        id="nav-studio"  onclick="app.switchTab('studio')"> <i class="fas fa-cube"           style="width:16px"></i> Студия</div>
-            <div class="nav-item" id="nav-quests" onclick="app.switchTab('quests')"><i class="fas fa-tasks" style="width:16px"></i> Задания <span class="nav-badge hidden" id="quest-badge">!</span></div>
-            <div class="nav-item" id="nav-roulette" onclick="app.switchTab('roulette')"><i class="fas fa-dice" style="width:16px"></i> Рулетка</div>
-            <div class="nav-item" id="nav-credits" onclick="app.switchTab('credits')"><i class="fas fa-hand-holding-usd" style="width:16px"></i> Кредиты</div>
-            <div class="nav-item" id="nav-gifts" onclick="app.switchTab('gifts')"><i class="fas fa-gift" style="width:16px"></i> Подарки</div>
+            <div class="sidebar-label">Навигация</div>
+            <div class="nav-item active" id="nav-games"   onclick="app.switchTab('games')">  <div class="nav-icon"><i class="fas fa-gamepad"></i></div> Миры</div>
+            <div class="nav-item"        id="nav-avatar"  onclick="app.switchTab('avatar')"> <div class="nav-icon"><i class="fas fa-user-astronaut"></i></div> Аватар</div>
+            <div class="nav-item"        id="nav-shop"    onclick="app.switchTab('shop')">   <div class="nav-icon"><i class="fas fa-store"></i></div> Магазин</div>
+            <div class="nav-item"        id="nav-friends" onclick="app.switchTab('friends')"><div class="nav-icon"><i class="fas fa-users"></i></div> Друзья <span class="nav-badge hidden" id="fr-badge">0</span></div>
+            <div class="nav-item"        id="nav-studio"  onclick="app.switchTab('studio')"> <div class="nav-icon"><i class="fas fa-cube"></i></div> Студия</div>
+            <div class="sidebar-label" style="margin-top:8px;">Активности</div>
+            <div class="nav-item" id="nav-quests"   onclick="app.switchTab('quests')">  <div class="nav-icon"><i class="fas fa-tasks"></i></div> Задания <span class="nav-badge hidden" id="quest-badge">!</span></div>
+            <div class="nav-item" id="nav-roulette" onclick="app.switchTab('roulette')"><div class="nav-icon"><i class="fas fa-dice"></i></div> Рулетка</div>
+            <div class="nav-item" id="nav-credits"  onclick="app.switchTab('credits')"> <div class="nav-icon"><i class="fas fa-coins"></i></div> Кредиты</div>
+            <div class="nav-item" id="nav-gifts"    onclick="app.switchTab('gifts')">   <div class="nav-icon"><i class="fas fa-gift"></i></div> Подарки</div>
         </div>
         <div class="content-area">
 
+            <!-- ══════════════════ TAB: GAMES ══════════════════ -->
             <div id="tab-games">
                 <div class="section-title">Официальные миры</div>
-                <div class="grid" style="margin-bottom:28px;">
-                    <div class="card" onclick="app.launch('play','lobby')">
-                        <div class="card-thumb" style="background:radial-gradient(circle,#0a0a20,#050505)">🌆</div>
-                        <div class="card-info"><div><b>Главная Площадь</b><br><small style="color:#555">Общение</small></div></div>
+                <div class="grid" style="margin-bottom:32px;">
+
+                    <div class="card world-card" onclick="app.launch('play','lobby')">
+                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,#0d1230,#050510);">
+                            <span class="world-emoji">🌆</span>
+                            <div class="world-glow" style="background:rgba(100,120,255,0.15);"></div>
+                        </div>
+                        <div class="card-info">
+                            <div><b>Главная Площадь</b><br><small class="world-tag" style="color:rgba(150,170,255,0.7)">💬 Общение</small></div>
+                            <div class="world-players-dot"></div>
+                        </div>
                     </div>
-                    <div class="card" onclick="app.launch('play','gather')" style="border-color:rgba(255,152,0,0.3)">
-                        <div class="card-thumb" style="background:radial-gradient(circle,rgba(255,152,0,0.12),#050505)">🍊</div>
-                        <div class="card-info"><div><b>Цитрусовый Лес</b><br><small style="color:var(--c-main)">Фарм монет!</small></div></div>
+
+                    <div class="card world-card featured-world" onclick="app.launch('play','gather')">
+                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(255,152,0,0.2),#050510);">
+                            <span class="world-emoji">🍊</span>
+                            <div class="world-glow" style="background:rgba(255,152,0,0.2);"></div>
+                        </div>
+                        <div class="card-info">
+                            <div><b>Цитрусовый Лес</b><br><small class="world-tag" style="color:var(--c-main)">💰 Фарм монет!</small></div>
+                            <span class="hot-badge">HOT</span>
+                        </div>
                     </div>
-                    <div class="card" onclick="app.launch('play','parkour')">
-                        <div class="card-thumb" style="background:radial-gradient(circle,rgba(0,229,255,0.08),#050505)">🏃</div>
-                        <div class="card-info"><div><b>Небесный Паркур</b><br><small style="color:#555">Испытай себя</small></div></div>
+
+                    <div class="card world-card" onclick="app.launch('play','parkour')">
+                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(0,229,255,0.1),#050510);">
+                            <span class="world-emoji">🏃</span>
+                            <div class="world-glow" style="background:rgba(0,229,255,0.1);"></div>
+                        </div>
+                        <div class="card-info">
+                            <div><b>Небесный Паркур</b><br><small class="world-tag" style="color:rgba(0,229,255,0.7)">⚡ Испытай себя</small></div>
+                        </div>
                     </div>
-                    <div class="card" onclick="app.launch('play','volcano')">
-                        <div class="card-thumb" style="background:radial-gradient(circle,rgba(255,80,0,0.12),#050505)">🌋</div>
-                        <div class="card-info"><div><b>Остров Вулкана</b><br><small style="color:#ff6030">Горячо!</small></div></div>
+
+                    <div class="card world-card" onclick="app.launch('play','volcano')">
+                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(255,80,0,0.18),#050510);">
+                            <span class="world-emoji">🌋</span>
+                            <div class="world-glow" style="background:rgba(255,80,0,0.2);"></div>
+                        </div>
+                        <div class="card-info">
+                            <div><b>Остров Вулкана</b><br><small class="world-tag" style="color:#ff7040">🔥 Горячо!</small></div>
+                        </div>
                     </div>
-                    <div class="card" onclick="app.launch('play','space')">
-                        <div class="card-thumb" style="background:radial-gradient(circle,rgba(80,0,200,0.1),#050505)">🚀</div>
-                        <div class="card-info"><div><b>Космическая База</b><br><small style="color:#a070ff">Невесомость</small></div></div>
+
+                    <div class="card world-card" onclick="app.launch('play','space')">
+                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(100,0,255,0.15),#050510);">
+                            <span class="world-emoji">🚀</span>
+                            <div class="world-glow" style="background:rgba(100,0,255,0.18);"></div>
+                        </div>
+                        <div class="card-info">
+                            <div><b>Космическая База</b><br><small class="world-tag" style="color:#b090ff">🌌 Невесомость</small></div>
+                        </div>
                     </div>
-                    <div class="card" onclick="app.launch('play','hideseek')">
-                        <div class="card-thumb" style="background:radial-gradient(circle,rgba(0,200,100,0.1),#050505)">🙈</div>
-                        <div class="card-info"><div><b>Прятки</b><br><small style="color:#00e676">Найди всех!</small></div></div>
+
+                    <div class="card world-card" onclick="app.launch('play','hideseek')">
+                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(0,200,100,0.12),#050510);">
+                            <span class="world-emoji">🙈</span>
+                            <div class="world-glow" style="background:rgba(0,200,100,0.15);"></div>
+                        </div>
+                        <div class="card-info">
+                            <div><b>Прятки</b><br><small class="world-tag" style="color:rgba(0,230,118,0.8)">👁 Найди всех!</small></div>
+                        </div>
                     </div>
-                    <div class="card" onclick="app.launch('play','snowmount')">
-                        <div class="card-thumb" style="background:radial-gradient(circle,rgba(100,200,255,0.12),#050505)">🏔️</div>
-                        <div class="card-info"><div><b>Снежная Гора</b><br><small style="color:#00e5ff">🏆 2000 🍊 за вершину!</small></div></div>
+
+                    <div class="card world-card" onclick="app.launch('play','snowmount')">
+                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(100,200,255,0.15),#050510);">
+                            <span class="world-emoji">🏔️</span>
+                            <div class="world-glow" style="background:rgba(100,200,255,0.15);"></div>
+                        </div>
+                        <div class="card-info">
+                            <div><b>Снежная Гора</b><br><small class="world-tag" style="color:rgba(0,229,255,0.8)">🏆 2000 🍊 за вершину!</small></div>
+                        </div>
                     </div>
-                    <div class="card" onclick="app.launch('play','dungeon')">
-                        <div class="card-thumb" style="background:radial-gradient(circle,rgba(150,0,200,0.12),#050505)">⚔️</div>
-                        <div class="card-info"><div><b>Тёмное Подземелье</b><br><small style="color:#c060ff">Выберись живым</small></div></div>
+
+                    <div class="card world-card" onclick="app.launch('play','dungeon')">
+                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(150,0,200,0.18),#050510);">
+                            <span class="world-emoji">⚔️</span>
+                            <div class="world-glow" style="background:rgba(150,0,200,0.2);"></div>
+                        </div>
+                        <div class="card-info">
+                            <div><b>Тёмное Подземелье</b><br><small class="world-tag" style="color:#c060ff">💀 Выберись живым</small></div>
+                        </div>
                     </div>
-                    <div class="card" onclick="app.launch('play','march8')" style="border:1px solid rgba(255,100,150,0.3)">
-                        <div class="card-thumb" style="background:radial-gradient(circle,rgba(255,100,150,0.15),#050505)">🌸</div>
-                        <div class="card-info"><div><b>🌸 8 Марта</b><br><small style="color:#ff6eb4">Цветы и весна!</small></div></div>
-                    </div>
+
+
+
                 </div>
                 <div class="section-title">Миры игроков</div>
                 <div class="grid" id="my-games-grid"></div>
             </div>
 
+            <!-- ══════════════════ TAB: AVATAR ══════════════════ -->
             <div id="tab-avatar" class="hidden">
                 <div class="section-title">Твой аватар</div>
-                <div style="display:flex;gap:18px;">
+                <div style="display:flex;gap:20px;">
                     <div id="avatar-container" style="flex:2;"></div>
-                    <div style="flex:1;display:flex;flex-direction:column;gap:11px;">
-                        <div style="background:#0e0e0e;padding:16px;border-radius:12px;border:1px solid #1e1e1e;">
-                            <div class="section-title" style="margin-bottom:11px;">Надето</div>
+                    <div style="flex:1;display:flex;flex-direction:column;gap:12px;">
+                        <div class="panel-box">
+                            <div class="panel-box-title">👗 Надето</div>
                             <ul id="inventory-list" style="list-style:none;padding:0;display:flex;flex-direction:column;gap:7px;"></ul>
                         </div>
-                        <button onclick="app.resetAvatar()" style="background:#111;color:#555;padding:11px;border-radius:10px;font-size:13px;border:1px solid #1e1e1e;">Снять всё</button>
+                        <button onclick="app.resetAvatar()" class="btn-ghost">🗑 Снять всё</button>
                     </div>
                 </div>
             </div>
 
+            <!-- ══════════════════ TAB: SHOP ══════════════════ -->
             <div id="tab-shop" class="hidden">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;">
                     <div class="section-title" style="margin:0;">Магазин</div>
-                    <span style="font-size:12px;color:#444;">Зарабатывай 🍊 в Цитрусовом Лесу</span>
+                    <span class="hint-tag">💡 Зарабатывай 🍊 в Цитрусовом Лесу</span>
                 </div>
                 <div class="grid" id="shop-grid"></div>
             </div>
 
+            <!-- ══════════════════ TAB: FRIENDS ══════════════════ -->
             <div id="tab-friends" class="hidden">
                 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;">
 
-                    <!-- ПОИСК -->
                     <div class="fp">
                         <h3>🔍 Найти игрока</h3>
                         <div class="srow">
                             <input type="text" id="srch" placeholder="Ник или Ник#1234..." autocomplete="off" onkeydown="if(event.key==='Enter')app.searchPlayer()">
                             <button onclick="app.searchPlayer()">Поиск</button>
                         </div>
-                        <div style="font-size:11px;color:#444;margin:-4px 0 12px;padding:0 2px;">
-                            Твой тег: <span id="my-tag-hint" style="color:var(--c-main);cursor:pointer;border-bottom:1px dotted var(--c-main);" title="Нажми — скопировать" onclick="navigator.clipboard&&navigator.clipboard.writeText(app.fullTag).then(()=>app.showNotif('📋','Скопировано!',app.fullTag))"></span>
+                        <div style="font-size:11px;color:rgba(255,152,0,0.4);margin:-4px 0 12px;padding:0 2px;font-family:var(--font-body);">
+                            Твой тег: <span id="my-tag-hint" style="color:var(--c-main);cursor:pointer;border-bottom:1px dotted rgba(255,152,0,0.4);" title="Нажми — скопировать" onclick="navigator.clipboard&&navigator.clipboard.writeText(app.fullTag).then(()=>app.showNotif('📋','Скопировано!',app.fullTag))"></span>
                         </div>
-                        <div id="srch-res"><div style="color:#333;font-size:12px;padding:6px;">Введи ник и нажми Поиск</div></div>
+                        <div id="srch-res"><div style="color:rgba(255,255,255,0.2);font-size:12px;padding:8px;text-align:center;">Введи ник и нажми Поиск</div></div>
                     </div>
 
-                    <!-- ПОЧТА / ВХОДЯЩИЕ -->
                     <div class="fp" style="position:relative;">
                         <h3 style="display:flex;align-items:center;gap:8px;">
                             📬 Почта
-                            <span id="inbox-badge" style="display:none;background:var(--c-pink);color:#fff;font-size:10px;font-weight:bold;padding:2px 7px;border-radius:20px;"></span>
-                            <button onclick="app._readMailbox();app.renderInbox();" style="margin-left:auto;background:#111;color:#555;border:1px solid #222;padding:3px 9px;border-radius:6px;font-size:11px;cursor:pointer;">⟳ Обновить</button>
+                            <span id="inbox-badge" style="display:none;background:var(--c-pink);color:#fff;font-size:10px;font-weight:bold;padding:2px 7px;border-radius:20px;box-shadow:0 0 10px rgba(255,64,129,0.4);"></span>
+                            <button onclick="app._readMailbox();app.renderInbox();" class="btn-mini-refresh">⟳</button>
                         </h3>
                         <div id="inbox-tabs" style="display:flex;gap:6px;margin-bottom:14px;">
-                            <button id="itab-in"  onclick="app.switchInbox('in')"  style="flex:1;padding:7px;border-radius:8px;font-size:11px;font-weight:bold;background:rgba(255,64,129,0.15);color:var(--c-pink);border:1px solid rgba(255,64,129,0.2);">Входящие</button>
-                            <button id="itab-out" onclick="app.switchInbox('out')" style="flex:1;padding:7px;border-radius:8px;font-size:11px;font-weight:bold;background:#111;color:#555;border:1px solid #1e1e1e;">Исходящие</button>
+                            <button id="itab-in"  onclick="app.switchInbox('in')"  class="inbox-tab inbox-tab-active">Входящие</button>
+                            <button id="itab-out" onclick="app.switchInbox('out')" class="inbox-tab">Исходящие</button>
                         </div>
                         <div id="inbox-in"></div>
                         <div id="inbox-out" style="display:none;"></div>
                     </div>
 
-                    <!-- МОИ ДРУЗЬЯ -->
                     <div class="fp">
                         <h3>💚 Мои друзья</h3>
                         <div id="friends-list"></div>
                     </div>
-
                 </div>
             </div>
 
+            <!-- ══════════════════ TAB: STUDIO ══════════════════ -->
             <div id="tab-studio" class="hidden">
                 <div class="section-title">Студия создателя</div>
-                <p style="color:#555;margin:0 0 22px;font-size:14px;line-height:1.7;">Строй миры из блоков, пиши скрипты на JavaScript, публикуй!</p>
-                <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px;">
-                    <button class="btn-primary" onclick="app.launch('studio','new')" style="width:auto;padding:13px 26px;font-size:14px;">🔨 Открыть студию</button>
-                    <button onclick="app.toggleHubScript()" style="background:rgba(0,229,255,0.08);color:var(--c-blue);padding:13px 26px;border-radius:10px;font-size:14px;border:1px solid rgba(0,229,255,0.18);">📝 Редактор скриптов</button>
+
+                <div class="studio-hero">
+                    <div class="studio-hero-icon">🔨</div>
+                    <div>
+                        <div style="font-size:17px;font-weight:700;font-family:var(--font-body);letter-spacing:0.5px;">Твоя Студия</div>
+                        <div style="font-size:13px;color:rgba(255,255,255,0.4);margin-top:4px;line-height:1.6;">Строй миры из блоков, пиши скрипты на JavaScript и публикуй для всех игроков!</div>
+                    </div>
+                    <div style="display:flex;gap:10px;margin-left:auto;flex-shrink:0;">
+                        <button class="btn-primary" onclick="app.launch('studio','new')" style="width:auto;padding:12px 24px;font-size:13px;">🔨 Открыть студию</button>
+                        <button onclick="app.toggleHubScript()" class="btn-cyan">📝 Редактор</button>
+                    </div>
                 </div>
-                <div id="hub-script" class="hidden" style="height:460px;display:flex;flex-direction:column;">
+
+                <div id="hub-script" class="hidden" style="height:460px;display:flex;flex-direction:column;margin-top:16px;">
                     <div class="etb">
-                        <button onclick="app.runHubScript()" style="background:var(--c-green);color:#000;">▶ Запустить</button>
+                        <button onclick="app.runHubScript()" style="background:linear-gradient(135deg,var(--c-green),#00BF59);color:#000;font-family:var(--font-head);letter-spacing:1px;">▶ Запустить</button>
                         <button onclick="document.getElementById('script-ta').value=''" class="btn-st">Очистить</button>
                         <button onclick="app.loadTpl('spawn')"   class="btn-st">Шаблон: спавн</button>
                         <button onclick="app.loadTpl('collect')" class="btn-st">Шаблон: сбор</button>
                         <button onclick="app.loadTpl('light')"   class="btn-st">Шаблон: свет</button>
                         <button onclick="app.loadTpl('npc')"     class="btn-st">Шаблон: NPC</button>
-                        <span style="margin-left:auto;font-size:11px;color:#333;">JavaScript · Three.js</span>
+                        <span style="margin-left:auto;font-size:11px;color:rgba(0,229,255,0.3);font-family:var(--font-head);letter-spacing:1px;">JS · THREE.JS</span>
                     </div>
                     <textarea id="script-ta" spellcheck="false" placeholder="// Пиши скрипт здесь...
 // Доступны: scene, THREE, spawnBlock(), showMsg()
@@ -330,92 +1534,96 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
                 </div>
             </div>
 
+            <!-- ══════════════════ TAB: QUESTS ══════════════════ -->
             <div id="tab-quests" class="hidden">
                 <div class="section-title">🎯 Задания</div>
                 <div id="quests-list" style="display:flex;flex-direction:column;gap:12px;padding-bottom:20px;"></div>
             </div>
 
-
-        <div id="tab-credits" class="hidden">
-            <div style="width:100%;">
+            <!-- ══════════════════ TAB: CREDITS ══════════════════ -->
+            <div id="tab-credits" class="hidden">
                 <div class="section-title">💳 Кредиты</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
 
-                <!-- Мой кредит -->
-                <div id="my-credit-section" style="background:#0e0e0e;border:1px solid #1e1e1e;border-radius:12px;padding:16px;margin-bottom:16px;">
-                    <div style="font-size:14px;font-weight:bold;color:#FF9800;margin-bottom:12px;">📤 Выставить кредит</div>
-                    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-                        <input id="credit-amount" type="number" min="1000" max="100000" placeholder="Сумма (1000–100000 🍊)" style="flex:1;min-width:160px;padding:10px;background:#111;border:1px solid #2a2a2a;border-radius:8px;color:#fff;font-size:13px;">
-                        <select id="credit-days" style="width:160px;padding:10px;background:#111;border:1px solid #2a2a2a;border-radius:8px;color:#fff;font-size:13px;">
-                            <option value="10">10 минут</option>
-                            <option value="20">20 минут</option>
-                            <option value="30">30 минут</option>
-                            <option value="45">45 минут</option>
-                            <option value="60">1 час</option>
-                        </select>
-                        <button onclick="app.postCredit()" style="padding:10px 20px;background:linear-gradient(135deg,#FF9800,#FF5722);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:bold;cursor:pointer;">Выставить</button>
+                    <div id="my-credit-section" class="panel-box">
+                        <div class="panel-box-title" style="color:var(--c-main);">📤 Выставить кредит</div>
+                        <div style="display:flex;flex-direction:column;gap:10px;">
+                            <input id="credit-amount" type="number" min="1000" max="100000" placeholder="Сумма (1000–100000 🍊)" class="styled-input">
+                            <select id="credit-days" class="styled-select">
+                                <option value="10">10 минут</option>
+                                <option value="20">20 минут</option>
+                                <option value="30">30 минут</option>
+                                <option value="45">45 минут</option>
+                                <option value="60">1 час</option>
+                            </select>
+                            <button onclick="app.postCredit()" class="btn-orange-full">Выставить кредит</button>
+                        </div>
+                        <div id="my-active-credit" style="margin-top:12px;"></div>
                     </div>
-                    <div id="my-active-credit" style="margin-top:12px;"></div>
+
+                    <div id="my-debt-section" class="panel-box" style="display:none;border-color:rgba(255,68,68,0.2);">
+                        <div class="panel-box-title" style="color:#FF4444;">⚠️ Мой долг</div>
+                        <div id="my-debt-info" style="color:rgba(255,255,255,0.5);font-size:13px;line-height:1.6;"></div>
+                        <button onclick="app.repayCredit()" style="margin-top:14px;padding:11px 24px;background:linear-gradient(135deg,#4CAF50,#2E7D32);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font-body);">💸 Вернуть долг</button>
+                    </div>
                 </div>
 
-                <!-- Мой долг -->
-                <div id="my-debt-section" style="background:#0e0e0e;border:1px solid #1e1e1e;border-radius:12px;padding:16px;margin-bottom:16px;display:none;">
-                    <div style="font-size:14px;font-weight:bold;color:#FF4444;margin-bottom:8px;">⚠️ Мой долг</div>
-                    <div id="my-debt-info" style="color:#aaa;font-size:13px;"></div>
-                    <button onclick="app.repayCredit()" style="margin-top:10px;padding:10px 24px;background:linear-gradient(135deg,#4CAF50,#2E7D32);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:bold;cursor:pointer;">💸 Вернуть долг</button>
-                </div>
-
-                <!-- Доступные кредиты -->
-                <div style="font-size:14px;font-weight:bold;color:#FF9800;margin-bottom:10px;">📋 Доступные кредиты</div>
+                <div class="section-title">📋 Доступные кредиты</div>
                 <div id="credits-list" style="display:flex;flex-direction:column;gap:8px;">
-                    <div style="color:#444;font-size:13px;">Загрузка...</div>
+                    <div style="color:rgba(255,255,255,0.2);font-size:13px;text-align:center;padding:20px;">Загрузка...</div>
                 </div>
             </div>
-        </div>
-        <div id="tab-gifts" class="hidden">
-            <h3 style="color:var(--c-main);margin:0 0 16px;font-size:15px;letter-spacing:2px;">🎁 ПОДАРКИ</h3>
 
-            <div style="background:#0d0d0d;border:1px solid #222;border-radius:12px;padding:16px;margin-bottom:14px;">
-                <div style="color:#aaa;font-size:13px;margin-bottom:10px;">Отправить подарок другу</div>
-                <div id="gift-friend-list" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;min-height:36px;">
-                    <div style="color:#444;font-size:12px;">Загрузка...</div>
-                </div>
-                <div style="display:flex;gap:8px;align-items:center;">
-                    <input type="number" id="gift-amount" min="1" max="100000" placeholder="Сумма (1–100 000)" style="flex:1;padding:10px;background:#111;border:1px solid #333;border-radius:8px;color:#fff;font-size:14px;outline:none;">
-                    <span style="color:#FF9800;">🍊</span>
-                </div>
-                <div id="gift-selected-friend" style="margin-top:8px;color:#555;font-size:12px;">Выбери друга выше 👆</div>
-                <button onclick="app.sendGift()" style="margin-top:10px;width:100%;padding:12px;background:linear-gradient(135deg,#FF9800,#FF5722);border:none;border-radius:8px;color:#fff;font-size:14px;font-weight:bold;cursor:pointer;touch-action:manipulation;">🎁 Отправить подарок</button>
-            </div>
+            <!-- ══════════════════ TAB: GIFTS ══════════════════ -->
+            <div id="tab-gifts" class="hidden">
+                <div class="section-title">🎁 Подарки</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
 
-            <div style="background:#0d0d0d;border:1px solid #222;border-radius:12px;padding:16px;">
-                <div style="color:#aaa;font-size:13px;margin-bottom:10px;">📬 Входящие подарки</div>
-                <div id="gifts-inbox"><div style="color:#444;font-size:12px;">Загрузка...</div></div>
-            </div>
-        </div>
-
-        <div id="tab-roulette" class="hidden">
-            <div style="display:flex;align-items:flex-start;justify-content:center;gap:40px;padding-top:20px;width:100%;">
-                <!-- Левая: колесо -->
-                <div style="display:flex;flex-direction:column;align-items:center;gap:5px;">
-                    <div style="text-align:center;">
-                        <div style="font-size:22px;font-weight:bold;color:var(--c-orange);letter-spacing:1px;">🎰 РУЛЕТКА</div>
-                        <div style="color:#555;font-size:12px;margin-top:2px;">Первый раз бесплатно • Затем 50 🍊</div>
+                    <div class="panel-box">
+                        <div class="panel-box-title">🎁 Отправить подарок</div>
+                        <div style="color:rgba(255,255,255,0.4);font-size:12px;margin-bottom:10px;font-family:var(--font-ui);">Выбери друга:</div>
+                        <div id="gift-friend-list" style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px;min-height:36px;">
+                            <div style="color:rgba(255,255,255,0.2);font-size:12px;">Загрузка...</div>
+                        </div>
+                        <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+                            <input type="number" id="gift-amount" min="1" max="100000" placeholder="Сумма (1–100 000 🍊)" class="styled-input" style="flex:1;">
+                        </div>
+                        <div id="gift-selected-friend" style="color:rgba(255,152,0,0.4);font-size:12px;margin-bottom:12px;font-family:var(--font-body);">Выбери друга выше 👆</div>
+                        <button onclick="app.sendGift()" class="btn-orange-full" style="touch-action:manipulation;">🎁 Отправить подарок</button>
                     </div>
-                    <div style="font-size:26px;line-height:1;filter:drop-shadow(0 2px 6px #FF9800);">▼</div>
-                    <canvas id="roulette-canvas" width="260" height="260" style="border-radius:50%;display:block;"></canvas>
-                    <div id="roulette-result" style="text-align:center;font-size:20px;font-weight:bold;color:#FFD700;"></div>
-                    <button id="roulette-btn" onclick="app.spinRoulette()" style="padding:12px 40px;background:linear-gradient(135deg,#FF9800,#FF5722);border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:bold;cursor:pointer;letter-spacing:1px;">🎲 КРУТИТЬ БЕСПЛАТНО</button>
-                    <div id="roulette-status" style="text-align:center;color:#555;font-size:12px;"></div>
-                </div>
-                <!-- Правая: таблица -->
-                <div style="width:240px;padding-top:8px;">
-                    <div style="text-align:center;font-size:13px;font-weight:bold;color:#FF9800;margin-bottom:8px;letter-spacing:1px;">🏆 ТОП ВЫИГРЫШЕЙ</div>
-                    <div id="roulette-leaderboard" style="background:#111;border-radius:10px;overflow:hidden;border:1px solid #222;">
-                        <div style="color:#444;text-align:center;padding:12px;font-size:12px;">Загрузка...</div>
+
+                    <div class="panel-box">
+                        <div class="panel-box-title">📬 Входящие подарки</div>
+                        <div id="gifts-inbox"><div style="color:rgba(255,255,255,0.2);font-size:12px;text-align:center;padding:20px;">Загрузка...</div></div>
                     </div>
                 </div>
             </div>
-        </div>
+
+            <!-- ══════════════════ TAB: ROULETTE ══════════════════ -->
+            <div id="tab-roulette" class="hidden">
+                <div style="display:flex;align-items:flex-start;justify-content:center;gap:40px;padding-top:10px;width:100%;">
+                    <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
+                        <div style="text-align:center;">
+                            <div class="roulette-title">🎰 РУЛЕТКА</div>
+                            <div style="color:rgba(255,255,255,0.3);font-size:12px;margin-top:4px;font-family:var(--font-ui);">Первый раз бесплатно • Затем 50 🍊</div>
+                        </div>
+                        <div class="roulette-arrow">▼</div>
+                        <div class="roulette-ring">
+                            <canvas id="roulette-canvas" width="260" height="260" style="border-radius:50%;display:block;position:relative;z-index:1;"></canvas>
+                        </div>
+                        <div id="roulette-result" class="roulette-result"></div>
+                        <button id="roulette-btn" onclick="app.spinRoulette()" class="btn-spin">🎲 КРУТИТЬ БЕСПЛАТНО</button>
+                        <div id="roulette-status" style="text-align:center;color:rgba(255,255,255,0.3);font-size:12px;font-family:var(--font-ui);"></div>
+                    </div>
+                    <div style="width:260px;padding-top:60px;">
+                        <div class="section-title">🏆 ТОП ВЫИГРЫШЕЙ</div>
+                        <div id="roulette-leaderboard" class="leaderboard-panel">
+                            <div style="color:rgba(255,255,255,0.2);text-align:center;padding:16px;font-size:12px;">Загрузка...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
@@ -1159,10 +2367,8 @@ const app = {
         const isLogin = tab==='login';
         document.getElementById('auth-login-form').style.display = isLogin?'block':'none';
         document.getElementById('auth-reg-form').style.display   = isLogin?'none':'block';
-        document.getElementById('tab-login-btn').style.background = isLogin?'rgba(255,152,0,0.2)':'transparent';
-        document.getElementById('tab-login-btn').style.color = isLogin?'var(--c-main)':'#555';
-        document.getElementById('tab-reg-btn').style.background = !isLogin?'rgba(255,152,0,0.2)':'transparent';
-        document.getElementById('tab-reg-btn').style.color = !isLogin?'var(--c-main)':'#555';
+        document.getElementById('tab-login-btn').classList.toggle('active-tab', isLogin);
+        document.getElementById('tab-reg-btn').classList.toggle('active-tab', !isLogin);
     },
 
     register(){
@@ -1374,10 +2580,15 @@ const app = {
         const g=document.getElementById('shop-grid');if(!g)return;g.innerHTML='';
         SHOP_ITEMS.forEach(it=>{
             const b=this.inventory.includes(it.id);
-            g.innerHTML+=`<div class="card" onclick="app.buyItem('${it.id}',${it.price})" ${b?'style="opacity:0.55"':''}>
-                <div class="card-thumb">${it.icon}</div>
-                <div class="card-info"><b>${it.name}</b>
-                <span class="price-tag" ${b?'style="background:rgba(0,230,118,0.1);color:#00E676"':''}>${b?'✓ Куплено':it.price+' 🍊'}</span></div></div>`;
+            g.innerHTML+=`<div class="card world-card" onclick="app.buyItem('${it.id}',${it.price})" ${b?'style="opacity:0.6"':''}>
+                <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(255,152,0,0.08),#050510);font-size:52px;position:relative;">
+                    <span class="world-emoji" style="z-index:2;position:relative;">${it.icon}</span>
+                    <div class="world-glow" style="background:rgba(255,152,0,0.08);"></div>
+                </div>
+                <div class="card-info">
+                    <div><b style="font-family:var(--font-body);letter-spacing:0.3px;">${it.name}</b></div>
+                    <span class="price-tag" ${b?'style="background:rgba(0,230,118,0.12);color:var(--c-green);border-color:rgba(0,230,118,0.2);"':''}>${b?'✓ Надето':it.price+' 🍊'}</span>
+                </div></div>`;
         });
     },
     buyItem(id,price){
@@ -1402,13 +2613,15 @@ const app = {
         this.buildCharacter(true);
         this.scene.add(this.playerGroup);
         const bv2=document.getElementById('balance-val'); if(bv2) bv2.textContent=this.balance;
-        // Re-render inventory list
         const il=document.getElementById('inventory-list');
         if(il){
-            il.innerHTML=this.inventory.length?'':"<li style='color:#444;font-size:13px'>Ничего нет</li>";
+            il.innerHTML=this.inventory.length?'':`<li style="color:rgba(255,255,255,0.2);font-size:13px;padding:10px;text-align:center;font-family:var(--font-ui);">Ничего нет</li>`;
             this.inventory.forEach(iid=>{
                 const it=SHOP_ITEMS.find(i=>i.id===iid);
-                if(it)il.innerHTML+=`<li style="display:flex;align-items:center;gap:9px;color:#aaa;font-size:13px;padding:7px;background:#111;border-radius:8px;"><span>${it.icon} ${it.name}</span><button onclick="app.removeItem('${iid}')" style="margin-left:auto;background:none;border:none;color:#444;cursor:pointer;font-size:16px;line-height:1;padding:0 2px;" title="Снять">✕</button></li>`;
+                if(it)il.innerHTML+=`<li style="display:flex;align-items:center;gap:10px;color:rgba(255,255,255,0.7);font-size:13px;padding:9px 12px;background:rgba(255,255,255,0.04);border-radius:10px;border:1px solid rgba(255,255,255,0.07);font-family:var(--font-body);font-weight:600;">
+                    <span style="font-size:20px;">${it.icon}</span>
+                    <span>${it.name}</span>
+                    <button onclick="app.removeItem('${iid}')" style="margin-left:auto;background:rgba(255,60,60,0.1);border:1px solid rgba(255,60,60,0.15);color:rgba(255,100,100,0.6);cursor:pointer;font-size:12px;line-height:1;padding:4px 8px;border-radius:6px;transition:all 0.2s;" title="Снять" onmouseover="this.style.background='rgba(255,60,60,0.2)';this.style.color='#ff6b6b'" onmouseout="this.style.background='rgba(255,60,60,0.1)';this.style.color='rgba(255,100,100,0.6)'">✕</button></li>`;
             });
         }
         this.updateAvatarPreview();
@@ -1970,7 +3183,7 @@ const app = {
         const findPeer=id=>pc.find(x=>x.id===id)||globalDB.find(x=>String(x.id)===id)||{id,name:id,color:'#888'};
 
         if(!this.friends.length){
-            fl.innerHTML='<div style="color:#444;font-size:13px;padding:10px;line-height:1.7;">Пока нет друзей.<br><small style="color:#333">Найди игрока и отправь заявку</small></div>';
+            fl.innerHTML=`<div class="empty-state"><div class="empty-state-icon">👥</div>Пока нет друзей<br><span style="color:rgba(255,255,255,0.15);font-size:11px;">Найди игрока и отправь заявку</span></div>`;
             return;
         }
         this.friends.forEach(fid=>{
@@ -2005,13 +3218,11 @@ const app = {
         const inDiv=document.getElementById('inbox-in');
         const outDiv=document.getElementById('inbox-out');
         if(tab==='in'){
-            inBtn.style.background='rgba(255,64,129,0.15)';inBtn.style.color='var(--c-pink)';inBtn.style.borderColor='rgba(255,64,129,0.25)';
-            outBtn.style.background='#111';outBtn.style.color='#555';outBtn.style.borderColor='#1e1e1e';
-            inDiv.style.display='';outDiv.style.display='none';
+            inBtn.classList.add('inbox-tab-active'); outBtn.classList.remove('inbox-tab-active');
+            inDiv.style.display=''; outDiv.style.display='none';
         } else {
-            outBtn.style.background='rgba(0,229,255,0.1)';outBtn.style.color='var(--c-blue)';outBtn.style.borderColor='rgba(0,229,255,0.2)';
-            inBtn.style.background='#111';inBtn.style.color='#555';inBtn.style.borderColor='#1e1e1e';
-            inDiv.style.display='none';outDiv.style.display='';
+            outBtn.classList.add('inbox-tab-active'); inBtn.classList.remove('inbox-tab-active');
+            inDiv.style.display='none'; outDiv.style.display='';
         }
         this.renderInbox();
     },
@@ -3810,32 +5021,32 @@ const app = {
 
     async renderMyGames(){
         const g=document.getElementById('my-games-grid');if(!g)return;
-        g.innerHTML='<p style="color:#444;font-size:13px">⏳ Загрузка...</p>';
-
-        // Загружаем с сервера
+        g.innerHTML='<p style="color:rgba(255,255,255,0.2);font-size:13px;grid-column:1/-1;padding:10px;font-family:var(--font-ui);">⏳ Загрузка...</p>';
         let serverGames=[];
         try{
             const r=await fetch(this._API+'/games');
             if(r.ok) serverGames=await r.json();
         }catch(e){}
-
         g.innerHTML='';
         if(!serverGames.length && !this.customMaps.length){
-            g.innerHTML='<p style="color:#444;grid-column:1/-1;font-size:14px">Нет карт. Создай в Студии!</p>';
+            g.innerHTML='<div style="color:rgba(255,255,255,0.2);grid-column:1/-1;font-size:14px;padding:20px;text-align:center;font-family:var(--font-ui);"><div style="font-size:32px;margin-bottom:8px;">🛠️</div>Нет карт. Создай в Студии!</div>';
             return;
         }
-
-        // Показываем игры с сервера
         serverGames.forEach(m=>{
             const isOwn=String(m.authorId)===String(this.userId);
-            const editBtn=isOwn?`<button onclick="event.stopPropagation();app.editPublishedGame('${m.id}')" style="position:absolute;top:6px;left:6px;background:rgba(30,136,229,0.85);border:none;border-radius:6px;color:#fff;font-size:11px;padding:4px 8px;cursor:pointer;">✏️</button>`:'';
-            const deleteBtn=isOwn?`<button onclick="event.stopPropagation();app.deleteGame('${m.id}')" style="position:absolute;top:6px;right:6px;background:rgba(255,50,50,0.8);color:#fff;border:none;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:11px">🗑</button>`:'';
-            g.innerHTML+=`<div class="card" style="position:relative" onclick="app.launchPublished('${m.id}')">
+            const editBtn=isOwn?`<button onclick="event.stopPropagation();app.editPublishedGame('${m.id}')" style="position:absolute;top:8px;left:8px;background:rgba(30,136,229,0.9);border:none;border-radius:8px;color:#fff;font-size:11px;padding:5px 10px;cursor:pointer;font-family:var(--font-body);font-weight:700;z-index:3;">✏️ Изменить</button>`:'';
+            const deleteBtn=isOwn?`<button onclick="event.stopPropagation();app.deleteGame('${m.id}')" style="position:absolute;top:8px;right:8px;background:rgba(255,50,50,0.85);color:#fff;border:none;border-radius:8px;padding:5px 10px;cursor:pointer;font-size:11px;font-family:var(--font-body);font-weight:700;z-index:3;">🗑</button>`:'';
+            g.innerHTML+=`<div class="card world-card" style="position:relative" onclick="app.launchPublished('${m.id}')">
                 ${editBtn||''}${deleteBtn}
-                <div class="card-thumb" style="background:radial-gradient(circle,rgba(0,229,255,0.07),#050505);font-size:40px;">🛠️</div>
-                <div class="card-info"><div><b>${m.name}</b><br>
-                <small style="color:${m.authorColor||'#888'}">${m.author}</small><br>
-                <small style="color:#555">${(m.blocks||[]).length} блоков</small></div></div>
+                <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(0,229,255,0.08),#050510);">
+                    <span class="world-emoji" style="z-index:2;position:relative;">🛠️</span>
+                    <div class="world-glow" style="background:rgba(0,229,255,0.06);"></div>
+                </div>
+                <div class="card-info">
+                    <div><b style="font-family:var(--font-body);">${m.name}</b><br>
+                    <small style="color:${m.authorColor||'rgba(255,255,255,0.4)'};font-family:var(--font-body);">${m.author}</small><br>
+                    <small style="color:rgba(255,255,255,0.25);font-size:11px;">${(m.blocks||[]).length} блоков</small></div>
+                </div>
             </div>`;
         });
     },
@@ -4091,15 +5302,29 @@ const app = {
 
 
     _showToast(msg){
-        // Показываем уведомление
         let t = document.getElementById('_toast');
         if(!t){ t=document.createElement('div'); t.id='_toast';
-            t.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(255,152,0,0.95);color:#000;padding:12px 24px;border-radius:12px;font-weight:700;font-size:14px;z-index:9999;pointer-events:none;transition:opacity 0.5s;';
+            t.style.cssText=`position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(20px);
+                background:rgba(8,8,20,0.97);
+                color:#fff;
+                padding:12px 24px;
+                border-radius:50px;
+                font-weight:700;font-size:13px;
+                z-index:9999;pointer-events:none;
+                transition:opacity 0.4s, transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+                border:1px solid rgba(255,152,0,0.3);
+                box-shadow:0 8px 32px rgba(0,0,0,0.6),0 0 20px rgba(255,152,0,0.1);
+                font-family:var(--font-body);
+                letter-spacing:0.5px;
+                backdrop-filter:blur(20px);
+                opacity:0;`;
             document.body.appendChild(t);
         }
-        t.textContent=msg; t.style.opacity='1';
+        t.textContent=msg;
+        t.style.opacity='1';
+        t.style.transform='translateX(-50%) translateY(0)';
         clearTimeout(t._timer);
-        t._timer=setTimeout(()=>t.style.opacity='0', 3000);
+        t._timer=setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateX(-50%) translateY(10px)'; }, 3000);
     },
 
     claimQuest(id){
@@ -4153,6 +5378,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
