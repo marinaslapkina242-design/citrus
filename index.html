@@ -1013,17 +1013,25 @@ const app = {
     _giftSelectedName: null,
 
     async initGifts(){
-        // Рендерим список друзей
         const box = document.getElementById('gift-friend-list');
         if(!box) return;
         const ids = (this.friends||[]).map(f=>typeof f==='object'?f.id:f).filter(Boolean);
         if(!ids.length){
             box.innerHTML = '<div style="color:#444;font-size:12px;">Нет друзей. Добавь друзей во вкладке Друзья 👥</div>';
-        } else {
-            box.innerHTML = '';
-            for(const id of ids){
-                let name = String(id);
-                try{ const r=await fetch(this._API+'/players/'+id); const d=await r.json(); if(d.name) name=d.name; }catch(e){}
+            return;
+        }
+        box.innerHTML = '<div style="color:#555;font-size:12px;">⏳ Загрузка...</div>';
+        // Загружаем всех друзей параллельно с сервера
+        const players = await Promise.all(ids.map(async id=>{
+            try{
+                const r = await fetch(this._API+'/players/'+id);
+                const d = await r.json();
+                const name = d.tag || d.name || d.username || ('#'+id);
+                return {id, name};
+            }catch(e){ return {id, name:'#'+id}; }
+        }));
+        box.innerHTML = '';
+        for(const {id, name} of players){
                 const btn = document.createElement('button');
                 btn.textContent = '👤 '+name;
                 btn.style.cssText = 'padding:8px 14px;background:#1a1a1a;border:1px solid #333;border-radius:20px;color:#aaa;font-size:13px;cursor:pointer;touch-action:manipulation;';
@@ -1035,7 +1043,6 @@ const app = {
                     btn.style.borderColor = '#FF9800';
                 };
                 box.appendChild(btn);
-            }
         }
         // Загружаем входящие подарки из mailbox
         this._loadGiftsInbox();
@@ -4153,3 +4160,4 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
