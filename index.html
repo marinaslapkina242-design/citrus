@@ -790,11 +790,11 @@ const app = {
         try {
             const res = await fetch(this._API + '/credits', {
                 method:'POST', headers:{'Content-Type':'application/json'},
-                body: JSON.stringify({lenderId: this.userId, lenderName: this.username+'#'+this.userId, amount, days})
+                body: JSON.stringify({lenderId: this.userId, lenderName: this.username+'#'+this.userId, amount, days, newBalance: this.balance - amount})
             });
             const d = await res.json();
             if(d.ok){
-                this.balance = d.balance !== undefined ? d.balance : this.balance - amount;
+                this.balance -= amount;
                 this.saveData();
                 document.getElementById('balance-val').textContent = this.balance;
                 this._questProgress('lend',1); this.showNotif('✅','Кредит выставлен!',`-${amount} 🍊 на ${days} мин.`);
@@ -4153,5 +4153,6 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
