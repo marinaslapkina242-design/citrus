@@ -1598,7 +1598,7 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
                     <div class="panel-box">
                         <div class="panel-box-title">🚫 Забанить игрока</div>
                         <div style="color:rgba(255,255,255,0.4);font-size:12px;margin-bottom:10px;font-family:var(--font-ui);">Введи никнейм или ID:</div>
-                        <input type="text" id="admin-ban-input" placeholder="Игрок#1234" class="styled-input" style="margin-bottom:8px;">
+                        <input type="text" id="admin-ban-input" placeholder="Имя игрока (без #тега)" class="styled-input" style="margin-bottom:8px;">
                         <input type="text" id="admin-ban-reason" placeholder="Причина" class="styled-input" style="margin-bottom:12px;">
                         <div style="display:flex;gap:8px;">
                             <button onclick="app.adminBan()" class="btn-orange-full" style="background:rgba(220,50,50,0.15);border-color:rgba(220,50,50,0.3);color:#ff5252;">🚫 Забанить</button>
@@ -2475,7 +2475,8 @@ const app = {
         }catch(e){}
     },
     async adminBan(){
-        const target=document.getElementById('admin-ban-input').value.trim();
+        const raw=document.getElementById('admin-ban-input').value.trim();
+        const target=raw.includes('#')?raw.split('#')[0]:raw;
         const reason=document.getElementById('admin-ban-reason').value.trim()||'Нарушение правил';
         const res=document.getElementById('admin-ban-result');
         if(!target){res.textContent='Введи никнейм';res.style.color='#ff5252';return;}
@@ -2497,7 +2498,8 @@ const app = {
         }catch(e){res.textContent='Ошибка соединения';res.style.color='#ff5252';}
     },
     async adminUnban(){
-        const target=document.getElementById('admin-ban-input').value.trim();
+        const raw=document.getElementById('admin-ban-input').value.trim();
+        const target=raw.includes('#')?raw.split('#')[0]:raw;
         const res=document.getElementById('admin-ban-result');
         if(!target){res.textContent='Введи никнейм';res.style.color='#ff5252';return;}
         try{
@@ -4187,6 +4189,7 @@ const app = {
         document.body.requestPointerLock = document.body.requestPointerLock || document.body.mozRequestPointerLock;
         if(window.innerWidth > 768) document.body.requestPointerLock();
         
+        this._checkBan();
         this._connectGameWS();
         this.engineLoop();
         // Опрашиваем позиции других игроков с сервера каждые 300мс
@@ -5505,6 +5508,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
