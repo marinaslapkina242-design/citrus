@@ -1863,6 +1863,8 @@ const app = {
             document.getElementById('ui-login').classList.add('hidden');
             document.getElementById('ui-hub').classList.remove('hidden');
             this.renderMyGames(); this.renderFriends(); this.renderOnline(); this.initAvatarPreview(); this.renderShop();
+            // Проверка бана при входе
+            this._checkBan();
             // Показать панель банов только для Разраб
             if(['разраб','admin'].includes((this.username||'').toLowerCase().split('#')[0])){
                 const navAdmin=document.getElementById('nav-admin');
@@ -2454,43 +2456,67 @@ const app = {
     isDev(name){
         return ['разраб','admin','citrus'].includes((name||'').toLowerCase().split('#')[0]);
     },
-    adminBan(){
+    async _checkBan(){
+        try{
+            const nameKey=encodeURIComponent((this.username||'').toLowerCase());
+            const r=await fetch('https://citrus-mail.onrender.com/checkban/'+nameKey);
+            const d=await r.json();
+            if(d.banned){
+                // Показать экран бана и заблокировать интерфейс
+                document.body.innerHTML=`
+                <div style="position:fixed;inset:0;background:#0a0008;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:99999;font-family:sans-serif;">
+                    <div style="font-size:72px;margin-bottom:24px;">🚫</div>
+                    <div style="font-size:28px;font-weight:bold;color:#ff5252;margin-bottom:12px;">Аккаунт заблокирован</div>
+                    <div style="font-size:15px;color:rgba(255,255,255,0.5);margin-bottom:8px;">Причина: <span style="color:#fff;">${d.reason||'Нарушение правил'}</span></div>
+                    <div style="font-size:13px;color:rgba(255,255,255,0.3);">Заблокировал: ${d.by||'Администрация'} · ${d.date||''}</div>
+                    <div style="margin-top:32px;font-size:12px;color:rgba(255,255,255,0.2);">Если вы считаете что это ошибка — обратитесь к администратору</div>
+                </div>`;
+            }
+        }catch(e){}
+    },
+    async adminBan(){
         const target=document.getElementById('admin-ban-input').value.trim();
         const reason=document.getElementById('admin-ban-reason').value.trim()||'Нарушение правил';
         const res=document.getElementById('admin-ban-result');
         if(!target){res.textContent='Введи никнейм';res.style.color='#ff5252';return;}
-        // Сохраняем бан локально + на сервере через credits endpoint как workaround
+        res.textContent='Отправка...';res.style.color='#aaa';
         try{
-            const bans=JSON.parse(localStorage.getItem('citrus_bans')||'[]');
-            if(!bans.find(b=>b.name===target)){
-                bans.push({name:target,reason,date:new Date().toLocaleDateString('ru')});
-                localStorage.setItem('citrus_bans',JSON.stringify(bans));
+            const r=await fetch('https://citrus-mail.onrender.com/bans',{
+                method:'POST',headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({name:target,reason,by:this.username,adminKey:'citrus_admin_2025'})
+            });
+            const d=await r.json();
+            if(d.ok){
+                res.textContent='🚫 '+target+' забанен';res.style.color='#ff5252';
+                document.getElementById('admin-ban-input').value='';
+                document.getElementById('admin-ban-reason').value='';
+                this.adminRefreshBanList();
+            } else {
+                res.textContent='Ошибка: '+(d.error||'неизвестно');res.style.color='#ff5252';
             }
-            res.textContent='🚫 '+target+' забанен';res.style.color='#ff5252';
-            document.getElementById('admin-ban-input').value='';
-            document.getElementById('admin-ban-reason').value='';
-            this.adminRefreshBanList();
-        }catch(e){res.textContent='Ошибка';res.style.color='#ff5252';}
+        }catch(e){res.textContent='Ошибка соединения';res.style.color='#ff5252';}
     },
-    adminUnban(){
+    async adminUnban(){
         const target=document.getElementById('admin-ban-input').value.trim();
         const res=document.getElementById('admin-ban-result');
         if(!target){res.textContent='Введи никнейм';res.style.color='#ff5252';return;}
         try{
-            let bans=JSON.parse(localStorage.getItem('citrus_bans')||'[]');
-            const before=bans.length;
-            bans=bans.filter(b=>b.name!==target);
-            localStorage.setItem('citrus_bans',JSON.stringify(bans));
-            if(bans.length<before){res.textContent='✓ '+target+' разбанен';res.style.color='#00e676';}
-            else{res.textContent='Игрок не в списке банов';res.style.color='#aaa';}
+            const r=await fetch('https://citrus-mail.onrender.com/bans/'+encodeURIComponent(target.toLowerCase()),{
+                method:'DELETE',headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({adminKey:'citrus_admin_2025'})
+            });
+            const d=await r.json();
+            if(d.ok){res.textContent='✓ '+target+' разбанен';res.style.color='#00e676';}
+            else{res.textContent='Не найден в банах';res.style.color='#aaa';}
             document.getElementById('admin-ban-input').value='';
             this.adminRefreshBanList();
-        }catch(e){}
+        }catch(e){res.textContent='Ошибка соединения';res.style.color='#ff5252';}
     },
-    adminRefreshBanList(){
+    async adminRefreshBanList(){
         const el=document.getElementById('admin-ban-list');if(!el)return;
         try{
-            const bans=JSON.parse(localStorage.getItem('citrus_bans')||'[]');
+            const r=await fetch('https://citrus-mail.onrender.com/bans');
+            const bans=await r.json();
             if(!bans.length){el.innerHTML='<span style="color:rgba(255,255,255,0.2)">Список пуст</span>';return;}
             el.innerHTML=bans.map(b=>`
                 <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:rgba(220,50,50,0.08);border-radius:8px;margin-bottom:4px;border:1px solid rgba(220,50,50,0.15);">
@@ -2503,7 +2529,7 @@ const app = {
                         <button onclick="document.getElementById('admin-ban-input').value='${b.name}';app.adminUnban();" style="background:none;border:none;color:#ff5252;cursor:pointer;font-size:14px;">✕</button>
                     </div>
                 </div>`).join('');
-        }catch(e){el.innerHTML='Ошибка';}
+        }catch(e){el.innerHTML='Ошибка загрузки';}
     },
     async adminRefreshOnline(){
         const el=document.getElementById('admin-online-list');if(!el)return;
@@ -3488,6 +3514,17 @@ const app = {
                         if(String(msg._from)!==String(this.userId)) {
                             this.appendChatMessage(msg.name, msg.text, msg.color);
                         }
+                        return;
+                    }
+                    if(msg.type==='banned') {
+                        document.body.innerHTML=`
+                        <div style="position:fixed;inset:0;background:#0a0008;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:99999;font-family:sans-serif;">
+                            <div style="font-size:72px;margin-bottom:24px;">🚫</div>
+                            <div style="font-size:28px;font-weight:bold;color:#ff5252;margin-bottom:12px;">Аккаунт заблокирован</div>
+                            <div style="font-size:15px;color:rgba(255,255,255,0.5);margin-bottom:8px;">Причина: <span style="color:#fff;">${msg.reason||'Нарушение правил'}</span></div>
+                            <div style="font-size:13px;color:rgba(255,255,255,0.3);">Заблокировал: ${msg.by||'Администрация'}</div>
+                            <div style="margin-top:32px;font-size:12px;color:rgba(255,255,255,0.2);">Если вы считаете что это ошибка — обратитесь к администратору</div>
+                        </div>`;
                         return;
                     }
                     if(msg.type==='req_pos') {
@@ -5468,6 +5505,7 @@ window.onload = () => app.init();
 </script>
 </body>
 </html>
+
 
 
 
