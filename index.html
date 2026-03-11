@@ -1141,6 +1141,9 @@
         #tab-roulette{ animation: fadeInUp 0.3s ease both; }
         #tab-credits { animation: fadeInUp 0.3s ease both; }
         #tab-gifts   { animation: fadeInUp 0.3s ease both; }
+        #tab-leaderboard { animation: fadeInUp 0.3s ease both; }
+        #tab-stats   { animation: fadeInUp 0.3s ease both; }
+        #tab-admin   { animation: fadeInUp 0.3s ease both; }
 
         /* Inventory list polish */
         #inventory-list li {
@@ -1343,6 +1346,7 @@
             <div class="nav-item" id="nav-credits"  onclick="app.switchTab('credits')"> <div class="nav-icon"><i class="fas fa-coins"></i></div> Кредиты</div>
             <div class="nav-item" id="nav-gifts"    onclick="app.switchTab('gifts')">   <div class="nav-icon"><i class="fas fa-gift"></i></div> Подарки</div>
             <div class="nav-item"        id="nav-stats"    onclick="app.switchTab('stats')">   <div class="nav-icon"><i class="fas fa-chart-line"></i></div> Статистика</div>
+            <div class="nav-item"        id="nav-leaderboard" onclick="app.switchTab('leaderboard')"> <div class="nav-icon"><i class="fas fa-trophy"></i></div> Топ</div>
             <div class="nav-item hidden" id="nav-admin"   onclick="app.switchTab('admin')">  <div class="nav-icon"><i class="fas fa-shield-alt"></i></div> Баны</div>
         </div>
         <div class="content-area">
@@ -1634,9 +1638,28 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
                 </div>
             </div>
 
+            <!-- ══════════════════ TAB: LEADERBOARD ══════════════════ -->
+            <div id="tab-leaderboard" class="hidden">
+                <div class="section-title">🏆 Топ игроков</div>
+
+                <!-- Топ-3 пьедестал -->
+                <div id="lb-podium" style="display:flex;justify-content:center;align-items:flex-end;gap:12px;margin-bottom:24px;padding:20px 0 0;"></div>
+
+                <!-- Остальные места -->
+                <div class="panel-box" style="padding:0;overflow:hidden;">
+                    <div id="lb-list" style="display:flex;flex-direction:column;"></div>
+                </div>
+
+                <!-- Моё место -->
+                <div id="lb-myrank" style="margin-top:12px;"></div>
+            </div>
+
             <!-- ══════════════════ TAB: STATS ══════════════════ -->
             <div id="tab-stats" class="hidden">
-                <div class="section-title">📊 Статистика</div>
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+                    <div class="section-title" style="margin:0;">📊 Статистика</div>
+                    <div id="stats-storage-status" style="font-size:11px;font-family:var(--font-ui);padding:4px 10px;border-radius:20px;background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.3);">проверка хранилища...</div>
+                </div>
                 <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">
                     <div class="panel-box" style="text-align:center;padding:18px 12px;">
                         <div style="font-size:32px;font-family:var(--font-head);color:var(--c-main);font-weight:900;" id="stat-registered">—</div>
@@ -2548,6 +2571,108 @@ const app = {
     _saveBans(list){ localStorage.setItem('citrus_bans', JSON.stringify(list)); },
 
 
+    // ══════════ ЛИДЕРБОРД ══════════
+
+    async loadLeaderboard(){
+        const podium = document.getElementById('lb-podium');
+        const list   = document.getElementById('lb-list');
+        const myrank = document.getElementById('lb-myrank');
+        if(!podium||!list) return;
+
+        podium.innerHTML = '<div style="color:rgba(255,255,255,0.2);font-size:13px;padding:20px;">Загрузка...</div>';
+        list.innerHTML = '';
+
+        let top = [];
+        try {
+            const r = await fetch(this._API+'/leaderboard');
+            if(r.ok) top = await r.json();
+        } catch(e){}
+
+        if(!top.length){
+            podium.innerHTML='<div style="color:rgba(255,255,255,0.2);font-size:13px;padding:20px;text-align:center;">Пока никого нет 🍊</div>';
+            return;
+        }
+
+        // Медали и цвета пьедестала
+        const medals = ['🥇','🥈','🥉'];
+        const podH   = [140, 110, 90]; // высота тумбы
+        const podClr = ['#FFD700','#C0C0C0','#CD7F32'];
+
+        // ── Пьедестал (топ-3) ──
+        const order = [1,0,2]; // визуальный порядок: 2-е, 1-е, 3-е
+        podium.innerHTML = '';
+        order.forEach(rank => {
+            const p = top[rank];
+            if(!p) return;
+            const isMe = String(p.id)===String(this.userId);
+            const col  = p.color||'#FF9800';
+            podium.innerHTML += `
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px;cursor:default;">
+                <div style="font-size:${rank===0?'28px':'22px'};font-weight:900;font-family:var(--font-head);color:${col};text-shadow:0 0 16px ${col}88;">
+                    ${p.name}${isMe?'<span style="font-size:10px;color:var(--c-main);margin-left:4px;">ты</span>':''}
+                </div>
+                <div style="font-size:11px;color:rgba(255,255,255,0.35);font-family:var(--font-ui);">${p.tag||''}</div>
+                <div style="font-size:${rank===0?'20px':'16px'};font-weight:700;color:${podClr[rank]};font-family:var(--font-head);">
+                    ${p.balance.toLocaleString('ru')} 🍊
+                </div>
+                <!-- Аватар-кружок -->
+                <div style="width:${rank===0?56:44}px;height:${rank===0?56:44}px;border-radius:50%;
+                    background:${col}22;border:3px solid ${podClr[rank]};
+                    display:flex;align-items:center;justify-content:center;
+                    font-size:${rank===0?'22px':'17px'};font-weight:900;color:${col};
+                    box-shadow:0 0 18px ${podClr[rank]}55;">
+                    ${(p.name[0]||'?').toUpperCase()}
+                </div>
+                <!-- Тумба -->
+                <div style="width:80px;height:${podH[rank]}px;
+                    background:linear-gradient(180deg,${podClr[rank]}33,${podClr[rank]}11);
+                    border:1px solid ${podClr[rank]}44;border-bottom:none;border-radius:6px 6px 0 0;
+                    display:flex;align-items:flex-start;justify-content:center;padding-top:8px;">
+                    <span style="font-size:26px;">${medals[rank]}</span>
+                </div>
+            </div>`;
+        });
+
+        // ── Список 4-50 ──
+        if(top.length > 3){
+            top.slice(3).forEach((p, i) => {
+                const rank = i + 4;
+                const isMe = String(p.id)===String(this.userId);
+                const col  = p.color||'#888';
+                list.innerHTML += `
+                <div style="display:flex;align-items:center;gap:12px;padding:11px 16px;
+                    border-bottom:1px solid rgba(255,255,255,0.04);
+                    ${isMe?'background:rgba(255,152,0,0.06);':''}
+                    transition:background 0.15s;" 
+                    onmouseover="this.style.background='rgba(255,255,255,0.03)'"
+                    onmouseout="this.style.background='${isMe?'rgba(255,152,0,0.06)':'transparent'}'">
+                    <div style="width:28px;text-align:center;font-family:var(--font-head);font-size:12px;color:rgba(255,255,255,0.25);flex-shrink:0;">${rank}</div>
+                    <div style="width:34px;height:34px;border-radius:50%;background:${col}22;color:${col};
+                        display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;">${(p.name[0]||'?').toUpperCase()}</div>
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-family:var(--font-body);font-weight:700;font-size:13px;color:rgba(255,255,255,${isMe?'1':'0.8'});">
+                            ${p.name}${isMe?' <span style="font-size:10px;color:var(--c-main);">← ты</span>':''}
+                        </div>
+                        <div style="font-size:10px;color:rgba(255,255,255,0.2);font-family:var(--font-ui);">${p.tag||''}</div>
+                    </div>
+                    <div style="font-family:var(--font-head);font-size:13px;font-weight:700;color:rgba(255,152,0,0.8);flex-shrink:0;">
+                        ${p.balance.toLocaleString('ru')} 🍊
+                    </div>
+                </div>`;
+            });
+        }
+
+        // ── Моё место если не в топ-50 ──
+        const myPos = top.findIndex(p=>String(p.id)===String(this.userId));
+        if(myPos === -1 && myrank){
+            myrank.innerHTML = `<div class="panel-box" style="display:flex;align-items:center;gap:12px;border-color:rgba(255,152,0,0.2);">
+                <div style="font-size:12px;color:rgba(255,255,255,0.3);font-family:var(--font-ui);">Твой баланс:</div>
+                <div style="font-family:var(--font-head);font-size:16px;color:var(--c-main);font-weight:700;">${(this.balance||0).toLocaleString('ru')} 🍊</div>
+                <div style="font-size:11px;color:rgba(255,255,255,0.2);margin-left:auto;">не в топ-50</div>
+            </div>`;
+        } else if(myrank) { myrank.innerHTML=''; }
+    },
+
     // ══════════ СТАТИСТИКА ══════════
 
     _statsAllAccounts: [],
@@ -2557,6 +2682,28 @@ const app = {
             volcano:'🌋 Остров Вулкана',space:'🚀 Космическая База',
             hideseek:'👀 Прятки',snowmount:'🏔 Снежная Гора',
             dungeon:'⚔️ Тёмное Подземелье'};
+
+        // Проверяем статус хранилища
+        try {
+            const rp = await fetch(this._API+'/ping');
+            if(rp.ok){
+                const pd = await rp.json();
+                const el = document.getElementById('stats-storage-status');
+                if(el){
+                    if(pd.jsonbin){
+                        el.textContent = '🟢 JSONBin подключён — данные сохраняются навсегда';
+                        el.style.background='rgba(0,230,118,0.08)';
+                        el.style.color='rgba(0,230,118,0.7)';
+                        el.style.border='1px solid rgba(0,230,118,0.15)';
+                    } else {
+                        el.textContent = '🔴 JSONBin НЕ настроен — данные теряются при рестарте!';
+                        el.style.background='rgba(255,50,50,0.08)';
+                        el.style.color='rgba(255,100,100,0.8)';
+                        el.style.border='1px solid rgba(255,50,50,0.2)';
+                    }
+                }
+            }
+        } catch(e){}
 
         // Онлайн сейчас
         try {
@@ -2850,7 +2997,7 @@ const app = {
 
     // ── TABS
     switchTab(id){
-        ['games','avatar','shop','friends','studio','quests','roulette','credits','gifts','stats','admin'].forEach(t=>{
+        ['games','avatar','shop','friends','studio','quests','roulette','credits','gifts','stats','leaderboard','admin'].forEach(t=>{
             document.getElementById('tab-'+t).classList.add('hidden');
             document.getElementById('nav-'+t)?.classList.remove('active');
         });
@@ -2864,6 +3011,7 @@ const app = {
         if(id==='gifts')this.initGifts();
         if(id==='admin'){ this.loadBanList(); this.loadBanOnlineList(); }
         if(id==='stats'){ this.loadStats(); }
+        if(id==='leaderboard'){ this.loadLeaderboard(); }
         else if(this._questCountdownInterval){ clearInterval(this._questCountdownInterval); this._questCountdownInterval=null; }
         if(id==='friends'){
             // Регистрируем на сервере (на случай если зашли раньше деплоя)
