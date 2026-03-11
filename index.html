@@ -2690,13 +2690,13 @@ const app = {
                 const pd = await rp.json();
                 const el = document.getElementById('stats-storage-status');
                 if(el){
-                    if(pd.jsonbin){
-                        el.textContent = '🟢 JSONBin подключён — данные сохраняются навсегда';
+                    if(pd.storage==='gist'){
+                        el.textContent = '🟢 GitHub Gist — данные сохраняются навсегда';
                         el.style.background='rgba(0,230,118,0.08)';
                         el.style.color='rgba(0,230,118,0.7)';
                         el.style.border='1px solid rgba(0,230,118,0.15)';
                     } else {
-                        el.textContent = '🔴 JSONBin НЕ настроен — данные теряются при рестарте!';
+                        el.textContent = '🔴 Хранилище не настроено — данные теряются при рестарте!';
                         el.style.background='rgba(255,50,50,0.08)';
                         el.style.color='rgba(255,100,100,0.8)';
                         el.style.border='1px solid rgba(255,50,50,0.2)';
