@@ -1820,7 +1820,8 @@ const SHOP_ITEMS = [
     {id:'hair_short',  name:'Короткие Волосы',     icon:'💇',  price:120  },
     {id:'hair_long',   name:'Длинные Волосы',      icon:'👩',  price:180  },
     {id:'hair_spiky',  name:'Дыбом Волосы',        icon:'⚡',  price:250  },
-    {id:'macaroni',    name:'Макарошки',            icon:'🍝',  price:10000}
+    {id:'macaroni',    name:'Макарошки',            icon:'🍝',  price:10000},
+    {id:'tvhead',      name:'Голова-Телевизор',     icon:'📺',  price:5000 },
 ];
 const COLORS=[
     {c:0xCCCCCC,n:'Камень'},{c:0xFF9800,n:'Апельсин'},{c:0x4CAF50,n:'Трава'},
@@ -3942,6 +3943,80 @@ const app = {
         if(inv.includes('wizard')){const wm2=new THREE.MeshStandardMaterial({color:0x220066,roughness:0.7});const wbrim=new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.5,0.06,12),wm2);wbrim.position.set(0,0.36,0);headGroup.add(wbrim);const wcone=new THREE.Mesh(new THREE.ConeGeometry(0.24,0.65,12),wm2);wcone.position.set(0,0.7,0);headGroup.add(wcone);}
         if(inv.includes('santa')){const sm=new THREE.MeshStandardMaterial({color:0xCC0000,roughness:0.8});const sbase=new THREE.Mesh(new THREE.CylinderGeometry(0.33,0.36,0.1,12),new THREE.MeshStandardMaterial({color:0xFFFFFF,roughness:0.9}));sbase.position.set(0,0.36,0);headGroup.add(sbase);const scone=new THREE.Mesh(new THREE.ConeGeometry(0.26,0.5,12),sm);scone.position.set(-0.05,0.65,0);scone.rotation.z=0.25;headGroup.add(scone);}
         if(inv.includes('ice')){const im=new THREE.MeshStandardMaterial({color:0x88DDFF,emissive:0x44AAFF,emissiveIntensity:0.5,transparent:true,opacity:0.5});const ia=new THREE.Mesh(new THREE.SphereGeometry(0.65,10,10),im);headGroup.add(ia);}
+        if(inv.includes('tvhead')){
+            // Корпус телевизора — большой прямоугольный ящик поверх головы
+            const tvMat = new THREE.MeshStandardMaterial({color:0x1a1a1a,roughness:0.6,metalness:0.3});
+            const tvBody = new THREE.Mesh(new THREE.BoxGeometry(0.88,0.72,0.64), tvMat);
+            tvBody.position.set(0, 0.09, 0);
+            headGroup.add(tvBody);
+
+            // Боковые грани — чуть светлее
+            const sideMat = new THREE.MeshStandardMaterial({color:0x2a2a2a,roughness:0.7});
+            const sideL = new THREE.Mesh(new THREE.BoxGeometry(0.04,0.68,0.60), sideMat);
+            sideL.position.set(-0.46,0.09,0); headGroup.add(sideL);
+            const sideR = sideL.clone(); sideR.position.set(0.46,0.09,0); headGroup.add(sideR);
+
+            // Экран — светящийся синеватый прямоугольник
+            const screenMat = new THREE.MeshStandardMaterial({
+                color:0x001133, emissive:0x0044ff, emissiveIntensity:0.9,
+                roughness:0.1, metalness:0.1
+            });
+            const screen = new THREE.Mesh(new THREE.BoxGeometry(0.64,0.50,0.04), screenMat);
+            screen.position.set(0, 0.12, 0.32);
+            headGroup.add(screen);
+
+            // Рамка экрана (тонкий бортик вокруг)
+            const bezelMat = new THREE.MeshStandardMaterial({color:0x111111,roughness:0.8});
+            const bezelH = new THREE.Mesh(new THREE.BoxGeometry(0.72,0.05,0.05), bezelMat);
+            bezelH.position.set(0, 0.37, 0.30); headGroup.add(bezelH);
+            const bezelHB = bezelH.clone(); bezelHB.position.set(0, -0.13, 0.30); headGroup.add(bezelHB);
+            const bezelV = new THREE.Mesh(new THREE.BoxGeometry(0.05,0.56,0.05), bezelMat);
+            bezelV.position.set(-0.36, 0.12, 0.30); headGroup.add(bezelV);
+            const bezelVR = bezelV.clone(); bezelVR.position.set(0.36, 0.12, 0.30); headGroup.add(bezelVR);
+
+            // Скан-линии (несколько тёмных полосок по экрану)
+            const lineMat = new THREE.MeshStandardMaterial({color:0x000022,transparent:true,opacity:0.35});
+            for(let i=0;i<4;i++){
+                const line=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.025,0.02),lineMat);
+                line.position.set(0, -0.08 + i*0.13, 0.35);
+                headGroup.add(line);
+            }
+
+            // Динамик — решётка из 3 горизонтальных полосок
+            const spkMat = new THREE.MeshStandardMaterial({color:0x333333,roughness:0.9});
+            for(let i=0;i<3;i++){
+                const sp=new THREE.Mesh(new THREE.BoxGeometry(0.22,0.035,0.03),spkMat);
+                sp.position.set(0.22, -0.04 + i*0.055, 0.33);
+                headGroup.add(sp);
+            }
+
+            // Кнопки (2 круглые точки)
+            const btnMat1 = new THREE.MeshStandardMaterial({color:0xFF2200,emissive:0xFF0000,emissiveIntensity:0.8,roughness:0.3});
+            const btnMat2 = new THREE.MeshStandardMaterial({color:0x00CC44,emissive:0x00FF44,emissiveIntensity:0.8,roughness:0.3});
+            const btn1 = new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,0.03,10), btnMat1);
+            btn1.rotation.x=Math.PI/2; btn1.position.set(-0.24,-0.2,0.33); headGroup.add(btn1);
+            const btn2 = new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,0.03,10), btnMat2);
+            btn2.rotation.x=Math.PI/2; btn2.position.set(-0.15,-0.2,0.33); headGroup.add(btn2);
+
+            // Ручка громкости (маленький цилиндр сбоку)
+            const knobMat = new THREE.MeshStandardMaterial({color:0x888888,metalness:0.7,roughness:0.3});
+            const knob = new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,0.08,10), knobMat);
+            knob.rotation.z=Math.PI/2; knob.position.set(0.49, -0.15, 0.05); headGroup.add(knob);
+
+            // Антенны — две тонкие палки расходящиеся вверх
+            const antMat = new THREE.MeshStandardMaterial({color:0x999999,metalness:0.8,roughness:0.2});
+            const ant1 = new THREE.Mesh(new THREE.CylinderGeometry(0.02,0.015,0.55,6), antMat);
+            ant1.position.set(-0.18, 0.73, 0.05); ant1.rotation.z = -0.35; headGroup.add(ant1);
+            const ant2 = new THREE.Mesh(new THREE.CylinderGeometry(0.02,0.015,0.55,6), antMat);
+            ant2.position.set(0.18, 0.73, 0.05); ant2.rotation.z = 0.35; headGroup.add(ant2);
+
+            // Ножки снизу
+            const legMat = new THREE.MeshStandardMaterial({color:0x555555,roughness:0.8});
+            [-0.28,0.28].forEach(x=>{
+                const leg = new THREE.Mesh(new THREE.BoxGeometry(0.08,0.14,0.08), legMat);
+                leg.position.set(x,-0.39,0); headGroup.add(leg);
+            });
+        }
         if(inv.includes('rainbow')){const colors=[0xFF0000,0xFF7700,0xFFFF00,0x00FF00,0x0000FF,0x8B00FF];colors.forEach((col,i)=>{const rb=new THREE.Mesh(new THREE.TorusGeometry(0.28+i*0.05,0.025,5,20,Math.PI),new THREE.MeshStandardMaterial({color:col,emissive:col,emissiveIntensity:0.7}));rb.position.set(0,0.38+i*0.02,0.05);rb.rotation.z=Math.PI;headGroup.add(rb);});}
         if(inv.includes('mask')){const mask=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.35,0.08),new THREE.MeshStandardMaterial({color:0xFFD700,metalness:0.9,roughness:0.1}));mask.position.set(0,0.08,0.32);headGroup.add(mask);}
 
