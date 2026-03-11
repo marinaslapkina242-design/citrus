@@ -3500,11 +3500,15 @@ const app = {
             fid=String(fid);
             const p=findPeer(fid);
             const on=online.find(x=>x.id===fid);
-            const st=on?(on.status==='ingame'?'🎮 '+on.world:'● Онлайн'):'○ Оффлайн';
-            const sc=on?(on.status==='ingame'?'ig':'on'):'';
-            const friendMap = on && on.status==='ingame' ? on.world : null;
-            const inviteBtn = friendMap
-                ? `<button class="bx b-add" onclick="app.joinFriend('${fid}','${friendMap}')" style="font-size:10px;background:#00E676;color:#000">▶ Войти</button>`
+            const wNames={gather:'Цитрусовый Лес',parkour:'Небесный Паркур',
+                volcano:'Остров Вулкана',space:'Космическая База',hideseek:'Прятки',
+                snowmount:'Снежная Гора',dungeon:'Тёмное Подземелье'};
+            const friendMapId = on && on.status==='ingame' ? on.world : null; // English key
+            const friendMapName = friendMapId ? (wNames[friendMapId] || friendMapId) : null;
+            const st = on ? (friendMapId ? '🎮 '+friendMapName : '● Онлайн') : '○ Оффлайн';
+            const sc = on ? (friendMapId ? 'ig' : 'on') : '';
+            const inviteBtn = friendMapId
+                ? `<button class="bx b-add" onclick="app.joinFriend('${fid}','${friendMapId}')" style="font-size:10px;background:#00E676;color:#000">▶ Войти</button>`
                 : on ? `<button class="bx b-add" onclick="app.inviteFriend('${fid}','${p.name}')" style="font-size:10px">▶ Играть</button>` : '';
             fl.innerHTML+=`<div class="fr">
                 <div class="fa2" style="background:${p.color||'#888'}22;color:${p.color||'#888'}">${(p.name[0]||'?').toUpperCase()}</div>
@@ -3681,22 +3685,41 @@ const app = {
 
     // Подключаемся к WS серверу для позиций в реальном времени
     _connectGameWS() {
-        if(this._gameWS) { try{this._gameWS.close();}catch(e){} }
+        if(this._gameWS) { try{this._gameWS.close();}catch(e){} this._gameWS=null; }
+        if(this._gameWSReconnTimer){ clearTimeout(this._gameWSReconnTimer); this._gameWSReconnTimer=null; }
+
         const wsUrl = this._API.replace('https://','wss://').replace('http://','ws://');
         try {
             this._gameWS = new WebSocket(wsUrl);
             this._gameWS.onopen = () => {
+                this._gameWSAlive = true;
                 this._gameWS.send(JSON.stringify({
                     type:'join', id:String(this.userId),
-                    name:this.username, map:String(this.currentMap)
+                    name:this.username, map:String(this.currentMap),
+                    color:this._myColor
                 }));
+                // Перестаём делать polling — WS работает
+                if(this._posInterval){ clearInterval(this._posInterval); this._posInterval=null; }
             };
             this._gameWS.onmessage = (e) => {
                 try {
                     const msg = JSON.parse(e.data);
-                    if(false && msg.type==='chat') {
-                        if(String(msg._from)!==String(this.userId)) {
-                            this.appendChatMessage(msg.name, msg.text, msg.color);
+                    if(msg.type==='req_pos') {
+                        // Кто-то зашёл в мир — сразу отправляем нашу позицию
+                        if(this.mode==='play' && this.playerGroup && this._gameWS.readyState===1){
+                            try{ this._gameWS.send(JSON.stringify({
+                                type:'move', id:String(this.userId), name:this.username,
+                                color:this._myColor, map:String(this.currentMap),
+                                x:this.playerGroup.position.x, y:this.playerGroup.position.y, z:this.playerGroup.position.z,
+                                ry:this.playerGroup.rotation.y, inv:this.inventory||[]
+                            })); }catch(e){}
+                        }
+                        return;
+                    }
+                    if(msg.type==='leave') {
+                        if(this._others && this._others[msg.id]) {
+                            this.scene&&this.scene.remove(this._others[msg.id]);
+                            delete this._others[msg.id];
                         }
                         return;
                     }
@@ -3709,7 +3732,6 @@ const app = {
                             this._others[msg.id]=g;
                             this.scene&&this.scene.add(g);
                         } else {
-                            // Обновляем аксессуары если изменились
                             const o=this._others[msg.id];
                             const newInvKey = (msg.inv||[]).join(',');
                             if(o._invKey !== newInvKey) {
@@ -3723,26 +3745,36 @@ const app = {
                             }
                         }
                         const o=this._others[msg.id];
-                        o._targetPos = new THREE.Vector3(msg.x, msg.y, msg.z);
+                        if(!o) return;
+                        if(!o._targetPos) o._targetPos = new THREE.Vector3(msg.x,msg.y,msg.z);
+                        o._targetPos.set(msg.x, msg.y, msg.z);
                         o._targetRy = msg.ry || 0;
                         o._lastSeen = Date.now();
                         o._moving = msg.moving;
                         o._jumping = msg.jumping;
-                        o._animT = msg.animT || 0;
+                    } else if(msg.type==='leave') {
+                        // Игрок вышел — убираем его модель
+                        if(this._others && this._others[msg.id]) {
+                            this.scene&&this.scene.remove(this._others[msg.id]);
+                            delete this._others[msg.id];
+                        }
                     }
                 }catch(e){}
             };
             this._gameWS.onclose = () => {
-                // Fallback на HTTP polling если WS не работает
+                this._gameWSAlive = false;
                 if(this.mode==='play') {
+                    // Реконнект через 2 секунды
+                    this._gameWSReconnTimer = setTimeout(()=>this._connectGameWS(), 2000);
+                    // Временный fallback на polling
                     if(this._posInterval) clearInterval(this._posInterval);
-                    this._posInterval = setInterval(()=>this._pollPositions(), 100);
+                    this._posInterval = setInterval(()=>this._pollPositions(), 150);
                 }
             };
+            this._gameWS.onerror = () => {};
         } catch(e) {
-            // WS не поддерживается — используем polling
             if(this._posInterval) clearInterval(this._posInterval);
-            this._posInterval = setInterval(()=>this._pollPositions(), 100);
+            this._posInterval = setInterval(()=>this._pollPositions(), 150);
         }
     },
 
@@ -4338,9 +4370,29 @@ const app = {
         if(window.innerWidth > 768) document.body.requestPointerLock();
         
         this.engineLoop();
-        // Опрашиваем позиции других игроков с сервера каждые 300мс
+        // Подключаемся к WS серверу для позиций в реальном времени
+        if(this.mode==='play') {
+            this._others = {}; // чистим перед входом в новый мир
+            this._connectGameWS();
+            // Резервный cleanup — убираем игроков которых не видели >3 сек
+            if(this._staleTimer) clearInterval(this._staleTimer);
+            this._staleTimer = setInterval(()=>{
+                if(!this._others || this.mode!=='play') return;
+                const now = Date.now();
+                for(const id in this._others){
+                    if(now - (this._others[id]._lastSeen||0) > 3000){
+                        this.scene&&this.scene.remove(this._others[id]);
+                        delete this._others[id];
+                    }
+                }
+            }, 1000);
+        }
+        // Опрашиваем позиции других игроков с сервера каждые 150мс (fallback если WS не поднялся)
         if(this._posInterval) clearInterval(this._posInterval);
-        this._posInterval = setInterval(()=>this._pollPositions(), 50);
+        this._posInterval = setInterval(()=>{
+            if(this._gameWSAlive) return; // WS работает — polling не нужен
+            this._pollPositions();
+        }, 150);
     },
 
     // ── WORLDS
@@ -5670,12 +5722,20 @@ const app = {
     },
 
     exitGame(){
-        this.spaceGrav=false;this.loopFn=null;this.mode='none';
-        this._others={}; this._lastPosSend=0;
+        this.spaceGrav=false;this.loopFn=null;
+        // Сообщаем серверу что вышли
+        if(this._gameWS && this._gameWS.readyState===1){
+            try{ this._gameWS.send(JSON.stringify({type:'leave', id:String(this.userId), map:String(this.currentMap)})); }catch(e){}
+        }
+        // Говорим другим через MQTT
+        this._wsSend({type:'leave', id:String(this.userId), map:String(this.currentMap)});
+        this.mode='none';
+        this._others={}; this._lastPosSend=0; this._gameWSAlive=false;
         if(this._posInterval){ clearInterval(this._posInterval); this._posInterval=null; }
+        if(this._staleTimer){ clearInterval(this._staleTimer); this._staleTimer=null; }
+        if(this._gameWSReconnTimer){ clearTimeout(this._gameWSReconnTimer); this._gameWSReconnTimer=null; }
         if(this._gameWS){ try{this._gameWS.close();}catch(e){} this._gameWS=null; }
         this._updateStatus('online',null);
-        // Очищаем таймеры мини-игр
         if(this._hsInterval){clearInterval(this._hsInterval);this._hsInterval=null;}this._hsTimer=null;
         if(this._mtInterval){clearInterval(this._mtInterval);this._mtInterval=null;}this._mtSeconds=null;this._mtReached=false;
         this._snowParticles=null;
