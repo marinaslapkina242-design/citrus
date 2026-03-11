@@ -1342,6 +1342,7 @@
             <div class="nav-item" id="nav-roulette" onclick="app.switchTab('roulette')"><div class="nav-icon"><i class="fas fa-dice"></i></div> Рулетка</div>
             <div class="nav-item" id="nav-credits"  onclick="app.switchTab('credits')"> <div class="nav-icon"><i class="fas fa-coins"></i></div> Кредиты</div>
             <div class="nav-item" id="nav-gifts"    onclick="app.switchTab('gifts')">   <div class="nav-icon"><i class="fas fa-gift"></i></div> Подарки</div>
+            <div class="nav-item"        id="nav-stats"    onclick="app.switchTab('stats')">   <div class="nav-icon"><i class="fas fa-chart-line"></i></div> Статистика</div>
             <div class="nav-item hidden" id="nav-admin"   onclick="app.switchTab('admin')">  <div class="nav-icon"><i class="fas fa-shield-alt"></i></div> Баны</div>
         </div>
         <div class="content-area">
@@ -1632,6 +1633,47 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
 
                 </div>
             </div>
+
+            <!-- ══════════════════ TAB: STATS ══════════════════ -->
+            <div id="tab-stats" class="hidden">
+                <div class="section-title">📊 Статистика</div>
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">
+                    <div class="panel-box" style="text-align:center;padding:18px 12px;">
+                        <div style="font-size:32px;font-family:var(--font-head);color:var(--c-main);font-weight:900;" id="stat-registered">—</div>
+                        <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:4px;font-family:var(--font-ui);">Зарегистрировалось</div>
+                    </div>
+                    <div class="panel-box" style="text-align:center;padding:18px 12px;">
+                        <div style="font-size:32px;font-family:var(--font-head);color:#00E5FF;font-weight:900;" id="stat-sessions">—</div>
+                        <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:4px;font-family:var(--font-ui);">Всего сессий</div>
+                    </div>
+                    <div class="panel-box" style="text-align:center;padding:18px 12px;">
+                        <div style="font-size:32px;font-family:var(--font-head);color:#69F0AE;font-weight:900;" id="stat-online">—</div>
+                        <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:4px;font-family:var(--font-ui);">Онлайн сейчас</div>
+                    </div>
+                    <div class="panel-box" style="text-align:center;padding:18px 12px;">
+                        <div style="font-size:32px;font-family:var(--font-head);color:#FF80AB;font-weight:900;" id="stat-today">—</div>
+                        <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:4px;font-family:var(--font-ui);">Активных сегодня</div>
+                    </div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+                    <div class="panel-box">
+                        <div class="panel-box-title">🌍 Популярность миров</div>
+                        <div id="stats-worlds" style="display:flex;flex-direction:column;gap:8px;margin-top:8px;"></div>
+                    </div>
+                    <div class="panel-box">
+                        <div class="panel-box-title">📈 Активность по дням</div>
+                        <canvas id="stats-chart" width="380" height="180" style="width:100%;margin-top:8px;border-radius:8px;"></canvas>
+                    </div>
+                </div>
+                <div class="panel-box">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+                        <div class="panel-box-title" style="margin:0;">👥 Все аккаунты <span id="stats-accounts-count" style="color:rgba(255,255,255,0.3);font-size:11px;font-weight:400;"></span></div>
+                        <input id="stats-search" class="styled-input" placeholder="Поиск по нику..." style="width:200px;padding:6px 12px;font-size:12px;" oninput="app.filterStatsAccounts()">
+                    </div>
+                    <div id="stats-accounts" style="display:flex;flex-direction:column;gap:6px;max-height:320px;overflow-y:auto;"></div>
+                </div>
+            </div>
+
             <div id="tab-roulette" class="hidden">
                 <div style="display:flex;align-items:flex-start;justify-content:center;gap:40px;padding-top:10px;width:100%;">
                     <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
@@ -2504,6 +2546,112 @@ const app = {
     _getBans(){ try{ return JSON.parse(localStorage.getItem('citrus_bans')||'[]'); }catch(e){return [];} },
     _saveBans(list){ localStorage.setItem('citrus_bans', JSON.stringify(list)); },
 
+
+    // ══════════ СТАТИСТИКА ══════════
+
+    _statsAllAccounts: [],
+
+    async loadStats(){
+        const wNames={gather:'🍊 Цитрусовый Лес',parkour:'🏃 Небесный Паркур',
+            volcano:'🌋 Остров Вулкана',space:'🚀 Космическая База',
+            hideseek:'👀 Прятки',snowmount:'🏔 Снежная Гора',
+            dungeon:'⚔️ Тёмное Подземелье'};
+
+        // Онлайн сейчас
+        try {
+            const ro = await fetch(this._API+'/online');
+            if(ro.ok){ const ol=await ro.json(); const e=document.getElementById('stat-online'); if(e) e.textContent=ol.length; }
+        } catch(e){}
+
+        // Данные сервера
+        try {
+            const r = await fetch(this._API+'/stats');
+            if(!r.ok) return;
+            const d = await r.json();
+
+            // Карточки
+            const today = new Date().toISOString().slice(0,10);
+            const setEl=(id,v)=>{ const e=document.getElementById(id); if(e) e.textContent=v; };
+            setEl('stat-registered', d.totalRegistered||Object.keys(d.allAccounts||{}).length||0);
+            setEl('stat-sessions',   d.totalSessions||0);
+            setEl('stat-today',      (d.dailyActive||{})[today]||0);
+
+            // Миры
+            const wEl = document.getElementById('stats-worlds');
+            if(wEl){
+                const plays = d.worldPlays||{};
+                const sorted = Object.entries(plays).sort((a,b)=>b[1]-a[1]);
+                const maxPlays = sorted[0]?.[1]||1;
+                if(!sorted.length){ wEl.innerHTML='<div style="color:rgba(255,255,255,0.2);font-size:12px;text-align:center;padding:16px;">Пока нет данных</div>'; }
+                else { wEl.innerHTML = sorted.map(([w,cnt])=>`
+                    <div>
+                        <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+                            <span style="font-size:12px;color:rgba(255,255,255,0.7);font-family:var(--font-body);">${wNames[w]||w}</span>
+                            <span style="font-size:12px;color:var(--c-main);font-family:var(--font-head);font-weight:700;">${cnt}</span>
+                        </div>
+                        <div style="height:4px;background:rgba(255,255,255,0.05);border-radius:4px;overflow:hidden;">
+                            <div style="height:100%;width:${Math.round(cnt/maxPlays*100)}%;background:linear-gradient(90deg,var(--c-main),var(--c-glow));border-radius:4px;transition:width 0.5s;"></div>
+                        </div>
+                    </div>`).join(''); }
+            }
+
+            // График активности по дням
+            const chartEl = document.getElementById('stats-chart');
+            if(chartEl && d.dailyActive){
+                const ctx = chartEl.getContext('2d');
+                const days = Object.keys(d.dailyActive).sort().slice(-14); // последние 14 дней
+                const vals = days.map(k=>d.dailyActive[k]||0);
+                const maxV = Math.max(...vals, 1);
+                const W=chartEl.width, H=chartEl.height, pad=24, barW=Math.floor((W-pad*2)/Math.max(days.length,1))-2;
+                ctx.clearRect(0,0,W,H);
+                // Сетка
+                ctx.strokeStyle='rgba(255,255,255,0.05)'; ctx.lineWidth=1;
+                for(let i=0;i<=4;i++){ const y=pad+(H-pad*2)*(1-i/4); ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(W-pad,y);ctx.stroke(); }
+                // Столбцы
+                days.forEach((day,i)=>{
+                    const v=vals[i]; const bH=Math.max(4,Math.floor((H-pad*2)*v/maxV));
+                    const x=pad+i*(barW+2); const y=H-pad-bH;
+                    const grad=ctx.createLinearGradient(0,y,0,H-pad);
+                    grad.addColorStop(0,'rgba(255,152,0,0.9)'); grad.addColorStop(1,'rgba(255,152,0,0.2)');
+                    ctx.fillStyle=grad; ctx.beginPath();
+                    ctx.roundRect(x,y,barW,bH,3); ctx.fill();
+                    // Подпись дня
+                    ctx.fillStyle='rgba(255,255,255,0.25)'; ctx.font='9px sans-serif'; ctx.textAlign='center';
+                    ctx.fillText(day.slice(5),x+barW/2,H-8);
+                    // Значение
+                    if(v>0){ ctx.fillStyle='rgba(255,255,255,0.6)'; ctx.font='bold 10px sans-serif'; ctx.fillText(v,x+barW/2,y-4); }
+                });
+            }
+
+            // Все аккаунты
+            this._statsAllAccounts = d.allAccounts||[];
+            this._renderStatsAccounts(this._statsAllAccounts);
+
+        } catch(e){ console.error('stats error',e); }
+    },
+
+    _renderStatsAccounts(list){
+        const el = document.getElementById('stats-accounts'); if(!el) return;
+        const cnt = document.getElementById('stats-accounts-count');
+        if(cnt) cnt.textContent = `(${list.length})`;
+        if(!list.length){ el.innerHTML='<div style="color:rgba(255,255,255,0.2);font-size:13px;text-align:center;padding:20px;">Нет аккаунтов</div>'; return; }
+        el.innerHTML = list.map((p,i)=>`
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(255,255,255,0.02);border-radius:10px;border:1px solid rgba(255,255,255,0.05);">
+                <div style="color:rgba(255,255,255,0.2);font-size:11px;width:20px;text-align:right;font-family:var(--font-head);">${i+1}</div>
+                <div style="width:32px;height:32px;border-radius:50%;background:${p.color||'#888'}22;color:${p.color||'#888'};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;">${(p.name[0]||'?').toUpperCase()}</div>
+                <div style="flex:1;min-width:0;">
+                    <div style="font-family:var(--font-body);font-weight:700;color:rgba(255,255,255,0.85);font-size:13px;">${p.name}${this.devBadge(p.name)}</div>
+                    <div style="font-size:10px;color:rgba(255,255,255,0.25);font-family:var(--font-ui);">${p.tag||'#'+p.id} · ${p.ts?new Date(p.ts).toLocaleDateString('ru'):''}</div>
+                </div>
+            </div>`).join('');
+    },
+
+    filterStatsAccounts(){
+        const q = (document.getElementById('stats-search')?.value||'').toLowerCase();
+        const filtered = q ? this._statsAllAccounts.filter(p=>(p.name||'').toLowerCase().includes(q)||(p.tag||'').toLowerCase().includes(q)) : this._statsAllAccounts;
+        this._renderStatsAccounts(filtered);
+    },
+
     clearAllBans(){
         if(!this.canBan(this.username)) return;
         if(!confirm('Очистить весь бан-лист? Все игроки будут разбанены.')) return;
@@ -2701,7 +2849,7 @@ const app = {
 
     // ── TABS
     switchTab(id){
-        ['games','avatar','shop','friends','studio','quests','roulette','credits','gifts','admin'].forEach(t=>{
+        ['games','avatar','shop','friends','studio','quests','roulette','credits','gifts','stats','admin'].forEach(t=>{
             document.getElementById('tab-'+t).classList.add('hidden');
             document.getElementById('nav-'+t)?.classList.remove('active');
         });
@@ -2714,6 +2862,7 @@ const app = {
         if(id==='credits')this.initCredits();
         if(id==='gifts')this.initGifts();
         if(id==='admin'){ this.loadBanList(); this.loadBanOnlineList(); }
+        if(id==='stats'){ this.loadStats(); }
         else if(this._questCountdownInterval){ clearInterval(this._questCountdownInterval); this._questCountdownInterval=null; }
         if(id==='friends'){
             // Регистрируем на сервере (на случай если зашли раньше деплоя)
@@ -4105,7 +4254,9 @@ const app = {
             snowmount:'Снежная Гора',dungeon:'Тёмное Подземелье',march8:'🌸 8 Марта'};
         this._worldName=wNames[mapId]||'Мир игрока';
         if(mode==='play'){
-            this._updateStatus('ingame',this._worldName);
+            this._updateStatus('ingame', mapId);
+            // Считаем посещение мира в статистике сервера
+            try { fetch(this._API+'/stats/world', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({world: mapId})}); } catch(e){}
             // Сразу пушим статус на сервер
             setTimeout(()=>this.renderMpPanel(), 500);
         }
