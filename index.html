@@ -4,29 +4,33 @@
     <meta charset="UTF-8">
     <title>CITRUS | ONLINE</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;600;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&family=Rajdhani:wght@500;600;700&family=Orbitron:wght@600;700;900&display=swap" rel="stylesheet">
     <style>
         /* ═══════════════════════════════════════════════════
            CITRUS ONLINE — ULTRA REDESIGN v2.0
            ═══════════════════════════════════════════════════ */
         :root {
-            --c-main: #FF9800;
-            --c-glow: #FFB74D;
-            --c-deep: #E65100;
-            --c-bg: #03030A;
-            --c-surface: #080814;
-            --c-surface2: #0D0D1E;
-            --c-border: rgba(255,152,0,0.12);
-            --c-border2: rgba(255,152,0,0.25);
-            --c-blue: #00E5FF;
-            --c-green: #00E676;
-            --c-pink: #FF4081;
-            --c-purple: #9C27B0;
+            --c-main: #FF9500;
+            --c-glow: #FFBA45;
+            --c-deep: #E05000;
+            --c-bg: #0A0608;
+            --c-surface: #0F0C10;
+            --c-surface2: #161018;
+            --c-surface3: #1C1520;
+            --c-border: rgba(255,149,0,0.1);
+            --c-border2: rgba(255,149,0,0.22);
+            --c-blue: #38BDF8;
+            --c-green: #4ADE80;
+            --c-pink: #F472B6;
+            --c-purple: #A78BFA;
             --font-head: 'Orbitron', sans-serif;
-            --font-body: 'Rajdhani', sans-serif;
-            --font-ui: 'Inter', sans-serif;
-            --shadow-glow: 0 0 40px rgba(255,152,0,0.2), 0 0 80px rgba(255,152,0,0.08);
-            --shadow-card: 0 4px 24px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.04) inset;
+            --font-body: 'Plus Jakarta Sans', sans-serif;
+            --font-ui: 'Plus Jakarta Sans', sans-serif;
+            --font-accent: 'Syne', sans-serif;
+            --shadow-glow: 0 0 60px rgba(255,149,0,0.18), 0 0 120px rgba(255,149,0,0.06);
+            --shadow-card: 0 2px 20px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04) inset;
+            --radius-card: 20px;
+            --radius-btn: 14px;
         }
 
         * { box-sizing: border-box; user-select: none; }
@@ -37,6 +41,7 @@
             background: var(--c-bg);
             color: #fff;
             overflow: hidden;
+            -webkit-font-smoothing: antialiased;
         }
 
         /* Animated background grain */
@@ -71,7 +76,7 @@
             content: '';
             position: absolute; inset: 0;
             background:
-                radial-gradient(ellipse 80% 60% at 50% 0%, rgba(255,152,0,0.12) 0%, transparent 60%),
+                radial-gradient(ellipse 80% 60% at 50% 0%, rgba(255,149,0,0.14) 0%, transparent 58%),
                 radial-gradient(ellipse 50% 40% at 20% 80%, rgba(255,80,0,0.08) 0%, transparent 50%),
                 radial-gradient(ellipse 40% 30% at 80% 60%, rgba(0,229,255,0.04) 0%, transparent 50%);
             animation: bgPulse 8s ease-in-out infinite alternate;
@@ -80,8 +85,8 @@
             content: '';
             position: absolute; inset: 0;
             background-image:
-                linear-gradient(rgba(255,152,0,0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,152,0,0.03) 1px, transparent 1px);
+                linear-gradient(rgba(255,149,0,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,149,0,0.03) 1px, transparent 1px);
             background-size: 60px 60px;
             mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black, transparent);
         }
@@ -97,14 +102,14 @@
             backdrop-filter: blur(40px) saturate(150%);
             padding: 50px 48px;
             border-radius: 28px;
-            border: 1px solid rgba(255,152,0,0.2);
+            border: 1px solid rgba(255,149,0,0.2);
             text-align: center;
             width: 420px;
             box-shadow:
                 0 0 0 1px rgba(255,255,255,0.03) inset,
                 0 40px 80px rgba(0,0,0,0.8),
-                0 0 60px rgba(255,152,0,0.08),
-                0 0 120px rgba(255,152,0,0.04);
+                0 0 60px rgba(255,149,0,0.08),
+                0 0 120px rgba(255,149,0,0.04);
             animation: loginAppear 0.6s cubic-bezier(0.34,1.56,0.64,1) both;
         }
 
@@ -117,7 +122,7 @@
         .login-box::before {
             content: '';
             position: absolute; top: 0; left: 10%; right: 10%; height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255,152,0,0.6), rgba(255,183,77,0.8), rgba(255,152,0,0.6), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255,149,0,0.6), rgba(255,183,77,0.8), rgba(255,149,0,0.6), transparent);
             border-radius: 1px;
         }
 
@@ -128,13 +133,13 @@
             background: linear-gradient(135deg, #FF9800 0%, #FFD54F 40%, #FF6D00 100%);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             background-clip: text;
-            filter: drop-shadow(0 0 30px rgba(255,152,0,0.4));
+            filter: drop-shadow(0 0 30px rgba(255,149,0,0.4));
             letter-spacing: 6px;
             position: relative;
         }
 
         .login-sub {
-            color: rgba(255,152,0,0.45);
+            color: rgba(255,149,0,0.45);
             margin: 0 0 28px;
             font-size: 10px;
             letter-spacing: 5px;
@@ -149,7 +154,7 @@
             margin-bottom: 24px;
             border-radius: 14px;
             overflow: hidden;
-            border: 1px solid rgba(255,152,0,0.15);
+            border: 1px solid rgba(255,149,0,0.15);
             background: rgba(0,0,0,0.3);
             padding: 4px;
             gap: 4px;
@@ -163,9 +168,9 @@
             font-family: var(--font-body);
         }
         .auth-tab-btn.active-tab {
-            background: linear-gradient(135deg, rgba(255,152,0,0.25), rgba(255,152,0,0.12));
+            background: linear-gradient(135deg, rgba(255,149,0,0.25), rgba(255,149,0,0.12));
             color: var(--c-main);
-            box-shadow: 0 0 20px rgba(255,152,0,0.15), 0 0 0 1px rgba(255,152,0,0.2) inset;
+            box-shadow: 0 0 20px rgba(255,149,0,0.15), 0 0 0 1px rgba(255,149,0,0.2) inset;
         }
         .auth-tab-btn:not(.active-tab) {
             background: transparent; color: rgba(255,255,255,0.3);
@@ -185,9 +190,9 @@
             font-family: var(--font-ui);
         }
         .login-box input:focus {
-            border-color: rgba(255,152,0,0.5);
-            background: rgba(255,152,0,0.04);
-            box-shadow: 0 0 0 3px rgba(255,152,0,0.08), 0 0 20px rgba(255,152,0,0.06);
+            border-color: rgba(255,149,0,0.5);
+            background: rgba(255,149,0,0.04);
+            box-shadow: 0 0 0 3px rgba(255,149,0,0.08), 0 0 20px rgba(255,149,0,0.06);
         }
         .login-box input::placeholder { color: rgba(255,255,255,0.2); }
 
@@ -226,14 +231,14 @@
             background: rgba(5,5,16,0.97);
             display: flex; align-items: center;
             padding: 0 28px;
-            border-bottom: 1px solid rgba(255,152,0,0.1);
+            border-bottom: 1px solid rgba(255,149,0,0.1);
             position: relative; z-index: 10;
             backdrop-filter: blur(20px);
         }
         .hub-header::after {
             content: '';
             position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255,152,0,0.4), rgba(255,183,77,0.6), rgba(255,152,0,0.4), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255,149,0,0.4), rgba(255,183,77,0.6), rgba(255,149,0,0.4), transparent);
         }
 
         .header-logo {
@@ -243,21 +248,21 @@
             background: linear-gradient(135deg, #FF9800, #FFD54F);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             background-clip: text;
-            filter: drop-shadow(0 0 12px rgba(255,152,0,0.5));
+            filter: drop-shadow(0 0 12px rgba(255,149,0,0.5));
             position: relative;
         }
         .header-logo::after {
             content: 'ONLINE';
             position: absolute; bottom: -10px; left: 0;
             font-size: 8px; letter-spacing: 4px;
-            color: rgba(255,152,0,0.4);
-            -webkit-text-fill-color: rgba(255,152,0,0.4);
+            color: rgba(255,149,0,0.4);
+            -webkit-text-fill-color: rgba(255,149,0,0.4);
             filter: none;
         }
 
         .header-divider {
             width: 1px; height: 32px;
-            background: linear-gradient(180deg, transparent, rgba(255,152,0,0.2), transparent);
+            background: linear-gradient(180deg, transparent, rgba(255,149,0,0.2), transparent);
             margin: 0 20px;
         }
 
@@ -272,19 +277,19 @@
 
         .balance-chip {
             display: flex; align-items: center; gap: 8px;
-            background: linear-gradient(135deg, rgba(255,152,0,0.12), rgba(255,152,0,0.06));
-            border: 1px solid rgba(255,152,0,0.25);
+            background: linear-gradient(135deg, rgba(255,149,0,0.12), rgba(255,149,0,0.06));
+            border: 1px solid rgba(255,149,0,0.25);
             padding: 8px 16px;
             border-radius: 50px;
             font-family: var(--font-head);
             font-size: 13px; font-weight: 700;
             color: var(--c-main);
-            box-shadow: 0 0 20px rgba(255,152,0,0.08), 0 0 0 1px rgba(255,183,77,0.1) inset;
+            box-shadow: 0 0 20px rgba(255,149,0,0.08), 0 0 0 1px rgba(255,183,77,0.1) inset;
             transition: all 0.2s;
         }
         .balance-chip:hover {
-            border-color: rgba(255,152,0,0.45);
-            box-shadow: 0 0 30px rgba(255,152,0,0.15);
+            border-color: rgba(255,149,0,0.45);
+            box-shadow: 0 0 30px rgba(255,149,0,0.15);
         }
 
         .btn-logout {
@@ -311,28 +316,28 @@
            ═══════════════════════════════════════════════════ */
         .sidebar {
             width: 240px;
-            background: rgba(5,5,16,0.98);
-            border-right: 1px solid rgba(255,152,0,0.08);
-            padding: 16px 0;
+            background: rgba(10,6,12,0.99);
+            border-right: 1px solid rgba(255,149,0,0.07);
+            padding: 12px 0 16px;
             display: flex; flex-direction: column;
             position: relative; overflow: hidden;
         }
         .sidebar::before {
             content: '';
             position: absolute; top: 0; right: 0; width: 1px; height: 100%;
-            background: linear-gradient(180deg, transparent, rgba(255,152,0,0.3) 30%, rgba(255,152,0,0.3) 70%, transparent);
+            background: linear-gradient(180deg, transparent, rgba(255,149,0,0.3) 30%, rgba(255,149,0,0.3) 70%, transparent);
         }
         /* Subtle ambient glow on sidebar */
         .sidebar::after {
             content: '';
             position: absolute; bottom: 0; left: 0; right: 0; height: 200px;
-            background: radial-gradient(ellipse at 50% 100%, rgba(255,152,0,0.04), transparent 70%);
+            background: radial-gradient(ellipse at 50% 100%, rgba(255,149,0,0.04), transparent 70%);
             pointer-events: none;
         }
 
         .sidebar-label {
             font-size: 9px; font-weight: 700;
-            color: rgba(255,152,0,0.3);
+            color: rgba(255,149,0,0.3);
             text-transform: uppercase; letter-spacing: 3px;
             padding: 0 22px 8px;
             font-family: var(--font-head);
@@ -340,54 +345,55 @@
         }
 
         .nav-item {
-            padding: 12px 22px;
-            color: rgba(255,255,255,0.35);
+            padding: 10px 16px;
+            color: rgba(255,255,255,0.38);
             cursor: pointer;
-            display: flex; align-items: center; gap: 13px;
-            transition: all 0.2s;
+            display: flex; align-items: center; gap: 11px;
+            transition: all 0.18s ease;
             border-left: 2px solid transparent;
             font-size: 13px; font-weight: 600;
             position: relative;
             font-family: var(--font-body);
-            letter-spacing: 0.3px;
-            margin: 1px 10px;
-            border-radius: 0 10px 10px 0;
-            border-left-width: 2px;
+            letter-spacing: 0.1px;
+            margin: 1px 8px 1px 0;
+            border-radius: 0 12px 12px 0;
         }
         .nav-item:hover {
-            color: rgba(255,255,255,0.7);
-            background: rgba(255,255,255,0.03);
+            color: rgba(255,255,255,0.75);
+            background: rgba(255,149,0,0.05);
+            transform: translateX(2px);
         }
         .nav-item .nav-icon {
-            width: 32px; height: 32px;
-            border-radius: 8px;
+            width: 30px; height: 30px;
+            border-radius: 9px;
             display: flex; align-items: center; justify-content: center;
             background: rgba(255,255,255,0.04);
-            font-size: 13px;
-            transition: all 0.2s;
+            font-size: 12px;
+            transition: all 0.18s ease;
             flex-shrink: 0;
         }
         .nav-item:hover .nav-icon {
-            background: rgba(255,152,0,0.08);
-            color: rgba(255,152,0,0.7);
+            background: rgba(255,149,0,0.1);
+            color: var(--c-main);
         }
         .nav-item.active {
-            color: var(--c-main);
-            background: linear-gradient(90deg, rgba(255,152,0,0.1), rgba(255,152,0,0.04));
+            color: #fff;
+            background: linear-gradient(90deg, rgba(255,149,0,0.14), rgba(255,149,0,0.05));
             border-left-color: var(--c-main);
-            margin-left: 0; border-radius: 0 12px 12px 0; padding-left: 20px;
+            margin-left: 0; border-radius: 0 12px 12px 0; padding-left: 14px;
+            transform: none;
         }
         .nav-item.active .nav-icon {
-            background: linear-gradient(135deg, rgba(255,152,0,0.2), rgba(255,152,0,0.1));
+            background: linear-gradient(135deg, rgba(255,149,0,0.25), rgba(255,149,0,0.12));
             color: var(--c-main);
-            box-shadow: 0 0 12px rgba(255,152,0,0.2);
+            box-shadow: 0 2px 12px rgba(255,149,0,0.25);
         }
         .nav-item.active::after {
             content: '';
-            position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
-            width: 4px; height: 4px; border-radius: 50%;
+            position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+            width: 5px; height: 5px; border-radius: 50%;
             background: var(--c-main);
-            box-shadow: 0 0 8px var(--c-main);
+            box-shadow: 0 0 10px var(--c-main);
         }
 
         .nav-badge {
@@ -412,28 +418,28 @@
             content: '';
             position: fixed; top: 68px; right: 0; bottom: 0; left: 240px;
             background:
-                radial-gradient(ellipse 60% 40% at 70% 0%, rgba(255,152,0,0.03), transparent),
+                radial-gradient(ellipse 60% 40% at 70% 0%, rgba(255,149,0,0.03), transparent),
                 radial-gradient(ellipse 40% 50% at 0% 80%, rgba(0,229,255,0.02), transparent);
             pointer-events: none; z-index: 0;
         }
         #tab-roulette { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 10px; width: 100%; gap: 4px; }
-        .content-area::-webkit-scrollbar { width: 4px; }
+        .content-area::-webkit-scrollbar { width: 3px; }
         .content-area::-webkit-scrollbar-track { background: transparent; }
-        .content-area::-webkit-scrollbar-thumb { background: rgba(255,152,0,0.2); border-radius: 4px; }
-        .content-area::-webkit-scrollbar-thumb:hover { background: rgba(255,152,0,0.4); }
+        .content-area::-webkit-scrollbar-thumb { background: rgba(255,149,0,0.15); border-radius: 4px; }
+        .content-area::-webkit-scrollbar-thumb:hover { background: rgba(255,149,0,0.35); }
 
         .section-title {
-            font-size: 10px; font-weight: 800;
-            color: rgba(255,152,0,0.5);
-            text-transform: uppercase; letter-spacing: 3px;
-            margin: 0 0 18px;
-            font-family: var(--font-head);
-            display: flex; align-items: center; gap: 10px;
+            font-size: 11px; font-weight: 700;
+            color: rgba(255,149,0,0.55);
+            text-transform: uppercase; letter-spacing: 2.5px;
+            margin: 0 0 20px;
+            font-family: var(--font-accent);
+            display: flex; align-items: center; gap: 12px;
         }
         .section-title::after {
             content: '';
             flex: 1; height: 1px;
-            background: linear-gradient(90deg, rgba(255,152,0,0.2), transparent);
+            background: linear-gradient(90deg, rgba(255,149,0,0.18), transparent);
         }
 
         /* ═══════════════════════════════════════════════════
@@ -442,29 +448,28 @@
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
 
         .card {
-            background: var(--c-surface2);
-            border-radius: 18px;
-            border: 1px solid rgba(255,255,255,0.06);
+            background: linear-gradient(145deg, var(--c-surface3), var(--c-surface2));
+            border-radius: var(--radius-card);
+            border: 1px solid rgba(255,255,255,0.05);
             overflow: hidden; cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.34,1.2,0.64,1);
-            box-shadow: var(--shadow-card);
+            transition: transform 0.28s cubic-bezier(0.34,1.2,0.64,1), box-shadow 0.28s ease, border-color 0.28s ease;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.03) inset;
             position: relative;
         }
         .card::before {
             content: '';
-            position: absolute; inset: 0;
-            background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, transparent 50%);
-            pointer-events: none; z-index: 1;
+            position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
         }
         .card:hover {
-            border-color: rgba(255,152,0,0.3);
-            transform: translateY(-6px) scale(1.01);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.7), 0 0 30px rgba(255,152,0,0.1), 0 0 0 1px rgba(255,152,0,0.15);
+            border-color: rgba(255,149,0,0.25);
+            transform: translateY(-5px) scale(1.015);
+            box-shadow: 0 18px 48px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,149,0,0.12), 0 0 30px rgba(255,149,0,0.07);
         }
         .card-thumb {
-            height: 130px;
+            height: 136px;
             display: flex; justify-content: center; align-items: center;
-            font-size: 52px; position: relative;
+            font-size: 56px; position: relative;
             overflow: hidden;
         }
         .card-thumb::after {
@@ -479,12 +484,12 @@
         .card-info b { font-family: var(--font-body); font-size: 14px; font-weight: 700; letter-spacing: 0.3px; }
 
         .price-tag {
-            background: linear-gradient(135deg, rgba(255,152,0,0.15), rgba(255,152,0,0.08));
-            color: var(--c-main);
-            padding: 4px 10px; border-radius: 8px;
-            font-size: 12px; font-weight: 800;
-            border: 1px solid rgba(255,152,0,0.2);
-            font-family: var(--font-head);
+            background: rgba(255,149,0,0.1);
+            color: var(--c-glow);
+            padding: 4px 11px; border-radius: 10px;
+            font-size: 12px; font-weight: 700;
+            border: 1px solid rgba(255,149,0,0.18);
+            font-family: var(--font-body);
         }
 
         /* ═══════════════════════════════════════════════════
@@ -492,9 +497,9 @@
            ═══════════════════════════════════════════════════ */
         #avatar-container {
             width: 100%; height: 420px;
-            background: radial-gradient(ellipse at 50% 40%, rgba(255,152,0,0.06) 0%, #060612 60%);
+            background: radial-gradient(ellipse at 50% 40%, rgba(255,149,0,0.06) 0%, #060612 60%);
             border-radius: 20px;
-            border: 1px solid rgba(255,152,0,0.12);
+            border: 1px solid rgba(255,149,0,0.12);
             box-shadow: 0 0 0 1px rgba(255,255,255,0.03) inset;
             position: relative; overflow: hidden;
         }
@@ -502,7 +507,7 @@
             content: '';
             position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
             width: 200px; height: 60px;
-            background: radial-gradient(ellipse, rgba(255,152,0,0.15), transparent 70%);
+            background: radial-gradient(ellipse, rgba(255,149,0,0.15), transparent 70%);
         }
 
         /* ═══════════════════════════════════════════════════
@@ -519,12 +524,12 @@
             position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
             background: rgba(5,5,16,0.92);
             padding: 10px 16px; border-radius: 50px;
-            border: 1px solid rgba(255,152,0,0.25);
+            border: 1px solid rgba(255,149,0,0.25);
             pointer-events: auto;
             display: flex; gap: 8px; align-items: center;
             backdrop-filter: blur(20px);
             flex-wrap: wrap; max-width: 90vw;
-            box-shadow: 0 4px 24px rgba(0,0,0,0.6), 0 0 20px rgba(255,152,0,0.08);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.6), 0 0 20px rgba(255,149,0,0.08);
         }
         .btn-st {
             background: rgba(255,255,255,0.06);
@@ -538,7 +543,7 @@
             background: linear-gradient(135deg, var(--c-main), var(--c-deep));
             color: #fff; padding: 7px 16px; border-radius: 8px;
             font-size: 12px; font-family: var(--font-head);
-            box-shadow: 0 0 15px rgba(255,152,0,0.3);
+            box-shadow: 0 0 15px rgba(255,149,0,0.3);
         }
         .btn-exit {
             position: absolute; top: 16px; right: 16px;
@@ -549,23 +554,14 @@
             font-family: var(--font-body);
         }
         .btn-exit:hover { background: rgba(255,50,50,0.2); box-shadow: 0 0 15px rgba(255,50,50,0.2); }
-        .emote-btn {
-            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
-            color: #fff; border-radius: 14px; padding: 10px 14px; cursor: pointer;
-            font-size: 22px; text-align: center; min-width: 68px; line-height: 1.3;
-            font-family: var(--font-ui); transition: background 0.15s, transform 0.1s;
-        }
-        .emote-btn span { font-size: 10px; display: block; color: rgba(255,255,255,0.45); font-family: var(--font-ui); margin-top: 2px; }
-        .emote-btn:hover, .emote-btn.active { background: rgba(255,152,0,0.2); border-color: rgba(255,152,0,0.4); transform: scale(1.05); }
-        .emote-btn.active { color: #FF9800; }
         #ingame-ui {
             position: absolute; top: 16px; left: 16px;
             background: rgba(5,5,16,0.85);
             padding: 10px 18px; border-radius: 14px;
-            border: 1px solid rgba(255,152,0,0.25);
+            border: 1px solid rgba(255,149,0,0.25);
             font-size: 20px; font-weight: 800;
             font-family: var(--font-head);
-            box-shadow: 0 0 20px rgba(255,152,0,0.1);
+            box-shadow: 0 0 20px rgba(255,149,0,0.1);
         }
         .c-swatch { width: 22px; height: 22px; border-radius: 6px; cursor: pointer; border: 2px solid transparent; transition: 0.15s; display: inline-block; }
         .c-swatch:hover, .c-swatch.sel { border-color: #fff; transform: scale(1.2); box-shadow: 0 0 8px rgba(255,255,255,0.3); }
@@ -590,10 +586,10 @@
             box-shadow: var(--shadow-card);
         }
         .fp::-webkit-scrollbar { width: 3px; }
-        .fp::-webkit-scrollbar-thumb { background: rgba(255,152,0,0.2); border-radius: 3px; }
+        .fp::-webkit-scrollbar-thumb { background: rgba(255,149,0,0.2); border-radius: 3px; }
 
         .fp h3 {
-            font-size: 10px; color: rgba(255,152,0,0.4);
+            font-size: 10px; color: rgba(255,149,0,0.4);
             text-transform: uppercase; letter-spacing: 3px;
             margin: 0 0 16px;
             font-family: var(--font-head);
@@ -608,7 +604,7 @@
             border: 1px solid transparent;
             margin-bottom: 6px; transition: all 0.2s;
         }
-        .fr:hover { border-color: rgba(255,152,0,0.12); background: rgba(255,152,0,0.03); }
+        .fr:hover { border-color: rgba(255,149,0,0.12); background: rgba(255,149,0,0.03); }
         .fa2 {
             width: 38px; height: 38px; border-radius: 10px;
             display: flex; align-items: center; justify-content: center;
@@ -637,14 +633,14 @@
             font-family: var(--font-ui);
             transition: all 0.2s;
         }
-        .srow input:focus { border-color: rgba(255,152,0,0.4); box-shadow: 0 0 0 3px rgba(255,152,0,0.06); }
+        .srow input:focus { border-color: rgba(255,149,0,0.4); box-shadow: 0 0 0 3px rgba(255,149,0,0.06); }
         .srow input::placeholder { color: rgba(255,255,255,0.18); }
         .srow button {
             background: linear-gradient(135deg, var(--c-main), var(--c-deep));
             color: #fff; padding: 10px 16px;
             border-radius: 10px; font-size: 12px;
             font-family: var(--font-body);
-            box-shadow: 0 0 14px rgba(255,152,0,0.25);
+            box-shadow: 0 0 14px rgba(255,149,0,0.25);
         }
 
         /* ═══════════════════════════════════════════════════
@@ -657,7 +653,7 @@
         }
         .notif {
             background: rgba(8,8,20,0.97);
-            border: 1px solid rgba(255,152,0,0.2);
+            border: 1px solid rgba(255,149,0,0.2);
             border-radius: 16px; padding: 14px 18px;
             max-width: 300px;
             transform: translateX(120%);
@@ -669,7 +665,7 @@
         .notif::before {
             content: '';
             position: absolute; top: 0; left: 12px; right: 12px; height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255,152,0,0.4), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255,149,0,0.4), transparent);
         }
         .notif.show { transform: translateX(0); }
         .nh { font-size: 13px; font-weight: 700; color: var(--c-main); margin-bottom: 5px; font-family: var(--font-body); letter-spacing: 0.5px; }
@@ -698,8 +694,8 @@
             box-shadow: 0 0 0 1px rgba(0,0,0,0.4) inset;
         }
         #script-ta:focus, #eng-script-ta:focus {
-            border-color: rgba(255,152,0,0.2);
-            box-shadow: 0 0 0 3px rgba(255,152,0,0.04);
+            border-color: rgba(255,149,0,0.2);
+            box-shadow: 0 0 0 3px rgba(255,149,0,0.04);
         }
 
         .sout {
@@ -724,14 +720,14 @@
         .touch-place-btn {
             position: absolute; top: 50%; right: 16px; transform: translateY(-50%);
             width: 56px; height: 56px; border-radius: 16px;
-            background: rgba(255,152,0,0.15);
-            border: 2px solid rgba(255,152,0,0.4);
+            background: rgba(255,149,0,0.15);
+            border: 2px solid rgba(255,149,0,0.4);
             display: flex; align-items: center; justify-content: center;
             font-size: 24px; pointer-events: auto; cursor: pointer;
             -webkit-tap-highlight-color: transparent;
             backdrop-filter: blur(10px);
         }
-        .touch-place-btn:active { background: rgba(255,152,0,0.4); }
+        .touch-place-btn:active { background: rgba(255,149,0,0.4); }
         #mp-panel {
             position: absolute; top: 16px; right: 65px;
             background: rgba(5,5,16,0.85);
@@ -756,7 +752,7 @@
         }
         .modal-bx {
             background: rgba(8,8,20,0.98);
-            border: 1px solid rgba(255,152,0,0.2);
+            border: 1px solid rgba(255,149,0,0.2);
             border-radius: 20px; padding: 32px;
             width: 390px; max-width: 90vw;
             box-shadow: 0 0 0 1px rgba(255,255,255,0.03) inset, 0 40px 80px rgba(0,0,0,0.8);
@@ -765,7 +761,7 @@
         .modal-bx::before {
             content: '';
             position: absolute; top: 0; left: 10%; right: 10%; height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255,152,0,0.5), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255,149,0,0.5), transparent);
         }
         .modal-bx h3 { margin: 0 0 16px; color: var(--c-main); font-size: 14px; font-family: var(--font-head); letter-spacing: 1px; }
         .modal-bx input {
@@ -775,7 +771,7 @@
             font-size: 14px; outline: none; margin-bottom: 12px;
             font-family: var(--font-ui); transition: all 0.2s;
         }
-        .modal-bx input:focus { border-color: rgba(255,152,0,0.4); }
+        .modal-bx input:focus { border-color: rgba(255,149,0,0.4); }
         .mbtns { display: flex; gap: 10px; }
         .mbtns button { flex: 1; padding: 12px; border-radius: 10px; font-size: 13px; font-weight: 700; font-family: var(--font-body); }
 
@@ -789,8 +785,8 @@
             to { opacity: 1; transform: translateY(0); }
         }
         @keyframes pulse-glow {
-            0%, 100% { box-shadow: 0 0 20px rgba(255,152,0,0.1); }
-            50% { box-shadow: 0 0 35px rgba(255,152,0,0.25); }
+            0%, 100% { box-shadow: 0 0 20px rgba(255,149,0,0.1); }
+            50% { box-shadow: 0 0 35px rgba(255,149,0,0.25); }
         }
         @keyframes mythic-glow {
             0%,100% { box-shadow: 0 0 20px rgba(255,61,61,0.3), 0 0 40px rgba(255,61,61,0.1); }
@@ -807,8 +803,8 @@
             100% { box-shadow: 0 0 20px rgba(123,104,238,0.3), 0 0 40px rgba(0,200,255,0.1); border-color: rgba(123,104,238,0.4); }
         }
         @keyframes citrus-glow {
-            0%,100% { box-shadow: 0 0 20px rgba(255,152,0,0.3), 0 0 40px rgba(255,152,0,0.1); }
-            50% { box-shadow: 0 0 40px rgba(255,152,0,0.6), 0 0 80px rgba(255,152,0,0.3); }
+            0%,100% { box-shadow: 0 0 20px rgba(255,149,0,0.3), 0 0 40px rgba(255,149,0,0.1); }
+            50% { box-shadow: 0 0 40px rgba(255,149,0,0.6), 0 0 80px rgba(255,149,0,0.3); }
         }
         @keyframes legendary-shine {
             0%,100% { box-shadow: 0 0 20px rgba(255,215,0,0.3); }
@@ -854,8 +850,8 @@
         }
 
         .featured-world {
-            border-color: rgba(255,152,0,0.3) !important;
-            box-shadow: 0 0 0 1px rgba(255,152,0,0.1), var(--shadow-card);
+            border-color: rgba(255,149,0,0.3) !important;
+            box-shadow: 0 0 0 1px rgba(255,149,0,0.1), var(--shadow-card);
         }
 
         .hot-badge {
@@ -933,18 +929,18 @@
         /* Studio hero */
         .studio-hero {
             display: flex; align-items: center; gap: 18px;
-            background: linear-gradient(135deg, rgba(255,152,0,0.07), rgba(255,152,0,0.02));
-            border: 1px solid rgba(255,152,0,0.15);
+            background: linear-gradient(135deg, rgba(255,149,0,0.07), rgba(255,149,0,0.02));
+            border: 1px solid rgba(255,149,0,0.15);
             border-radius: 18px; padding: 22px 24px;
             margin-bottom: 20px;
         }
         .studio-hero-icon {
             width: 52px; height: 52px; border-radius: 14px;
-            background: linear-gradient(135deg, rgba(255,152,0,0.2), rgba(255,152,0,0.08));
+            background: linear-gradient(135deg, rgba(255,149,0,0.2), rgba(255,149,0,0.08));
             display: flex; align-items: center; justify-content: center;
             font-size: 26px; flex-shrink: 0;
-            box-shadow: 0 0 20px rgba(255,152,0,0.15);
-            border: 1px solid rgba(255,152,0,0.2);
+            box-shadow: 0 0 20px rgba(255,149,0,0.15);
+            border: 1px solid rgba(255,149,0,0.2);
         }
 
         /* Inbox tabs */
@@ -986,8 +982,8 @@
             transition: all 0.2s;
         }
         .styled-input:focus {
-            border-color: rgba(255,152,0,0.4);
-            box-shadow: 0 0 0 3px rgba(255,152,0,0.06);
+            border-color: rgba(255,149,0,0.4);
+            box-shadow: 0 0 0 3px rgba(255,149,0,0.06);
         }
         .styled-input::placeholder { color: rgba(255,255,255,0.2); }
 
@@ -999,7 +995,7 @@
             font-size: 13px; outline: none;
             font-family: var(--font-ui); cursor: pointer;
             appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(255,152,0,0.5)' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(255,149,0,0.5)' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: right 14px center;
         }
@@ -1013,12 +1009,12 @@
             background: linear-gradient(135deg, #FF9800, #FFD54F);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             background-clip: text;
-            filter: drop-shadow(0 0 16px rgba(255,152,0,0.4));
+            filter: drop-shadow(0 0 16px rgba(255,149,0,0.4));
         }
         .roulette-arrow {
             font-size: 24px; line-height: 1;
             color: var(--c-main);
-            filter: drop-shadow(0 0 10px rgba(255,152,0,0.7));
+            filter: drop-shadow(0 0 10px rgba(255,149,0,0.7));
             animation: arrow-bounce 1s ease-in-out infinite;
         }
         @keyframes arrow-bounce {
@@ -1029,8 +1025,8 @@
             position: relative;
             padding: 6px;
             border-radius: 50%;
-            background: conic-gradient(from 0deg, rgba(255,152,0,0.3), rgba(255,183,77,0.1), rgba(255,152,0,0.3), rgba(255,109,0,0.2), rgba(255,152,0,0.3));
-            box-shadow: 0 0 30px rgba(255,152,0,0.2), 0 0 60px rgba(255,152,0,0.08);
+            background: conic-gradient(from 0deg, rgba(255,149,0,0.3), rgba(255,183,77,0.1), rgba(255,149,0,0.3), rgba(255,109,0,0.2), rgba(255,149,0,0.3));
+            box-shadow: 0 0 30px rgba(255,149,0,0.2), 0 0 60px rgba(255,149,0,0.08);
             animation: ring-spin 8s linear infinite;
         }
         @keyframes ring-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
@@ -1087,7 +1083,7 @@
             transition: all 0.2s;
         }
         #credits-list > div:hover {
-            border-color: rgba(255,152,0,0.2) !important;
+            border-color: rgba(255,149,0,0.2) !important;
         }
 
         /* Roulette leaderboard rows */
@@ -1117,10 +1113,10 @@
         }
         #gift-friend-list button:hover,
         #gift-friend-list button.sel {
-            background: rgba(255,152,0,0.15) !important;
-            border-color: rgba(255,152,0,0.3) !important;
+            background: rgba(255,149,0,0.15) !important;
+            border-color: rgba(255,149,0,0.3) !important;
             color: var(--c-main) !important;
-            box-shadow: 0 0 12px rgba(255,152,0,0.1) !important;
+            box-shadow: 0 0 12px rgba(255,149,0,0.1) !important;
         }
 
         /* Inbox mail items */
@@ -1136,8 +1132,8 @@
             line-height: 1.5;
         }
         #inbox-in > div:hover, #inbox-out > div:hover {
-            border-color: rgba(255,152,0,0.15);
-            background: rgba(255,152,0,0.02);
+            border-color: rgba(255,149,0,0.15);
+            background: rgba(255,149,0,0.02);
         }
 
         /* Search results */
@@ -1182,8 +1178,8 @@
             transition: all 0.2s;
         }
         #inventory-list li:hover {
-            border-color: rgba(255,152,0,0.2) !important;
-            background: rgba(255,152,0,0.04) !important;
+            border-color: rgba(255,149,0,0.2) !important;
+            background: rgba(255,149,0,0.04) !important;
         }
 
         /* Avatar panel side */
@@ -1209,12 +1205,12 @@
         /* Scrollbar global polish */
         * {
             scrollbar-width: thin;
-            scrollbar-color: rgba(255,152,0,0.2) transparent;
+            scrollbar-color: rgba(255,149,0,0.2) transparent;
         }
         *::-webkit-scrollbar { width: 4px; height: 4px; }
         *::-webkit-scrollbar-track { background: transparent; }
-        *::-webkit-scrollbar-thumb { background: rgba(255,152,0,0.2); border-radius: 4px; }
-        *::-webkit-scrollbar-thumb:hover { background: rgba(255,152,0,0.4); }
+        *::-webkit-scrollbar-thumb { background: rgba(255,149,0,0.2); border-radius: 4px; }
+        *::-webkit-scrollbar-thumb:hover { background: rgba(255,149,0,0.4); }
 
         /* Card stagger animation on load */
         .grid .card:nth-child(1) { animation-delay: 0.02s; }
@@ -1274,14 +1270,14 @@
 
         /* Studio hero border glow on hover */
         .studio-hero:hover {
-            border-color: rgba(255,152,0,0.25);
-            box-shadow: 0 0 30px rgba(255,152,0,0.06);
+            border-color: rgba(255,149,0,0.25);
+            box-shadow: 0 0 30px rgba(255,149,0,0.06);
         }
 
         /* Quests timer bar */
         #quests-list > div .quest-timer {
             font-size: 11px;
-            color: rgba(255,152,0,0.5);
+            color: rgba(255,149,0,0.5);
             font-family: var(--font-head);
             letter-spacing: 0.5px;
         }
@@ -1311,6 +1307,152 @@
             .nav-item { justify-content: center; padding: 14px; }
             .nav-item .nav-icon { margin: 0; }
         }
+        /* Sidebar всегда имеет место для кнопки снизу */
+        .sidebar { overflow-y: auto; }
+
+        /* Nav group */
+        .nav-group-header {
+            display: flex; align-items: center; gap: 11px;
+            padding: 10px 16px 10px 14px;
+            cursor: pointer; user-select: none;
+            color: rgba(255,255,255,0.55);
+            font-family: var(--font-body); font-size: 12px; font-weight: 700;
+            letter-spacing: 0.8px; text-transform: uppercase;
+            border-radius: 0 12px 12px 0;
+            margin: 4px 8px 4px 0;
+            transition: all 0.18s;
+        }
+        .nav-group-header:hover { background: rgba(255,149,0,0.06); color: rgba(255,255,255,0.8); }
+        .nav-group-icon {
+            width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
+            background: rgba(255,149,0,0.1); color: var(--c-main);
+            display: flex; align-items: center; justify-content: center; font-size: 12px;
+        }
+        .nav-group-header span { flex: 1; }
+        .nav-group-arrow {
+            font-size: 10px; color: rgba(255,149,0,0.4);
+            transition: transform 0.2s;
+        }
+        .nav-group-arrow.open { transform: rotate(180deg); }
+        #nav-group-items {
+            overflow: hidden;
+            max-height: 0;
+            transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1);
+        }
+        #nav-group-items.open {
+            /* ~5 пунктов по 46px = 230px, остальное скроллится */
+            max-height: 450px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,149,0,0.2) transparent;
+        }
+        #nav-group-items.open::-webkit-scrollbar { width: 3px; }
+        #nav-group-items.open::-webkit-scrollbar-thumb { background: rgba(255,149,0,0.25); border-radius: 4px; }
+        /* Fade-out снизу чтобы намекнуть что есть ещё */
+        #nav-group-items.open::after {
+            content: '';
+            position: sticky; bottom: 0; left: 0; right: 0;
+            height: 24px; display: block;
+            background: linear-gradient(transparent, rgba(5,5,16,0.9));
+            pointer-events: none;
+        }
+
+        /* ══ GLOBAL POLISH ══ */
+
+        /* Теплый ambient glow на фоне контента */
+        .content-area {
+            background: radial-gradient(ellipse 80% 50% at 60% -10%, rgba(255,100,0,0.03), transparent),
+                        radial-gradient(ellipse 50% 40% at 10% 90%, rgba(255,149,0,0.02), transparent),
+                        var(--c-surface);
+        }
+
+        /* Красивый hub header */
+        .hub-header {
+            background: linear-gradient(180deg, rgba(10,6,12,0.99), rgba(12,8,14,0.97));
+            border-bottom: 1px solid rgba(255,149,0,0.07);
+            backdrop-filter: blur(20px);
+        }
+
+        /* Кнопки — роunder */
+        button, .btn {
+            border-radius: var(--radius-btn) !important;
+        }
+
+        /* Инпуты — теплее */
+        input[type=text], input[type=password] {
+            border-radius: 12px !important;
+            border-color: rgba(255,149,0,0.12) !important;
+            background: rgba(255,255,255,0.04) !important;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        input[type=text]:focus, input[type=password]:focus {
+            border-color: rgba(255,149,0,0.3) !important;
+            box-shadow: 0 0 0 3px rgba(255,149,0,0.07) !important;
+            outline: none;
+        }
+
+        /* World cards — красивее thumbnail */
+        .world-emoji {
+            filter: drop-shadow(0 4px 16px rgba(255,149,0,0.3));
+            transition: transform 0.3s cubic-bezier(0.34,1.4,0.64,1);
+        }
+        .card:hover .world-emoji { transform: scale(1.15) translateY(-4px); }
+
+        /* Карточки магазина/аватара hover glow */
+        .card:hover::after {
+            content: '';
+            position: absolute; inset: 0;
+            background: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(255,149,0,0.04), transparent);
+            pointer-events: none;
+        }
+
+        /* Featured world — особый стиль */
+        .featured-world {
+            border-color: rgba(255,149,0,0.15) !important;
+            background: linear-gradient(145deg, rgba(28,20,24,0.95), rgba(20,14,18,0.95)) !important;
+        }
+        .featured-world:hover {
+            border-color: rgba(255,149,0,0.35) !important;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 40px rgba(255,149,0,0.12) !important;
+        }
+
+        /* Notif — приятнее */
+        .notif {
+            background: rgba(14,10,16,0.97) !important;
+            border: 1px solid rgba(255,255,255,0.08) !important;
+            border-radius: 16px !important;
+            backdrop-filter: blur(30px) !important;
+        }
+
+        /* Avatar container — теплее */
+        #avatar-container {
+            background: radial-gradient(ellipse 70% 60% at 50% 35%,
+                rgba(255,149,0,0.07) 0%,
+                rgba(255,80,0,0.03) 40%,
+                #080510 70%) !important;
+        }
+
+        /* Nav group items scrollbar */
+        #nav-group-items.open {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,149,0,0.15) transparent;
+        }
+
+        /* Smooth page transitions */
+        [id^="tab-"] {
+            animation: tabFadeIn 0.22s ease;
+        }
+        @keyframes tabFadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* World tag */
+        .world-tag { font-family: var(--font-body); font-size: 11px; opacity: 0.8; }
+
+        /* Section title emoji */
+        .section-title { font-family: var(--font-body); }
+
     </style>
 </head>
 <body>
@@ -1325,10 +1467,10 @@
         <!-- Табы -->
         <div class="auth-tabs">
             <button id="tab-login-btn" onclick="app.switchAuthTab('login')" class="auth-tab-btn active-tab">
-                🔑 .
+                🔑 Войти
             </button>
             <button id="tab-reg-btn" onclick="app.switchAuthTab('register')" class="auth-tab-btn">
-                ✨ .
+                ✨ Регистрация
             </button>
         </div>
 
@@ -1338,7 +1480,7 @@
                 onkeydown="if(event.key==='Enter')document.getElementById('login-password').focus()">
             <input type="password" id="login-password" placeholder="Пароль" autocomplete="off"
                 onkeydown="if(event.key==='Enter')app.login()">
-            <button class="btn-primary" onclick="app.login()" style="margin-top:8px;">⚡ .</button>
+            <button class="btn-primary" onclick="app.login()" style="margin-top:8px;">⚡ ВОЙТИ</button>
         </div>
 
         <!-- Форма РЕГИСТРАЦИИ -->
@@ -1349,14 +1491,14 @@
                 onkeydown="if(event.key==='Enter')document.getElementById('reg-password2').focus()">
             <input type="password" id="reg-password2" placeholder="Повтори пароль" autocomplete="off"
                 onkeydown="if(event.key==='Enter')app.register()">
-            <button class="btn-primary" onclick="app.register()" style="margin-top:8px;">✨ .</button>
+            <button class="btn-primary" onclick="app.register()" style="margin-top:8px;">✨ СОЗДАТЬ АККАУНТ</button>
         </div>
     </div>
 </div>
 
 <div id="ui-hub" class="hidden">
     <div class="hub-header">
-        <div class="header-logo">Не работаем.</div>
+        <div class="header-logo">CITRUS</div>
         <div class="header-divider"></div>
         <div class="header-right">
             <span id="display-name" class="header-username"></span>
@@ -1366,23 +1508,93 @@
     </div>
     <div class="hub-body">
         <div class="sidebar">
-            <div class="sidebar-label">Навигация</div>
-            <div class="nav-item active" id="nav-games"   onclick="app.switchTab('games')">  <div class="nav-icon"><i class="fas fa-gamepad"></i></div> Миры</div>
-            <div class="nav-item"        id="nav-avatar"  onclick="app.switchTab('avatar')"> <div class="nav-icon"><i class="fas fa-user-astronaut"></i></div> Аватар</div>
-            <div class="nav-item"        id="nav-shop"    onclick="app.switchTab('shop')">   <div class="nav-icon"><i class="fas fa-store"></i></div> Магазин</div>
-            <div class="nav-item"        id="nav-friends" onclick="app.switchTab('friends')"><div class="nav-icon"><i class="fas fa-users"></i></div> Друзья <span class="nav-badge hidden" id="fr-badge">0</span></div>
-            <div class="nav-item"        id="nav-studio"  onclick="app.switchTab('studio')"> <div class="nav-icon"><i class="fas fa-cube"></i></div> Студия</div>
-            <div class="sidebar-label" style="margin-top:8px;">Активности</div>
-            <div class="nav-item" id="nav-quests"   onclick="app.switchTab('quests')">  <div class="nav-icon"><i class="fas fa-tasks"></i></div> Задания <span class="nav-badge hidden" id="quest-badge">!</span></div>
-            <div class="nav-item" id="nav-roulette" onclick="app.switchTab('roulette')"><div class="nav-icon"><i class="fas fa-dice"></i></div> Рулетка</div>
-            <div class="nav-item" id="nav-credits"  onclick="app.switchTab('credits')"> <div class="nav-icon"><i class="fas fa-coins"></i></div> Кредиты</div>
-            <div class="nav-item" id="nav-gifts"    onclick="app.switchTab('gifts')">   <div class="nav-icon"><i class="fas fa-gift"></i></div> Подарки</div>
-            <div class="nav-item" id="nav-nft"      onclick="app.switchTab('nft')">     <div class="nav-icon"><i class="fas fa-gem"></i></div> НФТ Подарки</div>
-            <div class="nav-item"        id="nav-stats"    onclick="app.switchTab('stats')">   <div class="nav-icon"><i class="fas fa-chart-line"></i></div> Статистика</div>
-            <div class="nav-item"        id="nav-leaderboard" onclick="app.switchTab('leaderboard')"> <div class="nav-icon"><i class="fas fa-trophy"></i></div> Топ</div>
-            <div class="nav-item hidden" id="nav-admin"   onclick="app.switchTab('admin')">  <div class="nav-icon"><i class="fas fa-shield-alt"></i></div> Баны</div>
+            <!-- Группа всех вкладок (сворачивается) -->
+            <div class="nav-group-header" id="nav-group-hdr" onclick="app.toggleNavGroup()">
+                <div class="nav-group-icon"><i class="fas fa-th-large"></i></div>
+                <span>Разделы</span>
+                <i class="fas fa-chevron-down nav-group-arrow" id="nav-group-arrow"></i>
+            </div>
+            <div id="nav-group-items">
+                <div class="nav-item active" id="nav-games"      onclick="app.switchTab('games')">      <div class="nav-icon"><i class="fas fa-gamepad"></i></div> Миры</div>
+                <div class="nav-item"        id="nav-avatar"      onclick="app.switchTab('avatar')">     <div class="nav-icon"><i class="fas fa-user-astronaut"></i></div> Аватар</div>
+                <div class="nav-item"        id="nav-shop"        onclick="app.switchTab('shop')">       <div class="nav-icon"><i class="fas fa-store"></i></div> Магазин</div>
+                <div class="nav-item"        id="nav-friends"     onclick="app.switchTab('friends')">    <div class="nav-icon"><i class="fas fa-users"></i></div> Друзья <span class="nav-badge hidden" id="fr-badge">0</span></div>
+                <div class="nav-item"        id="nav-studio"      onclick="app.switchTab('studio')">     <div class="nav-icon"><i class="fas fa-cube"></i></div> Студия</div>
+                <div class="nav-item"        id="nav-quests"      onclick="app.switchTab('quests')">     <div class="nav-icon"><i class="fas fa-tasks"></i></div> Задания <span class="nav-badge hidden" id="quest-badge">!</span></div>
+                <div class="nav-item"        id="nav-roulette"    onclick="app.switchTab('roulette')">   <div class="nav-icon"><i class="fas fa-dice"></i></div> Рулетка</div>
+                <div class="nav-item"        id="nav-credits"     onclick="app.switchTab('credits')">    <div class="nav-icon"><i class="fas fa-coins"></i></div> Кредиты</div>
+                <div class="nav-item"        id="nav-gifts"       onclick="app.switchTab('gifts')">      <div class="nav-icon"><i class="fas fa-gift"></i></div> Подарки</div>
+                <div class="nav-item"        id="nav-nft"         onclick="app.switchTab('nft')">        <div class="nav-icon"><i class="fas fa-gem"></i></div> НФТ Подарки</div>
+                <div class="nav-item"        id="nav-stats"       onclick="app.switchTab('stats')">      <div class="nav-icon"><i class="fas fa-chart-line"></i></div> Статистика</div>
+                <div class="nav-item"        id="nav-leaderboard" onclick="app.switchTab('leaderboard')"><div class="nav-icon"><i class="fas fa-trophy"></i></div> Топ</div>
+                <div class="nav-item hidden" id="nav-admin"       onclick="app.switchTab('admin')">      <div class="nav-icon"><i class="fas fa-shield-alt"></i></div> Баны</div>
+                <div class="nav-item"        id="nav-help"        onclick="app.switchTab('help')">       <div class="nav-icon"><i class="fas fa-question-circle"></i></div> Помощь</div>
+            </div>
         </div>
         <div class="content-area">
+
+
+            <!-- ══════════════════ TAB: HELP ══════════════════ -->
+            <div id="tab-help" class="hidden">
+                <div class="section-title">❓ Помощь</div>
+
+                <div style="display:flex;flex-direction:column;gap:14px;max-width:680px;">
+
+                    <div style="background:rgba(255,149,0,0.06);border:1px solid rgba(255,149,0,0.15);border-radius:16px;padding:22px 24px;">
+                        <div style="font-family:var(--font-head);font-size:13px;color:var(--c-main);margin-bottom:12px;letter-spacing:1px;">🎮 КАК ИГРАТЬ</div>
+                        <div style="color:rgba(255,255,255,0.75);font-size:14px;line-height:1.8;font-family:var(--font-body);">
+                            Зайди в любой мир через вкладку <b style="color:#FF9800">Миры</b>.<br>
+                            Управление: <b style="color:#FF9800">WASD</b> — движение, <b style="color:#FF9800">Пробел</b> — прыжок.<br>
+                            На мобильном используй джойстик и кнопку прыжка на экране.<br>
+                            В мире можно зарабатывать 🍊 монеты — они копятся автоматически.
+                        </div>
+                    </div>
+
+                    <div style="background:rgba(255,149,0,0.06);border:1px solid rgba(255,149,0,0.15);border-radius:16px;padding:22px 24px;">
+                        <div style="font-family:var(--font-head);font-size:13px;color:var(--c-main);margin-bottom:12px;letter-spacing:1px;">🍊 МОНЕТЫ</div>
+                        <div style="color:rgba(255,255,255,0.75);font-size:14px;line-height:1.8;font-family:var(--font-body);">
+                            Монеты зарабатываются в мирах — просто играй и они идут сами.<br>
+                            Трать монеты в <b style="color:#FF9800">Магазине</b> на одежду и аксессуары для аватара.<br>
+                            Можно занять монеты у друзей через <b style="color:#FF9800">Кредиты</b>.<br>
+                            Испытай удачу в <b style="color:#FF9800">Рулетке</b> — шанс умножить монеты!
+                        </div>
+                    </div>
+
+                    <div style="background:rgba(255,149,0,0.06);border:1px solid rgba(255,149,0,0.15);border-radius:16px;padding:22px 24px;">
+                        <div style="font-family:var(--font-head);font-size:13px;color:var(--c-main);margin-bottom:12px;letter-spacing:1px;">👤 АВАТАР</div>
+                        <div style="color:rgba(255,255,255,0.75);font-size:14px;line-height:1.8;font-family:var(--font-body);">
+                            Кастомизируй своего персонажа во вкладке <b style="color:#FF9800">Аватар</b>.<br>
+                            Меняй цвет тела, надевай шляпы, очки и другие аксессуары.<br>
+                            Новые вещи покупаются в <b style="color:#FF9800">Магазине</b> за монеты.
+                        </div>
+                    </div>
+
+                    <div style="background:rgba(255,149,0,0.06);border:1px solid rgba(255,149,0,0.15);border-radius:16px;padding:22px 24px;">
+                        <div style="font-family:var(--font-head);font-size:13px;color:var(--c-main);margin-bottom:12px;letter-spacing:1px;">👥 ДРУЗЬЯ И ЧАТЫ</div>
+                        <div style="color:rgba(255,255,255,0.75);font-size:14px;line-height:1.8;font-family:var(--font-body);">
+                            Добавляй друзей по тегу во вкладке <b style="color:#FF9800">Друзья</b>.<br>
+                            Тег выглядит так: <b style="color:#FF9800">Ник#1234</b> — найди свой тег внизу вкладки.<br>
+                            Пиши другу напрямую — нажми 💬 рядом с его именем.<br>
+                            Дари друзьям подарки и НФТ через вкладки <b style="color:#FF9800">Подарки</b> и <b style="color:#FF9800">НФТ</b>.
+                        </div>
+                    </div>
+
+                    <div style="background:rgba(255,149,0,0.06);border:1px solid rgba(255,149,0,0.15);border-radius:16px;padding:22px 24px;">
+                        <div style="font-family:var(--font-head);font-size:13px;color:var(--c-main);margin-bottom:12px;letter-spacing:1px;">🏆 ЗАДАНИЯ И ТОП</div>
+                        <div style="color:rgba(255,255,255,0.75);font-size:14px;line-height:1.8;font-family:var(--font-body);">
+                            Выполняй ежедневные задания — они дают бонусные монеты.<br>
+                            Смотри таблицу лучших игроков во вкладке <b style="color:#FF9800">Топ</b>.<br>
+                            Студия позволяет создавать собственные миры.
+                        </div>
+                    </div>
+
+                    <div style="background:rgba(0,229,255,0.05);border:1px solid rgba(0,229,255,0.12);border-radius:16px;padding:18px 24px;text-align:center;">
+                        <div style="color:rgba(0,229,255,0.6);font-size:12px;font-family:var(--font-head);letter-spacing:2px;">CITRUS ONLINE v1.0</div>
+                        <div style="color:rgba(255,255,255,0.3);font-size:12px;margin-top:6px;font-family:var(--font-body);">Если что-то непонятно — спроси в чате или у друзей 🍊</div>
+                    </div>
+
+                </div>
+            </div>
 
             <!-- ══════════════════ TAB: GAMES ══════════════════ -->
             <div id="tab-games">
@@ -1390,9 +1602,9 @@
                 <div class="grid" style="margin-bottom:32px;">
 
                     <div class="card world-card featured-world" onclick="app.launch('play','gather')">
-                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(255,152,0,0.2),#050510);">
+                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(255,149,0,0.2),#050510);">
                             <span class="world-emoji">🍊</span>
-                            <div class="world-glow" style="background:rgba(255,152,0,0.2);"></div>
+                            <div class="world-glow" style="background:rgba(255,149,0,0.2);"></div>
                         </div>
                         <div class="card-info">
                             <div><b>Цитрусовый Лес</b><br><small class="world-tag" style="color:var(--c-main)">💰 Фарм монет!</small></div>
@@ -1440,13 +1652,13 @@
                         </div>
                     </div>
 
-                    <div class="card world-card" onclick="app.launch('play','snowmount')">
-                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(100,200,255,0.15),#050510);">
-                            <span class="world-emoji">🏔️</span>
-                            <div class="world-glow" style="background:rgba(100,200,255,0.15);"></div>
+                    <div class="card world-card" onclick="app.launch('play','pvp')">
+                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(255,50,50,0.2),#050510);">
+                            <span class="world-emoji">🔫</span>
+                            <div class="world-glow" style="background:rgba(255,50,50,0.2);"></div>
                         </div>
                         <div class="card-info">
-                            <div><b>Снежная Гора</b><br><small class="world-tag" style="color:rgba(0,229,255,0.8)">🏆 2000 🍊 за вершину!</small></div>
+                            <div><b>Арена ПВП</b><br><small class="world-tag" style="color:rgba(255,80,80,0.9)">💥 Стреляй в мишени!</small></div>
                         </div>
                     </div>
 
@@ -1501,8 +1713,8 @@
                             <input type="text" id="srch" placeholder="Ник или Ник#1234..." autocomplete="off" onkeydown="if(event.key==='Enter')app.searchPlayer()">
                             <button onclick="app.searchPlayer()">Поиск</button>
                         </div>
-                        <div style="font-size:11px;color:rgba(255,152,0,0.4);margin:-4px 0 12px;padding:0 2px;font-family:var(--font-body);">
-                            Твой тег: <span id="my-tag-hint" style="color:var(--c-main);cursor:pointer;border-bottom:1px dotted rgba(255,152,0,0.4);" title="Нажми — скопировать" onclick="navigator.clipboard&&navigator.clipboard.writeText(app.fullTag).then(()=>app.showNotif('📋','Скопировано!',app.fullTag))"></span>
+                        <div style="font-size:11px;color:rgba(255,149,0,0.4);margin:-4px 0 12px;padding:0 2px;font-family:var(--font-body);">
+                            Твой тег: <span id="my-tag-hint" style="color:var(--c-main);cursor:pointer;border-bottom:1px dotted rgba(255,149,0,0.4);" title="Нажми — скопировать" onclick="navigator.clipboard&&navigator.clipboard.writeText(app.fullTag).then(()=>app.showNotif('📋','Скопировано!',app.fullTag))"></span>
                         </div>
                         <div id="srch-res"><div style="color:rgba(255,255,255,0.2);font-size:12px;padding:8px;text-align:center;">Введи ник и нажми Поиск</div></div>
                     </div>
@@ -1615,7 +1827,7 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
                         <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
                             <input type="number" id="gift-amount" min="1" max="100000" placeholder="Сумма (1–100 000 🍊)" class="styled-input" style="flex:1;">
                         </div>
-                        <div id="gift-selected-friend" style="color:rgba(255,152,0,0.4);font-size:12px;margin-bottom:12px;font-family:var(--font-body);">Выбери друга выше 👆</div>
+                        <div id="gift-selected-friend" style="color:rgba(255,149,0,0.4);font-size:12px;margin-bottom:12px;font-family:var(--font-body);">Выбери друга выше 👆</div>
                         <button onclick="app.sendGift()" class="btn-orange-full" style="touch-action:manipulation;">🎁 Отправить подарок</button>
                     </div>
                     <div class="panel-box">
@@ -1634,7 +1846,7 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
                     </div>
                 </div>
                 <div style="display:flex;gap:8px;margin-bottom:20px;">
-                    <button id="nfttab-market-btn" onclick="app.switchNftTab('market')" style="flex:1;padding:9px;border-radius:10px;border:1px solid rgba(255,152,0,0.3);background:rgba(255,152,0,0.12);color:rgba(255,152,0,0.9);font-family:var(--font-body);font-weight:700;font-size:13px;cursor:pointer;">🏪 Маркет</button>
+                    <button id="nfttab-market-btn" onclick="app.switchNftTab('market')" style="flex:1;padding:9px;border-radius:10px;border:1px solid rgba(255,149,0,0.3);background:rgba(255,149,0,0.12);color:rgba(255,149,0,0.9);font-family:var(--font-body);font-weight:700;font-size:13px;cursor:pointer;">🏪 Маркет</button>
                     <button id="nfttab-my-btn"     onclick="app.switchNftTab('my')"     style="flex:1;padding:9px;border-radius:10px;border:1px solid rgba(255,255,255,0.08);background:transparent;color:rgba(255,255,255,0.4);font-family:var(--font-body);font-weight:700;font-size:13px;cursor:pointer;">🎒 Мои</button>
                     <button id="nfttab-create-btn" onclick="app.switchNftTab('create')" style="display:none;flex:1;padding:9px;border-radius:10px;border:1px solid rgba(255,255,255,0.08);background:transparent;color:rgba(255,255,255,0.4);font-family:var(--font-body);font-weight:700;font-size:13px;cursor:pointer;">✏️ Создать</button>
                 </div>
@@ -1700,7 +1912,7 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
                         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
                             <div class="panel-box-title" style="margin:0;">📋 Список банов</div>
                             <div style="display:flex;gap:6px;">
-                                <button onclick="app.loadBanList()" style="background:rgba(255,152,0,0.1);border:1px solid rgba(255,152,0,0.2);color:rgba(255,152,0,0.7);border-radius:8px;padding:5px 10px;cursor:pointer;font-size:11px;font-family:var(--font-body);">↻ Обновить</button>
+                                <button onclick="app.loadBanList()" style="background:rgba(255,149,0,0.1);border:1px solid rgba(255,149,0,0.2);color:rgba(255,149,0,0.7);border-radius:8px;padding:5px 10px;cursor:pointer;font-size:11px;font-family:var(--font-body);">↻ Обновить</button>
                                 <button onclick="app.clearAllBans()" style="background:rgba(255,50,50,0.1);border:1px solid rgba(255,50,50,0.2);color:rgba(255,100,100,0.7);border-radius:8px;padding:5px 10px;cursor:pointer;font-size:11px;font-family:var(--font-body);">🗑 Очистить всё</button>
                             </div>
                         </div>
@@ -1806,7 +2018,7 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
         <div id="studio-ui" class="studio-panel hidden">
             <div id="palette" style="display:flex;gap:4px;"></div>
             <div style="width:1px;height:20px;background:#333;"></div>
-            <button class="btn-st" id="stmode-place" onclick="app.setStudioMode('place')" style="background:rgba(255,152,0,0.3)">🧱 Ставить</button>
+            <button class="btn-st" id="stmode-place" onclick="app.setStudioMode('place')" style="background:rgba(255,149,0,0.3)">🧱 Ставить</button>
             <button class="btn-st" id="stmode-move"  onclick="app.setStudioMode('move')">✋ Двигать</button>
             <button class="btn-st" id="stmode-scale" onclick="app.setStudioMode('scale')">⤡ Размер</button>
             <button class="btn-st" id="stmode-delete" onclick="app.setStudioMode('delete')">🗑 Удалить</button>
@@ -1829,25 +2041,7 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
 
         <button class="btn-exit" onclick="app.exitGame()" ontouchstart="app.exitGame()" style="touch-action:manipulation;">← В ХАБ</button>
 
-        <!-- Кнопки эмоций и внешности -->
-        <div id="hud-actions" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);display:flex;gap:10px;z-index:55;pointer-events:auto;">
-            <button onclick="app.toggleEmotePanel()" style="background:rgba(255,152,0,0.18);border:1px solid rgba(255,152,0,0.35);color:#FF9800;border-radius:14px;padding:10px 18px;font-size:15px;cursor:pointer;font-family:var(--font-body);font-weight:700;backdrop-filter:blur(8px);touch-action:manipulation;">😄 Эмоции</button>
-        </div>
 
-        <!-- Панель эмоций -->
-        <div id="emote-panel" style="display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(8,8,20,0.92);border:1px solid rgba(255,152,0,0.2);border-radius:20px;padding:16px;z-index:56;backdrop-filter:blur(12px);pointer-events:auto;">
-            <div style="text-align:center;font-family:var(--font-body);font-size:11px;color:rgba(255,255,255,0.3);margin-bottom:12px;letter-spacing:2px;">ЭМОЦИИ</div>
-            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
-                <button onclick="app.doEmote('wave')" class="emote-btn">👋<br><span>Привет</span></button>
-                <button onclick="app.doEmote('dance')" class="emote-btn">💃<br><span>Танец</span></button>
-                <button onclick="app.doEmote('angry')" class="emote-btn">😤<br><span>Злость</span></button>
-                <button onclick="app.doEmote('sit')" class="emote-btn">🪑<br><span>Сидеть</span></button>
-                <button onclick="app.doEmote('spin')" class="emote-btn">🌀<br><span>Кружить</span></button>
-                <button onclick="app.doEmote('point')" class="emote-btn">👉<br><span>Тычок</span></button>
-                <button onclick="app.doEmote('flex')" class="emote-btn">💪<br><span>Flex</span></button>
-                <button onclick="app.doEmote(null)" class="emote-btn" style="color:rgba(255,255,255,0.3);">✕<br><span>Стоп</span></button>
-            </div>
-        </div>
 
         <div class="controls-hint" id="kb-hint">
             <p><span>WASD</span> — движение</p>
@@ -1857,16 +2051,16 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
 
         <div id="touch-controls">
             <!-- Джойстик движения (левая сторона) -->
-            <div id="joystick-base" style="position:fixed;bottom:80px;left:40px;width:110px;height:110px;background:rgba(255,152,0,0.15);border:2px solid rgba(255,152,0,0.4);border-radius:50%;pointer-events:auto;touch-action:none;"
+            <div id="joystick-base" style="position:fixed;bottom:80px;left:40px;width:110px;height:110px;background:rgba(255,149,0,0.15);border:2px solid rgba(255,149,0,0.4);border-radius:50%;pointer-events:auto;touch-action:none;"
                 ontouchstart="app.joyStart(event)" ontouchmove="app.joyMove(event)" ontouchend="app.joyEnd(event)">
-                <div id="joystick-knob" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:44px;height:44px;background:rgba(255,152,0,0.7);border-radius:50%;"></div>
+                <div id="joystick-knob" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:44px;height:44px;background:rgba(255,149,0,0.7);border-radius:50%;"></div>
             </div>
             <!-- Кнопка прыжка -->
             <button ontouchstart="app.keys['Space']=true;app.touchJump();" ontouchend="app.keys['Space']=false;"
-                style="position:fixed;bottom:80px;right:30px;width:64px;height:64px;background:rgba(255,152,0,0.7);border:none;border-radius:50%;color:#fff;font-size:22px;pointer-events:auto;touch-action:none;">↑</button>
+                style="position:fixed;bottom:80px;right:30px;width:64px;height:64px;background:rgba(255,149,0,0.7);border:none;border-radius:50%;color:#fff;font-size:22px;pointer-events:auto;touch-action:none;">↑</button>
             <div class="touch-place-btn hidden" id="btn-place" ontouchstart="app.placeBlock()">🧱</div>
         <div id="studio-touch-btns" class="hidden" style="position:fixed;bottom:20px;right:16px;display:flex;flex-direction:column;gap:8px;z-index:50;pointer-events:auto;">
-            <button ontouchstart="app.setStudioMode('place')" onclick="app.setStudioMode('place')" style="background:rgba(255,152,0,0.85);border:none;border-radius:12px;color:#000;font-size:18px;width:52px;height:52px;cursor:pointer;touch-action:manipulation">🧱</button>
+            <button ontouchstart="app.setStudioMode('place')" onclick="app.setStudioMode('place')" style="background:rgba(255,149,0,0.85);border:none;border-radius:12px;color:#000;font-size:18px;width:52px;height:52px;cursor:pointer;touch-action:manipulation">🧱</button>
             <button ontouchstart="app.setStudioMode('move')" onclick="app.setStudioMode('move')" style="background:rgba(0,229,255,0.85);border:none;border-radius:12px;color:#000;font-size:18px;width:52px;height:52px;cursor:pointer;touch-action:manipulation">✋</button>
             <button ontouchstart="app.setStudioMode('scale')" onclick="app.setStudioMode('scale')" style="background:rgba(0,255,100,0.85);border:none;border-radius:12px;color:#000;font-size:18px;width:52px;height:52px;cursor:pointer;touch-action:manipulation">⤡</button>
             <button ontouchstart="app.setStudioMode('delete')" onclick="app.setStudioMode('delete')" style="background:rgba(255,50,50,0.85);border:none;border-radius:12px;color:#fff;font-size:18px;width:52px;height:52px;cursor:pointer;touch-action:manipulation">🗑</button>
@@ -2034,6 +2228,7 @@ const app = {
             this.renderMyGames(); this.renderFriends(); this.renderOnline(); this.initAvatarPreview(); this.renderShop();
             const adminNav = document.getElementById('nav-admin');
             if(adminNav) adminNav.classList.toggle('hidden', !this.canBan(this.username));
+
             this.updateUI();
             this._wsConnect();
             setInterval(()=>this.renderOnline(), 30000);
@@ -2530,131 +2725,6 @@ const app = {
     // ══════════════════════════════════════
     // 🕺 ЭМОЦИИ
     // ══════════════════════════════════════
-    doEmote(name){
-        // Закрываем панель эмоций
-        const p=document.getElementById('emote-panel');
-        if(p) p.style.display='none';
-        // Сбрасываем подсветку кнопок
-        document.querySelectorAll('.emote-btn').forEach(b=>b.classList.remove('active'));
-
-        if(!name||!this.rig){ this._currentEmote=null; return; }
-
-        this._currentEmote = name;
-        this._emoteStart  = performance.now() / 1000;
-
-        // Подсвечиваем активную кнопку
-        const labels={wave:'Привет',dance:'Танец',angry:'Злость',sit:'Сидеть',spin:'Кружить',point:'Тычок',flex:'Flex'};
-        document.querySelectorAll('.emote-btn').forEach(b=>{
-            if(b.textContent.includes(labels[name]||'___')) b.classList.add('active');
-        });
-    },
-
-    _applyEmote(time, delta){
-        const rig = this.rig;
-        if(!rig) return;
-        const et = time - (this._emoteStart||0); // время внутри эмоции
-
-        switch(this._currentEmote){
-
-            case 'wave': {
-                // Правая рука машет вверх-вниз, остальное нейтрально
-                rig.rightArm.rotation.x = THREE.MathUtils.lerp(rig.rightArm.rotation.x, -1.1 + Math.sin(et*8)*0.45, 0.15);
-                rig.rightArm.rotation.z = THREE.MathUtils.lerp(rig.rightArm.rotation.z||0, -0.3, 0.1);
-                rig.leftArm.rotation.x  = THREE.MathUtils.lerp(rig.leftArm.rotation.x,  0.15, 0.1);
-                rig.leftArm.rotation.z  = THREE.MathUtils.lerp(rig.leftArm.rotation.z||0, 0,   0.1);
-                rig.leftLeg.rotation.x  = THREE.MathUtils.lerp(rig.leftLeg.rotation.x,  0, 0.1);
-                rig.rightLeg.rotation.x = THREE.MathUtils.lerp(rig.rightLeg.rotation.x, 0, 0.1);
-                rig.torso.rotation.y    = THREE.MathUtils.lerp(rig.torso.rotation.y,     Math.sin(et*4)*0.06, 0.1);
-                break;
-            }
-
-            case 'dance': {
-                // Всё тело пружинит в такт
-                const beat = Math.sin(et*10);
-                rig.leftArm.rotation.x  = beat * 0.7;
-                rig.rightArm.rotation.x = -beat * 0.7;
-                rig.leftArm.rotation.z  = THREE.MathUtils.lerp(rig.leftArm.rotation.z||0,  0.3 + beat*0.15, 0.15);
-                rig.rightArm.rotation.z = THREE.MathUtils.lerp(rig.rightArm.rotation.z||0,-0.3 - beat*0.15, 0.15);
-                rig.leftLeg.rotation.x  = -beat * 0.35;
-                rig.rightLeg.rotation.x =  beat * 0.35;
-                rig.torso.rotation.y    = Math.sin(et*5) * 0.18;
-                if(this.playerGroup) this.playerGroup.position.y += Math.abs(Math.sin(et*10)) * 0.008;
-                break;
-            }
-
-            case 'angry': {
-                // Руки разведены вбок чуть вперёд, трясутся
-                const shake = (Math.random()-0.5) * 0.08;
-                rig.leftArm.rotation.x  = THREE.MathUtils.lerp(rig.leftArm.rotation.x,  -0.5, 0.12);
-                rig.rightArm.rotation.x = THREE.MathUtils.lerp(rig.rightArm.rotation.x, -0.5, 0.12);
-                rig.leftArm.rotation.z  = THREE.MathUtils.lerp(rig.leftArm.rotation.z||0,  0.65 + shake, 0.12);
-                rig.rightArm.rotation.z = THREE.MathUtils.lerp(rig.rightArm.rotation.z||0,-0.65 - shake, 0.12);
-                rig.torso.rotation.y    = (Math.random()-0.5) * 0.05;
-                rig.leftLeg.rotation.x  = THREE.MathUtils.lerp(rig.leftLeg.rotation.x,  0, 0.1);
-                rig.rightLeg.rotation.x = THREE.MathUtils.lerp(rig.rightLeg.rotation.x, 0, 0.1);
-                break;
-            }
-
-            case 'sit': {
-                // Персонаж приседает — ноги сгибаются
-                rig.leftLeg.rotation.x  = THREE.MathUtils.lerp(rig.leftLeg.rotation.x,  1.3, 0.1);
-                rig.rightLeg.rotation.x = THREE.MathUtils.lerp(rig.rightLeg.rotation.x, 1.3, 0.1);
-                rig.leftArm.rotation.x  = THREE.MathUtils.lerp(rig.leftArm.rotation.x,  0.4, 0.1);
-                rig.rightArm.rotation.x = THREE.MathUtils.lerp(rig.rightArm.rotation.x, 0.4, 0.1);
-                rig.leftArm.rotation.z  = THREE.MathUtils.lerp(rig.leftArm.rotation.z||0,  0.2, 0.1);
-                rig.rightArm.rotation.z = THREE.MathUtils.lerp(rig.rightArm.rotation.z||0,-0.2, 0.1);
-                rig.torso.rotation.x    = THREE.MathUtils.lerp(rig.torso.rotation.x||0,  0.25, 0.1);
-                if(this.playerGroup) this.playerGroup.position.y = THREE.MathUtils.lerp(this.playerGroup.position.y, -0.45, 0.08);
-                break;
-            }
-
-            case 'spin': {
-                // Вращение персонажа
-                if(this.playerGroup) this.playerGroup.rotation.y += delta * 5;
-                rig.leftArm.rotation.z  = THREE.MathUtils.lerp(rig.leftArm.rotation.z||0,  0.9, 0.1);
-                rig.rightArm.rotation.z = THREE.MathUtils.lerp(rig.rightArm.rotation.z||0,-0.9, 0.1);
-                rig.leftArm.rotation.x  = THREE.MathUtils.lerp(rig.leftArm.rotation.x,  -0.3, 0.1);
-                rig.rightArm.rotation.x = THREE.MathUtils.lerp(rig.rightArm.rotation.x, -0.3, 0.1);
-                rig.leftLeg.rotation.x  = THREE.MathUtils.lerp(rig.leftLeg.rotation.x,   0.2, 0.1);
-                rig.rightLeg.rotation.x = THREE.MathUtils.lerp(rig.rightLeg.rotation.x,  0.2, 0.1);
-                break;
-            }
-
-            case 'point': {
-                // Правая рука указывает вперёд
-                rig.rightArm.rotation.x = THREE.MathUtils.lerp(rig.rightArm.rotation.x, -1.4, 0.12);
-                rig.rightArm.rotation.z = THREE.MathUtils.lerp(rig.rightArm.rotation.z||0, 0.1, 0.1);
-                rig.leftArm.rotation.x  = THREE.MathUtils.lerp(rig.leftArm.rotation.x,   0.2, 0.1);
-                rig.leftArm.rotation.z  = THREE.MathUtils.lerp(rig.leftArm.rotation.z||0, 0.1, 0.1);
-                rig.leftLeg.rotation.x  = THREE.MathUtils.lerp(rig.leftLeg.rotation.x,   0, 0.1);
-                rig.rightLeg.rotation.x = THREE.MathUtils.lerp(rig.rightLeg.rotation.x,  0, 0.1);
-                rig.torso.rotation.y    = THREE.MathUtils.lerp(rig.torso.rotation.y,      0, 0.1);
-                break;
-            }
-
-            case 'flex': {
-                // Обе руки подняты и согнуты — "показываю мышцы"
-                rig.leftArm.rotation.x  = THREE.MathUtils.lerp(rig.leftArm.rotation.x,  -1.0, 0.12);
-                rig.rightArm.rotation.x = THREE.MathUtils.lerp(rig.rightArm.rotation.x, -1.0, 0.12);
-                rig.leftArm.rotation.z  = THREE.MathUtils.lerp(rig.leftArm.rotation.z||0,  0.85 + Math.sin(et*6)*0.08, 0.12);
-                rig.rightArm.rotation.z = THREE.MathUtils.lerp(rig.rightArm.rotation.z||0,-0.85 - Math.sin(et*6)*0.08, 0.12);
-                rig.leftLeg.rotation.x  = THREE.MathUtils.lerp(rig.leftLeg.rotation.x,   0, 0.1);
-                rig.rightLeg.rotation.x = THREE.MathUtils.lerp(rig.rightLeg.rotation.x,  0, 0.1);
-                rig.torso.rotation.y    = Math.sin(et*3) * 0.07;
-                break;
-            }
-
-            default:
-                // Неизвестная эмоция — сброс
-                this._currentEmote = null;
-                break;
-        }
-
-        // При движении — сбрасываем эмоцию (кроме сидения)
-        const _emMoving=this.keys&&(this.keys['KeyW']||this.keys['KeyA']||this.keys['KeyS']||this.keys['KeyD']);
-        if(_emMoving&&this._currentEmote!=='sit') this.doEmote(null);
-    },
-
     async initGifts(){
         const box = document.getElementById('gift-friend-list');
         if(!box) return;
@@ -2694,7 +2764,7 @@ const app = {
                 const div=document.createElement('div');
                 div.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#111;border-radius:8px;border:1px solid #1a1a1a;';
                 div.innerHTML=`<div><b style="color:#FF9800">+${g.amount} 🍊</b><br><span style="color:#666;font-size:12px;">от ${g.from_name||g.from_id}</span></div>
-                    <button onclick="app._claimGift(${g.amount},'${g.from_id}',this)" style="padding:7px 14px;background:rgba(255,152,0,0.2);border:1px solid #FF9800;border-radius:8px;color:#FF9800;font-size:13px;cursor:pointer;">Забрать</button>`;
+                    <button onclick="app._claimGift(${g.amount},'${g.from_id}',this)" style="padding:7px 14px;background:rgba(255,149,0,0.2);border:1px solid #FF9800;border-radius:8px;color:#FF9800;font-size:13px;cursor:pointer;">Забрать</button>`;
                 inbox.appendChild(div);
             }
         }catch(e){ inbox.innerHTML='<div style="color:#444;font-size:12px;">Ошибка загрузки</div>'; }
@@ -2748,7 +2818,7 @@ const app = {
             mythic:   {color:'#FF3D3D',   glow:'rgba(255,61,61,0.35)',   label:'🔴 Мифический'},
             divine:   {color:'#FFFFFF',   glow:'rgba(255,255,255,0.3)',  label:'🌟 Божественный'},
             cosmic:   {color:'#7B68EE',   glow:'rgba(123,104,238,0.4)',  label:'🌌 Космический'},
-            citrus:   {color:'#FF9800',   glow:'rgba(255,152,0,0.4)',    label:'🍊 Цитрусовый'},
+            citrus:   {color:'#FF9800',   glow:'rgba(255,149,0,0.4)',    label:'🍊 Цитрусовый'},
         };
         return map[rarity]||map.common;
     },
@@ -2875,7 +2945,7 @@ const app = {
                 ${nft.rarity==='divine'?'text-shadow:0 0 10px rgba(255,255,255,0.5);':''}
                 ${nft.rarity==='mythic'?'text-shadow:0 0 10px rgba(255,61,61,0.6);':''}
                 ${nft.rarity==='cosmic'?'text-shadow:0 0 10px rgba(123,104,238,0.7);':''}
-                ${nft.rarity==='citrus'?'text-shadow:0 0 10px rgba(255,152,0,0.6);':''}
+                ${nft.rarity==='citrus'?'text-shadow:0 0 10px rgba(255,149,0,0.6);':''}
             ">${nft.name}</div>
             <div style="font-size:10px;color:${rs.color}99;text-align:center;margin-bottom:8px;font-family:var(--font-ui);font-weight:600;">${rs.label}</div>
             ${nft.desc?`<div style="font-size:11px;color:rgba(255,255,255,0.4);text-align:center;margin-bottom:8px;font-family:var(--font-ui);">${nft.desc}</div>`:''}
@@ -2912,9 +2982,9 @@ const app = {
             document.getElementById('nfttab-'+t)?.classList.toggle('hidden', t!==tab);
             const btn=document.getElementById('nfttab-'+t+'-btn');
             if(btn){
-                btn.style.background=t===tab?'rgba(255,152,0,0.12)':'transparent';
-                btn.style.color=t===tab?'rgba(255,152,0,0.9)':'rgba(255,255,255,0.4)';
-                btn.style.border=t===tab?'1px solid rgba(255,152,0,0.3)':'1px solid rgba(255,255,255,0.08)';
+                btn.style.background=t===tab?'rgba(255,149,0,0.12)':'transparent';
+                btn.style.color=t===tab?'rgba(255,149,0,0.9)':'rgba(255,255,255,0.4)';
+                btn.style.border=t===tab?'1px solid rgba(255,149,0,0.3)':'1px solid rgba(255,255,255,0.08)';
             }
         });
         if(tab==='market') this.loadNftMarket();
@@ -3362,10 +3432,10 @@ const app = {
                 list.innerHTML += `
                 <div style="display:flex;align-items:center;gap:12px;padding:11px 16px;
                     border-bottom:1px solid rgba(255,255,255,0.04);
-                    ${isMe?'background:rgba(255,152,0,0.06);':''}
+                    ${isMe?'background:rgba(255,149,0,0.06);':''}
                     transition:background 0.15s;" 
                     onmouseover="this.style.background='rgba(255,255,255,0.03)'"
-                    onmouseout="this.style.background='${isMe?'rgba(255,152,0,0.06)':'transparent'}'">
+                    onmouseout="this.style.background='${isMe?'rgba(255,149,0,0.06)':'transparent'}'">
                     <div style="width:28px;text-align:center;font-family:var(--font-head);font-size:12px;color:rgba(255,255,255,0.25);flex-shrink:0;">${rank}</div>
                     <div style="width:34px;height:34px;border-radius:50%;background:${col}22;color:${col};
                         display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;">${(p.name[0]||'?').toUpperCase()}</div>
@@ -3375,7 +3445,7 @@ const app = {
                         </div>
                         <div style="font-size:10px;color:rgba(255,255,255,0.2);font-family:var(--font-ui);">${p.tag||''}</div>
                     </div>
-                    <div style="font-family:var(--font-head);font-size:13px;font-weight:700;color:rgba(255,152,0,0.8);flex-shrink:0;">
+                    <div style="font-family:var(--font-head);font-size:13px;font-weight:700;color:rgba(255,149,0,0.8);flex-shrink:0;">
                         ${p.balance.toLocaleString('ru')} 🍊
                     </div>
                 </div>`;
@@ -3385,7 +3455,7 @@ const app = {
         // ── Моё место если не в топ-50 ──
         const myPos = top.findIndex(p=>String(p.id)===String(this.userId));
         if(myPos === -1 && myrank){
-            myrank.innerHTML = `<div class="panel-box" style="display:flex;align-items:center;gap:12px;border-color:rgba(255,152,0,0.2);">
+            myrank.innerHTML = `<div class="panel-box" style="display:flex;align-items:center;gap:12px;border-color:rgba(255,149,0,0.2);">
                 <div style="font-size:12px;color:rgba(255,255,255,0.3);font-family:var(--font-ui);">Твой баланс:</div>
                 <div style="font-family:var(--font-head);font-size:16px;color:var(--c-main);font-weight:700;">${(this.balance||0).toLocaleString('ru')} 🍊</div>
                 <div style="font-size:11px;color:rgba(255,255,255,0.2);margin-left:auto;">не в топ-50</div>
@@ -3400,7 +3470,7 @@ const app = {
     async loadStats(){
         const wNames={gather:'🍊 Цитрусовый Лес',parkour:'🏃 Небесный Паркур',
             volcano:'🌋 Остров Вулкана',space:'🚀 Космическая База',
-            hideseek:'👀 Прятки',snowmount:'🏔 Снежная Гора',
+            hideseek:'👀 Прятки',pvp:'🔫 Арена ПВП',
             dungeon:'⚔️ Тёмное Подземелье'};
 
         // Проверяем статус хранилища
@@ -3480,7 +3550,7 @@ const app = {
                     const v=vals[i]; const bH=Math.max(4,Math.floor((H-pad*2)*v/maxV));
                     const x=pad+i*(barW+2); const y=H-pad-bH;
                     const grad=ctx.createLinearGradient(0,y,0,H-pad);
-                    grad.addColorStop(0,'rgba(255,152,0,0.9)'); grad.addColorStop(1,'rgba(255,152,0,0.2)');
+                    grad.addColorStop(0,'rgba(255,149,0,0.9)'); grad.addColorStop(1,'rgba(255,149,0,0.2)');
                     ctx.fillStyle=grad; ctx.beginPath();
                     ctx.roundRect(x,y,barW,bH,3); ctx.fill();
                     // Подпись дня
@@ -3601,10 +3671,16 @@ const app = {
         } catch(e) {}
         document.getElementById('ui-login').classList.add('hidden');
         document.getElementById('ui-hub').classList.remove('hidden');
+        // Открываем группу вкладок сразу
+        const gi=document.getElementById('nav-group-items');
+        const ga=document.getElementById('nav-group-arrow');
+        if(gi){gi.classList.add('open');} if(ga){ga.classList.add('open');}
         this.renderMyGames(); this.renderFriends(); this.renderOnline(); this.initAvatarPreview(); this.renderShop();
         // Показываем панель управления только разрабу и citrus
         const adminNav = document.getElementById('nav-admin');
+        const bnAdmin = document.getElementById('bn-admin');
         if(adminNav) adminNav.classList.toggle('hidden', !this.canBan(this.username));
+        if(bnAdmin) bnAdmin.classList.toggle('hidden', !this.canBan(this.username));
         this.updateUI();
         // Проверяем офлайн заработок с продаж НФТ
         setTimeout(()=>this.checkOfflineEarnings(), 1500);
@@ -3717,18 +3793,29 @@ const app = {
     },
 
     touchJump(){
+
         if(this.canJump){this.velocity.y=this.spaceGrav?10:16;this.canJump=false;}
     },
 
     // ── TABS
-    switchTab(id){
-        ['games','avatar','shop','friends','studio','quests','roulette','credits','gifts','nft','stats','leaderboard','admin'].forEach(t=>{
-            document.getElementById('tab-'+t).classList.add('hidden');
+
+        toggleNavGroup(){
+        const items = document.getElementById('nav-group-items');
+        const arrow = document.getElementById('nav-group-arrow');
+        if(!items) return;
+        items.classList.toggle('open');
+        if(arrow) arrow.classList.toggle('open');
+    },
+
+        switchTab(id){
+        ['games','avatar','shop','friends','studio','quests','roulette','credits','gifts','nft','stats','leaderboard','admin','help'].forEach(t=>{
+            document.getElementById('tab-'+t)?.classList.add('hidden');
             document.getElementById('nav-'+t)?.classList.remove('active');
         });
-        document.getElementById('tab-'+id).classList.remove('hidden');
+        document.getElementById('tab-'+id)?.classList.remove('hidden');
         document.getElementById('nav-'+id)?.classList.add('active');
         if(id==='avatar')this.updateAvatarPreview();
+        if(id==='help'){}
         if(id==='games')this.renderMyGames();
         if(id==='quests')this.renderQuests();
         if(id==='roulette')this.initRoulette();
@@ -3755,9 +3842,9 @@ const app = {
         SHOP_ITEMS.forEach(it=>{
             const b=this.inventory.includes(it.id);
             g.innerHTML+=`<div class="card world-card" onclick="app.buyItem('${it.id}',${it.price})" ${b?'style="opacity:0.6"':''}>
-                <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(255,152,0,0.08),#050510);font-size:52px;position:relative;">
+                <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(255,149,0,0.08),#050510);font-size:52px;position:relative;">
                     <span class="world-emoji" style="z-index:2;position:relative;">${it.icon}</span>
-                    <div class="world-glow" style="background:rgba(255,152,0,0.08);"></div>
+                    <div class="world-glow" style="background:rgba(255,149,0,0.08);"></div>
                 </div>
                 <div class="card-info">
                     <div><b style="font-family:var(--font-body);letter-spacing:0.3px;">${it.name}</b></div>
@@ -4044,7 +4131,7 @@ const app = {
         else if(msg.type==='invite'&&String(msg.to)===String(this.userId)){
             const wNames={lobby:'Главная Площадь',gather:'Цитрусовый Лес',parkour:'Небесный Паркур',
                 volcano:'Остров Вулкана',space:'Космическая База',hideseek:'Прятки',
-                snowmount:'Снежная Гора',dungeon:'Тёмное Подземелье',march8:'🌸 8 Марта'};
+                pvp:'Арена ПВП',dungeon:'Тёмное Подземелье',march8:'🌸 8 Марта'};
             const wn=wNames[msg.world]||msg.worldName||msg.world;
             const n=document.createElement('div');n.className='notif';
             n.innerHTML=`<div class="nh">🎮 Приглашение в игру</div>
@@ -4285,7 +4372,7 @@ const app = {
                 // Не нашли — предлагаем отправить заявку вслепую
                 const isFr = this.friends.includes(tId);
                 const sent = this.sentReqs.includes(tId);
-                res.innerHTML = `<div class="fr" style="border-color:rgba(255,152,0,0.15);background:rgba(255,152,0,0.03)">
+                res.innerHTML = `<div class="fr" style="border-color:rgba(255,149,0,0.15);background:rgba(255,149,0,0.03)">
                     <div class="fa2" style="background:#FF980022;color:#FF9800">${tName[0].toUpperCase()}</div>
                     <div class="fi"><div class="fn">${tName} <small style="color:#555">#${tId}</small></div>
                     <div class="fs">Отправить заявку по тегу</div></div>
@@ -4385,7 +4472,7 @@ const app = {
             const on=online.find(x=>x.id===fid);
             const wNames={gather:'Цитрусовый Лес',parkour:'Небесный Паркур',
                 volcano:'Остров Вулкана',space:'Космическая База',hideseek:'Прятки',
-                snowmount:'Снежная Гора',dungeon:'Тёмное Подземелье'};
+                pvp:'Арена ПВП',dungeon:'Тёмное Подземелье'};
             const friendMapId = on && on.status==='ingame' ? on.world : null;
             const friendMapName = friendMapId ? (wNames[friendMapId] || friendMapId) : null;
             const st = on ? (friendMapId ? '🎮 '+friendMapName : '● Онлайн') : '○ Оффлайн';
@@ -4411,6 +4498,7 @@ const app = {
         // Обновляем бейдж на навбаре
         const cnt=this.friendRequests.length,b=document.getElementById('fr-badge');
         if(b){b.classList.toggle('hidden',cnt===0);if(cnt>0)b.innerText=cnt;}
+
     },
 
     // ── INBOX (ПОЧТА)
@@ -5168,6 +5256,35 @@ const app = {
             const legMat=new THREE.MeshStandardMaterial({color:0x555555,roughness:0.8});
             [-0.28,0.28].forEach(x=>{const leg=new THREE.Mesh(new THREE.BoxGeometry(0.08,0.14,0.08),legMat);leg.position.set(x,-0.39,0);headGroup.add(leg);});
         }
+        // Пистолет в ПВП
+        if(this.currentMap==='pvp'){
+            const gunGrp=new THREE.Group();
+            // Рукоять
+            const grip=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.22,0.09),
+                new THREE.MeshStandardMaterial({color:0x222222,roughness:0.7,metalness:0.4}));
+            grip.position.set(0,0,0);gunGrp.add(grip);
+            // Ствол
+            const barrel=new THREE.Mesh(new THREE.BoxGeometry(0.07,0.08,0.45),
+                new THREE.MeshStandardMaterial({color:0x333333,roughness:0.5,metalness:0.6}));
+            barrel.position.set(0,0.06,0.22);gunGrp.add(barrel);
+            // Дуло
+            const muzzle=new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.035,0.06,8),
+                new THREE.MeshStandardMaterial({color:0x111111,metalness:0.8,roughness:0.3}));
+            muzzle.rotation.x=Math.PI/2;muzzle.position.set(0,0.06,0.47);gunGrp.add(muzzle);
+            // Курок
+            const trigger=new THREE.Mesh(new THREE.BoxGeometry(0.02,0.08,0.04),
+                new THREE.MeshStandardMaterial({color:0x444444,metalness:0.5}));
+            trigger.position.set(0,-0.07,0.05);gunGrp.add(trigger);
+            // Прицельная планка
+            const sight=new THREE.Mesh(new THREE.BoxGeometry(0.02,0.04,0.08),
+                new THREE.MeshStandardMaterial({color:0x555555,metalness:0.7}));
+            sight.position.set(0,0.11,0.1);gunGrp.add(sight);
+            // Позиция в правой руке: вперёд вниз
+            gunGrp.position.set(0.02,-0.7,-0.15);
+            gunGrp.rotation.x=-Math.PI/2;
+            rA.add(gunGrp);
+            this._gunGroup=gunGrp;
+        }
         if(needsRig)this.rig={leftArm:lA,rightArm:rA,leftLeg:lL,rightLeg:rL,torso,head:headGroup};
         // Ник над головой
         try {
@@ -5278,7 +5395,7 @@ const app = {
         this.velocity.set(0,0,0);this.canJump=false;this.loopFn=null;this.spaceGrav=false;
         const wNames={lobby:'Главная Площадь',gather:'Цитрусовый Лес',parkour:'Небесный Паркур',
             volcano:'Остров Вулкана',space:'Космическая База',hideseek:'Прятки',
-            snowmount:'Снежная Гора',dungeon:'Тёмное Подземелье',march8:'🌸 8 Марта'};
+            pvp:'Арена ПВП',dungeon:'Тёмное Подземелье',march8:'🌸 8 Марта'};
         this._worldName=wNames[mapId]||'Мир игрока';
         if(mode==='play'){
             this._updateStatus('ingame', mapId);
@@ -5290,15 +5407,13 @@ const app = {
         
         document.getElementById('ui-hub').classList.add('hidden');
         document.getElementById('engine-view').style.display='block';
-        document.getElementById('crosshair').style.display=mode==='studio'?'block':'none';
+        document.getElementById('crosshair').style.display=(mode==='studio'||mapId==='pvp')?'block':'none';
         document.getElementById('studio-ui').classList.toggle('hidden',mode!=='studio');
         const stTouch = document.getElementById('studio-touch-btns');
         if(stTouch) stTouch.classList.toggle('hidden', mode!=='studio');
-        document.getElementById('ingame-ui').style.display=(mode==='play'&&(mapId==='gather'||mapId==='hideseek'||mapId==='snowmount'||mapId==='dungeon'||mapId==='march8'))?'flex':'none';
+        document.getElementById('ingame-ui').style.display=(mode==='play'&&(mapId==='gather'||mapId==='hideseek'||mapId==='pvp'||mapId==='dungeon'||mapId==='march8'))?'flex':'none';
         document.getElementById('mp-panel').classList.toggle('hidden',mode!=='play');
-        // Кнопки эмоций — только в режиме play
-        const hudAct=document.getElementById('hud-actions');
-        if(hudAct) hudAct.style.display=mode==='play'?'flex':'none';
+
         
         // Чат виден только в игре
 
@@ -5316,7 +5431,7 @@ const app = {
     setupScene(){
         const canvas=document.getElementById('gl-canvas');canvas.innerHTML='';
         this.scene=new THREE.Scene();
-        const bgs={lobby:0x0a0a18,gather:0x0d1f0a,parkour:0x87CEEB,volcano:0x1a0800,space:0x000005,hideseek:0x0d1a0d,snowmount:0x87CEEB,dungeon:0x050508,march8:0x1a0a1a};
+        const bgs={lobby:0x0a0a18,gather:0x0d1f0a,parkour:0x87CEEB,volcano:0x1a0800,space:0x000005,hideseek:0x0d1a0d,pvp:0x100a06,dungeon:0x050508,march8:0x1a0a1a};
         const bg=bgs[this.currentMap]||0x0a0a10;
         this.scene.background=new THREE.Color(bg);
         this.scene.fog=new THREE.FogExp2(bg,0.016);
@@ -5342,7 +5457,7 @@ const app = {
         if(this.mode==='play'){
             this.playerGroup=this.buildCharacter(true);
             // Спавн выше земли для всех миров
-            const spawnY = {parkour:8, march8:5, dungeon:3, volcano:4, space:4, snowmount:4, hideseek:4, gather:3, lobby:3};
+            const spawnY = {parkour:8, march8:5, dungeon:3, volcano:4, space:4, pvp:2, hideseek:4, gather:3, lobby:3};
             const baseY = this._joinSpawn ? 15 : (spawnY[this.currentMap] || (typeof this.currentMap==='number' ? 12 : 5));
             this._joinSpawn = false;
             this.playerGroup.position.set(0, baseY, 0);
@@ -5582,75 +5697,79 @@ const app = {
                 this.showHideSeekHud();
             }
         }
-        else if(this.currentMap==='snowmount'){
-            // СНЕЖНАЯ ГОРА: подъём за 5-7 минут, приз 2000 цитрусов
-            this.scene.background=new THREE.Color(0x87CEEB);
-            this.scene.fog=new THREE.Fog(0xd0eaf0,60,300);
-            addGround(0xaaddee);
-            // Снежные равнины
-            for(let i=0;i<30;i++){
-                const sx=(Math.random()-0.5)*200,sz=(Math.random()-0.5)*200;
-                if(Math.abs(sx)<15&&Math.abs(sz)<15)continue;
-                const snowPatch=new THREE.Mesh(new THREE.CylinderGeometry(3+Math.random()*5,3+Math.random()*5,0.3,12),
-                    new THREE.MeshStandardMaterial({color:0xf0f8ff,roughness:0.9}));
-                snowPatch.position.set(sx,0.1,sz);this.scene.add(snowPatch);
-            }
-            // Елки
-            for(let i=0;i<35;i++){
-                const ex=(Math.random()-0.5)*180,ez=(Math.random()-0.5)*180;
-                if(Math.abs(ex)<10&&Math.abs(ez)<10)continue;
-                const trunk=new THREE.Mesh(new THREE.CylinderGeometry(0.2,0.35,3),new THREE.MeshStandardMaterial({color:0x4a2a0a}));
-                trunk.position.set(ex,1.5,ez);this.scene.add(trunk);this.objectsToIntersect.push(trunk);
-                [3,2,1].forEach((s,j)=>{
-                    const cone=new THREE.Mesh(new THREE.ConeGeometry(s*0.7,s,8),new THREE.MeshStandardMaterial({color:0x1b5e20,roughness:0.9}));
-                    cone.position.set(ex,2+j*1.5,ez);this.scene.add(cone);this.objectsToIntersect.push(cone);
+        else if(this.currentMap==='pvp'){
+            this.scene.background=new THREE.Color(0x100a06);
+            this.scene.fog=new THREE.Fog(0x100a06,60,180);
+            this._pvpBullets=[];this._pvpTargets=[];this._pvpScore=0;this._pvpAmmo=30;
+
+            // Пол
+            const floor=new THREE.Mesh(new THREE.BoxGeometry(120,1,120),new THREE.MeshStandardMaterial({color:0x4a4035,roughness:0.9}));
+            floor.position.y=-0.5;floor.receiveShadow=true;this.scene.add(floor);this.objectsToIntersect.push(floor);
+
+            // Стены
+            const wm=new THREE.MeshStandardMaterial({color:0x3a3028,roughness:0.8});
+            [[0,4,-60,120,9,2],[0,4,60,120,9,2],[-60,4,0,2,9,120],[60,4,0,2,9,120]].forEach(([x,y,z,w,h,d])=>{
+                const wall=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),wm);
+                wall.position.set(x,y,z);wall.castShadow=true;wall.receiveShadow=true;
+                this.scene.add(wall);this.objectsToIntersect.push(wall);
+            });
+
+            // Укрытия (ящики и барьеры)
+            const bm=new THREE.MeshStandardMaterial({color:0x5c4a30,roughness:0.7});
+            const mm=new THREE.MeshStandardMaterial({color:0x607080,roughness:0.5,metalness:0.3});
+            [[-15,1,-15,4,3,4,bm],[15,1,-15,4,3,4,bm],[-15,1,15,4,3,4,bm],[15,1,15,4,3,4,bm],
+             [0,1,-25,12,2.5,1.5,mm],[0,1,25,12,2.5,1.5,mm],
+             [-25,1,0,1.5,2.5,12,mm],[25,1,0,1.5,2.5,12,mm],
+             [-8,1.5,0,3,3,3,bm],[8,1.5,0,3,3,3,bm],
+             [0,1,-8,6,1.5,1.5,mm],[0,1,8,6,1.5,1.5,mm],
+            ].forEach(([x,y,z,w,h,d,mat])=>{
+                const box=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
+                box.position.set(x,y,z);box.castShadow=true;box.receiveShadow=true;
+                this.scene.add(box);this.objectsToIntersect.push(box);
+            });
+
+            // Мишени
+            const tPos=[[-40,2.5,0],[40,2.5,0],[0,2.5,-50],[0,2.5,50],[-35,2.5,-35],[35,2.5,-35],[-35,2.5,35],[35,2.5,35]];
+            tPos.forEach(([x,y,z],i)=>{
+                const pole=new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.1,y),new THREE.MeshStandardMaterial({color:0x333333}));
+                pole.position.set(x,y/2,z);this.scene.add(pole);
+                [1.5,1.0,0.6,0.3].forEach((r,ri)=>{
+                    const ring=new THREE.Mesh(new THREE.CylinderGeometry(r,r,0.15,24),
+                        new THREE.MeshStandardMaterial({color:ri%2===0?0xdd2222:0xeeeeee,emissive:ri%2===0?0x550000:0x111111,emissiveIntensity:0.4}));
+                    ring.rotation.x=Math.PI/2;ring.position.set(x,y,z);
+                    ring.userData.isTarget=true;ring.userData.targetIdx=i;
+                    ring.userData.points=[5,15,30,50][ri];
+                    this.scene.add(ring);this.objectsToIntersect.push(ring);this._pvpTargets.push(ring);
                 });
-            }
-            // Гора — спиральная тропа
-            const mBase=new THREE.Mesh(new THREE.ConeGeometry(30,80,16),new THREE.MeshStandardMaterial({color:0x8899aa,roughness:0.8}));
-            mBase.position.set(0,40,-60);this.scene.add(mBase);this.objectsToIntersect.push(mBase);
-            // Снег на горе
-            const mSnow=new THREE.Mesh(new THREE.ConeGeometry(12,30,16),new THREE.MeshStandardMaterial({color:0xeef6ff,roughness:0.7}));
-            mSnow.position.set(0,75,-60);this.scene.add(mSnow);
-            // Ступеньки-платформы по горе
-            const stairColors=[0x90a4ae,0xb0bec5,0xcfd8dc,0xeceff1];
-            for(let i=0;i<28;i++){
-                const ang=(i/28)*Math.PI*5;const rad=25-i*0.7;const ht=i*2.8;
-                const step=new THREE.Mesh(new THREE.BoxGeometry(5,0.6,4),new THREE.MeshStandardMaterial({color:stairColors[i%4],roughness:0.7}));
-                step.position.set(Math.cos(ang)*rad,ht,-60+Math.sin(ang)*rad);step.castShadow=true;step.receiveShadow=true;
-                this.scene.add(step);this.objectsToIntersect.push(step);
-                // Снег на ступеньках
-                const snow=new THREE.Mesh(new THREE.BoxGeometry(4.8,0.15,3.8),new THREE.MeshStandardMaterial({color:0xffffff,roughness:1}));
-                snow.position.set(Math.cos(ang)*rad,ht+0.37,-60+Math.sin(ang)*rad);this.scene.add(snow);
-            }
-            // Вершина — золотая платформа с призом
-            const summit=new THREE.Mesh(new THREE.CylinderGeometry(6,6,0.8,16),new THREE.MeshStandardMaterial({color:0xFFD700,emissive:0xFFAA00,emissiveIntensity:0.6,metalness:0.5}));
-            summit.position.set(0,79,-60);this.scene.add(summit);this.objectsToIntersect.push(summit);
-            summit.userData.isSummit=true;
-            const sumLight=new THREE.PointLight(0xFFD700,5,25);sumLight.position.set(0,83,-60);this.scene.add(sumLight);
-            // Трофей на вершине
-            const trophy=new THREE.Mesh(new THREE.SphereGeometry(1.5,12,12),new THREE.MeshStandardMaterial({color:0xFFD700,emissive:0xFF8800,emissiveIntensity:1.2,metalness:0.8}));
-            trophy.position.set(0,81.5,-60);this.scene.add(trophy);
-            // Снегопад-частицы
-            const snowGeo=new THREE.BufferGeometry();const snowPos=[];
-            for(let i=0;i<1200;i++)snowPos.push((Math.random()-0.5)*200,Math.random()*100-5,(Math.random()-0.5)*200);
-            snowGeo.setAttribute('position',new THREE.Float32BufferAttribute(snowPos,3));
-            this._snowParticles=new THREE.Points(snowGeo,new THREE.PointsMaterial({color:0xffffff,size:0.4,transparent:true,opacity:0.8}));
-            this.scene.add(this._snowParticles);
-            // Таймер горы
-            if(!this._mtTimer){
-                this._mtSeconds=0;this._mtReached=false;
-                this._mtInterval=setInterval(()=>{
-                    if(this._mtReached)return;
-                    this._mtSeconds++;this.showSnowMountHud();
-                    const pl=this.playerGroup;
-                    if(pl&&pl.position.distanceTo(new THREE.Vector3(0,79,-60))<7&&!this._mtReached){
-                        this._mtReached=true;clearInterval(this._mtInterval);this._mtInterval=null;
-                        this.balance+=30;this.saveData();
-                        this.showNotif('🏆','ВЕРШИНА ПОКОРЕНА!','Получено 30 🍊 на баланс!');
-                    }
-                },1000);
-                this.showSnowMountHud();
+            });
+
+            // Лампы
+            [[-30,8,-30],[30,8,-30],[-30,8,30],[30,8,30],[0,10,0]].forEach(([x,y,z])=>{
+                const l=new THREE.PointLight(0xffcc88,2.5,50);l.position.set(x,y,z);this.scene.add(l);
+                const b=new THREE.Mesh(new THREE.SphereGeometry(0.3,8,8),new THREE.MeshStandardMaterial({color:0xffeeaa,emissive:0xffcc66,emissiveIntensity:3}));
+                b.position.set(x,y,z);this.scene.add(b);
+            });
+
+            // PVP HUD
+            const showPvpHud=()=>{
+                let h=document.getElementById('pvp-hud');
+                if(!h){h=document.createElement('div');h.id='pvp-hud';
+                    h.style.cssText='position:fixed;top:80px;right:20px;z-index:200;font-family:Orbitron,sans-serif;text-align:right;pointer-events:none;';
+                    document.body.appendChild(h);}
+                h.innerHTML='<div style="font-size:24px;font-weight:900;color:#ff4444;text-shadow:0 0 20px rgba(255,68,68,0.7);">💥 '+this._pvpScore+' очков</div>'+
+                    '<div style="font-size:13px;color:rgba(255,200,100,0.85);margin-top:4px;">🔫 Патроны: '+this._pvpAmmo+'</div>'+
+                    '<div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:2px;">ЛКМ / кнопка — выстрел</div>';
+            };
+            this._pvpShowHud=showPvpHud;showPvpHud();
+
+            // Мобильная кнопка
+            if('ontouchstart' in window){
+                let sb=document.getElementById('pvp-shoot-btn');
+                if(!sb){sb=document.createElement('button');sb.id='pvp-shoot-btn';sb.innerHTML='🔫';
+                    sb.style.cssText='position:fixed;right:24px;bottom:140px;z-index:300;width:70px;height:70px;border-radius:50%;background:rgba(255,50,50,0.2);border:2px solid rgba(255,80,80,0.4);font-size:30px;cursor:pointer;backdrop-filter:blur(8px);';
+                    document.body.appendChild(sb);}
+                sb.style.display='block';
+                sb.ontouchstart=(e)=>{e.preventDefault();this._pvpShoot();};
             }
         }
         else if(this.currentMap==='dungeon'){
@@ -5858,7 +5977,7 @@ const app = {
         this._studioMode = m;
         ['place','move','scale','delete'].forEach(n=>{
             const b=document.getElementById('stmode-'+n);
-            if(b) b.style.background = n===m ? 'rgba(255,152,0,0.5)' : '';
+            if(b) b.style.background = n===m ? 'rgba(255,149,0,0.5)' : '';
         });
         const hints = {
             place: '<span>[1]</span> Ставить · <span>ЛКМ</span> · <span>QE</span> высота · <span>Z/X</span> цвет · <span>F</span> позвать друга',
@@ -5871,6 +5990,7 @@ const app = {
     },
 
     onMouseClick(e) {
+        if(e.button===0&&this.currentMap==='pvp'&&this.mode==='play'){this._pvpShoot();return;}
         if (this.mode !== 'studio') return;
         const mode = this._studioMode || 'place';
         if(e.button === 2){
@@ -5954,6 +6074,55 @@ const app = {
         const list=this.currentMap==='parkour'?this.objectsToIntersect:this.objectsToIntersect.slice(1);
         const hits=this.raycaster.intersectObjects(list);
         return hits.length>0&&hits[0].distance<moveStep.length()+0.6;
+    },
+
+
+    _pvpShoot(){
+        if(this.currentMap!=='pvp'||this.mode!=='play') return;
+        if(this._pvpAmmo<=0){this.showNotif('🔫','Патроны кончились!','Следующая обойма через 5 сек');
+            setTimeout(()=>{this._pvpAmmo=30;if(this._pvpShowHud)this._pvpShowHud();},5000);return;}
+        this._pvpAmmo--;
+        if(this._pvpShowHud) this._pvpShowHud();
+
+        // Луч от камеры в центр экрана
+        const ray=new THREE.Raycaster();
+        ray.setFromCamera(new THREE.Vector2(0,0),this.camera);
+        const hits=ray.intersectObjects(this.objectsToIntersect);
+
+        // Визуальная пуля
+        const bulletDir=ray.ray.direction.clone();
+        const bulletStart=this.camera.position.clone().add(bulletDir.clone().multiplyScalar(1.5));
+        const bullet=new THREE.Mesh(new THREE.SphereGeometry(0.07,6,6),
+            new THREE.MeshStandardMaterial({color:0xffcc00,emissive:0xffaa00,emissiveIntensity:4}));
+        bullet.position.copy(bulletStart);
+        bullet._vel=bulletDir.clone().multiplyScalar(80);
+        bullet._life=1.5;
+        this.scene.add(bullet);
+        if(!this._pvpBullets) this._pvpBullets=[];
+        this._pvpBullets.push(bullet);
+
+        // Вспышка выстрела
+        const flash=new THREE.PointLight(0xffaa00,8,6);flash.position.copy(bulletStart);this.scene.add(flash);
+        setTimeout(()=>this.scene.remove(flash),80);
+
+        // Попадание в мишень?
+        if(hits.length>0){
+            const hit=hits[0];
+            if(hit.object.userData&&hit.object.userData.isTarget){
+                const pts=hit.object.userData.points||5;
+                this._pvpScore+=pts;
+                if(this._pvpShowHud) this._pvpShowHud();
+                // Вспышка попадания
+                const hitFlash=new THREE.PointLight(0xff2222,10,8);hitFlash.position.copy(hit.point);this.scene.add(hitFlash);
+                setTimeout(()=>this.scene.remove(hitFlash),150);
+                // Мишень мигает
+                const origColor=hit.object.material.color.getHex();
+                hit.object.material.color.set(0xffffff);
+                hit.object.material.emissiveIntensity=2;
+                setTimeout(()=>{hit.object.material.color.set(origColor);hit.object.material.emissiveIntensity=0.4;},200);
+                this.showNotif('🎯','Попадание!','+'+pts+' очков');
+            }
+        }
     },
 
     // ── ENGINE LOOP (КАМЕРА ОТ 3-ГО ЛИЦА В ЗАТЫЛОК)
@@ -6058,6 +6227,16 @@ const app = {
                 }
             }
 
+
+            // ── ПВП: обновляем пули
+            if(this.currentMap==='pvp'&&this._pvpBullets){
+                for(let i=this._pvpBullets.length-1;i>=0;i--){
+                    const b=this._pvpBullets[i];
+                    b.position.addScaledVector(b._vel,delta);
+                    b._life-=delta;
+                    if(b._life<=0){this.scene.remove(b);this._pvpBullets.splice(i,1);}
+                }
+            }
             // 🌸 Анимация монет и цветов 8 марта
             if(this.currentMap==='march8' && this._march8Anim) this._march8Anim(time);
             // Отправляем позицию на сервер (каждые 150мс)
@@ -6087,9 +6266,16 @@ const app = {
                 this._wsSend(posData);
             }
 
-            if(this._currentEmote){
-                // Эмоции — отдельная анимация, ходьба не перекрывает
-                this._applyEmote(time, delta);
+            if(this.currentMap==='pvp'){
+                // ПВП — правая рука держит пистолет вперёд
+                const ws=moving&&this.canJump?Math.sin(time*15)*0.3:0;
+                this.rig.rightArm.rotation.x = THREE.MathUtils.lerp(this.rig.rightArm.rotation.x, -1.35, 0.15);
+                this.rig.rightArm.rotation.z = THREE.MathUtils.lerp(this.rig.rightArm.rotation.z||0, -0.18, 0.15);
+                this.rig.leftArm.rotation.x  = THREE.MathUtils.lerp(this.rig.leftArm.rotation.x, -1.0 + ws*0.4, 0.15);
+                this.rig.leftArm.rotation.z  = THREE.MathUtils.lerp(this.rig.leftArm.rotation.z||0, 0.15, 0.15);
+                this.rig.leftLeg.rotation.x  = ws*1.1;
+                this.rig.rightLeg.rotation.x = -ws*1.1;
+                this.rig.torso.rotation.y    = moving ? Math.sin(time*10)*0.04 : 0;
             } else if(moving&&this.canJump){
                 // Ходьба — руки качаются вперёд/назад в противофазе
                 const s=Math.sin(time*15)*0.65;
@@ -6101,7 +6287,7 @@ const app = {
                 this.rig.rightLeg.rotation.x =  s;
                 this.rig.torso.rotation.y    = Math.sin(time*10)*0.06;
             } else if(!this.canJump){
-                // Прыжок — руки чуть разведены в стороны
+                // Прыжок
                 this.rig.leftArm.rotation.x  = THREE.MathUtils.lerp(this.rig.leftArm.rotation.x,  -0.3, 0.12);
                 this.rig.rightArm.rotation.x = THREE.MathUtils.lerp(this.rig.rightArm.rotation.x, -0.3, 0.12);
                 this.rig.leftArm.rotation.z  = THREE.MathUtils.lerp(this.rig.leftArm.rotation.z||0,  0.4, 0.12);
@@ -6109,7 +6295,7 @@ const app = {
                 this.rig.leftLeg.rotation.x  = THREE.MathUtils.lerp(this.rig.leftLeg.rotation.x,  -0.2, 0.1);
                 this.rig.rightLeg.rotation.x = THREE.MathUtils.lerp(this.rig.rightLeg.rotation.x,   0.1, 0.1);
             } else {
-                // Стоим — всё к нулю
+                // Стоим
                 ['leftArm','rightArm','leftLeg','rightLeg'].forEach(k=>{
                     this.rig[k].rotation.x = THREE.MathUtils.lerp(this.rig[k].rotation.x, 0, 0.1);
                     this.rig[k].rotation.z = THREE.MathUtils.lerp(this.rig[k].rotation.z||0, 0, 0.1);
@@ -6583,6 +6769,7 @@ const app = {
         const badge = document.getElementById('quest-badge');
         if(badge){ badge.textContent='!'; badge.classList.toggle('hidden', unclaimed===0); }
 
+
         // Запускаем таймер обновления
         if(!this._questTimer) {
             const msUntil = rot.nextAt - Date.now();
@@ -6656,7 +6843,7 @@ const app = {
             const pct = Math.min(100, Math.round((d.progress||0)/q.goal*100));
             const canClaim = d.done && !d.claimed;
             const claimed  = d.claimed;
-            const border = canClaim ? 'rgba(255,152,0,0.6)' : 'rgba(255,152,0,0.15)';
+            const border = canClaim ? 'rgba(255,149,0,0.6)' : 'rgba(255,149,0,0.15)';
             const opacity = claimed ? 'opacity:0.4;' : '';
             let btnHtml = '';
             if(canClaim) btnHtml = '<button onclick="app.claimQuest(\'' + q.id + '\')" style="margin-top:6px;background:#FF9800;color:#000;border:none;border-radius:8px;padding:6px 12px;font-weight:700;cursor:pointer;font-size:12px">Получить</button>';
@@ -6691,8 +6878,8 @@ const app = {
                 font-weight:700;font-size:13px;
                 z-index:9999;pointer-events:none;
                 transition:opacity 0.4s, transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
-                border:1px solid rgba(255,152,0,0.3);
-                box-shadow:0 8px 32px rgba(0,0,0,0.6),0 0 20px rgba(255,152,0,0.1);
+                border:1px solid rgba(255,149,0,0.3);
+                box-shadow:0 8px 32px rgba(0,0,0,0.6),0 0 20px rgba(255,149,0,0.1);
                 font-family:var(--font-body);
                 letter-spacing:0.5px;
                 backdrop-filter:blur(20px);
@@ -6723,15 +6910,6 @@ const app = {
         if(bv) bv.textContent = this.balance;
     },
 
-    },
-
-    toggleEmotePanel(){
-        const p=document.getElementById('emote-panel');
-        if(!p) return;
-        const show=p.style.display==='none'||!p.style.display;
-        p.style.display=show?'block':'none';
-    },
-
     toggleCamera(){
         const modes = ['third', 'first', 'far'];
         const names = {'third':'👤 3-е лицо', 'first':'👁 1-е лицо', 'far':'🔭 Далеко'};
@@ -6746,10 +6924,6 @@ const app = {
     exitGame(){
         this.spaceGrav=false;this.loopFn=null;
         // Сбрасываем эмоцию
-        this._currentEmote=null;
-        if(this._emoteSitting&&this.playerGroup){ this.playerGroup.position.y+=0.4; this._emoteSitting=false; }
-        const ep=document.getElementById('emote-panel');
-        if(ep) ep.style.display='none';
         // Сообщаем серверу что вышли
         if(this._gameWS && this._gameWS.readyState===1){
             try{ this._gameWS.send(JSON.stringify({type:'leave', id:String(this.userId), map:String(this.currentMap)})); }catch(e){}
@@ -6766,6 +6940,9 @@ const app = {
         if(this._hsInterval){clearInterval(this._hsInterval);this._hsInterval=null;}this._hsTimer=null;
         if(this._mtInterval){clearInterval(this._mtInterval);this._mtInterval=null;}this._mtSeconds=null;this._mtReached=false;
         this._snowParticles=null;
+        const pvpHud=document.getElementById('pvp-hud');if(pvpHud)pvpHud.remove();
+        const pvpBtn=document.getElementById('pvp-shoot-btn');if(pvpBtn)pvpBtn.style.display='none';
+        if(this._pvpBullets){this._pvpBullets.forEach(b=>this.scene&&this.scene.remove(b));this._pvpBullets=[];}
         document.exitPointerLock();
         document.getElementById('engine-view').style.display='none';
         document.getElementById('eng-script-ov').style.display='none';
