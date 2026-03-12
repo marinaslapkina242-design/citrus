@@ -2374,7 +2374,129 @@ const app = {
     _giftSelectedId: null,
     _giftSelectedName: null,
 
-    // ══════════ СТАРЫЕ ПОДАРКИ ══════════
+    // ══════════ ЛИЧНЫЙ ЧАТ (DM) ══════════
+
+    _dmChatId(otherId){ return [String(this.userId),String(otherId)].sort().join('_'); },
+
+    async openDm(friendId, friendName){
+        friendId=String(friendId);
+        const chatId=this._dmChatId(friendId);
+        this._dmFriendId=friendId;
+        this._dmFriendName=friendName;
+        this._dmChatIdCurrent=chatId;
+
+        // Создаём оверлей чата
+        const existing=document.getElementById('dm-overlay');
+        if(existing) existing.remove();
+
+        const overlay=document.createElement('div');
+        overlay.id='dm-overlay';
+        overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+        overlay.innerHTML=`
+        <div style="background:var(--c-surface2);border:1px solid rgba(79,195,247,0.2);border-radius:20px;width:100%;max-width:480px;height:70vh;display:flex;flex-direction:column;overflow:hidden;">
+            <!-- Шапка -->
+            <div style="display:flex;align-items:center;gap:12px;padding:16px 18px;border-bottom:1px solid rgba(255,255,255,0.06);">
+                <div style="width:38px;height:38px;border-radius:50%;background:rgba(79,195,247,0.15);color:#4fc3f7;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;">${(friendName[0]||'?').toUpperCase()}</div>
+                <div>
+                    <div style="font-family:var(--font-body);font-weight:700;font-size:15px;color:#fff;">${friendName}</div>
+                    <div id="dm-status" style="font-size:11px;color:rgba(255,255,255,0.3);">загрузка...</div>
+                </div>
+                <button onclick="document.getElementById('dm-overlay').remove();clearInterval(app._dmPollTimer);" style="margin-left:auto;background:none;border:none;color:rgba(255,255,255,0.3);font-size:22px;cursor:pointer;line-height:1;">✕</button>
+            </div>
+            <!-- Сообщения -->
+            <div id="dm-messages" style="flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:8px;"></div>
+            <!-- Ввод -->
+            <div style="padding:12px 16px;border-top:1px solid rgba(255,255,255,0.06);display:flex;gap:10px;align-items:flex-end;">
+                <input id="dm-input" class="styled-input" placeholder="Сообщение..." style="flex:1;margin:0;"
+                    onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();app.sendDm();}">
+                <button onclick="app.sendDm()" style="padding:10px 16px;background:linear-gradient(135deg,#4fc3f7,#0288d1);border:none;border-radius:10px;color:#000;font-weight:700;font-family:var(--font-body);font-size:14px;cursor:pointer;flex-shrink:0;">↑</button>
+            </div>
+        </div>`;
+        overlay.onclick=e=>{ if(e.target===overlay){ overlay.remove(); clearInterval(this._dmPollTimer); } };
+        document.body.appendChild(overlay);
+
+        // Загружаем сообщения и помечаем прочитанными
+        await this._dmLoadMessages();
+        fetch(this._API+'/dm/'+chatId+'/read',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId:this.userId})})
+            .then(()=>this.renderFriends())
+            .catch(()=>{});
+
+        // Поллинг новых сообщений каждые 2 сек
+        clearInterval(this._dmPollTimer);
+        this._dmPollTimer=setInterval(async()=>{
+            if(!document.getElementById('dm-overlay')){ clearInterval(this._dmPollTimer); return; }
+            await this._dmLoadMessages(true);
+            // Помечаем прочитанными пока чат открыт
+            fetch(this._API+'/dm/'+chatId+'/read',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId:this.userId})}).catch(()=>{});
+        }, 2000);
+    },
+
+    async _dmLoadMessages(silent=false){
+        const chatId=this._dmChatIdCurrent;
+        if(!chatId) return;
+        try{
+            const r=await fetch(this._API+'/dm/'+chatId);
+            const msgs=await r.json();
+            const box=document.getElementById('dm-messages');
+            if(!box) return;
+            const wasBottom=box.scrollHeight-box.clientHeight-box.scrollTop<60;
+            box.innerHTML='';
+            if(!msgs.length){
+                box.innerHTML='<div style="text-align:center;color:rgba(255,255,255,0.15);font-size:12px;padding:20px;font-family:var(--font-ui);">Начни общение 👋</div>';
+            } else {
+                msgs.forEach(m=>{
+                    const isMe=String(m.from)===String(this.userId);
+                    const time=new Date(m.ts).toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'});
+                    const read=m.read
+                        ?'<span style="color:#4fc3f7;font-size:11px;margin-left:3px;">✓✓</span>'
+                        :'<span style="color:rgba(255,255,255,0.25);font-size:11px;margin-left:3px;">✓</span>';
+                    box.innerHTML+=`<div style="display:flex;flex-direction:column;align-items:${isMe?'flex-end':'flex-start'};gap:2px;">
+                        <div style="max-width:80%;padding:9px 13px;border-radius:${isMe?'16px 16px 4px 16px':'16px 16px 16px 4px'};
+                            background:${isMe?'linear-gradient(135deg,#4fc3f7,#0288d1)':'rgba(255,255,255,0.07)'};
+                            color:${isMe?'#000':'rgba(255,255,255,0.85)'};font-size:13px;font-family:var(--font-body);word-break:break-word;">
+                            ${m.text}
+                        </div>
+                        <div style="font-size:10px;color:rgba(255,255,255,0.2);padding:0 4px;">${time}${isMe?read:''}</div>
+                    </div>`;
+                });
+            }
+            if(!silent||wasBottom) box.scrollTop=box.scrollHeight;
+
+            // Статус
+            const statusEl=document.getElementById('dm-status');
+            if(statusEl){
+                const online=this._cachedOnline||[];
+                const isOnline=online.find(x=>x.id===this._dmFriendId);
+                statusEl.textContent=isOnline?'● онлайн':'○ оффлайн';
+                statusEl.style.color=isOnline?'#4caf50':'rgba(255,255,255,0.25)';
+            }
+        }catch(e){}
+    },
+
+    async sendDm(){
+        const input=document.getElementById('dm-input');
+        const text=(input?.value||'').trim();
+        if(!text||!this._dmChatIdCurrent) return;
+        input.value='';
+        try{
+            await fetch(this._API+'/dm/'+this._dmChatIdCurrent,{
+                method:'POST',headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({from:this.userId, fromName:this.username, text})
+            });
+            await this._dmLoadMessages();
+        }catch(e){ input.value=text; this.showNotif('❌','Ошибка','Нет связи'); }
+    },
+
+    async _checkDmUnread(){
+        if(!this.userId) return;
+        try{
+            const r=await fetch(this._API+'/dm/unread/'+this.userId);
+            const d=await r.json();
+            const badge=document.getElementById('fr-badge');
+            const total=(this.friendRequests?.length||0)+d.count;
+            if(badge){ badge.classList.toggle('hidden',total===0); if(total>0) badge.innerText=total; }
+        }catch(e){}
+    },
 
     async initGifts(){
         const box = document.getElementById('gift-friend-list');
@@ -2563,7 +2685,7 @@ const app = {
         const chart=this._nftMiniChart(nft.priceHistory);
         const isOwner=String(nft.ownerId)===String(this.userId);
         const isDev=this.isDev((this.username||'').toLowerCase().trim());
-        const canOpen=isOwner&&!nft.opened;
+        const canOpen=isOwner&&!nft.opened&&!nft.onMarket;
         const canBuy=mode==='market'&&nft.onMarket&&!nft.opened&&!isOwner;
 
         // Анимация и фон по редкости
@@ -3329,6 +3451,9 @@ const app = {
         this.updateUI();
         // Проверяем офлайн заработок с продаж НФТ
         setTimeout(()=>this.checkOfflineEarnings(), 1500);
+        // Проверяем непрочитанные сообщения каждые 10 сек
+        this._checkDmUnread();
+        setInterval(()=>this._checkDmUnread(), 10000);
     },
 
     logout(){
@@ -4085,6 +4210,14 @@ const app = {
         try{globalDB=JSON.parse(localStorage.getItem('citrus_global_users')||'[]');}catch(e){}
         const findPeer=id=>pc.find(x=>x.id===id)||globalDB.find(x=>String(x.id)===id)||{id,name:id,color:'#888'};
 
+        // Загружаем непрочитанные по всем чатам
+        let unreadChats={};
+        try{
+            const ur=await fetch(this._API+'/dm/unread/'+this.userId);
+            const udata=await ur.json();
+            unreadChats=udata.chats||{};
+        }catch(e){}
+
         if(!this.friends.length){
             fl.innerHTML=`<div class="empty-state"><div class="empty-state-icon">👥</div>Пока нет друзей<br><span style="color:rgba(255,255,255,0.15);font-size:11px;">Найди игрока и отправь заявку</span></div>`;
             return;
@@ -4096,18 +4229,25 @@ const app = {
             const wNames={gather:'Цитрусовый Лес',parkour:'Небесный Паркур',
                 volcano:'Остров Вулкана',space:'Космическая База',hideseek:'Прятки',
                 snowmount:'Снежная Гора',dungeon:'Тёмное Подземелье'};
-            const friendMapId = on && on.status==='ingame' ? on.world : null; // English key
+            const friendMapId = on && on.status==='ingame' ? on.world : null;
             const friendMapName = friendMapId ? (wNames[friendMapId] || friendMapId) : null;
             const st = on ? (friendMapId ? '🎮 '+friendMapName : '● Онлайн') : '○ Оффлайн';
             const sc = on ? (friendMapId ? 'ig' : 'on') : '';
             const inviteBtn = friendMapId
                 ? `<button class="bx b-add" onclick="app.joinFriend('${fid}','${friendMapId}')" style="font-size:10px;background:#00E676;color:#000">▶ Войти</button>`
                 : on ? `<button class="bx b-add" onclick="app.inviteFriend('${fid}','${p.name}')" style="font-size:10px">▶ Играть</button>` : '';
+
+            // Непрочитанные в чате с этим другом
+            const chatId=[String(this.userId),fid].sort().join('_');
+            const unread=unreadChats[chatId]||0;
+            const unreadBadge=unread>0?`<span style="background:#4fc3f7;color:#000;border-radius:10px;font-size:10px;font-weight:700;padding:1px 6px;min-width:18px;text-align:center;">${unread}</span>`:'';
+
             fl.innerHTML+=`<div class="fr">
                 <div class="fa2" style="background:${p.color||'#888'}22;color:${p.color||'#888'}">${(p.name[0]||'?').toUpperCase()}</div>
                 <div class="fi"><div class="fn">${p.name}${app.devBadge(p.name)}</div>
                 <div class="fs ${sc}">${p.tag||('#'+p.id)} · ${st}</div></div>
                 <div class="fb">${inviteBtn}
+                    <button class="bx b-add" onclick="app.openDm('${fid}','${p.name}')" style="font-size:11px;background:rgba(79,195,247,0.15);color:#4fc3f7;border-color:rgba(79,195,247,0.2);position:relative;gap:4px;display:flex;align-items:center;">💬${unreadBadge}</button>
                     <button class="bx b-del" onclick="app.removeFriend('${fid}')">✕</button>
                 </div></div>`;
         });
