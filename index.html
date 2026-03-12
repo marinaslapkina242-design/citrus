@@ -2500,7 +2500,7 @@ const app = {
                     <div style="font-size:40px;">${nft.emoji||'🎁'}</div>
                     <div>
                         <div style="font-family:var(--font-body);font-weight:700;font-size:18px;color:${rs.color};">${nft.name}</div>
-                        <div style="font-size:12px;color:rgba(255,255,255,0.3);">${rs.label} · награда: ${nft.reward||nft.minReward||'?'} 🍊</div>
+                        <div style="font-size:12px;color:rgba(255,255,255,0.3);">${rs.label} · до ${nft.reward||nft.maxReward||'?'} 🍊</div>
                     </div>
                     <button onclick="this.closest('div[style*=fixed]').remove()" style="margin-left:auto;background:none;border:none;color:rgba(255,255,255,0.3);font-size:22px;cursor:pointer;">✕</button>
                 </div>
@@ -2549,9 +2549,9 @@ const app = {
             <div style="font-size:10px;color:rgba(255,255,255,0.2);text-align:center;margin-bottom:8px;font-family:var(--font-ui);">📈 нажми для графика</div>`:''}
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
                 <div style="font-family:var(--font-head);font-size:15px;font-weight:900;color:var(--c-main);">${nft.price>0?nft.price+' 🍊':'Бесплатно'}</div>
-                <div style="font-size:10px;color:rgba(255,255,255,0.2);">награда: ${nft.reward||nft.minReward||'?'}🍊</div>
+                <div style="font-size:10px;color:rgba(255,255,255,0.2);">1–${nft.reward||nft.maxReward||'?'}🍊</div>
             </div>
-            ${nft.opened?`<div style="text-align:center;padding:8px;background:rgba(0,230,118,0.08);border-radius:8px;color:#00E676;font-size:12px;font-weight:700;">✓ Открыт • +${nft.reward}🍊</div>`:''}
+            ${nft.opened?`<div style="text-align:center;padding:8px;background:rgba(0,230,118,0.08);border-radius:8px;color:#00E676;font-size:12px;font-weight:700;">✓ Открыт • +${nft.openedReward||nft.reward}🍊</div>`:''}
             ${canBuy?`<button onclick="app.buyNft('${nft.id}')" style="width:100%;padding:9px;background:linear-gradient(135deg,var(--c-main),var(--c-deep));border:none;border-radius:10px;color:#fff;font-weight:700;font-family:var(--font-body);font-size:13px;cursor:pointer;">Купить</button>`:''}
             ${canOpen?`<button onclick="app.openNft('${nft.id}')" style="width:100%;padding:9px;background:linear-gradient(135deg,#9C27B0,#6A1B9A);border:none;border-radius:10px;color:#fff;font-weight:700;font-family:var(--font-body);font-size:13px;cursor:pointer;">🎰 Открыть</button>`:''}
             ${isDev&&!nft.opened?`<div style="display:flex;gap:6px;margin-top:8px;">
@@ -2650,13 +2650,14 @@ const app = {
             const d=await res.json();
             if(!d.ok){ document.body.removeChild(overlay); this.showNotif('❌','Ошибка',d.error||'Не удалось открыть'); return; }
 
-            this.balance=d.nft.opened?(this.balance+d.reward):this.balance;
+            const reward=d.openedReward||d.reward;
+            this.balance=(this.balance||0)+reward;
             this.saveData();
 
             // Показываем результат
             overlay.innerHTML=`
                 <div style="font-size:90px;animation:nftPop 0.5s ease both;">🎊</div>
-                <div style="font-family:var(--font-head);font-size:48px;font-weight:900;color:#FFD700;animation:nftPop 0.5s 0.1s ease both;text-shadow:0 0 40px #FFD70088;">+${d.reward}</div>
+                <div style="font-family:var(--font-head);font-size:48px;font-weight:900;color:#FFD700;animation:nftPop 0.5s 0.1s ease both;text-shadow:0 0 40px #FFD70088;">+${reward}</div>
                 <div style="font-size:24px;color:rgba(255,255,255,0.7);animation:nftPop 0.5s 0.2s ease both;">🍊 цитрусов!</div>
                 <div style="font-family:var(--font-body);font-size:14px;color:rgba(255,255,255,0.4);animation:nftPop 0.5s 0.3s ease both;">${d.nft.name}</div>
                 <button onclick="this.closest('div[style*=fixed]').remove();app.loadMyNfts();" style="margin-top:16px;padding:14px 40px;background:linear-gradient(135deg,#FF9800,#E65100);border:none;border-radius:14px;color:#fff;font-weight:900;font-family:var(--font-head);font-size:16px;cursor:pointer;animation:nftPop 0.5s 0.4s ease both;">Забрать!</button>`;
