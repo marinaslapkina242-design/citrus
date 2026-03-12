@@ -783,6 +783,28 @@
             0%, 100% { box-shadow: 0 0 20px rgba(255,152,0,0.1); }
             50% { box-shadow: 0 0 35px rgba(255,152,0,0.25); }
         }
+        @keyframes mythic-glow {
+            0%,100% { box-shadow: 0 0 20px rgba(255,61,61,0.3), 0 0 40px rgba(255,61,61,0.1); }
+            50% { box-shadow: 0 0 35px rgba(255,61,61,0.6), 0 0 70px rgba(255,61,61,0.2); }
+        }
+        @keyframes divine-glow {
+            0%,100% { box-shadow: 0 0 20px rgba(255,255,255,0.2), 0 0 40px rgba(255,220,100,0.1); border-color: rgba(255,255,255,0.3); }
+            50% { box-shadow: 0 0 40px rgba(255,255,255,0.5), 0 0 80px rgba(255,220,100,0.3); border-color: rgba(255,255,255,0.8); }
+        }
+        @keyframes cosmic-glow {
+            0% { box-shadow: 0 0 20px rgba(123,104,238,0.3), 0 0 40px rgba(0,200,255,0.1); border-color: rgba(123,104,238,0.4); }
+            33% { box-shadow: 0 0 30px rgba(0,200,255,0.4), 0 0 60px rgba(123,104,238,0.2); border-color: rgba(0,200,255,0.6); }
+            66% { box-shadow: 0 0 30px rgba(200,100,255,0.4), 0 0 60px rgba(123,104,238,0.2); border-color: rgba(200,100,255,0.6); }
+            100% { box-shadow: 0 0 20px rgba(123,104,238,0.3), 0 0 40px rgba(0,200,255,0.1); border-color: rgba(123,104,238,0.4); }
+        }
+        @keyframes citrus-glow {
+            0%,100% { box-shadow: 0 0 20px rgba(255,152,0,0.3), 0 0 40px rgba(255,152,0,0.1); }
+            50% { box-shadow: 0 0 40px rgba(255,152,0,0.6), 0 0 80px rgba(255,152,0,0.3); }
+        }
+        @keyframes legendary-shine {
+            0%,100% { box-shadow: 0 0 20px rgba(255,215,0,0.3); }
+            50% { box-shadow: 0 0 35px rgba(255,215,0,0.6), 0 0 60px rgba(255,215,0,0.2); }
+        }
 
         /* Content fade in */
         #tab-games, #tab-avatar, #tab-shop, #tab-friends,
@@ -1632,6 +1654,10 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
                                     <option value="rare">🔵 Редкий</option>
                                     <option value="epic">🟣 Эпический</option>
                                     <option value="legendary">🟡 Легендарный</option>
+                                    <option value="mythic">🔴 Мифический</option>
+                                    <option value="divine">🌟 Божественный</option>
+                                    <option value="cosmic">🌌 Космический</option>
+                                    <option value="citrus">🍊 Цитрусовый</option>
                                 </select></div>
                             </div>
                             <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:6px;font-family:var(--font-ui);">Награда при открытии 🍊</div>
@@ -2436,10 +2462,14 @@ const app = {
 
     _nftRarityStyle(rarity){
         const map={
-            common:  {color:'#aaa',      glow:'rgba(170,170,170,0.15)', label:'⚪ Обычный'},
-            rare:    {color:'#4fc3f7',   glow:'rgba(79,195,247,0.2)',  label:'🔵 Редкий'},
-            epic:    {color:'#ce93d8',   glow:'rgba(206,147,216,0.2)', label:'🟣 Эпический'},
-            legendary:{color:'#FFD700', glow:'rgba(255,215,0,0.25)',  label:'🟡 Легендарный'},
+            common:   {color:'#aaa',      glow:'rgba(170,170,170,0.15)', label:'⚪ Обычный'},
+            rare:     {color:'#4fc3f7',   glow:'rgba(79,195,247,0.2)',   label:'🔵 Редкий'},
+            epic:     {color:'#ce93d8',   glow:'rgba(206,147,216,0.2)',  label:'🟣 Эпический'},
+            legendary:{color:'#FFD700',   glow:'rgba(255,215,0,0.3)',    label:'🟡 Легендарный'},
+            mythic:   {color:'#FF3D3D',   glow:'rgba(255,61,61,0.35)',   label:'🔴 Мифический'},
+            divine:   {color:'#FFFFFF',   glow:'rgba(255,255,255,0.3)',  label:'🌟 Божественный'},
+            cosmic:   {color:'#7B68EE',   glow:'rgba(123,104,238,0.4)',  label:'🌌 Космический'},
+            citrus:   {color:'#FF9800',   glow:'rgba(255,152,0,0.4)',    label:'🍊 Цитрусовый'},
         };
         return map[rarity]||map.common;
     },
@@ -2535,25 +2565,53 @@ const app = {
         const isDev=this.isDev((this.username||'').toLowerCase().trim());
         const canOpen=isOwner&&!nft.opened;
         const canBuy=mode==='market'&&nft.onMarket&&!nft.opened&&!isOwner;
-        const priceChange=nft.priceHistory&&nft.priceHistory.length>1
-            ?nft.priceHistory[nft.priceHistory.length-1].price-nft.priceHistory[0].price:0;
 
-        return `<div style="background:var(--c-surface2);border:1px solid ${rs.color}33;border-radius:16px;padding:14px;
-            box-shadow:0 0 18px ${rs.glow};cursor:default;transition:transform 0.15s;"
-            onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='none'">
-            <div style="font-size:44px;text-align:center;margin-bottom:6px;">${nft.emoji||'🎁'}</div>
-            <div style="font-family:var(--font-body);font-weight:700;font-size:14px;color:${rs.color};text-align:center;margin-bottom:2px;">${nft.name}</div>
-            <div style="font-size:10px;color:rgba(255,255,255,0.3);text-align:center;margin-bottom:8px;font-family:var(--font-ui);">${rs.label}</div>
+        // Анимация и фон по редкости
+        const rarityAnim={
+            legendary:'legendary-shine 2s ease-in-out infinite',
+            mythic:   'mythic-glow 1.5s ease-in-out infinite',
+            divine:   'divine-glow 2s ease-in-out infinite',
+            cosmic:   'cosmic-glow 3s linear infinite',
+            citrus:   'citrus-glow 2s ease-in-out infinite',
+        };
+        const rarityBg={
+            legendary:'linear-gradient(135deg,#1a1500,#0D0D1E)',
+            mythic:   'linear-gradient(135deg,#1a0000,#0D0D1E)',
+            divine:   'linear-gradient(135deg,#1a1a0a,#0D0D1E)',
+            cosmic:   'linear-gradient(135deg,#080018,#0D0D1E)',
+            citrus:   'linear-gradient(135deg,#1a0c00,#0D0D1E)',
+        };
+        const anim=rarityAnim[nft.rarity]||'';
+        const bg=rarityBg[nft.rarity]||'var(--c-surface2)';
+        const emojiSize=(['mythic','divine','cosmic','citrus'].includes(nft.rarity))?'56px':'44px';
+
+        return `<div style="background:${bg};border:1px solid ${rs.color}44;border-radius:16px;padding:14px;
+            ${anim?`animation:${anim};`:'box-shadow:0 0 12px '+rs.glow+';'}
+            cursor:default;transition:transform 0.15s;position:relative;overflow:hidden;"
+            onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='none'">
+            ${nft.rarity==='divine'?`<div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(255,255,255,0.05),transparent 70%);pointer-events:none;"></div>`:''}
+            ${nft.rarity==='cosmic'?`<div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,rgba(123,104,238,0.08),transparent 70%);pointer-events:none;"></div>`:''}
+            <div style="font-size:${emojiSize};text-align:center;margin-bottom:6px;filter:${nft.rarity==='divine'?'drop-shadow(0 0 8px #fff8)':nft.rarity==='mythic'?'drop-shadow(0 0 8px #f443)':nft.rarity==='cosmic'?'drop-shadow(0 0 8px #7b68ee88)':'none'};">${nft.emoji||'🎁'}</div>
+            <div style="font-family:var(--font-body);font-weight:700;font-size:14px;color:${rs.color};text-align:center;margin-bottom:2px;
+                ${nft.rarity==='divine'?'text-shadow:0 0 10px rgba(255,255,255,0.5);':''}
+                ${nft.rarity==='mythic'?'text-shadow:0 0 10px rgba(255,61,61,0.6);':''}
+                ${nft.rarity==='cosmic'?'text-shadow:0 0 10px rgba(123,104,238,0.7);':''}
+                ${nft.rarity==='citrus'?'text-shadow:0 0 10px rgba(255,152,0,0.6);':''}
+            ">${nft.name}</div>
+            <div style="font-size:10px;color:${rs.color}99;text-align:center;margin-bottom:8px;font-family:var(--font-ui);font-weight:600;">${rs.label}</div>
             ${nft.desc?`<div style="font-size:11px;color:rgba(255,255,255,0.4);text-align:center;margin-bottom:8px;font-family:var(--font-ui);">${nft.desc}</div>`:''}
-            ${chart?`<div style="margin-bottom:4px;cursor:pointer;" onclick="app.showNftChart('${nft.id}')" title="Смотреть полный график">${chart}</div>
+            ${chart?`<div style="margin-bottom:4px;cursor:pointer;" onclick="app.showNftChart('${nft.id}')" title="Полный график">${chart}</div>
             <div style="font-size:10px;color:rgba(255,255,255,0.2);text-align:center;margin-bottom:8px;font-family:var(--font-ui);">📈 нажми для графика</div>`:''}
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-                <div style="font-family:var(--font-head);font-size:15px;font-weight:900;color:var(--c-main);">${nft.price>0?nft.price+' 🍊':'Бесплатно'}</div>
-                <div style="font-size:10px;color:rgba(255,255,255,0.2);">1–${nft.reward||nft.maxReward||'?'}🍊</div>
+                <div style="font-family:var(--font-head);font-size:15px;font-weight:900;color:${rs.color};">${nft.price>0?nft.price+' 🍊':'Бесплатно'}</div>
+                <div style="font-size:10px;color:rgba(255,255,255,0.25);">1–${nft.reward||nft.maxReward||'?'}🍊</div>
             </div>
             ${nft.opened?`<div style="text-align:center;padding:8px;background:rgba(0,230,118,0.08);border-radius:8px;color:#00E676;font-size:12px;font-weight:700;">✓ Открыт • +${nft.openedReward||nft.reward}🍊</div>`:''}
-            ${canBuy?`<button onclick="app.buyNft('${nft.id}')" style="width:100%;padding:9px;background:linear-gradient(135deg,var(--c-main),var(--c-deep));border:none;border-radius:10px;color:#fff;font-weight:700;font-family:var(--font-body);font-size:13px;cursor:pointer;">Купить</button>`:''}
+            ${canBuy?`<button onclick="app.buyNft('${nft.id}')" style="width:100%;padding:9px;background:linear-gradient(135deg,${rs.color},${rs.color}99);border:none;border-radius:10px;color:#000;font-weight:700;font-family:var(--font-body);font-size:13px;cursor:pointer;">Купить</button>`:''}
             ${canOpen?`<button onclick="app.openNft('${nft.id}')" style="width:100%;padding:9px;background:linear-gradient(135deg,#9C27B0,#6A1B9A);border:none;border-radius:10px;color:#fff;font-weight:700;font-family:var(--font-body);font-size:13px;cursor:pointer;">🎰 Открыть</button>`:''}
+            ${isOwner&&!nft.opened&&!nft.onMarket?`<button onclick="app.sellNft('${nft.id}')" style="width:100%;padding:9px;margin-top:6px;background:linear-gradient(135deg,#2196F3,#1565C0);border:none;border-radius:10px;color:#fff;font-weight:700;font-family:var(--font-body);font-size:13px;cursor:pointer;">💰 Выставить на продажу</button>`:''}
+            ${isOwner&&!nft.opened&&nft.onMarket&&nft.sellerIsPlayer?`<button onclick="app.unsellNft('${nft.id}')" style="width:100%;padding:9px;margin-top:6px;background:rgba(255,100,100,0.15);border:1px solid rgba(255,100,100,0.3);border-radius:10px;color:#ff6b6b;font-weight:700;font-family:var(--font-body);font-size:13px;cursor:pointer;">✕ Снять с продажи</button>`:''}
+            ${nft.onMarket&&nft.sellerIsPlayer&&!isOwner?`<div style="font-size:10px;color:rgba(255,255,255,0.25);text-align:center;margin-top:4px;">продаёт: ${nft.sellerName||'игрок'}</div>`:''}
             ${isDev&&!nft.opened?`<div style="display:flex;gap:6px;margin-top:8px;">
                 <button onclick="app.nftChangePrice('${nft.id}','up')" style="flex:1;padding:6px;background:rgba(76,175,80,0.15);border:1px solid rgba(76,175,80,0.3);border-radius:8px;color:#4caf50;font-size:12px;cursor:pointer;font-family:var(--font-body);">▲ Цена</button>
                 <button onclick="app.nftChangePrice('${nft.id}','down')" style="flex:1;padding:6px;background:rgba(244,67,54,0.15);border:1px solid rgba(244,67,54,0.3);border-radius:8px;color:#f44336;font-size:12px;cursor:pointer;font-family:var(--font-body);">▼ Цена</button>
@@ -2665,6 +2723,91 @@ const app = {
             document.body.removeChild(overlay);
             this.showNotif('❌','Ошибка','Нет связи с сервером');
         }
+    },
+
+    async sellNft(nftId){
+        const priceStr=prompt('За сколько 🍊 выставить подарок?');
+        if(!priceStr) return;
+        const price=parseInt(priceStr);
+        if(isNaN(price)||price<1){ this.showNotif('❌','Ошибка','Цена должна быть больше 0'); return; }
+        try{
+            const r=await fetch(this._API+'/nfts/'+nftId+'/sell',{
+                method:'POST',headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({playerId:this.userId, playerName:this.username, price})
+            });
+            const d=await r.json();
+            if(!d.ok){ this.showNotif('❌','Ошибка',d.error||'Не удалось выставить'); return; }
+            this.showNotif('💰','Выставлено!',`Подарок за ${price} 🍊 на маркете`);
+            this.loadMyNfts();
+        }catch(e){ this.showNotif('❌','Ошибка','Нет связи'); }
+    },
+
+    async unsellNft(nftId){
+        try{
+            const r=await fetch(this._API+'/nfts/'+nftId+'/unsell',{
+                method:'POST',headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({playerId:this.userId})
+            });
+            const d=await r.json();
+            if(!d.ok){ this.showNotif('❌','Ошибка',d.error||'Не удалось снять'); return; }
+            this.showNotif('✓','Снято с продажи','Подарок возвращён в инвентарь');
+            this.loadMyNfts();
+        }catch(e){ this.showNotif('❌','Ошибка','Нет связи'); }
+    },
+
+    async checkOfflineEarnings(){
+        if(!this.userId) return;
+        try{
+            const r=await fetch(this._API+'/earnings/'+this.userId);
+            if(!r.ok) return;
+            const d=await r.json();
+            if(!d.total||d.total<1) return;
+            // Показываем красивое уведомление
+            const overlay=document.createElement('div');
+            overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+            const salesHtml=d.sales.map(s=>`
+                <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(255,255,255,0.04);border-radius:10px;border:1px solid rgba(255,255,255,0.06);">
+                    <div style="font-size:28px;">${s.nftEmoji||'🎁'}</div>
+                    <div style="flex:1;">
+                        <div style="font-family:var(--font-body);font-weight:700;font-size:13px;color:rgba(255,255,255,0.8);">${s.nftName}</div>
+                        <div style="font-size:11px;color:rgba(255,255,255,0.3);">купил: ${s.buyerName} · ${new Date(s.ts).toLocaleDateString('ru')}</div>
+                    </div>
+                    <div style="font-family:var(--font-head);font-size:15px;font-weight:700;color:#4caf50;">+${s.price}🍊</div>
+                </div>`).join('');
+            overlay.innerHTML=`
+                <div style="background:var(--c-surface2);border:1px solid rgba(76,175,80,0.3);border-radius:20px;padding:28px;max-width:480px;width:100%;max-height:80vh;overflow-y:auto;">
+                    <div style="text-align:center;margin-bottom:20px;">
+                        <div style="font-size:48px;margin-bottom:8px;">📬</div>
+                        <div style="font-family:var(--font-head);font-size:20px;color:#4caf50;font-weight:900;">Пока тебя не было...</div>
+                        <div style="font-size:13px;color:rgba(255,255,255,0.4);margin-top:6px;">У тебя купили ${d.sales.length} подарк${d.sales.length===1?'':d.sales.length<5?'а':'ов'}</div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;">${salesHtml}</div>
+                    <div style="background:rgba(76,175,80,0.08);border:1px solid rgba(76,175,80,0.2);border-radius:12px;padding:16px;text-align:center;margin-bottom:16px;">
+                        <div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:4px;">Всего заработано:</div>
+                        <div style="font-family:var(--font-head);font-size:36px;font-weight:900;color:#4caf50;">+${d.total} 🍊</div>
+                    </div>
+                    <button onclick="app._claimOfflineEarnings(${d.total},this)" style="width:100%;padding:14px;background:linear-gradient(135deg,#4caf50,#2e7d32);border:none;border-radius:14px;color:#fff;font-weight:900;font-family:var(--font-head);font-size:16px;cursor:pointer;">💰 ЗАБРАТЬ!</button>
+                </div>`;
+            overlay.onclick=e=>{ if(e.target===overlay) overlay.remove(); };
+            document.body.appendChild(overlay);
+        }catch(e){}
+    },
+
+    async _claimOfflineEarnings(amount, btn){
+        btn.disabled=true; btn.textContent='Получаем...';
+        try{
+            const r=await fetch(this._API+'/earnings/'+this.userId+'/claim',{
+                method:'POST',headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({playerId:this.userId})
+            });
+            const d=await r.json();
+            if(d.ok){
+                this.balance=(this.balance||0)+amount;
+                this.saveData();
+                btn.closest('div[style*=fixed]').remove();
+                this.showNotif('💰',`+${amount} 🍊 получено!`,'Заработок с продаж');
+            }
+        }catch(e){ btn.disabled=false; btn.textContent='💰 ЗАБРАТЬ!'; }
     },
 
     async nftChangePrice(nftId, dir){
@@ -3184,6 +3327,8 @@ const app = {
         const adminNav = document.getElementById('nav-admin');
         if(adminNav) adminNav.classList.toggle('hidden', !this.canBan(this.username));
         this.updateUI();
+        // Проверяем офлайн заработок с продаж НФТ
+        setTimeout(()=>this.checkOfflineEarnings(), 1500);
     },
 
     logout(){
