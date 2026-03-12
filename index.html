@@ -1142,6 +1142,7 @@
         #tab-credits { animation: fadeInUp 0.3s ease both; }
         #tab-gifts   { animation: fadeInUp 0.3s ease both; }
         #tab-leaderboard { animation: fadeInUp 0.3s ease both; }
+        #tab-nft     { animation: fadeInUp 0.3s ease both; }
         #tab-stats   { animation: fadeInUp 0.3s ease both; }
         #tab-admin   { animation: fadeInUp 0.3s ease both; }
 
@@ -1345,6 +1346,7 @@
             <div class="nav-item" id="nav-roulette" onclick="app.switchTab('roulette')"><div class="nav-icon"><i class="fas fa-dice"></i></div> Рулетка</div>
             <div class="nav-item" id="nav-credits"  onclick="app.switchTab('credits')"> <div class="nav-icon"><i class="fas fa-coins"></i></div> Кредиты</div>
             <div class="nav-item" id="nav-gifts"    onclick="app.switchTab('gifts')">   <div class="nav-icon"><i class="fas fa-gift"></i></div> Подарки</div>
+            <div class="nav-item" id="nav-nft"      onclick="app.switchTab('nft')">     <div class="nav-icon"><i class="fas fa-gem"></i></div> НФТ Подарки</div>
             <div class="nav-item"        id="nav-stats"    onclick="app.switchTab('stats')">   <div class="nav-icon"><i class="fas fa-chart-line"></i></div> Статистика</div>
             <div class="nav-item"        id="nav-leaderboard" onclick="app.switchTab('leaderboard')"> <div class="nav-icon"><i class="fas fa-trophy"></i></div> Топ</div>
             <div class="nav-item hidden" id="nav-admin"   onclick="app.switchTab('admin')">  <div class="nav-icon"><i class="fas fa-shield-alt"></i></div> Баны</div>
@@ -1355,17 +1357,6 @@
             <div id="tab-games">
                 <div class="section-title">Официальные миры</div>
                 <div class="grid" style="margin-bottom:32px;">
-
-                    <div class="card world-card" onclick="app.launch('play','lobby')">
-                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,#0d1230,#050510);">
-                            <span class="world-emoji">🌆</span>
-                            <div class="world-glow" style="background:rgba(100,120,255,0.15);"></div>
-                        </div>
-                        <div class="card-info">
-                            <div><b>Главная Площадь</b><br><small class="world-tag" style="color:rgba(150,170,255,0.7)">💬 Общение</small></div>
-                            <div class="world-players-dot"></div>
-                        </div>
-                    </div>
 
                     <div class="card world-card featured-world" onclick="app.launch('play','gather')">
                         <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(255,152,0,0.2),#050510);">
@@ -1584,7 +1575,6 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
             <div id="tab-gifts" class="hidden">
                 <div class="section-title">🎁 Подарки</div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-
                     <div class="panel-box">
                         <div class="panel-box-title">🎁 Отправить подарок</div>
                         <div style="color:rgba(255,255,255,0.4);font-size:12px;margin-bottom:10px;font-family:var(--font-ui);">Выбери друга:</div>
@@ -1597,10 +1587,63 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
                         <div id="gift-selected-friend" style="color:rgba(255,152,0,0.4);font-size:12px;margin-bottom:12px;font-family:var(--font-body);">Выбери друга выше 👆</div>
                         <button onclick="app.sendGift()" class="btn-orange-full" style="touch-action:manipulation;">🎁 Отправить подарок</button>
                     </div>
-
                     <div class="panel-box">
                         <div class="panel-box-title">📬 Входящие подарки</div>
                         <div id="gifts-inbox"><div style="color:rgba(255,255,255,0.2);font-size:12px;text-align:center;padding:20px;">Загрузка...</div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══════════════════ TAB: NFT ══════════════════ -->
+            <div id="tab-nft" class="hidden">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+                    <div class="section-title" style="margin:0;">💎 НФТ Подарки</div>
+                    <div id="nft-dev-btn" class="hidden">
+                        <button onclick="app.switchNftTab('create')" style="background:linear-gradient(135deg,#FF9800,#E65100);border:none;border-radius:10px;color:#fff;font-weight:700;font-family:var(--font-body);font-size:13px;cursor:pointer;padding:9px 16px;">+ Создать</button>
+                    </div>
+                </div>
+                <div style="display:flex;gap:8px;margin-bottom:20px;">
+                    <button id="nfttab-market-btn" onclick="app.switchNftTab('market')" style="flex:1;padding:9px;border-radius:10px;border:1px solid rgba(255,152,0,0.3);background:rgba(255,152,0,0.12);color:rgba(255,152,0,0.9);font-family:var(--font-body);font-weight:700;font-size:13px;cursor:pointer;">🏪 Маркет</button>
+                    <button id="nfttab-my-btn"     onclick="app.switchNftTab('my')"     style="flex:1;padding:9px;border-radius:10px;border:1px solid rgba(255,255,255,0.08);background:transparent;color:rgba(255,255,255,0.4);font-family:var(--font-body);font-weight:700;font-size:13px;cursor:pointer;">🎒 Мои</button>
+                    <button id="nfttab-create-btn" onclick="app.switchNftTab('create')" style="display:none;flex:1;padding:9px;border-radius:10px;border:1px solid rgba(255,255,255,0.08);background:transparent;color:rgba(255,255,255,0.4);font-family:var(--font-body);font-weight:700;font-size:13px;cursor:pointer;">✏️ Создать</button>
+                </div>
+                <div id="nfttab-market">
+                    <div id="nft-market-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;"></div>
+                </div>
+                <div id="nfttab-my" class="hidden">
+                    <div id="nft-my-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;"></div>
+                </div>
+                <div id="nfttab-create" class="hidden">
+                    <div class="panel-box" style="max-width:480px;margin:0 auto;">
+                        <div class="panel-box-title">✏️ Новый НФТ подарок</div>
+                        <div style="display:flex;flex-direction:column;gap:12px;">
+                            <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:6px;font-family:var(--font-ui);">Эмодзи</div>
+                            <input id="nft-emoji" class="styled-input" placeholder="🎁" maxlength="4" style="font-size:24px;text-align:center;width:80px;"></div>
+                            <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:6px;font-family:var(--font-ui);">Название</div>
+                            <input id="nft-name" class="styled-input" placeholder="Золотой Цитрус"></div>
+                            <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:6px;font-family:var(--font-ui);">Описание</div>
+                            <input id="nft-desc" class="styled-input" placeholder="Редкий подарок"></div>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                                <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:6px;font-family:var(--font-ui);">Цена (0=бесплатно)</div>
+                                <input id="nft-price" type="number" min="0" class="styled-input" placeholder="500"></div>
+                                <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:6px;font-family:var(--font-ui);">Редкость</div>
+                                <select id="nft-rarity" class="styled-input" style="cursor:pointer;">
+                                    <option value="common">⚪ Обычный</option>
+                                    <option value="rare">🔵 Редкий</option>
+                                    <option value="epic">🟣 Эпический</option>
+                                    <option value="legendary">🟡 Легендарный</option>
+                                </select></div>
+                            </div>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                                <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:6px;font-family:var(--font-ui);">Мин награда 🍊</div>
+                                <input id="nft-min" type="number" min="1" class="styled-input" placeholder="1"></div>
+                                <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:6px;font-family:var(--font-ui);">Макс награда 🍊</div>
+                                <input id="nft-max" type="number" min="1" class="styled-input" placeholder="1000"></div>
+                            </div>
+                            <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:6px;font-family:var(--font-ui);">Подарить игроку (необязательно)</div>
+                            <input id="nft-gift-to" class="styled-input" placeholder="sdw#1044 — пусто = маркет"></div>
+                            <button onclick="app.createNft()" class="btn-orange-full">🎁 Создать и выпустить</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -2309,82 +2352,62 @@ const app = {
     _giftSelectedId: null,
     _giftSelectedName: null,
 
+    // ══════════ СТАРЫЕ ПОДАРКИ ══════════
+
     async initGifts(){
         const box = document.getElementById('gift-friend-list');
         if(!box) return;
         const ids = (this.friends||[]).map(f=>typeof f==='object'?f.id:f).filter(Boolean);
-        if(!ids.length){
-            box.innerHTML = '<div style="color:#444;font-size:12px;">Нет друзей. Добавь друзей во вкладке Друзья 👥</div>';
-            return;
-        }
-        box.innerHTML = '<div style="color:#555;font-size:12px;">⏳ Загрузка...</div>';
-        // Загружаем всех друзей параллельно с сервера
-        const players = await Promise.all(ids.map(async id=>{
-            try{
-                const r = await fetch(this._API+'/players/'+id);
-                const d = await r.json();
-                const name = d.tag || d.name || d.username || ('#'+id);
-                return {id, name};
-            }catch(e){ return {id, name:'#'+id}; }
+        if(!ids.length){ box.innerHTML='<div style="color:#444;font-size:12px;">Нет друзей. Добавь друзей во вкладке Друзья 👥</div>'; return; }
+        box.innerHTML='<div style="color:#555;font-size:12px;">⏳ Загрузка...</div>';
+        const players=await Promise.all(ids.map(async id=>{
+            try{ const r=await fetch(this._API+'/players/'+id); const d=await r.json(); return {id,name:d.tag||d.name||d.username||('#'+id)}; }
+            catch(e){ return {id,name:'#'+id}; }
         }));
-        box.innerHTML = '';
-        for(const {id, name} of players){
-                const btn = document.createElement('button');
-                btn.textContent = '👤 '+name;
-                btn.style.cssText = 'padding:8px 14px;background:#1a1a1a;border:1px solid #333;border-radius:20px;color:#aaa;font-size:13px;cursor:pointer;touch-action:manipulation;';
-                btn.onclick = ()=>{
-                    this._giftSelectedId = id;
-                    this._giftSelectedName = name;
-                    document.getElementById('gift-selected-friend').innerHTML = `Получатель: <b style="color:#FF9800">${name}</b>`;
-                    box.querySelectorAll('button').forEach(b=>b.style.borderColor='#333');
-                    btn.style.borderColor = '#FF9800';
-                };
-                box.appendChild(btn);
+        box.innerHTML='';
+        for(const {id,name} of players){
+            const btn=document.createElement('button');
+            btn.textContent='👤 '+name;
+            btn.style.cssText='padding:8px 14px;background:#1a1a1a;border:1px solid #333;border-radius:20px;color:#aaa;font-size:13px;cursor:pointer;touch-action:manipulation;';
+            btn.onclick=()=>{
+                this._giftSelectedId=id; this._giftSelectedName=name;
+                document.getElementById('gift-selected-friend').innerHTML=`Получатель: <b style="color:#FF9800">${name}</b>`;
+                box.querySelectorAll('button').forEach(b=>b.style.borderColor='#333');
+                btn.style.borderColor='#FF9800';
+            };
+            box.appendChild(btn);
         }
-        // Загружаем входящие подарки из mailbox
         this._loadGiftsInbox();
     },
 
     async _loadGiftsInbox(){
-        const inbox = document.getElementById('gifts-inbox');
+        const inbox=document.getElementById('gifts-inbox');
         if(!inbox) return;
         try{
-            const r = await fetch(this._API+'/mail/'+this.userId);
-            const msgs = await r.json();
-            const gifts = msgs.filter(m=>m.type==='gift');
-            if(!gifts.length){
-                inbox.innerHTML = '<div style="color:#444;font-size:12px;">Нет подарков</div>';
-                return;
-            }
-            inbox.innerHTML = '';
-            let totalNew = 0;
+            const r=await fetch(this._API+'/mail/'+this.userId);
+            const msgs=await r.json();
+            const gifts=msgs.filter(m=>m.type==='gift');
+            if(!gifts.length){ inbox.innerHTML='<div style="color:#444;font-size:12px;">Нет подарков</div>'; return; }
+            inbox.innerHTML='';
             for(const g of gifts){
-                totalNew += g.amount||0;
-                const div = document.createElement('div');
-                div.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#111;border-radius:8px;border:1px solid #1a1a1a;';
-                div.innerHTML = `<div><b style="color:#FF9800">+${g.amount} 🍊</b><br><span style="color:#666;font-size:12px;">от ${g.from_name||g.from_id}</span></div>
-                    <button onclick="app._claimGift(${g.amount},'${g.from_id}',this)" style="padding:7px 14px;background:rgba(255,152,0,0.2);border:1px solid #FF9800;border-radius:8px;color:#FF9800;font-size:13px;cursor:pointer;touch-action:manipulation;">Забрать</button>`;
+                const div=document.createElement('div');
+                div.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#111;border-radius:8px;border:1px solid #1a1a1a;';
+                div.innerHTML=`<div><b style="color:#FF9800">+${g.amount} 🍊</b><br><span style="color:#666;font-size:12px;">от ${g.from_name||g.from_id}</span></div>
+                    <button onclick="app._claimGift(${g.amount},'${g.from_id}',this)" style="padding:7px 14px;background:rgba(255,152,0,0.2);border:1px solid #FF9800;border-radius:8px;color:#FF9800;font-size:13px;cursor:pointer;">Забрать</button>`;
                 inbox.appendChild(div);
             }
-        }catch(e){
-            inbox.innerHTML = '<div style="color:#444;font-size:12px;">Ошибка загрузки</div>';
-        }
+        }catch(e){ inbox.innerHTML='<div style="color:#444;font-size:12px;">Ошибка загрузки</div>'; }
     },
 
-    async _claimGift(amount, fromId, btn){
-        this.balance += amount;
-        this.saveData();
-        document.getElementById('balance-val').textContent = this.balance;
-        // Удаляем из mailbox
+    async _claimGift(amount,fromId,btn){
+        this.balance+=amount; this.saveData();
+        document.getElementById('balance-val').textContent=this.balance;
         try{
-            const r = await fetch(this._API+'/mail/'+this.userId);
-            const msgs = await r.json();
-            const remaining = msgs.filter(m=>!(m.type==='gift'&&String(m.from_id)===String(fromId)&&m.amount===amount));
-            await fetch(this._API+'/mail/'+this.userId, {method:'DELETE'});
-            // Переотправляем оставшиеся
-            for(const m of remaining){
-                await fetch(this._API+'/mail/'+this.userId, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(m)});
-            }
+            const r=await fetch(this._API+'/mail/'+this.userId);
+            const msgs=await r.json();
+            const remaining=msgs.filter(m=>!(m.type==='gift'&&String(m.from_id)===String(fromId)&&m.amount===amount));
+            await fetch(this._API+'/mail/'+this.userId,{method:'DELETE'});
+            for(const m of remaining) await fetch(this._API+'/mail/'+this.userId,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(m)});
         }catch(e){}
         this.showNotif('🎁',`+${amount} 🍊 получено!`,`Подарок от игрока`);
         btn.closest('div[style]').remove();
@@ -2392,41 +2415,256 @@ const app = {
     },
 
     async sendGift(){
-        const amount = parseInt(document.getElementById('gift-amount')?.value||'0');
-        if(!amount || amount < 1 || amount > 100000){
-            this.showNotif('❌','Ошибка','Сумма от 1 до 100 000 🍊'); return;
-        }
-        if(!this._giftSelectedId){
-            this.showNotif('❌','Выбери друга','Нажми на имя друга выше'); return;
-        }
-        if(this.balance < amount){
-            this.showNotif('❌','Мало монет',`Нужно ${amount} 🍊, у тебя ${this.balance}`); return;
-        }
-        this.balance -= amount;
-        this.saveData();
-        document.getElementById('balance-val').textContent = this.balance;
+        const amount=parseInt(document.getElementById('gift-amount')?.value||'0');
+        if(!amount||amount<1||amount>100000){ this.showNotif('❌','Ошибка','Сумма от 1 до 100 000 🍊'); return; }
+        if(!this._giftSelectedId){ this.showNotif('❌','Выбери друга','Нажми на имя друга выше'); return; }
+        if(this.balance<amount){ this.showNotif('❌','Мало монет',`Нужно ${amount} 🍊, у тебя ${this.balance}`); return; }
+        this.balance-=amount; this.saveData();
+        document.getElementById('balance-val').textContent=this.balance;
         try{
-            await fetch(this._API+'/mail/'+this._giftSelectedId, {
-                method:'POST', headers:{'Content-Type':'application/json'},
-                body: JSON.stringify({
-                    type:'gift', from_id:String(this.userId),
-                    from_name:this.username+'#'+this.userId,
-                    amount
-                })
-            });
+            await fetch(this._API+'/mail/'+this._giftSelectedId,{method:'POST',headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({type:'gift',from_id:String(this.userId),from_name:this.username+'#'+this.userId,amount})});
             this.showNotif('🎁','Подарок отправлен!',`${amount} 🍊 → ${this._giftSelectedName}`);
-            document.getElementById('gift-amount').value = '';
-            this._giftSelectedId = null;
-            this._giftSelectedName = null;
-            document.getElementById('gift-selected-friend').innerHTML = 'Выбери друга выше 👆';
+            document.getElementById('gift-amount').value='';
+            this._giftSelectedId=null; this._giftSelectedName=null;
+            document.getElementById('gift-selected-friend').innerHTML='Выбери друга выше 👆';
             document.querySelectorAll('#gift-friend-list button').forEach(b=>b.style.borderColor='#333');
         }catch(e){
-            // Если не дошло — вернём деньги
-            this.balance += amount;
-            this.saveData();
-            document.getElementById('balance-val').textContent = this.balance;
+            this.balance+=amount; this.saveData();
+            document.getElementById('balance-val').textContent=this.balance;
             this.showNotif('❌','Ошибка','Подарок не отправлен, монеты возвращены');
         }
+    },
+
+    // ══════════ НФТ СИСТЕМА ══════════
+
+    _nftRarityStyle(rarity){
+        const map={
+            common:  {color:'#aaa',      glow:'rgba(170,170,170,0.15)', label:'⚪ Обычный'},
+            rare:    {color:'#4fc3f7',   glow:'rgba(79,195,247,0.2)',  label:'🔵 Редкий'},
+            epic:    {color:'#ce93d8',   glow:'rgba(206,147,216,0.2)', label:'🟣 Эпический'},
+            legendary:{color:'#FFD700', glow:'rgba(255,215,0,0.25)',  label:'🟡 Легендарный'},
+        };
+        return map[rarity]||map.common;
+    },
+
+    _nftMiniChart(priceHistory){
+        if(!priceHistory||priceHistory.length<2) return '';
+        const prices=priceHistory.map(p=>p.price);
+        const min=Math.min(...prices), max=Math.max(...prices);
+        const w=100,h=36,pad=4;
+        const pts=prices.map((p,i)=>{
+            const x=pad+(i/(prices.length-1))*(w-pad*2);
+            const y=max===min?h/2:pad+(1-(p-min)/(max-min))*(h-pad*2);
+            return `${x},${y}`;
+        }).join(' ');
+        const last=prices[prices.length-1], first=prices[0];
+        const color=last>=first?'#4caf50':'#f44336';
+        const trend=last>first?'▲':'▼';
+        const pct=first>0?Math.abs(((last-first)/first)*100).toFixed(0):0;
+        return `<svg width="${w}" height="${h}" style="display:block;">
+            <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round"/>
+        </svg><div style="font-size:10px;color:${color};text-align:right;font-family:var(--font-ui);">${trend} ${pct}%</div>`;
+    },
+
+    _nftCard(nft, mode='market'){
+        const rs=this._nftRarityStyle(nft.rarity);
+        const chart=this._nftMiniChart(nft.priceHistory);
+        const isOwner=String(nft.ownerId)===String(this.userId);
+        const isDev=this.isDev((this.username||'').toLowerCase().trim());
+        const canOpen=isOwner&&!nft.opened;
+        const canBuy=mode==='market'&&nft.onMarket&&!nft.opened&&!isOwner;
+        const priceChange=nft.priceHistory&&nft.priceHistory.length>1
+            ?nft.priceHistory[nft.priceHistory.length-1].price-nft.priceHistory[0].price:0;
+
+        return `<div style="background:var(--c-surface2);border:1px solid ${rs.color}33;border-radius:16px;padding:14px;
+            box-shadow:0 0 18px ${rs.glow};cursor:default;transition:transform 0.15s;"
+            onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='none'">
+            <div style="font-size:44px;text-align:center;margin-bottom:6px;">${nft.emoji||'🎁'}</div>
+            <div style="font-family:var(--font-body);font-weight:700;font-size:14px;color:${rs.color};text-align:center;margin-bottom:2px;">${nft.name}</div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.3);text-align:center;margin-bottom:8px;font-family:var(--font-ui);">${rs.label}</div>
+            ${nft.desc?`<div style="font-size:11px;color:rgba(255,255,255,0.4);text-align:center;margin-bottom:8px;font-family:var(--font-ui);">${nft.desc}</div>`:''}
+            ${chart?`<div style="margin-bottom:8px;">${chart}</div>`:''}
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                <div style="font-family:var(--font-head);font-size:15px;font-weight:900;color:var(--c-main);">${nft.price>0?nft.price+' 🍊':'Бесплатно'}</div>
+                <div style="font-size:10px;color:rgba(255,255,255,0.2);">наг: ${nft.minReward}–${nft.maxReward}🍊</div>
+            </div>
+            ${nft.opened?`<div style="text-align:center;padding:8px;background:rgba(0,230,118,0.08);border-radius:8px;color:#00E676;font-size:12px;font-weight:700;">✓ Открыт • +${nft.reward}🍊</div>`:''}
+            ${canBuy?`<button onclick="app.buyNft('${nft.id}')" style="width:100%;padding:9px;background:linear-gradient(135deg,var(--c-main),var(--c-deep));border:none;border-radius:10px;color:#fff;font-weight:700;font-family:var(--font-body);font-size:13px;cursor:pointer;">Купить</button>`:''}
+            ${canOpen?`<button onclick="app.openNft('${nft.id}')" style="width:100%;padding:9px;background:linear-gradient(135deg,#9C27B0,#6A1B9A);border:none;border-radius:10px;color:#fff;font-weight:700;font-family:var(--font-body);font-size:13px;cursor:pointer;">🎰 Открыть</button>`:''}
+            ${isDev&&!nft.opened?`<div style="display:flex;gap:6px;margin-top:8px;">
+                <button onclick="app.nftChangePrice('${nft.id}','up')" style="flex:1;padding:6px;background:rgba(76,175,80,0.15);border:1px solid rgba(76,175,80,0.3);border-radius:8px;color:#4caf50;font-size:12px;cursor:pointer;font-family:var(--font-body);">▲ Цена</button>
+                <button onclick="app.nftChangePrice('${nft.id}','down')" style="flex:1;padding:6px;background:rgba(244,67,54,0.15);border:1px solid rgba(244,67,54,0.3);border-radius:8px;color:#f44336;font-size:12px;cursor:pointer;font-family:var(--font-body);">▼ Цена</button>
+            </div>`:''}
+            ${isOwner&&!nft.opened?`<div style="font-size:10px;color:rgba(255,255,255,0.2);text-align:center;margin-top:6px;">твой подарок</div>`:''}
+        </div>`;
+    },
+
+    async initNft(){
+        const isDev=this.isDev((this.username||'').toLowerCase().trim());
+        const devBtn=document.getElementById('nft-dev-btn');
+        const createBtn=document.getElementById('nfttab-create-btn');
+        if(isDev){ devBtn?.classList.remove('hidden'); if(createBtn) createBtn.style.display='flex'; }
+        this.switchNftTab('market');
+    },
+
+    switchNftTab(tab){
+        ['market','my','create'].forEach(t=>{
+            document.getElementById('nfttab-'+t)?.classList.toggle('hidden', t!==tab);
+            const btn=document.getElementById('nfttab-'+t+'-btn');
+            if(btn){
+                btn.style.background=t===tab?'rgba(255,152,0,0.12)':'transparent';
+                btn.style.color=t===tab?'rgba(255,152,0,0.9)':'rgba(255,255,255,0.4)';
+                btn.style.border=t===tab?'1px solid rgba(255,152,0,0.3)':'1px solid rgba(255,255,255,0.08)';
+            }
+        });
+        if(tab==='market') this.loadNftMarket();
+        if(tab==='my') this.loadMyNfts();
+    },
+
+    async loadNftMarket(){
+        const grid=document.getElementById('nft-market-grid');
+        if(!grid) return;
+        grid.innerHTML='<div style="color:rgba(255,255,255,0.2);font-size:13px;padding:20px;grid-column:1/-1;text-align:center;">Загрузка...</div>';
+        try{
+            const r=await fetch(this._API+'/nfts');
+            const all=await r.json();
+            const market=all.filter(n=>n.onMarket&&!n.opened);
+            if(!market.length){ grid.innerHTML='<div style="color:rgba(255,255,255,0.2);font-size:13px;padding:40px;grid-column:1/-1;text-align:center;">Маркет пуст 🎁<br><small>Разраб скоро добавит подарки</small></div>'; return; }
+            grid.innerHTML=market.map(n=>this._nftCard(n,'market')).join('');
+        }catch(e){ grid.innerHTML='<div style="color:rgba(255,100,100,0.5);grid-column:1/-1;text-align:center;padding:20px;">Ошибка загрузки</div>'; }
+    },
+
+    async loadMyNfts(){
+        const grid=document.getElementById('nft-my-grid');
+        if(!grid) return;
+        grid.innerHTML='<div style="color:rgba(255,255,255,0.2);font-size:13px;padding:20px;grid-column:1/-1;text-align:center;">Загрузка...</div>';
+        try{
+            const r=await fetch(this._API+'/nfts/player/'+this.userId);
+            const mine=await r.json();
+            if(!mine.length){ grid.innerHTML='<div style="color:rgba(255,255,255,0.2);font-size:13px;padding:40px;grid-column:1/-1;text-align:center;">У тебя нет подарков 🎁<br><small>Купи на маркете или получи от Разраба</small></div>'; return; }
+            grid.innerHTML=mine.map(n=>this._nftCard(n,'my')).join('');
+        }catch(e){ grid.innerHTML='<div style="color:rgba(255,100,100,0.5);grid-column:1/-1;text-align:center;padding:20px;">Ошибка загрузки</div>'; }
+    },
+
+    async buyNft(nftId){
+        try{
+            const r=await fetch(this._API+'/nfts/'+nftId+'/buy',{
+                method:'POST',headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({buyerId:this.userId, buyerName:this.username})
+            });
+            const d=await r.json();
+            if(!d.ok){ this.showNotif('❌','Ошибка',d.error||'Не удалось купить'); return; }
+            this.balance=d.newBalance;
+            this.saveData();
+            this.showNotif('🎁','Подарок куплен!',`${d.nft.name} теперь твой`);
+            this.loadNftMarket();
+        }catch(e){ this.showNotif('❌','Ошибка','Нет связи с сервером'); }
+    },
+
+    async openNft(nftId){
+        // Анимация открытия кейса
+        const overlay=document.createElement('div');
+        overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;';
+        overlay.innerHTML=`
+            <div id="nft-open-emoji" style="font-size:80px;animation:nftSpin 0.8s linear infinite;">🎁</div>
+            <div style="font-family:var(--font-head);font-size:18px;color:rgba(255,255,255,0.6);">Открываем подарок...</div>`;
+        document.body.appendChild(overlay);
+
+        // Добавляем анимацию спина
+        if(!document.getElementById('nft-spin-style')){
+            const s=document.createElement('style');
+            s.id='nft-spin-style';
+            s.textContent='@keyframes nftSpin{0%{transform:rotate(0deg) scale(1)}50%{transform:rotate(180deg) scale(1.2)}100%{transform:rotate(360deg) scale(1)}}@keyframes nftPop{0%{transform:scale(0.5);opacity:0}60%{transform:scale(1.3)}100%{transform:scale(1);opacity:1}}';
+            document.head.appendChild(s);
+        }
+
+        try{
+            await new Promise(r=>setTimeout(r,1800)); // драматическая пауза
+            const res=await fetch(this._API+'/nfts/'+nftId+'/open',{
+                method:'POST',headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({playerId:this.userId})
+            });
+            const d=await res.json();
+            if(!d.ok){ document.body.removeChild(overlay); this.showNotif('❌','Ошибка',d.error||'Не удалось открыть'); return; }
+
+            this.balance=d.nft.opened?(this.balance+d.reward):this.balance;
+            this.saveData();
+
+            // Показываем результат
+            overlay.innerHTML=`
+                <div style="font-size:90px;animation:nftPop 0.5s ease both;">🎊</div>
+                <div style="font-family:var(--font-head);font-size:48px;font-weight:900;color:#FFD700;animation:nftPop 0.5s 0.1s ease both;text-shadow:0 0 40px #FFD70088;">+${d.reward}</div>
+                <div style="font-size:24px;color:rgba(255,255,255,0.7);animation:nftPop 0.5s 0.2s ease both;">🍊 цитрусов!</div>
+                <div style="font-family:var(--font-body);font-size:14px;color:rgba(255,255,255,0.4);animation:nftPop 0.5s 0.3s ease both;">${d.nft.name}</div>
+                <button onclick="this.closest('div[style*=fixed]').remove();app.loadMyNfts();" style="margin-top:16px;padding:14px 40px;background:linear-gradient(135deg,#FF9800,#E65100);border:none;border-radius:14px;color:#fff;font-weight:900;font-family:var(--font-head);font-size:16px;cursor:pointer;animation:nftPop 0.5s 0.4s ease both;">Забрать!</button>`;
+        }catch(e){
+            document.body.removeChild(overlay);
+            this.showNotif('❌','Ошибка','Нет связи с сервером');
+        }
+    },
+
+    async nftChangePrice(nftId, dir){
+        const newPriceStr=prompt(dir==='up'?'Новая цена (выше текущей):':'Новая цена (ниже текущей):');
+        if(!newPriceStr) return;
+        const newPrice=parseInt(newPriceStr);
+        if(isNaN(newPrice)||newPrice<0){ this.showNotif('❌','Ошибка','Неверная цена'); return; }
+        try{
+            const r=await fetch(this._API+'/nfts/'+nftId+'/price',{
+                method:'PATCH',headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({adminKey:'citrus_admin_2025', price:newPrice})
+            });
+            const d=await r.json();
+            if(!d.ok){ this.showNotif('❌','Ошибка',d.error||'Не удалось изменить цену'); return; }
+            this.showNotif('📈','Цена обновлена',`${d.nft.name}: ${newPrice} 🍊`);
+            this.loadNftMarket();
+        }catch(e){ this.showNotif('❌','Ошибка','Нет связи'); }
+    },
+
+    async createNft(){
+        const emoji=document.getElementById('nft-emoji')?.value||'🎁';
+        const name=document.getElementById('nft-name')?.value?.trim();
+        const desc=document.getElementById('nft-desc')?.value?.trim()||'';
+        const price=parseInt(document.getElementById('nft-price')?.value||'0');
+        const rarity=document.getElementById('nft-rarity')?.value||'common';
+        const minR=parseInt(document.getElementById('nft-min')?.value||'1');
+        const maxR=parseInt(document.getElementById('nft-max')?.value||'1000');
+        const giftTo=document.getElementById('nft-gift-to')?.value?.trim()||'';
+
+        if(!name){ this.showNotif('❌','Ошибка','Введи название'); return; }
+        if(minR>maxR){ this.showNotif('❌','Ошибка','Мин награда больше макс'); return; }
+
+        // Ищем игрока если подарок кому-то
+        let giftToId=null, giftToName=null;
+        if(giftTo){
+            try{
+                const sr=await fetch(this._API+'/players/search?q='+encodeURIComponent(giftTo));
+                const players=await sr.json();
+                if(players.length){
+                    giftToId=players[0].id; giftToName=players[0].name||players[0].tag;
+                } else { this.showNotif('❌','Игрок не найден',giftTo); return; }
+            }catch(e){ this.showNotif('❌','Ошибка','Нет связи'); return; }
+        }
+
+        try{
+            const r=await fetch(this._API+'/nfts',{
+                method:'POST',headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({
+                    adminKey:'citrus_admin_2025',
+                    emoji,name,desc,price,rarity,
+                    minReward:minR, maxReward:maxR,
+                    by:this.username, giftTo:giftToId, giftToName
+                })
+            });
+            const d=await r.json();
+            if(!d.ok){ this.showNotif('❌','Ошибка',d.error||'Не удалось создать'); return; }
+            this.showNotif('🎁','Подарок создан!',giftTo?`Подарен ${giftToName}`:`Выставлен на маркет`);
+            // Очищаем форму
+            ['nft-emoji','nft-name','nft-desc','nft-price','nft-min','nft-max','nft-gift-to'].forEach(id=>{
+                const el=document.getElementById(id); if(el) el.value='';
+            });
+            this.switchNftTab('market');
+        }catch(e){ this.showNotif('❌','Ошибка','Нет связи с сервером'); }
     },
 
     saveData(){
@@ -2439,7 +2677,6 @@ const app = {
             rouletteTotal:this.rouletteTotal||0
         };
         localStorage.setItem('citrus_v5_pro', JSON.stringify(_d));
-        // Синхронизируем с сервером — как друзья, не пропадёт
         if(this.userId){
             fetch(this._API+'/players/'+this.userId,{
                 method:'POST',headers:{'Content-Type':'application/json'},
@@ -2997,7 +3234,7 @@ const app = {
 
     // ── TABS
     switchTab(id){
-        ['games','avatar','shop','friends','studio','quests','roulette','credits','gifts','stats','leaderboard','admin'].forEach(t=>{
+        ['games','avatar','shop','friends','studio','quests','roulette','credits','gifts','nft','stats','leaderboard','admin'].forEach(t=>{
             document.getElementById('tab-'+t).classList.add('hidden');
             document.getElementById('nav-'+t)?.classList.remove('active');
         });
@@ -3008,7 +3245,8 @@ const app = {
         if(id==='quests')this.renderQuests();
         if(id==='roulette')this.initRoulette();
         if(id==='credits')this.initCredits();
-        if(id==='gifts')this.initGifts();
+        if(id==='gifts'){ this.initGifts(); }
+        if(id==='nft'){ this.initNft(); }
         if(id==='admin'){ this.loadBanList(); this.loadBanOnlineList(); }
         if(id==='stats'){ this.loadStats(); }
         if(id==='leaderboard'){ this.loadLeaderboard(); }
