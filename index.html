@@ -2460,11 +2460,76 @@ const app = {
         }).join(' ');
         const last=prices[prices.length-1], first=prices[0];
         const color=last>=first?'#4caf50':'#f44336';
-        const trend=last>first?'▲':'▼';
+        const trend=last>first?'▲':last<first?'▼':'—';
         const pct=first>0?Math.abs(((last-first)/first)*100).toFixed(0):0;
         return `<svg width="${w}" height="${h}" style="display:block;">
             <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round"/>
+            <circle cx="${pts.split(' ').pop().split(',')[0]}" cy="${pts.split(' ').pop().split(',')[1]}" r="3" fill="${color}"/>
         </svg><div style="font-size:10px;color:${color};text-align:right;font-family:var(--font-ui);">${trend} ${pct}%</div>`;
+    },
+
+    showNftChart(nftId){
+        fetch(this._API+'/nfts').then(r=>r.json()).then(all=>{
+            const nft=all.find(n=>n.id===nftId);
+            if(!nft||!nft.priceHistory||nft.priceHistory.length<1) return;
+            const rs=this._nftRarityStyle(nft.rarity);
+            const history=nft.priceHistory;
+            const prices=history.map(p=>p.price);
+            const min=Math.min(...prices), max=Math.max(...prices);
+            const W=500,H=200,padL=50,padR=20,padT=20,padB=40;
+            const iW=W-padL-padR, iH=H-padT-padB;
+            const pts=prices.map((p,i)=>{
+                const x=padL+(i/(Math.max(prices.length-1,1)))*iW;
+                const y=padT+(max===min?iH/2:(1-(p-min)/(max-min))*iH);
+                return `${x},${y}`;
+            }).join(' ');
+            const last=prices[prices.length-1],first=prices[0];
+            const color=last>=first?'#4caf50':'#f44336';
+            // Ось Y метки
+            const yLabels=[min,Math.round((min+max)/2),max].map((v,i)=>{
+                const y=padT+(i===0?iH:i===1?iH/2:0);
+                return `<text x="${padL-8}" y="${y+4}" fill="rgba(255,255,255,0.3)" font-size="10" text-anchor="end">${v}</text>`;
+            }).join('');
+            // Ось X даты
+            const xLabels=history.filter((_,i)=>i===0||i===history.length-1).map((p,i)=>{
+                const x=i===0?padL:padL+iW;
+                const d=new Date(p.ts).toLocaleDateString('ru',{day:'2-digit',month:'2-digit'});
+                return `<text x="${x}" y="${H-8}" fill="rgba(255,255,255,0.3)" font-size="10" text-anchor="${i===0?'start':'end'}">${d}</text>`;
+            }).join('');
+
+            const overlay=document.createElement('div');
+            overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+            overlay.innerHTML=`<div style="background:var(--c-surface2);border:1px solid ${rs.color}44;border-radius:20px;padding:24px;max-width:560px;width:100%;">
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+                    <div style="font-size:40px;">${nft.emoji||'🎁'}</div>
+                    <div>
+                        <div style="font-family:var(--font-body);font-weight:700;font-size:18px;color:${rs.color};">${nft.name}</div>
+                        <div style="font-size:12px;color:rgba(255,255,255,0.3);">${rs.label} · наг: ${nft.minReward}–${nft.maxReward} 🍊</div>
+                    </div>
+                    <button onclick="this.closest('div[style*=fixed]').remove()" style="margin-left:auto;background:none;border:none;color:rgba(255,255,255,0.3);font-size:22px;cursor:pointer;">✕</button>
+                </div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:12px;">
+                    <div style="font-size:12px;color:rgba(255,255,255,0.4);">📈 История цены</div>
+                    <div style="font-family:var(--font-head);font-size:16px;color:${color};font-weight:700;">${last} 🍊 <span style="font-size:11px;">${last>=first?'▲':'▼'} ${first>0?Math.abs(((last-first)/first)*100).toFixed(0):0}%</span></div>
+                </div>
+                <svg width="100%" viewBox="0 0 ${W} ${H}" style="overflow:visible;">
+                    <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${padT+iH}" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+                    <line x1="${padL}" y1="${padT+iH}" x2="${padL+iW}" y2="${padT+iH}" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+                    ${yLabels}${xLabels}
+                    <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round"/>
+                    ${prices.map((p,i)=>{
+                        const x=padL+(i/(Math.max(prices.length-1,1)))*iW;
+                        const y=padT+(max===min?iH/2:(1-(p-min)/(max-min))*iH);
+                        return `<circle cx="${x}" cy="${y}" r="4" fill="${color}" stroke="var(--c-surface2)" stroke-width="2"/>`;
+                    }).join('')}
+                </svg>
+                <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;">
+                    ${history.map(p=>`<div style="font-size:10px;color:rgba(255,255,255,0.3);font-family:var(--font-ui);">${new Date(p.ts).toLocaleDateString('ru')}: <b style="color:rgba(255,255,255,0.6);">${p.price}🍊</b></div>`).join('')}
+                </div>
+            </div>`;
+            overlay.onclick=e=>{ if(e.target===overlay) overlay.remove(); };
+            document.body.appendChild(overlay);
+        }).catch(()=>{});
     },
 
     _nftCard(nft, mode='market'){
@@ -2484,7 +2549,8 @@ const app = {
             <div style="font-family:var(--font-body);font-weight:700;font-size:14px;color:${rs.color};text-align:center;margin-bottom:2px;">${nft.name}</div>
             <div style="font-size:10px;color:rgba(255,255,255,0.3);text-align:center;margin-bottom:8px;font-family:var(--font-ui);">${rs.label}</div>
             ${nft.desc?`<div style="font-size:11px;color:rgba(255,255,255,0.4);text-align:center;margin-bottom:8px;font-family:var(--font-ui);">${nft.desc}</div>`:''}
-            ${chart?`<div style="margin-bottom:8px;">${chart}</div>`:''}
+            ${chart?`<div style="margin-bottom:4px;cursor:pointer;" onclick="app.showNftChart('${nft.id}')" title="Смотреть полный график">${chart}</div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.2);text-align:center;margin-bottom:8px;font-family:var(--font-ui);">📈 нажми для графика</div>`:''}
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
                 <div style="font-family:var(--font-head);font-size:15px;font-weight:900;color:var(--c-main);">${nft.price>0?nft.price+' 🍊':'Бесплатно'}</div>
                 <div style="font-size:10px;color:rgba(255,255,255,0.2);">наг: ${nft.minReward}–${nft.maxReward}🍊</div>
@@ -2551,7 +2617,7 @@ const app = {
         try{
             const r=await fetch(this._API+'/nfts/'+nftId+'/buy',{
                 method:'POST',headers:{'Content-Type':'application/json'},
-                body:JSON.stringify({buyerId:this.userId, buyerName:this.username})
+                body:JSON.stringify({buyerId:this.userId, buyerName:this.username, buyerBalance:this.balance})
             });
             const d=await r.json();
             if(!d.ok){ this.showNotif('❌','Ошибка',d.error||'Не удалось купить'); return; }
