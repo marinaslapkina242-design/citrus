@@ -398,7 +398,30 @@
         /* ═══════════════════════════════════════════════════
            CARDS — PART 1
            ═══════════════════════════════════════════════════ */
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+        .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+
+    /* ДОБАВЬ ЭТИ СТРОКИ: */
+    max-height: 600px;  /* Высота группы. Измени цифру, если хочешь больше или меньше */
+    overflow-y: auto;   /* ВКЛЮЧАЕТ ПРОКРУТКУ */
+    padding: 10px;      /* Чтобы карточки не прилипали к краям */
+    scroll-behavior: smooth;
+}
+
+/* Сделаем скролл внутри группы красивым */
+.grid::-webkit-scrollbar {
+    width: 6px;
+}
+.grid::-webkit-scrollbar-track {
+    background: rgba(255,152,0,0.05);
+    border-radius: 10px;
+}
+.grid::-webkit-scrollbar-thumb {
+    background: var(--c-main);
+    border-radius: 10px;
+}
 
         .card {
             background: var(--c-surface2);
