@@ -1634,12 +1634,8 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
                                     <option value="legendary">🟡 Легендарный</option>
                                 </select></div>
                             </div>
-                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-                                <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:6px;font-family:var(--font-ui);">Мин награда 🍊</div>
-                                <input id="nft-min" type="number" min="1" class="styled-input" placeholder="1"></div>
-                                <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:6px;font-family:var(--font-ui);">Макс награда 🍊</div>
-                                <input id="nft-max" type="number" min="1" class="styled-input" placeholder="1000"></div>
-                            </div>
+                            <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:6px;font-family:var(--font-ui);">Награда при открытии 🍊</div>
+                            <input id="nft-reward" type="number" min="1" class="styled-input" placeholder="100"></div>
                             <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:6px;font-family:var(--font-ui);">Подарить игроку (необязательно)</div>
                             <input id="nft-gift-to" class="styled-input" placeholder="sdw#1044 — пусто = маркет"></div>
                             <button onclick="app.createNft()" class="btn-orange-full">🎁 Создать и выпустить</button>
@@ -2504,7 +2500,7 @@ const app = {
                     <div style="font-size:40px;">${nft.emoji||'🎁'}</div>
                     <div>
                         <div style="font-family:var(--font-body);font-weight:700;font-size:18px;color:${rs.color};">${nft.name}</div>
-                        <div style="font-size:12px;color:rgba(255,255,255,0.3);">${rs.label} · наг: ${nft.minReward}–${nft.maxReward} 🍊</div>
+                        <div style="font-size:12px;color:rgba(255,255,255,0.3);">${rs.label} · награда: ${nft.reward||nft.minReward||'?'} 🍊</div>
                     </div>
                     <button onclick="this.closest('div[style*=fixed]').remove()" style="margin-left:auto;background:none;border:none;color:rgba(255,255,255,0.3);font-size:22px;cursor:pointer;">✕</button>
                 </div>
@@ -2553,7 +2549,7 @@ const app = {
             <div style="font-size:10px;color:rgba(255,255,255,0.2);text-align:center;margin-bottom:8px;font-family:var(--font-ui);">📈 нажми для графика</div>`:''}
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
                 <div style="font-family:var(--font-head);font-size:15px;font-weight:900;color:var(--c-main);">${nft.price>0?nft.price+' 🍊':'Бесплатно'}</div>
-                <div style="font-size:10px;color:rgba(255,255,255,0.2);">наг: ${nft.minReward}–${nft.maxReward}🍊</div>
+                <div style="font-size:10px;color:rgba(255,255,255,0.2);">награда: ${nft.reward||nft.minReward||'?'}🍊</div>
             </div>
             ${nft.opened?`<div style="text-align:center;padding:8px;background:rgba(0,230,118,0.08);border-radius:8px;color:#00E676;font-size:12px;font-weight:700;">✓ Открыт • +${nft.reward}🍊</div>`:''}
             ${canBuy?`<button onclick="app.buyNft('${nft.id}')" style="width:100%;padding:9px;background:linear-gradient(135deg,var(--c-main),var(--c-deep));border:none;border-radius:10px;color:#fff;font-weight:700;font-family:var(--font-body);font-size:13px;cursor:pointer;">Купить</button>`:''}
@@ -2693,12 +2689,11 @@ const app = {
         const desc=document.getElementById('nft-desc')?.value?.trim()||'';
         const price=parseInt(document.getElementById('nft-price')?.value||'0');
         const rarity=document.getElementById('nft-rarity')?.value||'common';
-        const minR=parseInt(document.getElementById('nft-min')?.value||'1');
-        const maxR=parseInt(document.getElementById('nft-max')?.value||'1000');
+        const reward=parseInt(document.getElementById('nft-reward')?.value||'100');
         const giftTo=document.getElementById('nft-gift-to')?.value?.trim()||'';
 
         if(!name){ this.showNotif('❌','Ошибка','Введи название'); return; }
-        if(minR>maxR){ this.showNotif('❌','Ошибка','Мин награда больше макс'); return; }
+        if(reward<1){ this.showNotif('❌','Ошибка','Награда должна быть больше 0'); return; }
 
         // Ищем игрока если подарок кому-то
         let giftToId=null, giftToName=null;
@@ -2718,15 +2713,14 @@ const app = {
                 body:JSON.stringify({
                     adminKey:'citrus_admin_2025',
                     emoji,name,desc,price,rarity,
-                    minReward:minR, maxReward:maxR,
+                    reward,
                     by:this.username, giftTo:giftToId, giftToName
                 })
             });
             const d=await r.json();
             if(!d.ok){ this.showNotif('❌','Ошибка',d.error||'Не удалось создать'); return; }
             this.showNotif('🎁','Подарок создан!',giftTo?`Подарен ${giftToName}`:`Выставлен на маркет`);
-            // Очищаем форму
-            ['nft-emoji','nft-name','nft-desc','nft-price','nft-min','nft-max','nft-gift-to'].forEach(id=>{
+            ['nft-emoji','nft-name','nft-desc','nft-price','nft-reward','nft-gift-to'].forEach(id=>{
                 const el=document.getElementById(id); if(el) el.value='';
             });
             this.switchNftTab('market');
