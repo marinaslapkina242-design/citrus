@@ -1453,6 +1453,31 @@
         /* Section title emoji */
         .section-title { font-family: var(--font-body); }
 
+
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+        @keyframes shimmer {
+            0%   { transform: translateX(-100%); }
+            100% { transform: translateX(200%); }
+        }
+        @keyframes caseSpin {
+            0%   { transform: scale(0.5) rotate(-20deg); opacity:0; }
+            60%  { transform: scale(1.2) rotate(5deg); }
+            100% { transform: scale(1) rotate(0deg); opacity:1; }
+        }
+        @keyframes caseGlow {
+            0%,100% { box-shadow: 0 0 30px rgba(255,149,0,0.3); }
+            50%      { box-shadow: 0 0 60px rgba(255,149,0,0.6); }
+        }
+        /* Глобальный чат */
+        .gchat-msg { display:flex; gap:10px; align-items:flex-start; animation:fadeInUp 0.2s ease; }
+        .gchat-avatar { width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0;font-family:var(--font-head); }
+        .gchat-bubble { background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:0 14px 14px 14px;padding:9px 13px;flex:1; }
+        .gchat-bubble.mine { background:rgba(255,149,0,0.1);border-color:rgba(255,149,0,0.18);border-radius:14px 0 14px 14px; }
+        .gchat-name { font-size:11px;font-weight:700;font-family:var(--font-body);margin-bottom:3px;opacity:0.7; }
+        .gchat-text { font-size:13px;font-family:var(--font-body);line-height:1.4; }
+        .gchat-time { font-size:10px;color:rgba(255,255,255,0.2);margin-top:3px; }
+        /* Daily banner hover */
+        #daily-banner:hover { background:linear-gradient(135deg,rgba(255,149,0,0.16),rgba(255,60,0,0.1)) !important; transform:translateY(-2px); }
     </style>
 </head>
 <body>
@@ -1504,6 +1529,7 @@
             <span id="display-name" class="header-username"></span>
             <div class="balance-chip">🍊 <span id="balance-val">0</span></div>
             <button onclick="app.logout()" class="btn-logout">Сменить аккаунт</button>
+            <button id="music-toggle" onclick="app._toggleMusic()" title="Музыка" style="background:rgba(255,149,0,0.1);border:1px solid rgba(255,149,0,0.2);border-radius:10px;padding:6px 10px;color:rgba(255,149,0,0.7);font-size:14px;cursor:pointer;transition:all 0.2s;">🎵</button>
         </div>
     </div>
     <div class="hub-body">
@@ -1529,75 +1555,134 @@
                 <div class="nav-item"        id="nav-leaderboard" onclick="app.switchTab('leaderboard')"><div class="nav-icon"><i class="fas fa-trophy"></i></div> Топ</div>
                 <div class="nav-item hidden" id="nav-admin"       onclick="app.switchTab('admin')">      <div class="nav-icon"><i class="fas fa-shield-alt"></i></div> Баны</div>
                 <div class="nav-item"        id="nav-help"        onclick="app.switchTab('help')">       <div class="nav-icon"><i class="fas fa-question-circle"></i></div> Помощь</div>
+                <div class="nav-item"        id="nav-chat"        onclick="app.switchTab('chat')">       <div class="nav-icon"><i class="fas fa-comments"></i></div> Чат</div>
+
             </div>
         </div>
         <div class="content-area">
 
 
+
+            <!-- ══════════════════ TAB: GLOBAL CHAT ══════════════════ -->
+            <div id="tab-chat" class="hidden">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+                    <div class="section-title" style="margin:0;">💬 Глобальный чат</div>
+                    <div id="gchat-online-badge" style="display:flex;align-items:center;gap:6px;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);border-radius:20px;padding:5px 12px;">
+                        <div style="width:7px;height:7px;border-radius:50%;background:#4ADE80;box-shadow:0 0 6px rgba(74,222,128,0.8);animation:pulse 2s infinite;"></div>
+                        <span id="gchat-online-count" style="font-size:12px;font-family:var(--font-body);color:rgba(74,222,128,0.9);font-weight:600;">онлайн</span>
+                    </div>
+                </div>
+                <div style="max-width:680px;display:flex;flex-direction:column;height:calc(100vh - 220px);min-height:320px;">
+                    <!-- Шапка чата -->
+                    <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-bottom:none;border-radius:16px 16px 0 0;padding:10px 16px;display:flex;align-items:center;gap:8px;">
+                        <span style="font-size:18px;">🌍</span>
+                        <span style="font-size:12px;color:rgba(255,255,255,0.4);font-family:var(--font-body);">Общий канал — виден всем игрокам онлайн</span>
+                    </div>
+                    <!-- Сообщения -->
+                    <div id="gchat-msgs" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:6px;padding:14px 14px;background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);border-top:none;border-bottom:none;scrollbar-width:thin;scrollbar-color:rgba(255,149,0,0.15) transparent;">
+                        <div style="text-align:center;padding:24px 0;color:rgba(255,255,255,0.2);font-size:13px;font-family:var(--font-body);" id="gchat-empty">Пока никто ничего не написал. Будь первым! 👋</div>
+                    </div>
+                    <!-- Ввод -->
+                    <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-top:1px solid rgba(255,149,0,0.1);border-radius:0 0 16px 16px;padding:12px 14px;display:flex;gap:10px;align-items:center;">
+                        <div style="width:32px;height:32px;border-radius:10px;background:rgba(255,149,0,0.15);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;font-family:var(--font-head);color:#FF9500;flex-shrink:0;" id="gchat-my-avatar">?</div>
+                        <input id="gchat-input" type="text" maxlength="200" placeholder="Написать всем..." style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:10px 14px;color:#fff;font-family:var(--font-body);font-size:14px;outline:none;transition:border-color 0.2s;"
+                            onfocus="this.style.borderColor='rgba(255,149,0,0.4)'" onblur="this.style.borderColor='rgba(255,255,255,0.08)'"
+                            onkeydown="if(event.key==='Enter')app.sendGlobalChat()">
+                        <button onclick="app.sendGlobalChat()" style="background:linear-gradient(135deg,#FF9500,#E05000);border:none;border-radius:12px;padding:10px 18px;color:#fff;font-weight:700;font-family:var(--font-body);font-size:14px;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:opacity 0.15s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">➤</button>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- ══════════════════ TAB: CASES ══════════════════ -->
+
+
             <!-- ══════════════════ TAB: HELP ══════════════════ -->
             <div id="tab-help" class="hidden">
-                <div class="section-title">❓ Помощь</div>
+                <div class="section-title">❓ Помощь — все вкладки</div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;max-width:900px;">
 
-                <div style="display:flex;flex-direction:column;gap:14px;max-width:680px;">
-
-                    <div style="background:rgba(255,149,0,0.06);border:1px solid rgba(255,149,0,0.15);border-radius:16px;padding:22px 24px;">
-                        <div style="font-family:var(--font-head);font-size:13px;color:var(--c-main);margin-bottom:12px;letter-spacing:1px;">🎮 КАК ИГРАТЬ</div>
-                        <div style="color:rgba(255,255,255,0.75);font-size:14px;line-height:1.8;font-family:var(--font-body);">
-                            Зайди в любой мир через вкладку <b style="color:#FF9800">Миры</b>.<br>
-                            Управление: <b style="color:#FF9800">WASD</b> — движение, <b style="color:#FF9800">Пробел</b> — прыжок.<br>
-                            На мобильном используй джойстик и кнопку прыжка на экране.<br>
-                            В мире можно зарабатывать 🍊 монеты — они копятся автоматически.
-                        </div>
+                    <div style="background:rgba(255,149,0,0.05);border:1px solid rgba(255,149,0,0.12);border-radius:16px;padding:20px 22px;">
+                        <div style="font-family:var(--font-head);font-size:12px;color:#FF9500;margin-bottom:10px;letter-spacing:1px;">🎮 МИРЫ</div>
+                        <div style="color:rgba(255,255,255,0.72);font-size:13.5px;line-height:1.85;font-family:var(--font-body);">Выбери мир и нажми чтобы войти. Управление: <b style="color:#FF9500">WASD</b> — движение, <b style="color:#FF9500">Пробел</b> — прыжок, <b style="color:#FF9500">мышь</b> — камера. На мобиле — джойстик и кнопка прыжка. В каждом мире свои монеты и секреты.</div>
+                    </div>
+                    <div style="background:rgba(255,149,0,0.05);border:1px solid rgba(255,149,0,0.12);border-radius:16px;padding:20px 22px;">
+                        <div style="font-family:var(--font-head);font-size:12px;color:#FF4444;margin-bottom:10px;letter-spacing:1px;">🔫 АРЕНА ПВП</div>
+                        <div style="color:rgba(255,255,255,0.72);font-size:13.5px;line-height:1.85;font-family:var(--font-body);">Заходи в Арену ПВП и стреляй по мишеням! <b style="color:#ff6666">ЛКМ</b> — выстрел, прицел в центре экрана. У тебя 30 патронов, через 5 сек перезарядка. Попадание в центр даёт 50 очков. На мобиле — кнопка 🔫 на экране.</div>
+                    </div>
+                    <div style="background:rgba(255,149,0,0.05);border:1px solid rgba(255,149,0,0.12);border-radius:16px;padding:20px 22px;">
+                        <div style="font-family:var(--font-head);font-size:12px;color:#FF9500;margin-bottom:10px;letter-spacing:1px;">👤 АВАТАР</div>
+                        <div style="color:rgba(255,255,255,0.72);font-size:13.5px;line-height:1.85;font-family:var(--font-body);">Настрой внешность персонажа: цвет тела, одежда, аксессуары. Вещи покупаются в <b style="color:#FF9500">Магазине</b> за цитрусы 🍊. Аватар виден другим игрокам в мирах.</div>
+                    </div>
+                    <div style="background:rgba(255,149,0,0.05);border:1px solid rgba(255,149,0,0.12);border-radius:16px;padding:20px 22px;">
+                        <div style="font-family:var(--font-head);font-size:12px;color:#FF9500;margin-bottom:10px;letter-spacing:1px;">🛒 МАГАЗИН</div>
+                        <div style="color:rgba(255,255,255,0.72);font-size:13.5px;line-height:1.85;font-family:var(--font-body);">Покупай шляпы, очки, крылья, мечи, плащи и многое другое. Каждая вещь стоит цитрусы 🍊. Купленное автоматически попадает в инвентарь аватара.</div>
+                    </div>
+                    <div style="background:rgba(255,149,0,0.05);border:1px solid rgba(255,149,0,0.12);border-radius:16px;padding:20px 22px;">
+                        <div style="font-family:var(--font-head);font-size:12px;color:#38BDF8;margin-bottom:10px;letter-spacing:1px;">👥 ДРУЗЬЯ</div>
+                        <div style="color:rgba(255,255,255,0.72);font-size:13.5px;line-height:1.85;font-family:var(--font-body);">Добавляй друзей по тегу — он выглядит как <b style="color:#38BDF8">Ник#1234</b>. Нажми 💬 рядом с другом чтобы написать ему лично. Можно видеть онлайн-статус и в каком мире сидит друг — нажми Войти чтобы попасть к нему.</div>
+                    </div>
+                    <div style="background:rgba(255,149,0,0.05);border:1px solid rgba(255,149,0,0.12);border-radius:16px;padding:20px 22px;">
+                        <div style="font-family:var(--font-head);font-size:12px;color:#38BDF8;margin-bottom:10px;letter-spacing:1px;">💬 ГЛОБАЛЬНЫЙ ЧАТ</div>
+                        <div style="color:rgba(255,255,255,0.72);font-size:13.5px;line-height:1.85;font-family:var(--font-body);">Общий чат для всех игроков онлайн. Пиши сообщения, знакомься с другими. Обновляется каждые 4 секунды автоматически. Сообщения видят все кто онлайн прямо сейчас.</div>
                     </div>
 
-                    <div style="background:rgba(255,149,0,0.06);border:1px solid rgba(255,149,0,0.15);border-radius:16px;padding:22px 24px;">
-                        <div style="font-family:var(--font-head);font-size:13px;color:var(--c-main);margin-bottom:12px;letter-spacing:1px;">🍊 МОНЕТЫ</div>
-                        <div style="color:rgba(255,255,255,0.75);font-size:14px;line-height:1.8;font-family:var(--font-body);">
-                            Монеты зарабатываются в мирах — просто играй и они идут сами.<br>
-                            Трать монеты в <b style="color:#FF9800">Магазине</b> на одежду и аксессуары для аватара.<br>
-                            Можно занять монеты у друзей через <b style="color:#FF9800">Кредиты</b>.<br>
-                            Испытай удачу в <b style="color:#FF9800">Рулетке</b> — шанс умножить монеты!
-                        </div>
+                    <div style="background:rgba(255,149,0,0.05);border:1px solid rgba(255,149,0,0.12);border-radius:16px;padding:20px 22px;">
+                        <div style="font-family:var(--font-head);font-size:12px;color:#4ADE80;margin-bottom:10px;letter-spacing:1px;">🎰 РУЛЕТКА</div>
+                        <div style="color:rgba(255,255,255,0.72);font-size:13.5px;line-height:1.85;font-family:var(--font-body);">Поставь цитрусы и крути рулетку — можно умножить цитрусы в несколько раз! Чем больше ставишь — тем выше риск и награда. Используй с умом.</div>
                     </div>
-
-                    <div style="background:rgba(255,149,0,0.06);border:1px solid rgba(255,149,0,0.15);border-radius:16px;padding:22px 24px;">
-                        <div style="font-family:var(--font-head);font-size:13px;color:var(--c-main);margin-bottom:12px;letter-spacing:1px;">👤 АВАТАР</div>
-                        <div style="color:rgba(255,255,255,0.75);font-size:14px;line-height:1.8;font-family:var(--font-body);">
-                            Кастомизируй своего персонажа во вкладке <b style="color:#FF9800">Аватар</b>.<br>
-                            Меняй цвет тела, надевай шляпы, очки и другие аксессуары.<br>
-                            Новые вещи покупаются в <b style="color:#FF9800">Магазине</b> за монеты.
-                        </div>
+                    <div style="background:rgba(255,149,0,0.05);border:1px solid rgba(255,149,0,0.12);border-radius:16px;padding:20px 22px;">
+                        <div style="font-family:var(--font-head);font-size:12px;color:#FF9500;margin-bottom:10px;letter-spacing:1px;">💰 КРЕДИТЫ</div>
+                        <div style="color:rgba(255,255,255,0.72);font-size:13.5px;line-height:1.85;font-family:var(--font-body);">Одолжи цитрусы у другого игрока или дай в долг сам. Удобно если цитрусы кончились а хочется купить в магазине. Договаривайся с друзьями!</div>
                     </div>
-
-                    <div style="background:rgba(255,149,0,0.06);border:1px solid rgba(255,149,0,0.15);border-radius:16px;padding:22px 24px;">
-                        <div style="font-family:var(--font-head);font-size:13px;color:var(--c-main);margin-bottom:12px;letter-spacing:1px;">👥 ДРУЗЬЯ И ЧАТЫ</div>
-                        <div style="color:rgba(255,255,255,0.75);font-size:14px;line-height:1.8;font-family:var(--font-body);">
-                            Добавляй друзей по тегу во вкладке <b style="color:#FF9800">Друзья</b>.<br>
-                            Тег выглядит так: <b style="color:#FF9800">Ник#1234</b> — найди свой тег внизу вкладки.<br>
-                            Пиши другу напрямую — нажми 💬 рядом с его именем.<br>
-                            Дари друзьям подарки и НФТ через вкладки <b style="color:#FF9800">Подарки</b> и <b style="color:#FF9800">НФТ</b>.
-                        </div>
+                    <div style="background:rgba(255,149,0,0.05);border:1px solid rgba(255,149,0,0.12);border-radius:16px;padding:20px 22px;">
+                        <div style="font-family:var(--font-head);font-size:12px;color:#F472B6;margin-bottom:10px;letter-spacing:1px;">🎁 ПОДАРКИ и НФТ</div>
+                        <div style="color:rgba(255,255,255,0.72);font-size:13.5px;line-height:1.85;font-family:var(--font-body);">Дари предметы и НФТ-подарки друзьям просто так или за заслуги. НФТ можно продавать и покупать между игроками. Редкие НФТ стоят дорого — следи за рынком!</div>
                     </div>
-
-                    <div style="background:rgba(255,149,0,0.06);border:1px solid rgba(255,149,0,0.15);border-radius:16px;padding:22px 24px;">
-                        <div style="font-family:var(--font-head);font-size:13px;color:var(--c-main);margin-bottom:12px;letter-spacing:1px;">🏆 ЗАДАНИЯ И ТОП</div>
-                        <div style="color:rgba(255,255,255,0.75);font-size:14px;line-height:1.8;font-family:var(--font-body);">
-                            Выполняй ежедневные задания — они дают бонусные монеты.<br>
-                            Смотри таблицу лучших игроков во вкладке <b style="color:#FF9800">Топ</b>.<br>
-                            Студия позволяет создавать собственные миры.
-                        </div>
+                    <div style="background:rgba(255,149,0,0.05);border:1px solid rgba(255,149,0,0.12);border-radius:16px;padding:20px 22px;">
+                        <div style="font-family:var(--font-head);font-size:12px;color:#4ADE80;margin-bottom:10px;letter-spacing:1px;">🎯 ЗАДАНИЯ</div>
+                        <div style="color:rgba(255,255,255,0.72);font-size:13.5px;line-height:1.85;font-family:var(--font-body);">Каждый день появляются новые задания — выполняй и получай бонусные цитрусы 🍊. Задания разные: прыгать, посещать миры, играть с друзьями. Всё выполнено — жди следующего дня!</div>
                     </div>
-
-                    <div style="background:rgba(0,229,255,0.05);border:1px solid rgba(0,229,255,0.12);border-radius:16px;padding:18px 24px;text-align:center;">
-                        <div style="color:rgba(0,229,255,0.6);font-size:12px;font-family:var(--font-head);letter-spacing:2px;">CITRUS ONLINE v1.0</div>
-                        <div style="color:rgba(255,255,255,0.3);font-size:12px;margin-top:6px;font-family:var(--font-body);">Если что-то непонятно — спроси в чате или у друзей 🍊</div>
+                    <div style="background:rgba(255,149,0,0.05);border:1px solid rgba(255,149,0,0.12);border-radius:16px;padding:20px 22px;">
+                        <div style="font-family:var(--font-head);font-size:12px;color:#FFD700;margin-bottom:10px;letter-spacing:1px;">🏆 ТОП ИГРОКОВ</div>
+                        <div style="color:rgba(255,255,255,0.72);font-size:13.5px;line-height:1.85;font-family:var(--font-body);">Таблица лучших по балансу монет. Топ-3 — на пьедестале. Копи цитрусы и попади в лидеры! Ежедневный турнир: кто соберёт больше всех 🍊 за день — получает приз.</div>
                     </div>
-
+                    <div style="background:rgba(255,149,0,0.05);border:1px solid rgba(255,149,0,0.12);border-radius:16px;padding:20px 22px;">
+                        <div style="font-family:var(--font-head);font-size:12px;color:#FF9500;margin-bottom:10px;letter-spacing:1px;">🎨 СТУДИЯ</div>
+                        <div style="color:rgba(255,255,255,0.72);font-size:13.5px;line-height:1.85;font-family:var(--font-body);">Создавай собственные миры из блоков. Строй что хочешь — платформы, лабиринты, арены. Готовый мир появится в списке миров игроков и другие смогут зайти.</div>
+                    </div>
+                    <div style="background:rgba(255,149,0,0.05);border:1px solid rgba(255,149,0,0.12);border-radius:16px;padding:20px 22px;">
+                        <div style="font-family:var(--font-head);font-size:12px;color:#38BDF8;margin-bottom:10px;letter-spacing:1px;">📊 СТАТИСТИКА</div>
+                        <div style="color:rgba(255,255,255,0.72);font-size:13.5px;line-height:1.85;font-family:var(--font-body);">Общая статистика игры: сколько зарегистрировалось, сессий, кто онлайн. Графики активности и популярности миров. Интересно посмотреть как растёт игра!</div>
+                    </div>
+                    <div style="background:rgba(0,229,255,0.04);border:1px solid rgba(0,229,255,0.1);border-radius:16px;padding:18px 22px;text-align:center;grid-column:1/-1;">
+                        <div style="color:rgba(0,229,255,0.5);font-size:11px;font-family:var(--font-head);letter-spacing:2px;margin-bottom:6px;">CITRUS ONLINE</div>
+                        <div style="color:rgba(255,255,255,0.25);font-size:12px;font-family:var(--font-body);">Зови друзей, собирай цитрусы, становись легендой 🍊</div>
+                    </div>
                 </div>
             </div>
 
             <!-- ══════════════════ TAB: GAMES ══════════════════ -->
             <div id="tab-games">
+                <!-- Баннер ежедневного турнира -->
+                <div id="daily-banner" onclick="app.switchTab('leaderboard')" style="
+                    background:linear-gradient(135deg,rgba(255,149,0,0.12),rgba(255,60,0,0.08));
+                    border:1px solid rgba(255,149,0,0.25);border-radius:18px;
+                    padding:16px 22px;margin-bottom:22px;cursor:pointer;
+                    display:flex;align-items:center;justify-content:space-between;
+                    transition:all 0.2s;position:relative;overflow:hidden;">
+                    <div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,149,0,0.04),transparent);animation:shimmer 3s infinite;pointer-events:none;"></div>
+                    <div>
+                        <div style="font-family:var(--font-head);font-size:11px;color:rgba(255,149,0,0.5);letter-spacing:2px;margin-bottom:4px;">ЕЖЕДНЕВНЫЙ ТУРНИР</div>
+                        <div style="font-size:17px;font-weight:800;font-family:var(--font-body);">🏆 Кто соберёт больше <span style="color:#FF9500;">🍊</span> за день?</div>
+                        <div style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:3px;" id="tournament-timer">Обновляется каждые 24ч</div>
+                    </div>
+                    <div style="text-align:right;flex-shrink:0;margin-left:16px;">
+                        <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-bottom:2px;">Приз дня</div>
+                        <div style="font-size:22px;font-weight:900;font-family:var(--font-head);color:#FFB74D;" id="tournament-prize">15000 🍊</div>
+                        <div style="font-size:10px;color:rgba(255,149,0,0.5);margin-top:2px;">→ Смотреть топ</div>
+                    </div>
+                </div>
                 <div class="section-title">Официальные миры</div>
                 <div class="grid" style="margin-bottom:32px;">
 
@@ -2383,7 +2468,7 @@ const app = {
         const days = parseInt(document.getElementById('credit-days').value);
         if(!amount || amount < 1000 || amount > 100000){ this.showNotif('❌','Ошибка','Сумма от 1000 до 100000 🍊'); return; }
         if(!days || days < 10 || days > 60){ this.showNotif('❌','Ошибка','Выбери срок'); return; }
-        if(this.balance < amount){ this.showNotif('❌','Мало монет',`Нужно ${amount} 🍊`); return; }
+        if(this.balance < amount){ this.showNotif('❌','Мало цитрусов',`Нужно ${amount} 🍊`); return; }
         try {
             const res = await fetch(this._API + '/credits', {
                 method:'POST', headers:{'Content-Type':'application/json'},
@@ -2426,7 +2511,7 @@ const app = {
             const myBorrow = (checkData.borrows||[]).find(b=>String(b.borrowerId)===String(this.userId));
             if(!myBorrow){ this.showNotif('❌','Ошибка','Нет долга'); return; }
             if(this.balance < myBorrow.amount){
-                this.showNotif('❌','Мало монет',`Нужно ${myBorrow.amount} 🍊 для погашения`); return;
+                this.showNotif('❌','Мало цитрусов',`Нужно ${myBorrow.amount} 🍊 для погашения`); return;
             }
             // Deduct from borrower first
             this.balance -= myBorrow.amount;
@@ -2520,7 +2605,7 @@ const app = {
 
     spinRoulette(){
         const used = this.rouletteUsed || false;
-        if(used && this.balance < 50){ this.showNotif('💸','Мало монет','Нужно 50 🍊 для спина'); return; }
+        if(used && this.balance < 50){ this.showNotif('💸','Мало цитрусов','Нужно 50 🍊 для спина'); return; }
         if(used){ this.balance -= 50; this.saveData(); const bv=document.getElementById('balance-val'); if(bv)bv.textContent=this.balance; }
         const btn = document.getElementById('roulette-btn');
         const result = document.getElementById('roulette-result');
@@ -2789,7 +2874,7 @@ const app = {
         const amount=parseInt(document.getElementById('gift-amount')?.value||'0');
         if(!amount||amount<1||amount>100000){ this.showNotif('❌','Ошибка','Сумма от 1 до 100 000 🍊'); return; }
         if(!this._giftSelectedId){ this.showNotif('❌','Выбери друга','Нажми на имя друга выше'); return; }
-        if(this.balance<amount){ this.showNotif('❌','Мало монет',`Нужно ${amount} 🍊, у тебя ${this.balance}`); return; }
+        if(this.balance<amount){ this.showNotif('❌','Мало цитрусов',`Нужно ${amount} 🍊, у тебя ${this.balance}`); return; }
         this.balance-=amount; this.saveData();
         document.getElementById('balance-val').textContent=this.balance;
         try{
@@ -3671,7 +3756,26 @@ const app = {
         } catch(e) {}
         document.getElementById('ui-login').classList.add('hidden');
         document.getElementById('ui-hub').classList.remove('hidden');
+        // Музыка хаба — сразу или по первому действию
+        this._initAudio();
+        const _tryMusic = () => {
+            if(this._ac && this._ac.state==='suspended') this._ac.resume().then(()=>{ if(!this._musicPlaying) this.startHubMusic(); });
+            else if(!this._musicPlaying) this.startHubMusic();
+            document.removeEventListener('click',_tryMusic);
+            document.removeEventListener('keydown',_tryMusic);
+            document.removeEventListener('touchstart',_tryMusic);
+        };
+        setTimeout(()=>{
+            if(this._ac && this._ac.state!=='suspended'){ this.startHubMusic(); }
+            else { document.addEventListener('click',_tryMusic); document.addEventListener('keydown',_tryMusic); document.addEventListener('touchstart',_tryMusic); }
+        },200);
         // Открываем группу вкладок сразу
+        this._startTournamentTimer();
+        // Запускаем поллинг глобального чата
+        if(!this._gchatPollInterval){
+            this._pollGlobalChat();
+            this._gchatPollInterval=setInterval(()=>this._pollGlobalChat(),4000);
+        }
         const gi=document.getElementById('nav-group-items');
         const ga=document.getElementById('nav-group-arrow');
         if(gi){gi.classList.add('open');} if(ga){ga.classList.add('open');}
@@ -3799,7 +3903,582 @@ const app = {
 
     // ── TABS
 
-        toggleNavGroup(){
+    
+    // ── ГЛОБАЛЬНЫЙ ЧАТ
+    _gchatMessages: [],
+    _gchatPollInterval: null,
+    _gchatLastCount: 0,
+
+    async sendGlobalChat(){
+        const inp=document.getElementById('gchat-input');
+        if(!inp) return;
+        const text=inp.value.trim();
+        if(!text) return;
+        inp.value='';
+        // Показываем сразу локально
+        const msg={from:String(this.userId),name:this.username||'Игрок',text,time:Date.now()};
+        this._gchatMessages.push(msg);
+        this._renderGlobalChat();
+        // Шлём на сервер
+        try{
+            await fetch(this._API+'/dm/global_chat',{method:'POST',
+                headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({from:String(this.userId),fromName:this.username||'Игрок',text})});
+        }catch(e){}
+        // Обновляем аватар в поле ввода
+        this._updateGchatMyAvatar();
+    },
+
+    async _pollGlobalChat(){
+        try{
+            const r=await fetch(this._API+'/dm/global_chat');
+            if(!r.ok) return;
+            const data=await r.json();
+            if(data&&data.messages){
+                const newMsgs=data.messages.slice(-100);
+                const hadNew=newMsgs.length>this._gchatLastCount;
+                this._gchatMessages=newMsgs;
+                this._gchatLastCount=newMsgs.length;
+                this._renderGlobalChat(hadNew);
+            }
+        }catch(e){}
+    },
+
+    _gchatColor(id){
+        // Стабильный яркий цвет по ID
+        const colors=['#FF6B6B','#FF9F43','#FECA57','#48DBFB','#FF9FF3','#54A0FF','#5F27CD','#00D2D3','#1DD1A1','#C8D6E5'];
+        return colors[Math.abs(parseInt(id||0))%colors.length];
+    },
+
+    _updateGchatMyAvatar(){
+        const av=document.getElementById('gchat-my-avatar');
+        if(!av||!this.username) return;
+        const c=this._gchatColor(this.userId);
+        av.textContent=(this.username[0]||'?').toUpperCase();
+        av.style.background=c+'22';
+        av.style.color=c;
+    },
+
+    _renderGlobalChat(scrollToBottom){
+        const box=document.getElementById('gchat-msgs');
+        if(!box) return;
+        const msgs=this._gchatMessages||[];
+        // Обновляем аватар
+        this._updateGchatMyAvatar();
+        // Скрываем заглушку
+        const empty=document.getElementById('gchat-empty');
+        if(empty) empty.style.display=msgs.length?'none':'block';
+        // Рендерим сообщения
+        const wasAtBottom=box.scrollHeight-box.scrollTop-box.clientHeight<60;
+        box.innerHTML=(msgs.length?'':'')+ msgs.map(m=>{
+            const name=m.name||m.fromName||'Игрок';
+            const mine=String(m.from)===String(this.userId)||name===this.username;
+            const color=this._gchatColor(m.from);
+            const initial=name[0].toUpperCase();
+            const t=new Date(m.time||Date.now());
+            const ts=t.getHours().toString().padStart(2,'0')+':'+t.getMinutes().toString().padStart(2,'0');
+            // Роль
+            const base=name.toLowerCase().split('#')[0].trim();
+            let badge='';
+            if(this.isOwner(base)) badge=`<span style="font-size:9px;background:rgba(255,215,0,0.15);color:#FFD700;border-radius:6px;padding:1px 5px;margin-left:4px;font-family:var(--font-head);">DEV</span>`;
+            else if(this.isAdmin(base)) badge=`<span style="font-size:9px;background:rgba(79,195,247,0.15);color:#4fc3f7;border-radius:6px;padding:1px 5px;margin-left:4px;font-family:var(--font-head);">ADMIN</span>`;
+            const safeText=(m.text||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            if(mine){
+                return `<div style="display:flex;flex-direction:row-reverse;gap:8px;align-items:flex-end;margin-bottom:2px;">
+                    <div style="width:28px;height:28px;border-radius:9px;background:${color}25;color:${color};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;font-family:var(--font-head);flex-shrink:0;">${initial}</div>
+                    <div style="max-width:72%;background:linear-gradient(135deg,rgba(255,149,0,0.15),rgba(224,80,0,0.08));border:1px solid rgba(255,149,0,0.2);border-radius:14px 2px 14px 14px;padding:8px 12px;">
+                        <div style="font-size:10px;color:${color};font-weight:700;font-family:var(--font-body);margin-bottom:3px;">Ты${badge}</div>
+                        <div style="font-size:13.5px;font-family:var(--font-body);line-height:1.4;color:rgba(255,255,255,0.9);">${safeText}</div>
+                        <div style="font-size:10px;color:rgba(255,255,255,0.2);margin-top:3px;text-align:right;">${ts} ✓</div>
+                    </div>
+                </div>`;
+            } else {
+                return `<div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:2px;">
+                    <div style="width:28px;height:28px;border-radius:9px;background:${color}25;color:${color};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;font-family:var(--font-head);flex-shrink:0;">${initial}</div>
+                    <div style="max-width:72%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:2px 14px 14px 14px;padding:8px 12px;">
+                        <div style="font-size:10px;color:${color};font-weight:700;font-family:var(--font-body);margin-bottom:3px;">${name}${badge}</div>
+                        <div style="font-size:13.5px;font-family:var(--font-body);line-height:1.4;color:rgba(255,255,255,0.88);">${safeText}</div>
+                        <div style="font-size:10px;color:rgba(255,255,255,0.2);margin-top:3px;">${ts}</div>
+                    </div>
+                </div>`;
+            }
+        }).join('');
+        // Онлайн бейдж
+        const ob=document.getElementById('gchat-online-count');
+        if(ob) ob.textContent=(this._onlineCount||1)+' онлайн';
+        // Скролл вниз если был внизу или новые сообщения
+        if(wasAtBottom||scrollToBottom) box.scrollTop=box.scrollHeight;
+    },
+
+    // ── КЕЙСЫ
+    openCase(type){
+        const costs={citrus:1000,premium:15000,legend:50000,mythic:100000,divine:500000,galactic:1000000};
+        const cost=costs[type]||100;
+        if(this.balance<cost){this.showNotif('❌','Мало цитрусов','Нужно '+cost+' 🍊');return;}
+
+        const rewards={
+            citrus:[
+                {emoji:'🍊',name:'50 цитрусов',sub:'Бонус цитрусами',coins:50},
+                {emoji:'🍊',name:'100 цитрусов',sub:'Бонус цитрусами',coins:100},
+                {emoji:'🍊',name:'25 цитрусов',sub:'Бонус цитрусами',coins:25},
+                {emoji:'🎩',name:'Шляпа',sub:'Аксессуар для аватара',item:'hat'},
+                {emoji:'😎',name:'Очки',sub:'Аксессуар для аватара',item:'glasses'},
+                {emoji:'🍊',name:'200 цитрусов',sub:'Большой куш!',coins:200},
+            ],
+            premium:[
+                {emoji:'👑',name:'Корона',sub:'Редкий аксессуар',item:'crown'},
+                {emoji:'🦋',name:'Крылья',sub:'Редкий аксессуар',item:'wings'},
+                {emoji:'🎭',name:'Маска',sub:'Редкий аксессуар',item:'mask'},
+                {emoji:'🍊',name:'300 цитрусов',sub:'Бонус цитрусами',coins:300},
+                {emoji:'⚔️',name:'Меч',sub:'Редкое оружие',item:'sword'},
+                {emoji:'💜',name:'1000 цитрусов',sub:'Джекпот!',coins:1000},
+            ],
+            legend:[
+                {emoji:'🌈',name:'Радуга',sub:'Легендарный эффект',item:'rainbow'},
+                {emoji:'🔥',name:'Пламя',sub:'Легендарный эффект',item:'flame'},
+                {emoji:'⭐',name:'Звёзды',sub:'Легендарный шлейф',item:'star'},
+                {emoji:'👑',name:'5000 цитрусов',sub:'Легендарный куш!',coins:5000},
+                {emoji:'💎',name:'Кристальный посох',sub:'Легендарное оружие',item:'gem'},
+                {emoji:'🤖',name:'Робот-маска',sub:'Легендарный скин',item:'robot'},
+            ],
+            mythic:[
+                {emoji:'🧬',name:'Инопланетный шлем',sub:'Мифический скин',item:'alien'},
+                {emoji:'😈',name:'Рога дьявола',sub:'Мифический эффект',item:'devil'},
+                {emoji:'🧙',name:'Шляпа волшебника',sub:'Мифический аксессуар',item:'wizard'},
+                {emoji:'😇',name:'Ангельский нимб',sub:'Мифический эффект',item:'halo'},
+                {emoji:'🍊',name:'20 000 цитрусов',sub:'Мифический куш!',coins:20000},
+                {emoji:'🦸',name:'Плащ тьмы',sub:'Мифический плащ',item:'cape'},
+                {emoji:'🛡',name:'Щит героя',sub:'Мифическое оружие',item:'shield'},
+            ],
+            divine:[
+                {emoji:'⚡',name:'Ледяная аура',sub:'Божественный эффект',item:'ice'},
+                {emoji:'🌌',name:'Радужный шлейф',sub:'Божественный эффект',item:'rainbow'},
+                {emoji:'🔱',name:'Звёздный шлейф',sub:'Божественный эффект',item:'star'},
+                {emoji:'💫',name:'Огненный ореол',sub:'Божественный эффект',item:'flame'},
+                {emoji:'🍊',name:'100 000 цитрусов',sub:'Божественный куш!!',coins:100000},
+                {emoji:'🌟',name:'Все легендарные вещи',sub:'Полный набор!',multi:['rainbow','flame','star','gem','robot','alien']},
+            ],
+            galactic:[
+                {emoji:'🌌',name:'200 000 цитрусов',sub:'Галактический куш!!!',coins:200000},
+                {emoji:'🪐',name:'500 000 цитрусов',sub:'Межгалактический джекпот!',coins:500000},
+                {emoji:'🍊',name:'1 000 000 цитрусов',sub:'МАКСИМАЛЬНЫЙ ДЖЕКПОТ!!!',coins:1000000},
+                {emoji:'✨',name:'Весь инвентарь',sub:'Абсолютно все вещи в игре!',all:true},
+                {emoji:'🚀',name:'Галактический набор',sub:'Все мифические + легендарные',multi:['rainbow','flame','star','gem','robot','alien','devil','wizard','halo','cape','shield','ice']},
+            ]
+        };
+
+        this.balance-=cost;
+        const pool=rewards[type]||rewards.citrus;
+        const prize=pool[Math.floor(Math.random()*pool.length)];
+
+        if(prize.coins) this.balance+=prize.coins;
+        if(prize.item&&!this.inventory.includes(prize.item)) this.inventory.push(prize.item);
+        if(prize.multi) prize.multi.forEach(i=>{if(!this.inventory.includes(i))this.inventory.push(i);});
+        if(prize.all){const allItems=['hat','glasses','crown','wings','sword','mask','cape','headphones','medal','flame','ice','star','rainbow','robot','alien','gem','shield','bow','devil','halo','hair_short','hair_long','hair_spiky','detective','santa','wizard','party','macaroni','tvhead'];allItems.forEach(i=>{if(!this.inventory.includes(i))this.inventory.push(i);});}
+        this.saveData();
+        this.updateBalance();
+
+        // Показываем оверлей
+        const ov=document.getElementById('case-overlay');
+        document.getElementById('case-emoji').textContent=prize.emoji;
+        document.getElementById('case-prize-name').textContent=prize.name;
+        document.getElementById('case-prize-sub').textContent=prize.sub;
+        this._sfx('case');if(ov){ov.style.display='flex';}
+    },
+
+    // ── ТУРНИР ТАЙМЕР
+    _startTournamentTimer(){
+        const update=()=>{
+            const el=document.getElementById('tournament-timer');
+            if(!el) return;
+            const now=new Date();
+            const tomorrow=new Date(now);
+            tomorrow.setHours(24,0,0,0);
+            const diff=Math.floor((tomorrow-now)/1000);
+            const h=Math.floor(diff/3600),m=Math.floor((diff%3600)/60),s=diff%60;
+            el.textContent='⏱ До сброса: '+h+'ч '+m.toString().padStart(2,'0')+'м '+s.toString().padStart(2,'0')+'с';
+        };
+        update();
+        setInterval(update,1000);
+    },
+
+    
+    // ════════════════════════════════════
+    // 🎵 AUDIO SYSTEM
+    // ════════════════════════════════════
+    _ac: null,
+    _musicNodes: [],
+    _musicGain: null,
+    _sfxGain: null,
+    _musicPlaying: false,
+    _musicScheduled: [],
+    _musicMuted: false,
+
+    _toggleMusic(){
+        this._musicMuted=!this._musicMuted;
+        const btn=document.getElementById('music-toggle');
+        if(this._musicMuted){
+            if(this._musicGain) this._musicGain.gain.setTargetAtTime(0,this._ac.currentTime,0.5);
+            if(btn) btn.textContent='🔇';
+        } else {
+            if(this._musicGain) this._musicGain.gain.setTargetAtTime(0.13,this._ac.currentTime,0.5);
+            if(btn) btn.textContent='🎵';
+        }
+    },
+
+    _initAudio(){
+        if(this._ac) return;
+        try{
+            this._ac = new (window.AudioContext||window.webkitAudioContext)();
+            this._musicGain = this._ac.createGain();
+            this._musicGain.gain.value = 0.13;
+            // Реверб для музыки
+            this._musicReverb = this._ac.createConvolver();
+            const rLen = this._ac.sampleRate * 1.5;
+            const rBuf = this._ac.createBuffer(2, rLen, this._ac.sampleRate);
+            for(let c=0;c<2;c++){const d=rBuf.getChannelData(c);for(let i=0;i<rLen;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/rLen,2);}
+            this._musicReverb.buffer = rBuf;
+            const reverbGain = this._ac.createGain(); reverbGain.gain.value = 0.25;
+            this._musicGain.connect(this._musicReverb); this._musicReverb.connect(reverbGain); reverbGain.connect(this._ac.destination);
+            this._musicGain.connect(this._ac.destination);
+            this._sfxGain = this._ac.createGain();
+            this._sfxGain.gain.value = 0.28;
+            this._sfxGain.connect(this._ac.destination);
+        }catch(e){}
+    },
+
+    _sfx(type){
+        this._initAudio();
+        if(!this._ac) return;
+        const ctx = this._ac;
+        const now = ctx.currentTime;
+
+        if(type==='click'){
+            // Мягкий современный клик
+            const o=ctx.createOscillator(); o.type='sine';
+            o.frequency.setValueAtTime(1000,now); o.frequency.exponentialRampToValueAtTime(700,now+0.07);
+            const g=ctx.createGain(); g.gain.setValueAtTime(0.18,now); g.gain.exponentialRampToValueAtTime(0.001,now+0.09);
+            o.connect(g); g.connect(this._sfxGain); o.start(now); o.stop(now+0.09);
+        } else if(type==='nav'){
+            // Тихий приятный тик
+            const o=ctx.createOscillator(); o.type='sine';
+            o.frequency.setValueAtTime(1400,now); o.frequency.exponentialRampToValueAtTime(1000,now+0.05);
+            const g=ctx.createGain(); g.gain.setValueAtTime(0.1,now); g.gain.exponentialRampToValueAtTime(0.001,now+0.06);
+            o.connect(g); g.connect(this._sfxGain); o.start(now); o.stop(now+0.06);
+        } else if(type==='launch'){
+            // Красивый вход — нарастающий аккорд
+            [261,329,392,523].forEach((freq,i)=>{
+                const o=ctx.createOscillator(); o.type='sine'; o.frequency.value=freq;
+                const g=ctx.createGain();
+                g.gain.setValueAtTime(0,now+i*0.05);
+                g.gain.linearRampToValueAtTime(0.12,now+i*0.05+0.08);
+                g.gain.exponentialRampToValueAtTime(0.001,now+i*0.05+0.5);
+                o.connect(g); g.connect(this._sfxGain); o.start(now+i*0.05); o.stop(now+i*0.05+0.5);
+            });
+        } else if(type==='exit'){
+            // Плавный выход
+            [523,392,329,261].forEach((freq,i)=>{
+                const o=ctx.createOscillator(); o.type='sine'; o.frequency.value=freq;
+                const g=ctx.createGain();
+                g.gain.setValueAtTime(0.1,now+i*0.04);
+                g.gain.exponentialRampToValueAtTime(0.001,now+i*0.04+0.3);
+                o.connect(g); g.connect(this._sfxGain); o.start(now+i*0.04); o.stop(now+i*0.04+0.3);
+            });
+        } else if(type==='coin'){
+            // Приятный звон монеты
+            [1318,1760].forEach((freq,i)=>{
+                const o=ctx.createOscillator(); o.type='sine'; o.frequency.value=freq;
+                const g=ctx.createGain();
+                g.gain.setValueAtTime(0.18,now+i*0.06); g.gain.exponentialRampToValueAtTime(0.001,now+i*0.06+0.25);
+                o.connect(g); g.connect(this._sfxGain); o.start(now+i*0.06); o.stop(now+i*0.06+0.25);
+            });
+        } else if(type==='buy'){
+            // Приятный победный звук покупки
+            [523,659,784,1047,1318].forEach((freq,i)=>{
+                const o=ctx.createOscillator(); o.type='sine'; o.frequency.value=freq;
+                const g=ctx.createGain();
+                g.gain.setValueAtTime(0,now+i*0.07); g.gain.linearRampToValueAtTime(0.14,now+i*0.07+0.03);
+                g.gain.exponentialRampToValueAtTime(0.001,now+i*0.07+0.35);
+                o.connect(g); g.connect(this._sfxGain); o.start(now+i*0.07); o.stop(now+i*0.07+0.35);
+            });
+        } else if(type==='error'){
+            // Мягкая ошибка
+            const o=ctx.createOscillator(); o.type='sine';
+            o.frequency.setValueAtTime(300,now); o.frequency.exponentialRampToValueAtTime(150,now+0.18);
+            const g=ctx.createGain(); g.gain.setValueAtTime(0.15,now); g.gain.exponentialRampToValueAtTime(0.001,now+0.2);
+            o.connect(g); g.connect(this._sfxGain); o.start(now); o.stop(now+0.2);
+        } else if(type==='notif'){
+            // Нежное уведомление — три ноты
+            [659,784,1047].forEach((freq,i)=>{
+                const o=ctx.createOscillator(); o.type='sine'; o.frequency.value=freq;
+                const g=ctx.createGain();
+                g.gain.setValueAtTime(0.12,now+i*0.1); g.gain.exponentialRampToValueAtTime(0.001,now+i*0.1+0.22);
+                o.connect(g); g.connect(this._sfxGain); o.start(now+i*0.1); o.stop(now+i*0.1+0.22);
+            });
+        } else if(type==='shoot'){
+            // Чистый выстрел
+            const buf=ctx.createBuffer(1,ctx.sampleRate*0.12,ctx.sampleRate);
+            const d=buf.getChannelData(0);
+            for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/(ctx.sampleRate*0.03));
+            const src=ctx.createBufferSource(); src.buffer=buf;
+            const f=ctx.createBiquadFilter(); f.type='bandpass'; f.frequency.value=1200; f.Q.value=0.8;
+            const g=ctx.createGain(); g.gain.setValueAtTime(0.35,now); g.gain.exponentialRampToValueAtTime(0.001,now+0.12);
+            src.connect(f); f.connect(g); g.connect(this._sfxGain); src.start(now);
+        } else if(type==='hit'){
+            // Мягкий удар
+            const o=ctx.createOscillator(); o.type='sine';
+            o.frequency.setValueAtTime(220,now); o.frequency.exponentialRampToValueAtTime(60,now+0.15);
+            const g=ctx.createGain(); g.gain.setValueAtTime(0.25,now); g.gain.exponentialRampToValueAtTime(0.001,now+0.18);
+            o.connect(g); g.connect(this._sfxGain); o.start(now); o.stop(now+0.18);
+        } else if(type==='jump'){
+            // Лёгкий прыжок — быстрый свист вверх
+            const o=ctx.createOscillator(); o.type='sine';
+            o.frequency.setValueAtTime(400,now); o.frequency.exponentialRampToValueAtTime(900,now+0.1);
+            const g=ctx.createGain(); g.gain.setValueAtTime(0.1,now); g.gain.exponentialRampToValueAtTime(0.001,now+0.12);
+            o.connect(g); g.connect(this._sfxGain); o.start(now); o.stop(now+0.12);
+        } else if(type==='case'){
+            // Открытие кейса — магический звук
+            [523,659,784,1047,1318,1568].forEach((freq,i)=>{
+                const o=ctx.createOscillator(); o.type='sine'; o.frequency.value=freq;
+                const g=ctx.createGain();
+                g.gain.setValueAtTime(0,now+i*0.07); g.gain.linearRampToValueAtTime(0.15,now+i*0.07+0.04);
+                g.gain.exponentialRampToValueAtTime(0.001,now+i*0.07+0.5);
+                o.connect(g); g.connect(this._sfxGain); o.start(now+i*0.07); o.stop(now+i*0.07+0.5);
+            });
+        }
+    },
+
+    // ════ МУЗЫКА — приятный чилл lo-fi ════
+    startHubMusic(){
+        this._initAudio();
+        if(!this._ac||this._musicPlaying) return;
+        this._musicPlaying=true;
+        const ctx=this._ac;
+        if(ctx.state==='suspended') ctx.resume();
+
+        const BPM=75, beat=60/BPM;
+
+        // Мягкая мелодия — пентатоника
+        const melody=[
+            0,523,0,659,784,0,659,523,
+            0,440,0,523,659,0,523,440,
+            0,392,0,523,659,784,659,0,
+            0,523,659,0,784,659,523,0,
+        ];
+        // Тихий бас
+        const bass=[
+            130,0,0,0,130,0,0,0,
+            116,0,0,0,116,0,0,0,
+            98, 0,0,0,98, 0,0,0,
+            130,0,0,0,130,0,0,0,
+        ];
+        // Лёгкие пэды (аккорды)
+        const pads=[
+            [261,329,392], null, null, null, null, null, null, null,
+            [220,277,349], null, null, null, null, null, null, null,
+            [196,247,294], null, null, null, null, null, null, null,
+            [261,329,392], null, null, null, null, null, null, null,
+        ];
+
+        const totalBeats=melody.length;
+        const loopLen=totalBeats*beat*0.5;
+
+        const playLoop=(startTime)=>{
+            if(!this._musicPlaying) return;
+
+            // Мелодия — мягкий синус
+            melody.forEach((freq,i)=>{
+                if(!freq) return;
+                const t=startTime+i*beat*0.5;
+                const o=ctx.createOscillator(); o.type='sine';
+                o.frequency.value=freq;
+                const gn=ctx.createGain();
+                gn.gain.setValueAtTime(0,t);
+                gn.gain.linearRampToValueAtTime(0.09,t+0.04);
+                gn.gain.exponentialRampToValueAtTime(0.001,t+beat*0.6);
+                o.connect(gn); gn.connect(this._musicGain);
+                o.start(t); o.stop(t+beat*0.65);
+            });
+
+            // Бас — мягкий с фильтром
+            bass.forEach((freq,i)=>{
+                if(!freq) return;
+                const t=startTime+i*beat*0.5;
+                const o=ctx.createOscillator(); o.type='triangle';
+                o.frequency.value=freq;
+                const f=ctx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=400; f.Q.value=0.5;
+                const gn=ctx.createGain();
+                gn.gain.setValueAtTime(0,t);
+                gn.gain.linearRampToValueAtTime(0.18,t+0.05);
+                gn.gain.exponentialRampToValueAtTime(0.001,t+beat*0.9);
+                o.connect(f); f.connect(gn); gn.connect(this._musicGain);
+                o.start(t); o.stop(t+beat);
+            });
+
+            // Пэды — долгие мягкие аккорды
+            pads.forEach((chord,i)=>{
+                if(!chord) return;
+                const t=startTime+i*beat*0.5;
+                chord.forEach(freq=>{
+                    const o=ctx.createOscillator(); o.type='sine';
+                    o.frequency.value=freq;
+                    const gn=ctx.createGain();
+                    gn.gain.setValueAtTime(0,t);
+                    gn.gain.linearRampToValueAtTime(0.04,t+0.3);
+                    gn.gain.linearRampToValueAtTime(0.03,t+loopLen/2-0.3);
+                    gn.gain.linearRampToValueAtTime(0,t+loopLen/2);
+                    o.connect(gn); gn.connect(this._musicGain);
+                    o.start(t); o.stop(t+loopLen/2+0.1);
+                });
+            });
+
+            // Лёгкая перкуссия — только тихий хайхэт
+            for(let i=0;i<totalBeats;i++){
+                if(i%2!==0) continue;
+                const t=startTime+i*beat*0.5;
+                const buf=ctx.createBuffer(1,ctx.sampleRate*0.04,ctx.sampleRate);
+                const d=buf.getChannelData(0);
+                for(let j=0;j<d.length;j++) d[j]=(Math.random()*2-1)*Math.exp(-j/(ctx.sampleRate*0.008));
+                const src=ctx.createBufferSource(); src.buffer=buf;
+                const f=ctx.createBiquadFilter(); f.type='highpass'; f.frequency.value=9000;
+                const gn=ctx.createGain(); gn.gain.setValueAtTime(0.04,t); gn.gain.exponentialRampToValueAtTime(0.001,t+0.04);
+                src.connect(f); f.connect(gn); gn.connect(this._musicGain); src.start(t);
+            }
+
+            const nextId=setTimeout(()=>playLoop(startTime+loopLen),(loopLen-0.2)*1000);
+            this._musicScheduled.push(nextId);
+        };
+
+        playLoop(ctx.currentTime+0.1);
+    },
+
+    stopHubMusic(){
+        this._musicPlaying=false;
+        this._musicScheduled.forEach(id=>clearTimeout(id));
+        this._musicScheduled=[];
+        if(this._musicGain){
+            try{
+                this._musicGain.gain.setTargetAtTime(0, this._ac.currentTime, 0.3);
+                setTimeout(()=>{ if(this._musicGain) this._musicGain.gain.value=0.18; },1000);
+            }catch(e){}
+        }
+    },
+
+    // Музыка в игровых мирах
+    startGameMusic(mapId){
+        this._initAudio();
+        if(!this._ac) return;
+        this._musicPlaying=true;
+        const ctx=this._ac;
+        if(ctx.state==='suspended') ctx.resume();
+
+        // Мелодии и настройки для каждого мира
+        const worlds={
+            gather:{
+                bpm:85, melody:[523,659,784,659,523,440,523,0,523,659,784,880,784,659,0,523],
+                bass:[130,0,0,130,0,0,130,0,116,0,0,116,0,0,116,0],
+                wave:'triangle', bassWave:'triangle', vol:0.08, bassVol:0.15,
+            },
+            parkour:{
+                bpm:128, melody:[659,784,880,784,659,523,659,0,784,880,988,880,784,659,784,0],
+                bass:[165,0,165,0,174,0,174,0,196,0,196,0,185,0,185,0],
+                wave:'sawtooth', bassWave:'triangle', vol:0.06, bassVol:0.12,
+            },
+            volcano:{
+                bpm:95, melody:[220,0,246,220,196,0,220,0,174,0,196,174,164,0,174,0],
+                bass:[55,0,0,55,0,0,49,0,0,49,0,0,52,0,0,52],
+                wave:'sawtooth', bassWave:'sawtooth', vol:0.07, bassVol:0.14,
+            },
+            space:{
+                bpm:60, melody:[392,0,440,0,392,0,349,0,329,0,392,0,440,0,0,0],
+                bass:[98,0,0,0,98,0,0,0,87,0,0,0,87,0,0,0],
+                wave:'sine', bassWave:'sine', vol:0.06, bassVol:0.1,
+            },
+            hideseek:{
+                bpm:75, melody:[523,494,440,392,440,494,523,0,523,587,659,587,523,494,440,0],
+                bass:[130,0,0,0,116,0,0,0,130,0,0,0,98,0,0,0],
+                wave:'triangle', bassWave:'triangle', vol:0.07, bassVol:0.13,
+            },
+            dungeon:{
+                bpm:70, melody:[220,0,196,0,174,196,220,0,246,0,220,0,196,174,164,0],
+                bass:[55,0,0,0,49,0,0,0,52,0,0,0,49,0,0,0],
+                wave:'sawtooth', bassWave:'sawtooth', vol:0.07, bassVol:0.14,
+            },
+            pvp:{
+                bpm:140, melody:[440,494,523,587,523,494,440,0,392,440,494,523,494,440,392,0],
+                bass:[110,0,110,0,116,0,116,0,98,0,98,0,110,0,110,0],
+                wave:'square', bassWave:'triangle', vol:0.06, bassVol:0.13,
+            },
+            lobby:{
+                bpm:80, melody:[523,659,784,659,523,0,440,523,587,659,784,659,587,523,0,0],
+                bass:[130,0,0,130,0,0,116,0,0,116,0,0,130,0,0,0],
+                wave:'triangle', bassWave:'triangle', vol:0.08, bassVol:0.14,
+            },
+        };
+        const cfg=worlds[mapId]||worlds.lobby;
+        const beat=60/cfg.bpm;
+        const loopLen=cfg.melody.length*beat*0.5;
+
+        // Реверб для атмосферы
+        const rLen=ctx.sampleRate*1.2;
+        const rBuf=ctx.createBuffer(2,rLen,ctx.sampleRate);
+        for(let c=0;c<2;c++){const d=rBuf.getChannelData(c);for(let i=0;i<rLen;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/rLen,2.5);}
+        const reverb=ctx.createConvolver(); reverb.buffer=rBuf;
+        const rvGain=ctx.createGain(); rvGain.gain.value=0.18;
+        reverb.connect(rvGain); rvGain.connect(this._musicGain);
+
+        const playLoop=(t0)=>{
+            if(!this._musicPlaying) return;
+
+            cfg.melody.forEach((freq,i)=>{
+                if(!freq) return;
+                const t=t0+i*beat*0.5;
+                const o=ctx.createOscillator(); o.type=cfg.wave; o.frequency.value=freq;
+                const f=ctx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=1400;
+                const gn=ctx.createGain();
+                gn.gain.setValueAtTime(0,t);
+                gn.gain.linearRampToValueAtTime(cfg.vol,t+0.03);
+                gn.gain.exponentialRampToValueAtTime(0.001,t+beat*0.55);
+                o.connect(f); f.connect(gn); gn.connect(this._musicGain);
+                o.connect(f); f.connect(reverb);
+                o.start(t); o.stop(t+beat*0.6);
+            });
+
+            cfg.bass.forEach((freq,i)=>{
+                if(!freq) return;
+                const t=t0+i*beat*0.5;
+                const o=ctx.createOscillator(); o.type=cfg.bassWave; o.frequency.value=freq;
+                const f=ctx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=350;
+                const gn=ctx.createGain();
+                gn.gain.setValueAtTime(0,t);
+                gn.gain.linearRampToValueAtTime(cfg.bassVol,t+0.04);
+                gn.gain.exponentialRampToValueAtTime(0.001,t+beat*0.85);
+                o.connect(f); f.connect(gn); gn.connect(this._musicGain);
+                o.start(t); o.stop(t+beat*0.9);
+            });
+
+            // Лёгкий хайхэт только для быстрых миров
+            if(cfg.bpm>=110){
+                for(let i=0;i<cfg.melody.length;i+=2){
+                    const t=t0+i*beat*0.5;
+                    const buf=ctx.createBuffer(1,ctx.sampleRate*0.03,ctx.sampleRate);
+                    const d=buf.getChannelData(0);
+                    for(let j=0;j<d.length;j++) d[j]=(Math.random()*2-1)*Math.exp(-j/(ctx.sampleRate*0.006));
+                    const src=ctx.createBufferSource(); src.buffer=buf;
+                    const hf=ctx.createBiquadFilter(); hf.type='highpass'; hf.frequency.value=10000;
+                    const gn=ctx.createGain(); gn.gain.setValueAtTime(0.03,t);
+                    src.connect(hf); hf.connect(gn); gn.connect(this._musicGain); src.start(t);
+                }
+            }
+
+            const nid=setTimeout(()=>playLoop(t0+loopLen),(loopLen-0.2)*1000);
+            this._musicScheduled.push(nid);
+        };
+
+        playLoop(ctx.currentTime+0.1);
+    },
+
+    toggleNavGroup(){
         const items = document.getElementById('nav-group-items');
         const arrow = document.getElementById('nav-group-arrow');
         if(!items) return;
@@ -3808,7 +4487,8 @@ const app = {
     },
 
         switchTab(id){
-        ['games','avatar','shop','friends','studio','quests','roulette','credits','gifts','nft','stats','leaderboard','admin','help'].forEach(t=>{
+        this._sfx('nav');
+        ['games','avatar','shop','friends','studio','quests','roulette','credits','gifts','nft','stats','leaderboard','admin','help','chat','cases'].forEach(t=>{
             document.getElementById('tab-'+t)?.classList.add('hidden');
             document.getElementById('nav-'+t)?.classList.remove('active');
         });
@@ -3816,6 +4496,8 @@ const app = {
         document.getElementById('nav-'+id)?.classList.add('active');
         if(id==='avatar')this.updateAvatarPreview();
         if(id==='help'){}
+        if(id==='chat'){ this._pollGlobalChat(); }
+        if(id==='cases'){}
         if(id==='games')this.renderMyGames();
         if(id==='quests')this.renderQuests();
         if(id==='roulette')this.initRoulette();
@@ -3866,7 +4548,7 @@ const app = {
             const bv2=document.getElementById('balance-val'); if(bv2) bv2.textContent=this.balance;
             const it=SHOP_ITEMS.find(i=>i.id===id);
             this.showNotif(it.icon,'Куплено!',`${it.name} в гардеробе`);
-        }else this.showNotif('💸','Мало монет',`Нужно ещё ${price-this.balance} 🍊`);
+        }else this.showNotif('💸','Мало цитрусов',`Нужно ещё ${price-this.balance} 🍊`);
     },
     removeItem(id){
         this.inventory = this.inventory.filter(i => i !== id);
@@ -4065,6 +4747,7 @@ const app = {
                 ng._targetRy = msg.ry||0;
                 ng._lastSeen = Date.now();
                 ng._moving = msg.moving||false;
+                ng._animOffset = Math.random()*Math.PI*2;
                 ng._jumping = msg.jumping||false;
                 ng._prevY = other._prevY;
                 this._others[msg.id] = ng;
@@ -4824,16 +5507,31 @@ const app = {
         headGroup.add(new THREE.Mesh(new THREE.BoxGeometry(0.6,0.6,0.6), matSkin));
         const em = new THREE.MeshBasicMaterial({color:0x000000});
         [-0.15,0.15].forEach(x=>{const e=new THREE.Mesh(new THREE.PlaneGeometry(0.1,0.1),em);e.position.set(x,0.05,0.31);headGroup.add(e);});
-        const mo=new THREE.Mesh(new THREE.PlaneGeometry(0.2,0.05),em);mo.position.set(0,-0.15,0.31);headGroup.add(mo);
+        // Улыбка через canvas
+        const smileCanvas=document.createElement('canvas');smileCanvas.width=64;smileCanvas.height=32;
+        const sCtx=smileCanvas.getContext('2d');sCtx.strokeStyle='#000';sCtx.lineWidth=5;sCtx.lineCap='round';
+        sCtx.beginPath();sCtx.arc(32,8,16,0,Math.PI);sCtx.stroke();
+        const smileTex=new THREE.CanvasTexture(smileCanvas);
+        const mo=new THREE.Mesh(new THREE.PlaneGeometry(0.22,0.11),new THREE.MeshBasicMaterial({map:smileTex,transparent:true}));
+        mo.position.set(0,-0.14,0.31);headGroup.add(mo);
         // Руки с ригом
-        const mkLimb=(x,y,mat)=>{
-            const gg=new THREE.Group();
-            const m=new THREE.Mesh(new THREE.BoxGeometry(0.35,1.1,0.35),mat);
-            m.position.y=-0.45; gg.add(m);
-            gg.position.set(x,y,0);torso.add(gg);return gg;
+        const mkArm2=(x,mat)=>{
+            const gg=new THREE.Group(); gg.position.set(x,0.45,0);
+            const up=new THREE.Mesh(new THREE.BoxGeometry(0.3,0.6,0.3),mat); up.position.y=-0.3; gg.add(up);
+            const elb=new THREE.Group(); elb.position.y=-0.6;
+            const lo=new THREE.Mesh(new THREE.BoxGeometry(0.27,0.55,0.27),mat); lo.position.y=-0.25; elb.add(lo);
+            gg.add(elb); gg._elbow=elb; torso.add(gg); return gg;
         };
-        const lA=mkLimb(-0.6,0.5,matSkin),rA=mkLimb(0.6,0.5,matSkin);
-        const lL=mkLimb(-0.22,-0.6,matPants),rL=mkLimb(0.22,-0.6,matPants);
+        const mkLeg2=(x,mat)=>{
+            const gg=new THREE.Group(); gg.position.set(x,-0.6,0);
+            const up=new THREE.Mesh(new THREE.BoxGeometry(0.33,0.6,0.33),mat); up.position.y=-0.3; gg.add(up);
+            const kn=new THREE.Group(); kn.position.y=-0.6;
+            const lo=new THREE.Mesh(new THREE.BoxGeometry(0.3,0.55,0.3),new THREE.MeshStandardMaterial({color:0x222244,roughness:0.8})); lo.position.y=-0.25; kn.add(lo);
+            const ft=new THREE.Mesh(new THREE.BoxGeometry(0.3,0.12,0.4),new THREE.MeshStandardMaterial({color:0x111111,roughness:0.9})); ft.position.set(0.02,-0.58,0.07); kn.add(ft);
+            gg.add(kn); gg._knee=kn; torso.add(gg); return gg;
+        };
+        const lA=mkArm2(-0.57,matSkin),rA=mkArm2(0.57,matSkin);
+        const lL=mkLeg2(-0.21,matPants),rL=mkLeg2(0.21,matPants);
         g._rig={lA,rA,lL,rL};
         g._invKey = inv.join(',');
         g._name = name;
@@ -5006,22 +5704,54 @@ const app = {
         const matSkin =new THREE.MeshStandardMaterial({color:0xffcc99,roughness:0.4});
         const matShirt=new THREE.MeshStandardMaterial({color:0xff5500,roughness:0.7});
         const matPants=new THREE.MeshStandardMaterial({color:0x111133,roughness:0.8});
-        const torso=new THREE.Mesh(new THREE.BoxGeometry(0.8,1.2,0.4),matShirt);
-        torso.position.y=1.4;group.add(torso);
-        const headGroup=new THREE.Group();headGroup.position.y=0.8;torso.add(headGroup);
+        const torso=new THREE.Mesh(new THREE.BoxGeometry(0.8,0.85,0.4),matShirt);
+        torso.position.y=1.35;group.add(torso);
+        const headGroup=new THREE.Group();headGroup.position.y=0.73;torso.add(headGroup);
         headGroup.add(new THREE.Mesh(new THREE.BoxGeometry(0.6,0.6,0.6),matSkin));
         const md=new THREE.MeshBasicMaterial({color:0x000000});
         const eL=new THREE.Mesh(new THREE.PlaneGeometry(0.1,0.1),md);eL.position.set(-0.15,0.05,0.31);headGroup.add(eL);
         const eR=new THREE.Mesh(new THREE.PlaneGeometry(0.1,0.1),md);eR.position.set(0.15,0.05,0.31);headGroup.add(eR);
-        const mo=new THREE.Mesh(new THREE.PlaneGeometry(0.2,0.05),md);mo.position.set(0,-0.15,0.31);headGroup.add(mo);
-        const mkLimb=(x,y,mat)=>{
+        // Улыбка
+        const smC=document.createElement('canvas');smC.width=64;smC.height=40;
+        const smX=smC.getContext('2d');smX.strokeStyle='#000';smX.lineWidth=6;smX.lineCap='round';
+        smX.beginPath();smX.arc(32,6,20,0,Math.PI);smX.stroke();
+        const smT=new THREE.CanvasTexture(smC);
+        const mo=new THREE.Mesh(new THREE.PlaneGeometry(0.28,0.14),new THREE.MeshBasicMaterial({map:smT,transparent:true}));
+        mo.position.set(0,-0.17,0.31);headGroup.add(mo);
+        // Конечности: pivot сверху, меш свисает вниз
+        const mkArm=(x,mat)=>{
             const g=new THREE.Group();
-            const m=new THREE.Mesh(new THREE.BoxGeometry(0.35,1.1,0.35),mat);
-            m.geometry.translate(0,-0.45,0);g.add(m);
-            g.position.set(x,y,0);torso.add(g);return g;
+            // Плечо — pivot на уровне верха руки
+            g.position.set(x, 0.45, 0); // верх торса = 0.6, чуть ниже
+            const upper=new THREE.Mesh(new THREE.BoxGeometry(0.3,0.6,0.3),mat);
+            upper.position.y=-0.3; g.add(upper); // верхняя часть руки
+            // Предплечье — pivot у локтя
+            const elbowG=new THREE.Group(); elbowG.position.y=-0.6;
+            const lower=new THREE.Mesh(new THREE.BoxGeometry(0.27,0.55,0.27),mat);
+            lower.position.y=-0.25; elbowG.add(lower);
+            g.add(elbowG);
+            g._elbow=elbowG;
+            torso.add(g); return g;
         };
-        const lA=mkLimb(-0.6,0.5,matSkin),rA=mkLimb(0.6,0.5,matSkin);
-        const lL=mkLimb(-0.22,-0.6,matPants),rL=mkLimb(0.22,-0.6,matPants);
+        const mkLeg=(x,mat)=>{
+            const g=new THREE.Group();
+            g.position.set(x,-0.44,0); // низ торса
+            const upper=new THREE.Mesh(new THREE.BoxGeometry(0.33,0.6,0.33),mat);
+            upper.position.y=-0.3; g.add(upper);
+            const kneeG=new THREE.Group(); kneeG.position.y=-0.6;
+            const lower=new THREE.Mesh(new THREE.BoxGeometry(0.3,0.55,0.3),
+                new THREE.MeshStandardMaterial({color:0x222244,roughness:0.8}));
+            lower.position.y=-0.25; kneeG.add(lower);
+            // Ступня
+            const foot=new THREE.Mesh(new THREE.BoxGeometry(0.3,0.12,0.4),
+                new THREE.MeshStandardMaterial({color:0x111111,roughness:0.9}));
+            foot.position.set(0.02,-0.58,0.07); kneeG.add(foot);
+            g.add(kneeG);
+            g._knee=kneeG;
+            torso.add(g); return g;
+        };
+        const lA=mkArm(-0.57,matSkin),rA=mkArm(0.57,matSkin);
+        const lL=mkLeg(-0.21,matPants),rL=mkLeg(0.21,matPants);
         
         if(this.inventory.includes('glasses')){
             const g=new THREE.Mesh(new THREE.BoxGeometry(0.65,0.15,0.1),new THREE.MeshStandardMaterial({color:0x111111}));
@@ -5286,37 +6016,39 @@ const app = {
             this._gunGroup=gunGrp;
         }
         if(needsRig)this.rig={leftArm:lA,rightArm:rA,leftLeg:lL,rightLeg:rL,torso,head:headGroup};
+        // Всегда сохраняем _rig для анимации других игроков
+        group._rig={lA,rA,lL,rL,torso,head:headGroup};
         // Ник над головой
         try {
             const canvas = document.createElement('canvas');
-            canvas.width = 256; canvas.height = 64;
+            canvas.width = 256; canvas.height = 44;
             const ctx = canvas.getContext('2d');
-            ctx.fillStyle = 'rgba(0,0,0,0.6)';
-            ctx.roundRect(4,4,248,56,12);
+            ctx.fillStyle = 'rgba(0,0,0,0.65)';
+            ctx.roundRect(4,4,248,36,10);
             ctx.fill();
             const _myBase=(this.username||'').toLowerCase().split('#')[0].trim();
             const _isOwner=this.isOwner(_myBase);
             const _isAdmin=this.isAdmin(_myBase);
             if(_isOwner||_isAdmin){
-                ctx.font='bold 28px Arial';
+                ctx.font='bold 22px Arial';
                 const _nw=ctx.measureText(this.username||'').width;
-                const _sx=128-(_nw+28)/2;
+                const _sx=128-(_nw+24)/2;
                 ctx.fillStyle=this._myColor||'#FF9800';
                 ctx.textAlign='left'; ctx.textBaseline='middle';
-                ctx.fillText(this.username||'',_sx,32);
+                ctx.fillText(this.username||'',_sx,22);
                 ctx.fillStyle=_isOwner?'#FFD700':'#4fc3f7';
-                ctx.font='bold 26px Arial';
-                ctx.fillText(' ✔',_sx+_nw,32);
+                ctx.font='bold 20px Arial';
+                ctx.fillText(' ✔',_sx+_nw,22);
             } else {
                 ctx.fillStyle=this._myColor||'#FF9800';
-                ctx.font='bold 28px Arial';
+                ctx.font='bold 22px Arial';
                 ctx.textAlign='center'; ctx.textBaseline='middle';
-                ctx.fillText(this.username||'',128,32);
+                ctx.fillText(this.username||'',128,22);
             }
             const tex = new THREE.CanvasTexture(canvas);
             const sprite = new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true}));
-            sprite.scale.set(2.2, 0.55, 1);
-            sprite.position.set(0, 3.2, 0);
+            sprite.scale.set(1.8, 0.38, 1);
+            sprite.position.set(0, 3.0, 0);
             group.add(sprite);
         } catch(e) {}
         return group;
@@ -5393,6 +6125,9 @@ const app = {
             }
         }
         this.velocity.set(0,0,0);this.canJump=false;this.loopFn=null;this.spaceGrav=false;
+        this.stopHubMusic();
+        this._sfx('launch');
+        if(mode==='play') setTimeout(()=>this.startGameMusic(mapId),600);
         const wNames={lobby:'Главная Площадь',gather:'Цитрусовый Лес',parkour:'Небесный Паркур',
             volcano:'Остров Вулкана',space:'Космическая База',hideseek:'Прятки',
             pvp:'Арена ПВП',dungeon:'Тёмное Подземелье',march8:'🌸 8 Марта'};
@@ -5511,7 +6246,7 @@ const app = {
     // ── WORLDS
     buildWorld(){
         const addGround=color=>{
-            const g=new THREE.Mesh(new THREE.PlaneGeometry(300,300),new THREE.MeshStandardMaterial({color,roughness:0.9}));
+            const g=new THREE.Mesh(new THREE.PlaneGeometry(300,300),new THREE.MeshStandardMaterial({color,roughness:0.9,side:THREE.DoubleSide}));
             g.rotation.x=-Math.PI/2;g.receiveShadow=true;
             this.scene.add(g);this.objectsToIntersect.push(g);return g;
         };
@@ -5627,7 +6362,7 @@ const app = {
         }
         else if(this.currentMap==='space'){
             this.scene.fog=null;this.spaceGrav=true;
-            const moon=new THREE.Mesh(new THREE.PlaneGeometry(300,300),new THREE.MeshStandardMaterial({color:0x888898,roughness:0.95}));
+            const moon=new THREE.Mesh(new THREE.PlaneGeometry(300,300),new THREE.MeshStandardMaterial({color:0x888898,roughness:0.95,side:THREE.DoubleSide}));
             moon.rotation.x=-Math.PI/2;moon.receiveShadow=true;this.scene.add(moon);this.objectsToIntersect.push(moon);
             for(let i=0;i<20;i++){
                 const cr=new THREE.Mesh(new THREE.CylinderGeometry(2+Math.random()*3,2+Math.random()*3,0.3,16),new THREE.MeshStandardMaterial({color:0x6a6a7a,roughness:1}));
@@ -6064,8 +6799,8 @@ const app = {
     checkGround(pos){
         const rp=pos.clone();rp.y+=0.5;
         this.raycaster.set(rp,new THREE.Vector3(0,-1,0));
-        const hits=this.raycaster.intersectObjects(this.objectsToIntersect);
-        if(hits.length>0&&hits[0].distance<=0.6)return hits[0].point.y;
+        const hits=this.raycaster.intersectObjects(this.objectsToIntersect,true);
+        if(hits.length>0&&hits[0].distance<=1.5)return hits[0].point.y + 0.44;
         return -999;
     },
     checkCollision(pos,moveStep){
@@ -6082,6 +6817,8 @@ const app = {
         if(this._pvpAmmo<=0){this.showNotif('🔫','Патроны кончились!','Следующая обойма через 5 сек');
             setTimeout(()=>{this._pvpAmmo=30;if(this._pvpShowHud)this._pvpShowHud();},5000);return;}
         this._pvpAmmo--;
+        this._pvpRecoil=1.0;
+        this._sfx('shoot');
         if(this._pvpShowHud) this._pvpShowHud();
 
         // Луч от камеры в центр экрана
@@ -6120,7 +6857,7 @@ const app = {
                 hit.object.material.color.set(0xffffff);
                 hit.object.material.emissiveIntensity=2;
                 setTimeout(()=>{hit.object.material.color.set(origColor);hit.object.material.emissiveIntensity=0.4;},200);
-                this.showNotif('🎯','Попадание!','+'+pts+' очков');
+                this._sfx('hit');this.showNotif('🎯','Попадание!','+'+pts+' очков');
             }
         }
     },
@@ -6178,8 +6915,8 @@ const app = {
                 this.canJump = true;
             } else this.canJump = false;
             const jumpH = this.spaceGrav ? 10 : 16;
-            if(this.keys['Space'] && this.canJump){this.velocity.y=jumpH; this.canJump=false; this._questProgress('jumps',1);}
-            if(this.playerGroup.position.y < -25){this.playerGroup.position.set(0,5,0); this.velocity.y=0;}
+            if(this.keys['Space'] && this.canJump){this.velocity.y=jumpH; this.canJump=false; this._sfx('jump'); this._questProgress('jumps',1);}
+            if(this.playerGroup.position.y < -5){this.playerGroup.position.set(0,5,0); this.velocity.y=0;}
 
             if(this._camMode === 'first') {
                 // Вид от первого лица — камера в голове
@@ -6206,7 +6943,7 @@ const app = {
                 const c=this.collectibles[i];
                 c.rotation.y+=2*delta;c.position.y=0.5+Math.sin(time*3+i)*0.2;
                 if(c.position.distanceTo(this.playerGroup.position)<1.6){
-                    this.scene.remove(c);this.collectibles.splice(i,1);this.balance+=10;this.saveData();
+                    this.scene.remove(c);this.collectibles.splice(i,1);this.balance+=10;this.saveData();this._sfx('coin');
                 }
             }
             // Снегопад анимация
@@ -6266,41 +7003,61 @@ const app = {
                 this._wsSend(posData);
             }
 
-            if(this.currentMap==='pvp'){
-                // ПВП — правая рука держит пистолет вперёд
-                const ws=moving&&this.canJump?Math.sin(time*15)*0.3:0;
-                this.rig.rightArm.rotation.x = THREE.MathUtils.lerp(this.rig.rightArm.rotation.x, -1.35, 0.15);
-                this.rig.rightArm.rotation.z = THREE.MathUtils.lerp(this.rig.rightArm.rotation.z||0, -0.18, 0.15);
-                this.rig.leftArm.rotation.x  = THREE.MathUtils.lerp(this.rig.leftArm.rotation.x, -1.0 + ws*0.4, 0.15);
-                this.rig.leftArm.rotation.z  = THREE.MathUtils.lerp(this.rig.leftArm.rotation.z||0, 0.15, 0.15);
-                this.rig.leftLeg.rotation.x  = ws*1.1;
-                this.rig.rightLeg.rotation.x = -ws*1.1;
-                this.rig.torso.rotation.y    = moving ? Math.sin(time*10)*0.04 : 0;
-            } else if(moving&&this.canJump){
-                // Ходьба — руки качаются вперёд/назад в противофазе
-                const s=Math.sin(time*15)*0.65;
-                this.rig.leftArm.rotation.x  =  s * 0.55;
-                this.rig.rightArm.rotation.x = -s * 0.55;
-                this.rig.leftArm.rotation.z  = THREE.MathUtils.lerp(this.rig.leftArm.rotation.z||0, 0, 0.1);
-                this.rig.rightArm.rotation.z = THREE.MathUtils.lerp(this.rig.rightArm.rotation.z||0, 0, 0.1);
-                this.rig.leftLeg.rotation.x  = -s;
-                this.rig.rightLeg.rotation.x =  s;
-                this.rig.torso.rotation.y    = Math.sin(time*10)*0.06;
-            } else if(!this.canJump){
-                // Прыжок
-                this.rig.leftArm.rotation.x  = THREE.MathUtils.lerp(this.rig.leftArm.rotation.x,  -0.3, 0.12);
-                this.rig.rightArm.rotation.x = THREE.MathUtils.lerp(this.rig.rightArm.rotation.x, -0.3, 0.12);
-                this.rig.leftArm.rotation.z  = THREE.MathUtils.lerp(this.rig.leftArm.rotation.z||0,  0.4, 0.12);
-                this.rig.rightArm.rotation.z = THREE.MathUtils.lerp(this.rig.rightArm.rotation.z||0, -0.4, 0.12);
-                this.rig.leftLeg.rotation.x  = THREE.MathUtils.lerp(this.rig.leftLeg.rotation.x,  -0.2, 0.1);
-                this.rig.rightLeg.rotation.x = THREE.MathUtils.lerp(this.rig.rightLeg.rotation.x,   0.1, 0.1);
-            } else {
-                // Стоим
-                ['leftArm','rightArm','leftLeg','rightLeg'].forEach(k=>{
-                    this.rig[k].rotation.x = THREE.MathUtils.lerp(this.rig[k].rotation.x, 0, 0.1);
-                    this.rig[k].rotation.z = THREE.MathUtils.lerp(this.rig[k].rotation.z||0, 0, 0.1);
-                });
-                this.rig.torso.rotation.y = THREE.MathUtils.lerp(this.rig.torso.rotation.y, 0, 0.1);
+            // ── АНИМАЦИИ ИГРОКА
+            {
+                const r = this.rig;
+                const L = THREE.MathUtils.lerp;
+                const sp = time * 11;
+                const s  = Math.sin(sp);
+
+                if(this.currentMap==='pvp'){
+                    const ws = moving&&this.canJump ? s*0.25 : 0;
+                    const recoil = this._pvpRecoil||0;
+                    this._pvpRecoil = L(recoil, 0, 0.2);
+                    r.rightArm.rotation.x = L(r.rightArm.rotation.x, -1.4 + recoil*0.5, 0.2);
+                    r.rightArm.rotation.z = L(r.rightArm.rotation.z||0, -0.12, 0.15);
+                    r.leftArm.rotation.x  = L(r.leftArm.rotation.x, -1.0, 0.15);
+                    r.leftArm.rotation.z  = L(r.leftArm.rotation.z||0, 0.12, 0.15);
+                    r.leftLeg.rotation.x  = L(r.leftLeg.rotation.x,   ws, 0.15);
+                    r.rightLeg.rotation.x = L(r.rightLeg.rotation.x, -ws, 0.15);
+                    r.torso.rotation.y    = L(r.torso.rotation.y, 0, 0.1);
+
+                } else if(moving && this.canJump){
+                    // ХОДЬБА: маятник рук и ног, торс чуть поворачивается
+                    r.leftArm.rotation.x  = L(r.leftArm.rotation.x,  -s*0.65, 0.22);
+                    r.rightArm.rotation.x = L(r.rightArm.rotation.x,  s*0.65, 0.22);
+                    r.leftArm.rotation.z  = L(r.leftArm.rotation.z||0,  0.0, 0.15);
+                    r.rightArm.rotation.z = L(r.rightArm.rotation.z||0, 0.0, 0.15);
+                    r.leftLeg.rotation.x  = L(r.leftLeg.rotation.x,   s*0.7, 0.22);
+                    r.rightLeg.rotation.x = L(r.rightLeg.rotation.x,  -s*0.7, 0.22);
+                    r.torso.rotation.y    = L(r.torso.rotation.y,  Math.cos(sp)*0.05, 0.15);
+                    r.torso.rotation.z    = L(r.torso.rotation.z||0, 0, 0.1);
+                    r.torso.rotation.x    = L(r.torso.rotation.x||0, 0, 0.1);
+
+                } else if(!this.canJump){
+                    // ПРЫЖОК — руки прямо вверх
+                    r.leftArm.rotation.x  = L(r.leftArm.rotation.x,  -2.4, 0.16);
+                    r.rightArm.rotation.x = L(r.rightArm.rotation.x, -2.4, 0.16);
+                    r.leftArm.rotation.z  = L(r.leftArm.rotation.z||0, 0, 0.16);
+                    r.rightArm.rotation.z = L(r.rightArm.rotation.z||0, 0, 0.16);
+                    r.leftLeg.rotation.x  = L(r.leftLeg.rotation.x,   0.4, 0.14);
+                    r.rightLeg.rotation.x = L(r.rightLeg.rotation.x,  0.4, 0.14);
+                    r.torso.rotation.x    = L(r.torso.rotation.x||0, 0, 0.1);
+                    r.torso.rotation.y    = L(r.torso.rotation.y, 0, 0.1);
+                    r.torso.rotation.z    = L(r.torso.rotation.z||0, 0, 0.1);
+
+                } else {
+                    // IDLE — руки прямо вниз, всё статично
+                    r.leftArm.rotation.x  = L(r.leftArm.rotation.x,  0, 0.08);
+                    r.rightArm.rotation.x = L(r.rightArm.rotation.x, 0, 0.08);
+                    r.leftArm.rotation.z  = L(r.leftArm.rotation.z||0, 0, 0.08);
+                    r.rightArm.rotation.z = L(r.rightArm.rotation.z||0, 0, 0.08);
+                    r.leftLeg.rotation.x  = L(r.leftLeg.rotation.x,  0, 0.08);
+                    r.rightLeg.rotation.x = L(r.rightLeg.rotation.x, 0, 0.08);
+                    r.torso.rotation.x    = L(r.torso.rotation.x||0, 0, 0.08);
+                    r.torso.rotation.y    = L(r.torso.rotation.y, 0, 0.08);
+                    r.torso.rotation.z    = L(r.torso.rotation.z||0, 0, 0.08);
+                }
             }
             if(this.loopFn){try{this.loopFn(delta,time);}catch(e){this.loopFn=null;}}
         }
@@ -6347,29 +7104,35 @@ const app = {
                     o.rotation.y += diff * 0.2;
                     // Анимация конечностей
                     if(o._rig) {
-                        const isFalling = (o._velY||0) < -0.05;
-                        if(o._moving && !o._jumping && !isFalling) {
-                            // Бег
-                            const s = Math.sin(time * 15) * 0.8;
-                            o._rig.lA.rotation.x = s;
-                            o._rig.rA.rotation.x = -s;
-                            o._rig.lL.rotation.x = -s;
-                            o._rig.rL.rotation.x = s;
-                        } else if(o._jumping) {
-                            // Прыжок — руки вверх, ноги согнуты
-                            o._rig.lA.rotation.x = THREE.MathUtils.lerp(o._rig.lA.rotation.x, -1.8, 0.2);
-                            o._rig.rA.rotation.x = THREE.MathUtils.lerp(o._rig.rA.rotation.x, -1.8, 0.2);
-                            o._rig.lL.rotation.x = THREE.MathUtils.lerp(o._rig.lL.rotation.x, 0.5, 0.2);
-                            o._rig.rL.rotation.x = THREE.MathUtils.lerp(o._rig.rL.rotation.x, 0.5, 0.2);
-                        } else if(isFalling) {
-                            // Падение — руки в стороны
-                            o._rig.lA.rotation.x = THREE.MathUtils.lerp(o._rig.lA.rotation.x, -0.8, 0.15);
-                            o._rig.rA.rotation.x = THREE.MathUtils.lerp(o._rig.rA.rotation.x, -0.8, 0.15);
-                            o._rig.lL.rotation.x = THREE.MathUtils.lerp(o._rig.lL.rotation.x, 0.3, 0.15);
-                            o._rig.rL.rotation.x = THREE.MathUtils.lerp(o._rig.rL.rotation.x, 0.3, 0.15);
+                        const L = THREE.MathUtils.lerp;
+                        const rig = o._rig;
+                        const sp = time*9 + (o._animOffset||0);
+                        const s  = Math.sin(sp);
+
+                        if(o._moving && !o._jumping){
+                            rig.lA.rotation.x = L(rig.lA.rotation.x, -s*0.55, 0.15);
+                            rig.rA.rotation.x = L(rig.rA.rotation.x,  s*0.55, 0.15);
+                            rig.lA.rotation.z = L(rig.lA.rotation.z||0,  0.12, 0.1);
+                            rig.rA.rotation.z = L(rig.rA.rotation.z||0,-0.12, 0.1);
+                            rig.lL.rotation.x = L(rig.lL.rotation.x,  s*0.65, 0.15);
+                            rig.rL.rotation.x = L(rig.rL.rotation.x, -s*0.65, 0.15);
+                            if(rig.torso) rig.torso.rotation.y = L(rig.torso.rotation.y||0, Math.cos(sp)*0.04, 0.1);
+                        } else if(o._jumping){
+                            rig.lA.rotation.x = L(rig.lA.rotation.x, -0.5, 0.14);
+                            rig.rA.rotation.x = L(rig.rA.rotation.x, -0.5, 0.14);
+                            rig.lA.rotation.z = L(rig.lA.rotation.z||0,  0.65, 0.14);
+                            rig.rA.rotation.z = L(rig.rA.rotation.z||0,-0.65, 0.14);
+                            rig.lL.rotation.x = L(rig.lL.rotation.x, -0.15, 0.1);
+                            rig.rL.rotation.x = L(rig.rL.rotation.x,  0.15, 0.1);
                         } else {
-                            // Стоит — всё в ноль
-                            ['lA','rA','lL','rL'].forEach(k=>o._rig[k].rotation.x=THREE.MathUtils.lerp(o._rig[k].rotation.x,0,0.12));
+                            const idle = Math.sin(time*1.1+(o._animOffset||0))*0.02;
+                            rig.lA.rotation.x = L(rig.lA.rotation.x,  idle, 0.06);
+                            rig.rA.rotation.x = L(rig.rA.rotation.x, -idle, 0.06);
+                            rig.lA.rotation.z = L(rig.lA.rotation.z||0,  0.15, 0.06);
+                            rig.rA.rotation.z = L(rig.rA.rotation.z||0,-0.15, 0.06);
+                            rig.lL.rotation.x = L(rig.lL.rotation.x, 0, 0.07);
+                            rig.rL.rotation.x = L(rig.rL.rotation.x, 0, 0.07);
+                            if(rig.torso) rig.torso.rotation.y = L(rig.torso.rotation.y||0, 0, 0.07);
                         }
                     }
                 }
@@ -6949,6 +7712,9 @@ const app = {
         document.getElementById('ui-hub').classList.remove('hidden');
         if(this.renderer){this.renderer.dispose();this.renderer=null;}
         this.renderMyGames();this.updateUI();
+        this.stopHubMusic();
+        this._sfx('exit');
+        setTimeout(()=>this.startHubMusic(),800);
     }
 };
 
