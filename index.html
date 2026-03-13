@@ -7106,33 +7106,42 @@ const app = {
                     if(o._rig) {
                         const L = THREE.MathUtils.lerp;
                         const rig = o._rig;
-                        const sp = time*9 + (o._animOffset||0);
+                        const sp = time * 11 + (o._animOffset||0);
                         const s  = Math.sin(sp);
 
                         if(o._moving && !o._jumping){
-                            rig.lA.rotation.x = L(rig.lA.rotation.x, -s*0.55, 0.15);
-                            rig.rA.rotation.x = L(rig.rA.rotation.x,  s*0.55, 0.15);
-                            rig.lA.rotation.z = L(rig.lA.rotation.z||0,  0.12, 0.1);
-                            rig.rA.rotation.z = L(rig.rA.rotation.z||0,-0.12, 0.1);
-                            rig.lL.rotation.x = L(rig.lL.rotation.x,  s*0.65, 0.15);
-                            rig.rL.rotation.x = L(rig.rL.rotation.x, -s*0.65, 0.15);
-                            if(rig.torso) rig.torso.rotation.y = L(rig.torso.rotation.y||0, Math.cos(sp)*0.04, 0.1);
+                            // ХОДЬБА — точно как у главного персонажа
+                            rig.lA.rotation.x = L(rig.lA.rotation.x, -s*0.65, 0.22);
+                            rig.rA.rotation.x = L(rig.rA.rotation.x,  s*0.65, 0.22);
+                            rig.lA.rotation.z = L(rig.lA.rotation.z||0, 0, 0.15);
+                            rig.rA.rotation.z = L(rig.rA.rotation.z||0, 0, 0.15);
+                            rig.lL.rotation.x = L(rig.lL.rotation.x,  s*0.7, 0.22);
+                            rig.rL.rotation.x = L(rig.rL.rotation.x, -s*0.7, 0.22);
+                            if(rig.torso) rig.torso.rotation.y = L(rig.torso.rotation.y||0, Math.cos(sp)*0.05, 0.15);
+                            if(rig.torso) rig.torso.rotation.z = L(rig.torso.rotation.z||0, 0, 0.1);
+                            if(rig.torso) rig.torso.rotation.x = L(rig.torso.rotation.x||0, 0, 0.1);
                         } else if(o._jumping){
+                            // ПРЫЖОК — руки вверх
                             rig.lA.rotation.x = L(rig.lA.rotation.x, -2.4, 0.16);
                             rig.rA.rotation.x = L(rig.rA.rotation.x, -2.4, 0.16);
-                            rig.lA.rotation.z = L(rig.lA.rotation.z||0, 0, 0.14);
-                            rig.rA.rotation.z = L(rig.rA.rotation.z||0, 0, 0.14);
-                            rig.lL.rotation.x = L(rig.lL.rotation.x, 0.4, 0.1);
-                            rig.rL.rotation.x = L(rig.rL.rotation.x, 0.4, 0.1);
+                            rig.lA.rotation.z = L(rig.lA.rotation.z||0, 0, 0.16);
+                            rig.rA.rotation.z = L(rig.rA.rotation.z||0, 0, 0.16);
+                            rig.lL.rotation.x = L(rig.lL.rotation.x, 0.4, 0.14);
+                            rig.rL.rotation.x = L(rig.rL.rotation.x, 0.4, 0.14);
+                            if(rig.torso) rig.torso.rotation.x = L(rig.torso.rotation.x||0, 0, 0.1);
+                            if(rig.torso) rig.torso.rotation.y = L(rig.torso.rotation.y||0, 0, 0.1);
+                            if(rig.torso) rig.torso.rotation.z = L(rig.torso.rotation.z||0, 0, 0.1);
                         } else {
-                            const idle = Math.sin(time*1.1+(o._animOffset||0))*0.02;
-                            rig.lA.rotation.x = L(rig.lA.rotation.x,  idle, 0.06);
-                            rig.rA.rotation.x = L(rig.rA.rotation.x, -idle, 0.06);
-                            rig.lA.rotation.z = L(rig.lA.rotation.z||0,  0.15, 0.06);
-                            rig.rA.rotation.z = L(rig.rA.rotation.z||0,-0.15, 0.06);
-                            rig.lL.rotation.x = L(rig.lL.rotation.x, 0, 0.07);
-                            rig.rL.rotation.x = L(rig.rL.rotation.x, 0, 0.07);
-                            if(rig.torso) rig.torso.rotation.y = L(rig.torso.rotation.y||0, 0, 0.07);
+                            // IDLE — всё статично
+                            rig.lA.rotation.x = L(rig.lA.rotation.x, 0, 0.08);
+                            rig.rA.rotation.x = L(rig.rA.rotation.x, 0, 0.08);
+                            rig.lA.rotation.z = L(rig.lA.rotation.z||0, 0, 0.08);
+                            rig.rA.rotation.z = L(rig.rA.rotation.z||0, 0, 0.08);
+                            rig.lL.rotation.x = L(rig.lL.rotation.x, 0, 0.08);
+                            rig.rL.rotation.x = L(rig.rL.rotation.x, 0, 0.08);
+                            if(rig.torso) rig.torso.rotation.x = L(rig.torso.rotation.x||0, 0, 0.08);
+                            if(rig.torso) rig.torso.rotation.y = L(rig.torso.rotation.y||0, 0, 0.08);
+                            if(rig.torso) rig.torso.rotation.z = L(rig.torso.rotation.z||0, 0, 0.08);
                         }
                     }
                 }
