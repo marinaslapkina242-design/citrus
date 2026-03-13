@@ -3404,11 +3404,13 @@ const app = {
     isCitrus(name){ const n=(name||'').toLowerCase().trim(); return n==='citrus'; },
     isDev(name){ const n=(name||'').toLowerCase().trim(); return n==='разраб' || n==='razrab'; },
     isOwner(name){ return this.isCitrus(name) || this.isDev(name); },
+    isVerified(name){ const n=(name||'').toLowerCase().trim(); return ['ft77799','dantiyt_official'].includes(n); },
     isStaff(name){ return this.isAdmin(name) || this.isOwner(name); },
 
     devBadge(name){
-        if(this.isOwner(name)) return ' <span style="color:#FFD700;font-size:11px;" title="Владелец">✔</span>';
-        if(this.isAdmin(name))  return ' <span style="color:#4fc3f7;font-size:11px;" title="Администратор">✔</span>';
+        if(this.isOwner(name))    return ' <span style="color:#FFD700;font-size:11px;" title="Владелец">✔</span>';
+        if(this.isAdmin(name))    return ' <span style="color:#4fc3f7;font-size:11px;" title="Администратор">✔</span>';
+        if(this.isVerified(name)) return ' <span style="color:#aaaaaa;font-size:11px;" title="Верифицирован">✔</span>';
         return '';
     },
 
@@ -5547,7 +5549,8 @@ const app = {
             const nameBase = (name||'').toLowerCase().split('#')[0].trim();
             const isOwnerLabel = app.isOwner(nameBase);
             const isAdminLabel = app.isAdmin(nameBase);
-            if(isOwnerLabel || isAdminLabel){
+            const isVerifiedLabel = app.isVerified(nameBase);
+            if(isOwnerLabel || isAdminLabel || isVerifiedLabel){
                 ctx.font = 'bold 28px Arial';
                 const nameW = ctx.measureText(name).width;
                 const totalW = nameW + 28;
@@ -5556,7 +5559,7 @@ const app = {
                 ctx.textAlign = 'left';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(name, startX, 32);
-                ctx.fillStyle = isOwnerLabel ? '#FFD700' : '#4fc3f7';
+                ctx.fillStyle = isOwnerLabel ? '#FFD700' : isAdminLabel ? '#4fc3f7' : '#aaaaaa';
                 ctx.font = 'bold 26px Arial';
                 ctx.fillText(' ✔', startX + nameW, 32);
             } else {
