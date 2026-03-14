@@ -7862,23 +7862,66 @@ const app = {
             g.innerHTML='<div style="color:rgba(255,255,255,0.2);grid-column:1/-1;font-size:14px;padding:20px;text-align:center;font-family:var(--font-ui);"><div style="font-size:32px;margin-bottom:8px;">🛠️</div>Нет карт. Создай в Студии!</div>';
             return;
         }
+        const isDev = this.isOwner((this.username||'').toLowerCase().trim());
         serverGames.forEach(m=>{
-            const isOwn=String(m.authorId)===String(this.userId);
-            const editBtn=isOwn?`<button onclick="event.stopPropagation();app.editPublishedGame('${m.id}')" style="position:absolute;top:8px;left:8px;background:rgba(30,136,229,0.9);border:none;border-radius:8px;color:#fff;font-size:11px;padding:5px 10px;cursor:pointer;font-family:var(--font-body);font-weight:700;z-index:3;">✏️ Изменить</button>`:'';
-            const deleteBtn=isOwn?`<button onclick="event.stopPropagation();app.deleteGame('${m.id}')" style="position:absolute;top:8px;right:8px;background:rgba(255,50,50,0.85);color:#fff;border:none;border-radius:8px;padding:5px 10px;cursor:pointer;font-size:11px;font-family:var(--font-body);font-weight:700;z-index:3;">🗑</button>`:'';
-            g.innerHTML+=`<div class="card world-card" style="position:relative" onclick="app.launchPublished('${m.id}')">
-                ${editBtn||''}${deleteBtn}
-                <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(0,229,255,0.08),#050510);">
-                    <span class="world-emoji" style="z-index:2;position:relative;">🛠️</span>
-                    <div class="world-glow" style="background:rgba(0,229,255,0.06);"></div>
+            const isOwn = String(m.authorId)===String(this.userId);
+            const canDel = isOwn || isDev;
+            const verified = !!m.verified;
+
+            // Кнопка редактировать (только свои)
+            const editBtn = isOwn ? `<button onclick="event.stopPropagation();app.editPublishedGame('${m.id}')" style="position:absolute;top:8px;left:8px;background:rgba(30,136,229,0.9);border:none;border-radius:8px;color:#fff;font-size:11px;padding:5px 10px;cursor:pointer;font-family:var(--font-body);font-weight:700;z-index:3;">✏️</button>` : '';
+
+            // Кнопка удалить (свои + разраб)
+            const deleteBtn = canDel ? `<button onclick="event.stopPropagation();app.deleteGame('${m.id}')" style="position:absolute;top:8px;right:8px;background:rgba(255,50,50,0.85);color:#fff;border:none;border-radius:8px;padding:5px 10px;cursor:pointer;font-size:11px;font-family:var(--font-body);font-weight:700;z-index:3;">🗑</button>` : '';
+
+            // Кнопка подтвердить/снять (только разраб)
+            const verifyBtn = isDev ? `<button onclick="event.stopPropagation();app.toggleVerifyGame('${m.id}',${verified})" style="position:absolute;bottom:8px;right:8px;background:${verified?'rgba(255,100,100,0.85)':'rgba(0,200,100,0.85)'};color:#fff;border:none;border-radius:8px;padding:4px 9px;cursor:pointer;font-size:10px;font-family:var(--font-body);font-weight:700;z-index:3;">${verified?'✕ Снять':'✓ Подтвердить'}</button>` : '';
+
+            // Бейдж "Подтверждено разрабом"
+            const verifiedBadge = verified ? `<div style="position:absolute;top:8px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,rgba(255,215,0,0.95),rgba(255,149,0,0.9));border-radius:20px;padding:3px 10px;font-size:10px;font-weight:800;color:#000;font-family:var(--font-head);letter-spacing:0.5px;white-space:nowrap;z-index:4;box-shadow:0 2px 12px rgba(255,149,0,0.5);">⭐ Подтверждено разрабом</div>` : '';
+
+            // Рамка карточки — золотая если подтверждено
+            const cardStyle = verified
+                ? 'position:relative;border-color:rgba(255,215,0,0.5)!important;box-shadow:0 0 20px rgba(255,215,0,0.2)!important;'
+                : 'position:relative;';
+
+            g.innerHTML+=`<div class="card world-card" style="${cardStyle}" onclick="app.launchPublished('${m.id}')">
+                ${verifiedBadge}
+                ${editBtn}${deleteBtn}${verifyBtn}
+                <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,${verified?'rgba(255,215,0,0.1)':'rgba(0,229,255,0.08)'},#050510);">
+                    <span class="world-emoji" style="z-index:2;position:relative;">${verified?'🌟':'🛠️'}</span>
+                    <div class="world-glow" style="background:${verified?'rgba(255,215,0,0.1)':'rgba(0,229,255,0.06)'};"></div>
                 </div>
                 <div class="card-info">
-                    <div><b style="font-family:var(--font-body);">${m.name}</b><br>
-                    <small style="color:${m.authorColor||'rgba(255,255,255,0.4)'};font-family:var(--font-body);">${m.author}</small><br>
-                    <small style="color:rgba(255,255,255,0.25);font-size:11px;">${(m.blocks||[]).length} блоков</small></div>
+                    <div>
+                        <b style="font-family:var(--font-body);">${m.name}</b><br>
+                        <small style="color:${m.authorColor||'rgba(255,255,255,0.4)'};font-family:var(--font-body);">${m.author}</small><br>
+                        <small style="color:rgba(255,255,255,0.25);font-size:11px;">${(m.blocks||[]).length} блоков</small>
+                    </div>
                 </div>
             </div>`;
         });
+    },
+
+    async toggleVerifyGame(gameId, currentlyVerified){
+        try{
+            const r = await fetch(this._API+'/games/'+gameId+'/verify', {
+                method:'POST',
+                headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({adminKey:'citrus_admin_2025', verified: !currentlyVerified})
+            });
+            const d = await r.json();
+            if(d.ok){
+                this.showNotif(
+                    currentlyVerified ? '❌' : '⭐',
+                    currentlyVerified ? 'Подтверждение снято' : 'Игра подтверждена!',
+                    currentlyVerified ? '' : 'Теперь видна как проверенная разрабом'
+                );
+                this.renderMyGames();
+            } else {
+                this.showNotif('❌','Ошибка', d.error||'');
+            }
+        }catch(e){ this.showNotif('❌','Нет связи',''); }
     },
 
     async editPublishedGame(serverId){
@@ -7915,10 +7958,20 @@ const app = {
 
     async deleteGame(serverId){
         if(!confirm('Удалить эту карту?')) return;
+        const isDev = this.isOwner((this.username||'').toLowerCase().trim());
+        // Разраб передаёт adminKey, обычный игрок — authorId
+        const params = isDev
+            ? '?authorId='+this.userId+'&adminKey=citrus_admin_2025'
+            : '?authorId='+this.userId;
         try{
-            await fetch(this._API+'/games/'+serverId+'?authorId='+this.userId,{method:'DELETE'});
-            this._showToast('🗑 Карта удалена');
-            this.renderMyGames();
+            const r = await fetch(this._API+'/games/'+serverId+params, {method:'DELETE'});
+            const d = await r.json();
+            if(d.ok || !d.error){
+                this._showToast('🗑 Карта удалена');
+                this.renderMyGames();
+            } else {
+                this.showNotif('❌','Ошибка удаления', d.error||'');
+            }
         }catch(e){ this._showToast('Ошибка удаления'); }
     },
 
