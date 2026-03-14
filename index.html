@@ -1017,6 +1017,80 @@
             filter: drop-shadow(0 0 10px rgba(255,149,0,0.7));
             animation: arrow-bounce 1s ease-in-out infinite;
         }
+        /* ══ ДЕНЬ РОЖДЕНИЯ ══ */
+        @keyframes confetti-fall {
+            0%   { transform: translateY(-20px) rotate(0deg);   opacity:1; }
+            100% { transform: translateY(110vh) rotate(720deg); opacity:0; }
+        }
+        @keyframes bday-glow {
+            0%,100% { box-shadow: 0 0 20px rgba(255,105,180,0.4), 0 0 40px rgba(255,215,0,0.2); }
+            50%      { box-shadow: 0 0 40px rgba(255,105,180,0.8), 0 0 80px rgba(255,215,0,0.4); }
+        }
+        @keyframes bday-text {
+            0%,100% { background-position: 0% 50%; }
+            50%      { background-position: 100% 50%; }
+        }
+        @keyframes float-emoji {
+            0%,100% { transform: translateY(0px) rotate(-5deg); }
+            50%      { transform: translateY(-8px) rotate(5deg); }
+        }
+        @keyframes cake-bounce {
+            0%,100% { transform: scale(1) rotate(-3deg); }
+            50%      { transform: scale(1.15) rotate(3deg); }
+        }
+        .bday-banner {
+            background: linear-gradient(135deg, rgba(255,20,147,0.12), rgba(255,215,0,0.08), rgba(255,105,180,0.1));
+            border: 1px solid rgba(255,105,180,0.3);
+            border-radius: 16px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            animation: bday-glow 2s ease-in-out infinite;
+            position: relative;
+            overflow: hidden;
+        }
+        .bday-banner:hover { transform: translateY(-2px); }
+        .bday-banner::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
+            animation: shimmer 2s infinite;
+        }
+        .bday-cake {
+            font-size: 28px;
+            animation: cake-bounce 1.5s ease-in-out infinite;
+            flex-shrink: 0;
+        }
+        .bday-title {
+            font-family: var(--font-head);
+            font-size: 13px;
+            letter-spacing: 1.5px;
+            background: linear-gradient(90deg, #FF69B4, #FFD700, #FF1493, #FFD700, #FF69B4);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: bday-text 3s ease infinite;
+            font-weight: 900;
+        }
+        .bday-sub {
+            font-size: 11px;
+            color: rgba(255,255,255,0.45);
+            font-family: var(--font-body);
+            margin-top: 2px;
+        }
+        .confetti-piece {
+            position: fixed;
+            width: 10px; height: 10px;
+            top: -20px;
+            border-radius: 2px;
+            pointer-events: none;
+            z-index: 9998;
+            animation: confetti-fall linear forwards;
+        }
         @keyframes arrow-bounce {
             0%,100% { transform: translateY(0); }
             50% { transform: translateY(4px); }
@@ -1639,6 +1713,15 @@
 
             <!-- ══════════════════ TAB: GAMES ══════════════════ -->
             <div id="tab-games">
+                <!-- БАННЕР ДНЯ РОЖДЕНИЯ -->
+                <div id="bday-banner" class="bday-banner" onclick="app.openBdayModal()" style="margin-bottom:20px;">
+                    <div class="bday-cake">🎂</div>
+                    <div style="flex:1;">
+                        <div class="bday-title">🎉 СЕГОДНЯ ДЕНЬ РОЖДЕНИЯ! 🎉</div>
+                        <div class="bday-sub">У игрока <b style="color:#FF69B4;">firefox#6368</b> сегодня праздник — поздравь его!</div>
+                    </div>
+                    <div style="display:flex;gap:4px;font-size:18px;animation:float-emoji 2s ease-in-out infinite;">🎈🎁🥳</div>
+                </div>
                 <div class="section-title">Официальные миры</div>
                 <div class="grid" style="margin-bottom:32px;">
 
@@ -2854,7 +2937,20 @@ const app = {
         try{
             const r=await fetch(this._API+'/mail/'+this.userId);
             const msgs=await r.json();
+            const bdayMsgs=msgs.filter(m=>m.type==='bday_msg');
             const gifts=msgs.filter(m=>m.type==='gift');
+            // Показываем поздравления отдельно если есть
+            if(bdayMsgs.length && inbox){
+                const bdayDiv = document.createElement('div');
+                bdayDiv.style.cssText='background:rgba(255,105,180,0.08);border:1px solid rgba(255,105,180,0.2);border-radius:12px;padding:12px 14px;margin-bottom:10px;';
+                bdayDiv.innerHTML='<div style="font-size:11px;color:#FF69B4;font-family:var(--font-head);letter-spacing:1px;margin-bottom:8px;">🎂 ПОЗДРАВЛЕНИЯ С ДР ('+bdayMsgs.length+')</div>'+
+                    bdayMsgs.map(m=>`<div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
+                        <div style="font-size:18px;">${m.text.match(/^[\u{1F300}-\u{1FFFF}]/u)?.[0]||'🎉'}</div>
+                        <div><div style="font-size:12px;color:rgba(255,255,255,0.7);">${(m.text||'').replace(/</g,'&lt;')}</div>
+                        <div style="font-size:10px;color:rgba(255,255,255,0.25);">от ${m.from_name||m.from_id}</div></div>
+                    </div>`).join('');
+                inbox.insertBefore(bdayDiv, inbox.firstChild);
+            }
             if(!gifts.length){ inbox.innerHTML='<div style="color:#444;font-size:12px;">Нет подарков</div>'; return; }
             inbox.innerHTML='';
             for(const g of gifts){
@@ -3420,7 +3516,10 @@ const app = {
     isSpecial(name){ const n=(name||'').toLowerCase().trim().split('#')[0]; return n==='добрый разраб'; },
     isStaff(name){ return this.isAdmin(name) || this.isOwner(name); },
 
+    isBirthday(name){ const n=(name||'').toLowerCase().trim().split('#')[0]; return n==='firefox'; },
+
     devBadge(name){
+        if(this.isBirthday(name)) return '<span style="display:inline-block;vertical-align:middle;margin-left:3px;font-size:14px;animation:cake-bounce 1.5s ease-in-out infinite;cursor:default;" title="🎂 День рождения!">🎂</span>';
         if(this.isSpecial(name))  return '<svg width="16" height="16" viewBox="0 0 16 16" style="display:inline-block;vertical-align:middle;margin-left:3px;flex-shrink:0;" title="Друг разраба"><circle cx="8" cy="8" r="8" fill="#00C896"/><text x="8" y="11.5" text-anchor="middle" font-size="9" fill="#000">🤝</text></svg>';
         if(this.isOwner(name))    return '<svg width="16" height="16" viewBox="0 0 16 16" style="display:inline-block;vertical-align:middle;margin-left:3px;flex-shrink:0;" title="Владелец"><circle cx="8" cy="8" r="8" fill="#FFD700"/><path d="M4.5 8.2l2.3 2.3 4.2-4.2" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>';
         if(this.isAdmin(name))    return '<svg width="16" height="16" viewBox="0 0 16 16" style="display:inline-block;vertical-align:middle;margin-left:3px;flex-shrink:0;" title="Администратор"><circle cx="8" cy="8" r="8" fill="#4fc3f7"/><path d="M4.5 8.2l2.3 2.3 4.2-4.2" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>';
@@ -4975,6 +5074,172 @@ const app = {
             const letters = await r.json();
             const unread = letters.filter(l=>!l.reply).length;
             this._updateSupportBadge(unread);
+        }catch(e){}
+    },
+
+
+    // ════════════════════════════════════
+    // 🎂 ДЕНЬ РОЖДЕНИЯ
+    // ════════════════════════════════════
+    _bdayTarget: { name: 'firefox', id: '6368', fullTag: 'firefox#6368' },
+
+    _launchConfetti(){
+        const colors = ['#FF69B4','#FFD700','#FF1493','#00CED1','#FF6347','#7B68EE','#00FA9A','#FF4500'];
+        for(let i=0;i<80;i++){
+            setTimeout(()=>{
+                const el = document.createElement('div');
+                el.className = 'confetti-piece';
+                el.style.left = Math.random()*100+'vw';
+                el.style.background = colors[Math.floor(Math.random()*colors.length)];
+                el.style.width  = (6+Math.random()*8)+'px';
+                el.style.height = (6+Math.random()*8)+'px';
+                el.style.borderRadius = Math.random()>0.5 ? '50%' : '2px';
+                el.style.animationDuration = (2+Math.random()*3)+'s';
+                el.style.animationDelay = '0s';
+                document.body.appendChild(el);
+                setTimeout(()=>el.remove(), 5000);
+            }, i*50);
+        }
+    },
+
+    openBdayModal(){
+        this._launchConfetti();
+        const existing = document.getElementById('bday-modal');
+        if(existing) existing.remove();
+
+        // Ищем ID именинника в кэше игроков
+        const pc = this._pc||[];
+        let globalDB = [];
+        try{ globalDB = JSON.parse(localStorage.getItem('citrus_global_users')||'[]'); }catch(e){}
+        const firefoxUser = [...pc, ...globalDB].find(u=>(u.name||'').toLowerCase()==='firefox');
+        const firefoxId = firefoxUser?.id || '6368';
+
+        const overlay = document.createElement('div');
+        overlay.id = 'bday-modal';
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+        overlay.onclick = e=>{ if(e.target===overlay) overlay.remove(); };
+
+        overlay.innerHTML = `
+        <div style="background:linear-gradient(145deg,#1a0d1a,#0d0d1a);border:1px solid rgba(255,105,180,0.4);border-radius:24px;width:100%;max-width:480px;overflow:hidden;position:relative;">
+            <!-- Праздничная шапка -->
+            <div style="background:linear-gradient(135deg,rgba(255,20,147,0.2),rgba(255,215,0,0.1),rgba(255,105,180,0.15));padding:28px 24px 20px;text-align:center;position:relative;border-bottom:1px solid rgba(255,105,180,0.2);">
+                <div style="font-size:60px;animation:cake-bounce 1.5s ease-in-out infinite;display:inline-block;margin-bottom:10px;">🎂</div>
+                <div style="font-family:var(--font-head);font-size:20px;font-weight:900;background:linear-gradient(90deg,#FF69B4,#FFD700,#FF1493);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:2px;animation:bday-text 3s ease infinite;background-size:300%;">ДЕНЬ РОЖДЕНИЯ!</div>
+                <div style="font-size:16px;color:rgba(255,255,255,0.8);margin-top:8px;font-family:var(--font-body);">Поздравим <b style="color:#FF69B4;">firefox</b> <span style="font-size:13px;color:rgba(255,255,255,0.4);">#6368</span> 🎉</div>
+                <div style="font-size:24px;margin-top:8px;animation:float-emoji 2s ease-in-out infinite;">🎈 🥳 🎁 🎊 🎈</div>
+                <button onclick="document.getElementById('bday-modal').remove()" style="position:absolute;top:14px;right:14px;background:none;border:none;color:rgba(255,255,255,0.3);font-size:22px;cursor:pointer;">✕</button>
+            </div>
+
+            <!-- Действия -->
+            <div style="padding:20px 24px;display:flex;flex-direction:column;gap:12px;">
+
+                <!-- Отправить поздравление -->
+                <div style="background:rgba(255,105,180,0.06);border:1px solid rgba(255,105,180,0.15);border-radius:14px;padding:16px;">
+                    <div style="font-size:12px;color:#FF69B4;font-family:var(--font-head);letter-spacing:1px;margin-bottom:10px;">💌 НАПИСАТЬ ПОЗДРАВЛЕНИЕ</div>
+                    <textarea id="bday-msg" placeholder="С днём рождения, firefox! 🎂🎉" maxlength="300"
+                        style="width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,105,180,0.2);border-radius:10px;padding:10px 13px;color:#fff;font-family:var(--font-body);font-size:13px;resize:none;height:80px;outline:none;transition:border-color 0.2s;"
+                        onfocus="this.style.borderColor='rgba(255,105,180,0.5)'" onblur="this.style.borderColor='rgba(255,105,180,0.2)'">С днём рождения, firefox! 🎂🎉</textarea>
+                    <button onclick="app.sendBdayMessage()" style="width:100%;margin-top:8px;padding:11px;background:linear-gradient(135deg,#FF1493,#FF69B4);border:none;border-radius:10px;color:#fff;font-weight:700;font-family:var(--font-body);font-size:14px;cursor:pointer;">🎉 Отправить поздравление</button>
+                </div>
+
+                <!-- Отправить подарок цитрусы -->
+                <div style="background:rgba(255,215,0,0.05);border:1px solid rgba(255,215,0,0.15);border-radius:14px;padding:16px;">
+                    <div style="font-size:12px;color:#FFD700;font-family:var(--font-head);letter-spacing:1px;margin-bottom:10px;">🍊 ПОДАРИТЬ ЦИТРУСЫ</div>
+                    <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;">
+                        ${[50,100,200,500,1000].map(v=>`<button onclick="document.getElementById('bday-amount').value=${v};this.parentNode.querySelectorAll('button').forEach(b=>b.style.background='rgba(255,215,0,0.08)');this.style.background='rgba(255,215,0,0.25)';" style="padding:6px 12px;background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.2);border-radius:8px;color:#FFD700;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-body);">${v} 🍊</button>`).join('')}
+                    </div>
+                    <div style="display:flex;gap:8px;">
+                        <input id="bday-amount" type="number" placeholder="Своя сумма" min="1" max="100000"
+                            style="flex:1;background:rgba(255,255,255,0.04);border:1px solid rgba(255,215,0,0.2);border-radius:10px;padding:9px 13px;color:#fff;font-family:var(--font-body);font-size:13px;outline:none;">
+                        <button onclick="app.sendBdayGift()" style="padding:9px 18px;background:linear-gradient(135deg,#FFD700,#FF8C00);border:none;border-radius:10px;color:#000;font-weight:700;font-family:var(--font-body);font-size:13px;cursor:pointer;white-space:nowrap;">🎁 Подарить</button>
+                    </div>
+                </div>
+
+                <!-- Быстрые поздравления -->
+                <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:14px;">
+                    <div style="font-size:12px;color:rgba(255,255,255,0.35);font-family:var(--font-head);letter-spacing:1px;margin-bottom:10px;">⚡ БЫСТРЫЕ СТИКЕРЫ</div>
+                    <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                        ${['🎂','🎉','🥳','🎈','🎁','🎊','🍰','❤️','🌟','🥂'].map(e=>`<button onclick="app.sendBdaySticker('${e}')" style="width:40px;height:40px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:10px;font-size:20px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform=''">${e}</button>`).join('')}
+                    </div>
+                </div>
+            </div>
+        </div>`;
+
+        document.body.appendChild(overlay);
+    },
+
+    async sendBdayMessage(){
+        const text = document.getElementById('bday-msg')?.value?.trim();
+        if(!text) return;
+        // Ищем ID именинника
+        let firefoxId = null;
+        try{
+            const r = await fetch(this._API+'/players/search?q=firefox');
+            const players = await r.json();
+            const ff = players.find(p=>(p.name||'').toLowerCase()==='firefox');
+            if(ff) firefoxId = String(ff.id);
+        }catch(e){}
+        if(!firefoxId){
+            this.showNotif('❌','Не найден','firefox ещё не заходил в игру');
+            return;
+        }
+        try{
+            await fetch(this._API+'/mail/'+firefoxId, {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({type:'bday_msg', from_id:String(this.userId), from_name:this.username+'#'+this.userId, text, ts:Date.now()})
+            });
+            this._launchConfetti();
+            this.showNotif('🎉','Поздравление отправлено!','firefox получит твоё сообщение');
+            document.getElementById('bday-modal')?.remove();
+        }catch(e){ this.showNotif('❌','Ошибка','Нет связи'); }
+    },
+
+    async sendBdayGift(){
+        const amount = parseInt(document.getElementById('bday-amount')?.value||'0');
+        if(!amount||amount<1){ this.showNotif('❌','Ошибка','Введи сумму'); return; }
+        if(this.balance<amount){ this.showNotif('❌','Мало цитрусов',`Нужно ${amount} 🍊`); return; }
+        let firefoxId = null;
+        try{
+            const r = await fetch(this._API+'/players/search?q=firefox');
+            const players = await r.json();
+            const ff = players.find(p=>(p.name||'').toLowerCase()==='firefox');
+            if(ff) firefoxId = String(ff.id);
+        }catch(e){}
+        if(!firefoxId){ this.showNotif('❌','Не найден','firefox ещё не заходил в игру'); return; }
+        this.balance -= amount;
+        this.saveData();
+        document.getElementById('balance-val').textContent = this.balance;
+        try{
+            await fetch(this._API+'/mail/'+firefoxId, {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({type:'gift', from_id:String(this.userId), from_name:this.username+'#'+this.userId, amount, ts:Date.now()})
+            });
+            this._launchConfetti();
+            this.showNotif('🎁',`+${amount} 🍊 подарено!`,'firefox получит цитрусы');
+            document.getElementById('bday-modal')?.remove();
+        }catch(e){
+            this.balance += amount; this.saveData();
+            document.getElementById('balance-val').textContent = this.balance;
+            this.showNotif('❌','Ошибка','Нет связи');
+        }
+    },
+
+    async sendBdaySticker(emoji){
+        let firefoxId = null;
+        try{
+            const r = await fetch(this._API+'/players/search?q=firefox');
+            const players = await r.json();
+            const ff = players.find(p=>(p.name||'').toLowerCase()==='firefox');
+            if(ff) firefoxId = String(ff.id);
+        }catch(e){}
+        if(!firefoxId){ this.showNotif('❌','Не найден','firefox ещё не заходил в игру'); return; }
+        try{
+            await fetch(this._API+'/mail/'+firefoxId, {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({type:'bday_msg', from_id:String(this.userId), from_name:this.username+'#'+this.userId, text:emoji+' С днём рождения!', ts:Date.now()})
+            });
+            this._launchConfetti();
+            this.showNotif(emoji,'Стикер отправлен!','');
         }catch(e){}
     },
 
