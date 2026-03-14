@@ -1527,6 +1527,10 @@
             <span id="display-name" class="header-username"></span>
             <div class="balance-chip">🍊 <span id="balance-val">0</span></div>
             <button onclick="app.logout()" class="btn-logout">Сменить аккаунт</button>
+            <button id="support-btn" onclick="app.openSupport()" title="Срочная помощь и идеи" style="position:relative;background:linear-gradient(135deg,rgba(255,80,80,0.15),rgba(255,40,40,0.08));border:1px solid rgba(255,80,80,0.35);border-radius:10px;padding:6px 14px;color:#ff6b6b;font-size:13px;font-weight:700;font-family:var(--font-body);cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:6px;">
+                🆘 Помощь / Идеи
+                <span id="support-badge" style="display:none;position:absolute;top:-6px;right:-6px;background:linear-gradient(135deg,#FF4444,#CC0000);color:#fff;font-size:10px;font-weight:800;padding:2px 6px;border-radius:20px;font-family:var(--font-head);min-width:18px;text-align:center;box-shadow:0 0 8px rgba(255,50,50,0.6);">0</span>
+            </button>
             <button id="music-toggle" onclick="app._toggleMusic()" title="Музыка" style="background:rgba(255,149,0,0.1);border:1px solid rgba(255,149,0,0.2);border-radius:10px;padding:6px 10px;color:rgba(255,149,0,0.7);font-size:14px;cursor:pointer;transition:all 0.2s;">🎵</button>
         </div>
     </div>
@@ -1717,16 +1721,6 @@
                         </div>
                         <div class="card-info">
                             <div><b>Лабиринт</b><br><small class="world-tag" style="color:#00FF96">🧩 Найди выход!</small></div>
-                        </div>
-                    </div>
-
-                    <div class="card world-card" onclick="app.launch('play','sky')">
-                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(150,100,255,0.2),#050510);">
-                            <span class="world-emoji">☁️</span>
-                            <div class="world-glow" style="background:rgba(150,100,255,0.2);"></div>
-                        </div>
-                        <div class="card-info">
-                            <div><b>Небесные Острова</b><br><small class="world-tag" style="color:#B085FF">🌤 Прыгай по облакам!</small></div>
                         </div>
                     </div>
 
@@ -3793,6 +3787,9 @@ const app = {
         } catch(e) {}
         document.getElementById('ui-login').classList.add('hidden');
         document.getElementById('ui-hub').classList.remove('hidden');
+        // Поллинг бейджа поддержки для разраба
+        this._pollSupportBadge();
+        setInterval(()=>this._pollSupportBadge(), 30000);
         // Музыка хаба — сразу или по первому действию
         this._initAudio();
         const _tryMusic = () => {
@@ -4746,6 +4743,241 @@ const app = {
         }
     },
 
+
+    // ════════════════════════════════════
+    // 🆘 СИСТЕМА ПОДДЕРЖКИ
+    // ════════════════════════════════════
+    _supportPollInterval: null,
+
+    async openSupport(){
+        const isDev = this.isOwner((this.username||'').toLowerCase().trim());
+        // Создаём оверлей
+        const existing = document.getElementById('support-overlay');
+        if(existing) existing.remove();
+        const overlay = document.createElement('div');
+        overlay.id = 'support-overlay';
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+        overlay.onclick = e => { if(e.target===overlay){ overlay.remove(); clearInterval(app._supportPollInterval); } };
+
+        if(isDev){
+            overlay.innerHTML = `
+            <div style="background:var(--c-surface2);border:1px solid rgba(255,80,80,0.3);border-radius:20px;width:100%;max-width:700px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;">
+                <div style="display:flex;align-items:center;gap:12px;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,0.06);">
+                    <div style="font-size:22px;">🆘</div>
+                    <div>
+                        <div style="font-family:var(--font-head);font-size:14px;color:#ff6b6b;letter-spacing:1px;">ПИСЬМА ИГРОКОВ</div>
+                        <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:2px;">Помощь и идеи от сообщества</div>
+                    </div>
+                    <button onclick="document.getElementById('support-overlay').remove();clearInterval(app._supportPollInterval);" style="margin-left:auto;background:none;border:none;color:rgba(255,255,255,0.3);font-size:22px;cursor:pointer;">✕</button>
+                </div>
+                <div id="support-letters-list" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;">
+                    <div style="text-align:center;color:rgba(255,255,255,0.2);padding:30px;">⏳ Загрузка...</div>
+                </div>
+            </div>`;
+            overlay.querySelector('#support-letters-list');
+            document.body.appendChild(overlay);
+            this._loadSupportLetters();
+            // Поллинг каждые 10 сек
+            clearInterval(this._supportPollInterval);
+            this._supportPollInterval = setInterval(()=>this._loadSupportLetters(), 10000);
+        } else {
+            overlay.innerHTML = `
+            <div style="background:var(--c-surface2);border:1px solid rgba(255,80,80,0.3);border-radius:20px;width:100%;max-width:520px;display:flex;flex-direction:column;overflow:hidden;">
+                <div style="display:flex;align-items:center;gap:12px;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,0.06);">
+                    <div style="font-size:22px;">🆘</div>
+                    <div>
+                        <div style="font-family:var(--font-head);font-size:14px;color:#ff6b6b;letter-spacing:1px;">ПОМОЩЬ / ИДЕИ</div>
+                        <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:2px;">Напиши Разрабу — он ответит!</div>
+                    </div>
+                    <button onclick="document.getElementById('support-overlay').remove();clearInterval(app._supportPollInterval);" style="margin-left:auto;background:none;border:none;color:rgba(255,255,255,0.3);font-size:22px;cursor:pointer;">✕</button>
+                </div>
+                <div style="padding:20px;display:flex;flex-direction:column;gap:14px;">
+                    <!-- Тип -->
+                    <div style="display:flex;gap:8px;">
+                        <button onclick="app._supportSetType('help',this)" id="stype-help" style="flex:1;padding:10px;border-radius:10px;border:1px solid rgba(255,80,80,0.4);background:rgba(255,80,80,0.15);color:#ff6b6b;font-family:var(--font-body);font-weight:700;font-size:13px;cursor:pointer;">🆘 Нужна помощь</button>
+                        <button onclick="app._supportSetType('idea',this)" id="stype-idea" style="flex:1;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.08);background:transparent;color:rgba(255,255,255,0.4);font-family:var(--font-body);font-weight:700;font-size:13px;cursor:pointer;">💡 Идея</button>
+                        <button onclick="app._supportSetType('bug',this)" id="stype-bug" style="flex:1;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.08);background:transparent;color:rgba(255,255,255,0.4);font-family:var(--font-body);font-weight:700;font-size:13px;cursor:pointer;">🐛 Баг</button>
+                    </div>
+                    <!-- Текст -->
+                    <textarea id="support-text" placeholder="Опиши проблему или идею подробно..." maxlength="1000"
+                        style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:14px;color:#fff;font-family:var(--font-body);font-size:13px;resize:none;height:120px;outline:none;transition:border-color 0.2s;"
+                        onfocus="this.style.borderColor='rgba(255,80,80,0.4)'" onblur="this.style.borderColor='rgba(255,255,255,0.08)'"></textarea>
+                    <button onclick="app.sendSupportLetter()" style="padding:13px;background:linear-gradient(135deg,#FF4444,#CC0000);border:none;border-radius:12px;color:#fff;font-weight:700;font-family:var(--font-body);font-size:14px;cursor:pointer;">📨 Отправить Разрабу</button>
+                    <!-- Мои письма -->
+                    <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:14px;">
+                        <div style="font-size:11px;color:rgba(255,255,255,0.3);font-family:var(--font-head);letter-spacing:1px;margin-bottom:10px;">МОИ ПИСЬМА</div>
+                        <div id="my-support-letters" style="display:flex;flex-direction:column;gap:8px;max-height:200px;overflow-y:auto;">
+                            <div style="text-align:center;color:rgba(255,255,255,0.2);font-size:12px;padding:10px;">⏳ Загрузка...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+            document.body.appendChild(overlay);
+            this._supportType = 'help';
+            this._loadMySupport();
+        }
+    },
+
+    _supportType: 'help',
+    _supportSetType(type, btn){
+        this._supportType = type;
+        ['help','idea','bug'].forEach(t=>{
+            const b = document.getElementById('stype-'+t);
+            if(!b) return;
+            const active = t===type;
+            const colors = {help:'rgba(255,80,80,0.4)',idea:'rgba(255,200,0,0.4)',bug:'rgba(100,200,100,0.4)'};
+            const bgs = {help:'rgba(255,80,80,0.15)',idea:'rgba(255,200,0,0.1)',bug:'rgba(100,200,100,0.1)'};
+            const txts = {help:'#ff6b6b',idea:'#FFD700',bug:'#6fcf6f'};
+            b.style.borderColor = active ? colors[t] : 'rgba(255,255,255,0.08)';
+            b.style.background  = active ? bgs[t]   : 'transparent';
+            b.style.color       = active ? txts[t]  : 'rgba(255,255,255,0.4)';
+        });
+    },
+
+    async sendSupportLetter(){
+        const text = document.getElementById('support-text')?.value?.trim();
+        if(!text){ this.showNotif('❌','Пусто','Напиши что-нибудь'); return; }
+        const type = this._supportType || 'help';
+        const typeLabels = {help:'🆘 Помощь', idea:'💡 Идея', bug:'🐛 Баг'};
+        try{
+            const r = await fetch(this._API+'/support', {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({
+                    fromId: String(this.userId),
+                    fromName: this.username+'#'+this.userId,
+                    type, text, ts: Date.now()
+                })
+            });
+            const d = await r.json();
+            if(d.ok){
+                document.getElementById('support-text').value = '';
+                this.showNotif('📨','Отправлено!','Разраб скоро ответит');
+                this._loadMySupport();
+            }
+        }catch(e){ this.showNotif('❌','Ошибка','Нет связи'); }
+    },
+
+    async _loadMySupport(){
+        const el = document.getElementById('my-support-letters');
+        if(!el) return;
+        try{
+            const r = await fetch(this._API+'/support/player/'+this.userId);
+            const letters = await r.json();
+            if(!letters.length){
+                el.innerHTML='<div style="text-align:center;color:rgba(255,255,255,0.2);font-size:12px;padding:10px;">Писем нет</div>';
+                return;
+            }
+            const typeIcons = {help:'🆘',idea:'💡',bug:'🐛'};
+            el.innerHTML = letters.map(l=>`
+                <div style="background:rgba(255,255,255,0.03);border:1px solid ${l.reply?'rgba(0,230,118,0.2)':'rgba(255,255,255,0.06)'};border-radius:12px;padding:12px 14px;position:relative;">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                        <span style="font-size:14px;">${typeIcons[l.type]||'📨'}</span>
+                        <span style="font-size:11px;color:rgba(255,255,255,0.35);font-family:var(--font-ui);">${new Date(l.ts).toLocaleDateString('ru')} ${new Date(l.ts).toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'})}</span>
+                        ${l.reply?'<span style="margin-left:auto;font-size:10px;background:rgba(0,230,118,0.12);color:#00E676;border-radius:20px;padding:2px 8px;font-weight:700;">✓ Ответил</span>':'<span style="margin-left:auto;font-size:10px;color:rgba(255,255,255,0.2);">Без ответа</span>'}
+                    </div>
+                    <div style="font-size:13px;color:rgba(255,255,255,0.75);line-height:1.5;margin-bottom:${l.reply?'8px':'0'};">${l.text.replace(/</g,'&lt;')}</div>
+                    ${l.reply?`<div style="background:rgba(0,230,118,0.06);border:1px solid rgba(0,230,118,0.15);border-radius:8px;padding:8px 12px;font-size:12px;color:#00E676;line-height:1.5;"><b>Разраб:</b> ${l.reply.replace(/</g,'&lt;')}</div>`:''}
+                    <button onclick="app.deleteSupportLetter('${l.id}','player')" style="position:absolute;top:8px;right:8px;background:none;border:none;color:rgba(255,255,255,0.15);font-size:14px;cursor:pointer;line-height:1;padding:2px 4px;" title="Удалить">✕</button>
+                </div>`).join('');
+        }catch(e){}
+    },
+
+    async _loadSupportLetters(){
+        const el = document.getElementById('support-letters-list');
+        if(!el) return;
+        try{
+            const r = await fetch(this._API+'/support?adminKey=citrus_admin_2025');
+            const letters = await r.json();
+            // Обновляем бейдж
+            const unread = letters.filter(l=>!l.reply).length;
+            this._updateSupportBadge(unread);
+            if(!letters.length){
+                el.innerHTML='<div style="text-align:center;color:rgba(255,255,255,0.2);padding:40px;font-size:14px;">📭 Писем нет</div>';
+                return;
+            }
+            const typeIcons = {help:'🆘',idea:'💡',bug:'🐛'};
+            const typeColors = {help:'rgba(255,80,80,0.15)',idea:'rgba(255,200,0,0.08)',bug:'rgba(100,200,100,0.08)'};
+            el.innerHTML = letters.map(l=>`
+                <div style="background:${typeColors[l.type]||'rgba(255,255,255,0.03)'};border:1px solid ${l.reply?'rgba(0,230,118,0.2)':'rgba(255,255,255,0.07)'};border-radius:14px;padding:16px 18px;">
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+                        <span style="font-size:18px;">${typeIcons[l.type]||'📨'}</span>
+                        <div>
+                            <div style="font-weight:700;font-size:13px;color:rgba(255,255,255,0.9);">${l.fromName}</div>
+                            <div style="font-size:10px;color:rgba(255,255,255,0.3);">${new Date(l.ts).toLocaleDateString('ru')} ${new Date(l.ts).toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'})}</div>
+                        </div>
+                        ${l.reply?'<span style="margin-left:auto;font-size:11px;background:rgba(0,230,118,0.12);color:#00E676;border-radius:20px;padding:3px 10px;font-weight:700;">✓ Отвечено</span>':'<span style="margin-left:auto;font-size:11px;background:rgba(255,80,80,0.1);color:#ff6b6b;border-radius:20px;padding:3px 10px;font-weight:700;">● Новое</span>'}
+                        <button onclick="app.deleteSupportLetter('${l.id}','dev')" style="background:rgba(255,50,50,0.1);border:1px solid rgba(255,50,50,0.2);border-radius:8px;color:#ff6b6b;font-size:11px;padding:4px 8px;cursor:pointer;font-family:var(--font-body);">🗑</button>
+                    </div>
+                    <div style="font-size:13px;color:rgba(255,255,255,0.8);line-height:1.6;margin-bottom:12px;padding:10px 14px;background:rgba(0,0,0,0.2);border-radius:10px;">${l.text.replace(/</g,'&lt;')}</div>
+                    ${l.reply?`<div style="background:rgba(0,230,118,0.06);border:1px solid rgba(0,230,118,0.15);border-radius:10px;padding:10px 14px;font-size:12px;color:#00E676;line-height:1.5;margin-bottom:10px;"><b>Твой ответ:</b> ${l.reply.replace(/</g,'&lt;')}</div>`:''}
+                    <!-- Форма ответа -->
+                    <div style="display:flex;gap:8px;">
+                        <input id="reply-${l.id}" type="text" placeholder="${l.reply?'Изменить ответ...':'Ответить игроку...'}" maxlength="500"
+                            style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:9px 13px;color:#fff;font-family:var(--font-body);font-size:13px;outline:none;"
+                            onkeydown="if(event.key==='Enter')app.replySupport('${l.id}')">
+                        <button onclick="app.replySupport('${l.id}')" style="padding:9px 16px;background:linear-gradient(135deg,#00E676,#00A854);border:none;border-radius:10px;color:#000;font-weight:700;font-family:var(--font-body);font-size:13px;cursor:pointer;white-space:nowrap;">Ответить</button>
+                    </div>
+                </div>`).join('');
+        }catch(e){ el.innerHTML='<div style="color:rgba(255,100,100,0.5);text-align:center;padding:20px;">Ошибка загрузки</div>'; }
+    },
+
+    async replySupport(letterId){
+        const input = document.getElementById('reply-'+letterId);
+        const reply = input?.value?.trim();
+        if(!reply){ this.showNotif('❌','Пусто','Напиши ответ'); return; }
+        try{
+            const r = await fetch(this._API+'/support/'+letterId+'/reply', {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({adminKey:'citrus_admin_2025', reply})
+            });
+            const d = await r.json();
+            if(d.ok){
+                input.value = '';
+                this.showNotif('✅','Ответ отправлен','Игрок увидит его в своих письмах');
+                this._loadSupportLetters();
+            }
+        }catch(e){ this.showNotif('❌','Ошибка','Нет связи'); }
+    },
+
+    async deleteSupportLetter(letterId, role){
+        try{
+            const body = role==='dev'
+                ? {adminKey:'citrus_admin_2025'}
+                : {playerId: String(this.userId)};
+            const r = await fetch(this._API+'/support/'+letterId, {
+                method:'DELETE', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify(body)
+            });
+            const d = await r.json();
+            if(d.ok){
+                if(role==='dev') this._loadSupportLetters();
+                else this._loadMySupport();
+            }
+        }catch(e){}
+    },
+
+    _updateSupportBadge(count){
+        const badge = document.getElementById('support-badge');
+        if(!badge) return;
+        if(count > 0){
+            badge.style.display = 'block';
+            badge.textContent = count;
+        } else {
+            badge.style.display = 'none';
+        }
+    },
+
+    async _pollSupportBadge(){
+        const isDev = this.isOwner((this.username||'').toLowerCase().trim());
+        if(!isDev) return;
+        try{
+            const r = await fetch(this._API+'/support?adminKey=citrus_admin_2025');
+            const letters = await r.json();
+            const unread = letters.filter(l=>!l.reply).length;
+            this._updateSupportBadge(unread);
+        }catch(e){}
+    },
+
     toggleNavGroup(){
         const items = document.getElementById('nav-group-items');
         const arrow = document.getElementById('nav-group-arrow');
@@ -5423,7 +5655,7 @@ const app = {
             const on=online.find(x=>x.id===fid);
             const wNames={gather:'Цитрусовый Лес',parkour:'Небесный Паркур',
                 volcano:'Остров Вулкана',space:'Космическая База',race:'Гонки',dropper:'Дроппер',obby:'Обби',
-                pvp:'Арена ПВП',maze:'Лабиринт',sky:'Небесные Острова',coins:'Золотая Лихорадка'};
+                pvp:'Арена ПВП',maze:'Лабиринт',coins:'Золотая Лихорадка'};
             const friendMapId = on && on.status==='ingame' ? on.world : null;
             const friendMapName = friendMapId ? (wNames[friendMapId] || friendMapId) : null;
             const st = on ? (friendMapId ? '🎮 '+friendMapName : '● Онлайн') : '○ Оффлайн';
@@ -6437,7 +6669,7 @@ const app = {
     setupScene(){
         const canvas=document.getElementById('gl-canvas');canvas.innerHTML='';
         this.scene=new THREE.Scene();
-        const bgs={lobby:0x0a0a18,gather:0x0d1f0a,parkour:0x87CEEB,volcano:0x1a0800,space:0x000005,race:0x0a0a0a,dropper:0x001133,obby:0x1a0500,maze:0x0a0f0a,sky:0x87CEEB,coins:0x0d0800,march8:0x1a0a1a};
+        const bgs={lobby:0x0a0a18,gather:0x0d1f0a,parkour:0x87CEEB,volcano:0x1a0800,space:0x000005,race:0x0a0a0a,dropper:0x001133,obby:0x1a0500,maze:0x0a0f0a,coins:0x0d0800,march8:0x1a0a1a};
         const bg=bgs[this.currentMap]||0x0a0a10;
         this.scene.background=new THREE.Color(bg);
         this.scene.fog=new THREE.FogExp2(bg,0.016);
@@ -6463,7 +6695,7 @@ const app = {
         if(this.mode==='play'){
             this.playerGroup=this.buildCharacter(true);
             // Спавн выше земли для всех миров
-            const spawnY = {parkour:8, march8:5, maze:2, sky:7, coins:2, dropper:6, obby:2, race:1, volcano:4, space:4, gather:3, lobby:3};
+            const spawnY = {parkour:8, march8:5, maze:2,  coins:2, dropper:6, obby:2, race:1, volcano:4, space:4, gather:3, lobby:3};
             const baseY = this._joinSpawn ? 15 : (spawnY[this.currentMap] || (typeof this.currentMap==='number' ? 12 : 5));
             this._joinSpawn = false;
             this.playerGroup.position.set(0, baseY, 0);
@@ -6908,50 +7140,7 @@ const app = {
                 mh.textContent='🌀 Найди зелёный выход!'; document.body.appendChild(mh);}
         }
 
-        else if(this.currentMap==='sky'){
-            // ☁️ НЕБЕСНЫЕ ОСТРОВА — прыжки по облакам
-            this.scene.background=new THREE.Color(0x87CEEB);
-            this.scene.fog=new THREE.Fog(0xaaddff,80,250);
-            this.scene.add(new THREE.AmbientLight(0xffffff,1.2));
-            this.scene.add(new THREE.DirectionalLight(0xffee88,1.5)).position.set(20,50,10);
-            // Острова-облака
-            const cloudMat=new THREE.MeshStandardMaterial({color:0xffffff,roughness:0.9});
-            const grassMat=new THREE.MeshStandardMaterial({color:0x44cc44,roughness:0.8});
-            const islands=[
-                [0,5,0,12,1.5,12,'grass'],[20,10,-10,7,1.5,7,'cloud'],[38,16,-5,8,1.5,8,'grass'],
-                [30,22,15,6,1.5,6,'cloud'],[15,28,20,7,1.5,7,'grass'],[0,34,15,6,1.5,6,'cloud'],
-                [-15,40,5,8,1.5,8,'grass'],[-25,46,-10,6,1.5,6,'cloud'],[-10,52,-20,7,1.5,7,'grass'],
-                [10,58,-15,10,2,10,'grass'], // финальный остров
-            ];
-            islands.forEach(([x,y,z,w,h,d,type])=>{
-                const mat=type==='grass'?grassMat:cloudMat;
-                const isl=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
-                isl.position.set(x,y,z); isl.castShadow=true; isl.receiveShadow=true;
-                this.scene.add(isl); this.objectsToIntersect.push(isl);
-                // Низ острова — конус
-                const bot=new THREE.Mesh(new THREE.ConeGeometry(w*0.4,3,8),cloudMat);
-                bot.position.set(x,y-2,z); bot.rotation.y=Math.PI/4; this.scene.add(bot);
-            });
-            // Деревья на зелёных островах
-            [[0,7,0],[38,18,-5],[-15,42,5],[10,60,-15]].forEach(([x,y,z])=>{
-                const trunk=new THREE.Mesh(new THREE.CylinderGeometry(0.2,0.3,2),new THREE.MeshStandardMaterial({color:0x8B4513}));
-                trunk.position.set(x,y,z); this.scene.add(trunk);
-                const crown=new THREE.Mesh(new THREE.SphereGeometry(1.5,8,8),new THREE.MeshStandardMaterial({color:0x228B22}));
-                crown.position.set(x,y+2.5,z); this.scene.add(crown);
-            });
-            // Цитрусы над островами
-            [[20,12,-10],[30,24,15],[0,36,15],[-25,48,-10],[10,61,-15]].forEach(([x,y,z])=>{
-                const c=new THREE.Group();
-                c.add(Object.assign(new THREE.Mesh(new THREE.SphereGeometry(0.35,10,10),new THREE.MeshStandardMaterial({color:0xFF8C00,emissive:0xFF6000,emissiveIntensity:0.6,roughness:0.6})),{}));
-                const l=new THREE.Mesh(new THREE.SphereGeometry(0.11,6,6),new THREE.MeshStandardMaterial({color:0x22aa22})); l.position.set(0,0.37,0); c.add(l);
-                c.position.set(x,y,z); this.scene.add(c); this.collectibles.push(c);
-            });
-            // Радужный мост на финале
-            [0xFF0000,0xff8800,0xFFFF00,0x00FF00,0x0088FF,0x8800FF].forEach((col,i)=>{
-                const rb=new THREE.Mesh(new THREE.BoxGeometry(2,0.3,8),new THREE.MeshStandardMaterial({color:col,emissive:col,emissiveIntensity:0.5}));
-                rb.position.set(10-15+i*2,57,-15); rb.rotation.y=0.3; this.scene.add(rb);
-            });
-        }
+        
 
         else if(this.currentMap==='coins'){
             // 💰 ЗОЛОТАЯ ЛИХОРАДКА — шахта с монетами
@@ -7488,7 +7677,7 @@ const app = {
                 this._snowParticles.geometry.attributes.position.needsUpdate=true;
             }
             // Монеты в новых мирах — вращаются и подбираются
-            if(['race','obby','maze','sky','coins'].includes(this.currentMap)){
+            if(['race','obby','maze','coins'].includes(this.currentMap)){
                 for(let i=this.collectibles.length-1;i>=0;i--){
                     const c=this.collectibles[i];
                     c.rotation.z+=2*delta;
