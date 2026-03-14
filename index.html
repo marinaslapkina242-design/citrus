@@ -1722,6 +1722,16 @@
                         </div>
                     </div>
 
+                    <div class="card world-card" onclick="app.launch('play','sky')">
+                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(150,100,255,0.2),#050510);">
+                            <span class="world-emoji">☁️</span>
+                            <div class="world-glow" style="background:rgba(150,100,255,0.2);"></div>
+                        </div>
+                        <div class="card-info">
+                            <div><b>Небесные Острова</b><br><small class="world-tag" style="color:#B085FF">🌤 Прыгай по облакам!</small></div>
+                        </div>
+                    </div>
+
                     <div class="card world-card" onclick="app.launch('play','coins')">
                         <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(255,220,50,0.2),#050510);">
                             <span class="world-emoji">💰</span>
@@ -5362,7 +5372,7 @@ const app = {
             const on=online.find(x=>x.id===fid);
             const wNames={gather:'Цитрусовый Лес',parkour:'Небесный Паркур',
                 volcano:'Остров Вулкана',space:'Космическая База',race:'Гонки',dropper:'Дроппер',obby:'Обби',
-                pvp:'Арена ПВП',maze:'Лабиринт',coins:'Золотая Лихорадка'};
+                pvp:'Арена ПВП',maze:'Лабиринт',sky:'Небесные Острова',coins:'Золотая Лихорадка'};
             const friendMapId = on && on.status==='ingame' ? on.world : null;
             const friendMapName = friendMapId ? (wNames[friendMapId] || friendMapId) : null;
             const st = on ? (friendMapId ? '🎮 '+friendMapName : '● Онлайн') : '○ Оффлайн';
@@ -6375,7 +6385,7 @@ const app = {
     setupScene(){
         const canvas=document.getElementById('gl-canvas');canvas.innerHTML='';
         this.scene=new THREE.Scene();
-        const bgs={lobby:0x0a0a18,gather:0x0d1f0a,parkour:0x87CEEB,volcano:0x1a0800,space:0x000005,race:0x0a0a0a,dropper:0x001133,obby:0x1a0500,maze:0x0a0f0a,coins:0x0d0800,march8:0x1a0a1a};
+        const bgs={lobby:0x0a0a18,gather:0x0d1f0a,parkour:0x87CEEB,volcano:0x1a0800,space:0x000005,race:0x0a0a0a,dropper:0x001133,obby:0x1a0500,maze:0x0a0f0a,sky:0x87CEEB,coins:0x0d0800,march8:0x1a0a1a};
         const bg=bgs[this.currentMap]||0x0a0a10;
         this.scene.background=new THREE.Color(bg);
         this.scene.fog=new THREE.FogExp2(bg,0.016);
@@ -6401,7 +6411,7 @@ const app = {
         if(this.mode==='play'){
             this.playerGroup=this.buildCharacter(true);
             // Спавн выше земли для всех миров
-            const spawnY = {parkour:8, march8:5, maze:2,  coins:2, dropper:6, obby:2, race:1, volcano:4, space:4, gather:3, lobby:3};
+            const spawnY = {parkour:8, march8:5, maze:2, sky:7, coins:2, dropper:6, obby:2, race:1, volcano:4, space:4, gather:3, lobby:3};
             const baseY = this._joinSpawn ? 15 : (spawnY[this.currentMap] || (typeof this.currentMap==='number' ? 12 : 5));
             this._joinSpawn = false;
             this.playerGroup.position.set(0, baseY, 0);
@@ -6846,7 +6856,50 @@ const app = {
                 mh.textContent='🌀 Найди зелёный выход!'; document.body.appendChild(mh);}
         }
 
-        
+        else if(this.currentMap==='sky'){
+            // ☁️ НЕБЕСНЫЕ ОСТРОВА — прыжки по облакам
+            this.scene.background=new THREE.Color(0x87CEEB);
+            this.scene.fog=new THREE.Fog(0xaaddff,80,250);
+            this.scene.add(new THREE.AmbientLight(0xffffff,1.2));
+            this.scene.add(new THREE.DirectionalLight(0xffee88,1.5)).position.set(20,50,10);
+            // Острова-облака
+            const cloudMat=new THREE.MeshStandardMaterial({color:0xffffff,roughness:0.9});
+            const grassMat=new THREE.MeshStandardMaterial({color:0x44cc44,roughness:0.8});
+            const islands=[
+                [0,5,0,12,1.5,12,'grass'],[20,10,-10,7,1.5,7,'cloud'],[38,16,-5,8,1.5,8,'grass'],
+                [30,22,15,6,1.5,6,'cloud'],[15,28,20,7,1.5,7,'grass'],[0,34,15,6,1.5,6,'cloud'],
+                [-15,40,5,8,1.5,8,'grass'],[-25,46,-10,6,1.5,6,'cloud'],[-10,52,-20,7,1.5,7,'grass'],
+                [10,58,-15,10,2,10,'grass'], // финальный остров
+            ];
+            islands.forEach(([x,y,z,w,h,d,type])=>{
+                const mat=type==='grass'?grassMat:cloudMat;
+                const isl=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
+                isl.position.set(x,y,z); isl.castShadow=true; isl.receiveShadow=true;
+                this.scene.add(isl); this.objectsToIntersect.push(isl);
+                // Низ острова — конус
+                const bot=new THREE.Mesh(new THREE.ConeGeometry(w*0.4,3,8),cloudMat);
+                bot.position.set(x,y-2,z); bot.rotation.y=Math.PI/4; this.scene.add(bot);
+            });
+            // Деревья на зелёных островах
+            [[0,7,0],[38,18,-5],[-15,42,5],[10,60,-15]].forEach(([x,y,z])=>{
+                const trunk=new THREE.Mesh(new THREE.CylinderGeometry(0.2,0.3,2),new THREE.MeshStandardMaterial({color:0x8B4513}));
+                trunk.position.set(x,y,z); this.scene.add(trunk);
+                const crown=new THREE.Mesh(new THREE.SphereGeometry(1.5,8,8),new THREE.MeshStandardMaterial({color:0x228B22}));
+                crown.position.set(x,y+2.5,z); this.scene.add(crown);
+            });
+            // Цитрусы над островами
+            [[20,12,-10],[30,24,15],[0,36,15],[-25,48,-10],[10,61,-15]].forEach(([x,y,z])=>{
+                const c=new THREE.Group();
+                c.add(Object.assign(new THREE.Mesh(new THREE.SphereGeometry(0.35,10,10),new THREE.MeshStandardMaterial({color:0xFF8C00,emissive:0xFF6000,emissiveIntensity:0.6,roughness:0.6})),{}));
+                const l=new THREE.Mesh(new THREE.SphereGeometry(0.11,6,6),new THREE.MeshStandardMaterial({color:0x22aa22})); l.position.set(0,0.37,0); c.add(l);
+                c.position.set(x,y,z); this.scene.add(c); this.collectibles.push(c);
+            });
+            // Радужный мост на финале
+            [0xFF0000,0xff8800,0xFFFF00,0x00FF00,0x0088FF,0x8800FF].forEach((col,i)=>{
+                const rb=new THREE.Mesh(new THREE.BoxGeometry(2,0.3,8),new THREE.MeshStandardMaterial({color:col,emissive:col,emissiveIntensity:0.5}));
+                rb.position.set(10-15+i*2,57,-15); rb.rotation.y=0.3; this.scene.add(rb);
+            });
+        }
 
         else if(this.currentMap==='coins'){
             // 💰 ЗОЛОТАЯ ЛИХОРАДКА — шахта с монетами
@@ -7013,8 +7066,26 @@ const app = {
         }
         else if(typeof this.currentMap==='number'){
             addGround(0x1a1a1a);
+            this.scene.add(new THREE.GridHelper(100,50,0x222244,0x111133));
             const m=this.customMaps[this.currentMap];
-            if(m)m.blocks.forEach(b=>this.spawnBlock(b.x,b.y,b.z,b.color));
+            if(m && m.blocks && m.blocks.length){
+                m.blocks.forEach(b=>{
+                    const bx = b.x ?? b.px ?? 0;
+                    const by = b.y ?? b.py ?? 0;
+                    const bz = b.z ?? b.pz ?? 0;
+                    // Цвет: число или строка #hex
+                    let col = b.color;
+                    if(typeof col === 'string' && col.startsWith('#')) col = parseInt(col.replace('#',''), 16);
+                    if(!col) col = 0xCCCCCC;
+                    const sx = b.sx || b.scale || 2;
+                    const sy = b.sy || b.scale || 2;
+                    const sz = b.sz || b.scale || 2;
+                    this.spawnBlock(bx, by, bz, col, sx, sy, sz);
+                });
+                console.log('[buildWorld] loaded', m.blocks.length, 'blocks');
+            } else {
+                console.warn('[buildWorld] no blocks found for map', this.currentMap, m);
+            }
         }
     },
 
@@ -7365,7 +7436,7 @@ const app = {
                 this._snowParticles.geometry.attributes.position.needsUpdate=true;
             }
             // Монеты в новых мирах — вращаются и подбираются
-            if(['race','obby','maze','coins'].includes(this.currentMap)){
+            if(['race','obby','maze','sky','coins'].includes(this.currentMap)){
                 for(let i=this.collectibles.length-1;i>=0;i--){
                     const c=this.collectibles[i];
                     c.rotation.z+=2*delta;
@@ -7725,10 +7796,16 @@ const app = {
         this.modalCb=async name=>{
             const sc=document.getElementById('eng-script-ta')?.value||'';
             const blocks = (this.mapBlocks||[]).filter(b=>b&&b.position).map(b=>({
+                x:+((b.position.x||0).toFixed(2)),
+                y:+((b.position.y||0).toFixed(2)),
+                z:+((b.position.z||0).toFixed(2)),
                 px:+((b.position.x||0).toFixed(2)),
                 py:+((b.position.y||0).toFixed(2)),
                 pz:+((b.position.z||0).toFixed(2)),
-                color:b.userData?.color||'#ff9800',
+                color: b.userData?.blockData?.color || b.userData?.color || b.material?.color?.getHex() || 0xCCCCCC,
+                sx: +((b.scale.x||1).toFixed(2)),
+                sy: +((b.scale.y||1).toFixed(2)),
+                sz: +((b.scale.z||1).toFixed(2)),
                 scale:+((b.scale?.x||1).toFixed(2))
             }));
             console.log('[publish] blocks:', blocks.length, 'map:', this.mapBlocks?.length);
@@ -7822,15 +7899,16 @@ const app = {
                     (this.mapBlocks||[]).forEach(b=>this.scene.remove(b));
                     this.mapBlocks = [];
                     game.blocks.forEach(b=>{
-                        const geo = new THREE.BoxGeometry(b.scale||1,b.scale||1,b.scale||1);
-                        const mat = new THREE.MeshLambertMaterial({color:b.color||'#ff9800'});
-                        const mesh = new THREE.Mesh(geo,mat);
-                        mesh.position.set(b.px||b.x||0, b.py||b.y||0, b.pz||b.z||0);
-                        mesh.userData = {color:b.color||'#ff9800'};
-                        mesh.castShadow = true; mesh.receiveShadow = true;
-                        this.scene.add(mesh);
-                        this.mapBlocks.push(mesh);
-                        this.objectsToIntersect && this.objectsToIntersect.push(mesh);
+                        const bx = b.x ?? b.px ?? 0;
+                        const by = b.y ?? b.py ?? 0;
+                        const bz = b.z ?? b.pz ?? 0;
+                        let col = b.color;
+                        if(typeof col === 'string' && col.startsWith('#')) col = parseInt(col.replace('#',''),16);
+                        if(!col) col = 0xCCCCCC;
+                        const sx = b.sx || b.scale || 2;
+                        const sy = b.sy || b.scale || 2;
+                        const sz = b.sz || b.scale || 2;
+                        const mesh = this.spawnBlock(bx, by, bz, col, sx, sy, sz);
                     });
                     this.showNotif('✅','Карта загружена!',`Редактируй и опубликуй снова`);
                 }
@@ -7849,25 +7927,41 @@ const app = {
 
     async launchPublished(serverId){
         try{
-            const r=await fetch(this._API+'/games');
-            const games=await r.json();
-            const g=games.find(x=>x.id===serverId);
+            // Загружаем конкретную карту по ID
+            const r=await fetch(this._API+'/games/'+serverId);
+            let g = null;
+            if(r.ok){
+                g = await r.json();
+            }
+            // Фолбэк — грузим список и ищем
+            if(!g || g.error){
+                const r2=await fetch(this._API+'/games');
+                const games=await r2.json();
+                g=games.find(x=>x.id===serverId);
+            }
             if(!g){ this._showToast('Карта не найдена'); return; }
-            // Используем serverId как общий идентификатор карты
-            // чтобы все игроки в этой карте были в одном "мире"
+
+            // Проверяем наличие блоков
+            if(!g.blocks || g.blocks.length === 0){
+                this._showToast('⚠️ Карта пустая (нет блоков)');
+            }
+            console.log('[launchPublished] blocks:', g.blocks?.length, 'name:', g.name);
+
+            // Всегда обновляем блоки из сервера (свежая версия)
             let idx = this.customMaps.findIndex(m=>m.serverId===serverId);
             if(idx===-1){
                 this.customMaps.push({name:g.name, blocks:g.blocks||[], script:g.script||'', serverId, id:serverId});
                 idx = this.customMaps.length-1;
             } else {
                 this.customMaps[idx].blocks = g.blocks||[];
+                this.customMaps[idx].name = g.name;
             }
             this._worldName = g.name;
-            this._pubMapId = serverId; // запомним для launch
+            this._pubMapId = serverId;
             this.launch('play', idx);
         }catch(e){
             console.error('launchPublished error:', e);
-            this._showToast('Ошибка загрузки карты');
+            this._showToast('Ошибка загрузки карты: ' + e.message);
         }
     },
 
