@@ -1027,9 +1027,7 @@
             border-radius: 50%;
             background: conic-gradient(from 0deg, rgba(255,149,0,0.3), rgba(255,183,77,0.1), rgba(255,149,0,0.3), rgba(255,109,0,0.2), rgba(255,149,0,0.3));
             box-shadow: 0 0 30px rgba(255,149,0,0.2), 0 0 60px rgba(255,149,0,0.08);
-            animation: ring-spin 8s linear infinite;
         }
-        @keyframes ring-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .roulette-ring canvas { border-radius: 50%; }
 
         .roulette-result {
@@ -2060,9 +2058,12 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
                             <div class="roulette-title">🎰 РУЛЕТКА</div>
                             <div style="color:rgba(255,255,255,0.3);font-size:12px;margin-top:4px;font-family:var(--font-ui);">Первый раз бесплатно • Затем 50 🍊</div>
                         </div>
-                        <div class="roulette-arrow">▼</div>
-                        <div class="roulette-ring">
-                            <canvas id="roulette-canvas" width="260" height="260" style="border-radius:50%;display:block;position:relative;z-index:1;"></canvas>
+                        <div style="position:relative;width:272px;margin:0 auto;">
+                            <!-- Стрелка строго по центру сверху -->
+                            <div style="position:absolute;top:-26px;left:0;right:0;text-align:center;font-size:28px;color:var(--c-main);filter:drop-shadow(0 0 10px rgba(255,149,0,0.8));z-index:10;line-height:1;animation:arrow-bounce 1s ease-in-out infinite;">▼</div>
+                            <div class="roulette-ring">
+                                <canvas id="roulette-canvas" width="260" height="260" style="border-radius:50%;display:block;position:relative;z-index:1;"></canvas>
+                            </div>
                         </div>
                         <div id="roulette-result" class="roulette-result"></div>
                         <button id="roulette-btn" onclick="app.spinRoulette()" class="btn-spin">🎲 КРУТИТЬ БЕСПЛАТНО</button>
@@ -2548,8 +2549,9 @@ const app = {
         const ctx = canvas.getContext('2d');
         this._roulettePrizes = prizes;
         this._rouletteColors = colors;
-        this._rouletteAngle = this._rouletteAngle || 0;
-        this._drawRoulette(ctx, this._rouletteAngle);
+        // НЕ сбрасываем угол — рисуем там где остановилось
+        const drawAngle = this._rouletteAngle || 0;
+        this._drawRoulette(ctx, drawAngle);
         const used = this.rouletteUsed || false;
         const btn = document.getElementById('roulette-btn');
         const status = document.getElementById('roulette-status');
@@ -2599,34 +2601,65 @@ const app = {
         const ctx = canvas.getContext('2d');
         btn.disabled = true; btn.style.opacity='0.5';
         if(result) result.textContent = '';
-        const n = this._roulettePrizes.length;
+
+        const prizes = this._roulettePrizes;
+        const n = prizes.length;
         const arc = (2*Math.PI)/n;
-        const winner = Math.floor(Math.random()*n);
-        const spins = Math.PI*2*(5+Math.floor(Math.random()*3));
-        const baseAngle = -Math.PI/2 - winner*arc - arc/2;
-        const startAngle = this._rouletteAngle;
-        const totalSpin = spins + ((baseAngle - startAngle % (Math.PI*2) + Math.PI*4) % (Math.PI*2));
-        const targetAngle = startAngle + totalSpin;
-        const duration = 4000;
+
+        // Выбираем победителя случайно
+        const winner = Math.floor(Math.random() * n);
+
+        // Стрелка сверху = -PI/2
+        // Сектор i рисуется от угла (wheelAngle + i*arc) до (wheelAngle + (i+1)*arc)
+        // Хотим чтобы под стрелкой (-PI/2) был ЦЕНТР сектора winner:
+        //   wheelAngle + winner*arc + arc/2 ≡ -PI/2  (mod 2PI)
+        //   wheelAngle = -PI/2 - winner*arc - arc/2
+        //
+        // Нормализуем в [0, 2PI):
+        const TWO_PI = Math.PI * 2;
+        const rawFinal = -Math.PI/2 - winner * arc - arc/2;
+        const finalAngle = ((rawFinal % TWO_PI) + TWO_PI) % TWO_PI;
+
+        // Стартуем с текущего угла, нормализованного в [0, 2PI)
+        const rawStart = this._rouletteAngle || 0;
+        const startAngle = ((rawStart % TWO_PI) + TWO_PI) % TWO_PI;
+
+        // Сколько нужно докрутить от startAngle до finalAngle (всегда вперёд)
+        let diff = finalAngle - startAngle;
+        if(diff <= 0) diff += TWO_PI;
+
+        // Добавляем 6–8 полных оборотов
+        const totalSpin = diff + (6 + Math.floor(Math.random()*3)) * TWO_PI;
+
+        const duration = 5000;
         const startTime = Date.now();
+
         const animate = () => {
             const elapsed = Date.now() - startTime;
-            const t = Math.min(elapsed/duration, 1);
-            const ease = 1 - Math.pow(1-t, 3);
-            this._rouletteAngle = startAngle + (targetAngle - startAngle)*ease;
-            this._drawRoulette(ctx, this._rouletteAngle);
-            if(t < 1){ requestAnimationFrame(animate); }
-            else {
-                this._rouletteAngle = baseAngle;
-                this._drawRoulette(ctx, baseAngle);
-                const prize = this._roulettePrizes[winner];
+            const t = Math.min(elapsed / duration, 1);
+            const ease = 1 - Math.pow(1 - t, 4); // ease-out quart
+            const curAngle = startAngle + totalSpin * ease;
+            this._rouletteAngle = curAngle;
+            this._drawRoulette(ctx, curAngle);
+
+            if(t < 1){
+                requestAnimationFrame(animate);
+            } else {
+                // Фиксируем точно — колесо стоит так чтобы winner под стрелкой
+                this._rouletteAngle = finalAngle;
+                this._drawRoulette(ctx, finalAngle);
+
+                const prize = prizes[winner];
                 this.balance += prize;
                 this.rouletteUsed = true;
                 this.saveData();
-                const bv=document.getElementById('balance-val'); if(bv)bv.textContent=this.balance;
+                const bv = document.getElementById('balance-val');
+                if(bv) bv.textContent = this.balance;
                 if(result) result.textContent = '🎉 +' + prize + ' 🍊!';
-                this.showNotif('🎰','Рулетка!','Ты выиграл '+prize+' 🍊!');
-                this._questProgress('roulette',1); if(prize>=100) this._questProgress('roulbig',prize); this._updateRouletteLeaderboard(prize);
+                this.showNotif('🎰','Рулетка!','Ты выиграл ' + prize + ' 🍊!');
+                this._questProgress('roulette', 1);
+                if(prize >= 100) this._questProgress('roulbig', prize);
+                this._updateRouletteLeaderboard(prize);
                 btn.disabled = false;
                 this.initRoulette();
             }
@@ -3551,6 +3584,9 @@ const app = {
             obby:    '🔥 Огненный Обби',
             maze:    '🌀 Лабиринт',
             coins:   '💰 Золотая Лихорадка',
+            pvp:     '🔫 Арена ПВП',
+            hideseek:'👀 Прятки',
+            dungeon: '⚔️ Тёмное Подземелье',
         };
         const KNOWN_WORLDS = new Set(Object.keys(wNames));
 
