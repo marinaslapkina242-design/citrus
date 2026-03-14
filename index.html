@@ -1555,7 +1555,7 @@
                 <div class="nav-item"        id="nav-leaderboard" onclick="app.switchTab('leaderboard')"><div class="nav-icon"><i class="fas fa-trophy"></i></div> Топ</div>
                 <div class="nav-item hidden" id="nav-admin"       onclick="app.switchTab('admin')">      <div class="nav-icon"><i class="fas fa-shield-alt"></i></div> Баны</div>
                 <div class="nav-item"        id="nav-help"        onclick="app.switchTab('help')">       <div class="nav-icon"><i class="fas fa-question-circle"></i></div> Помощь</div>
-                <div class="nav-item"        id="nav-chat"        onclick="app.switchTab('chat')">       <div class="nav-icon"><i class="fas fa-comments"></i></div> Чат</div>
+
 
             </div>
         </div>
@@ -1564,34 +1564,7 @@
 
 
             <!-- ══════════════════ TAB: GLOBAL CHAT ══════════════════ -->
-            <div id="tab-chat" class="hidden">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
-                    <div class="section-title" style="margin:0;">💬 Глобальный чат</div>
-                    <div id="gchat-online-badge" style="display:flex;align-items:center;gap:6px;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);border-radius:20px;padding:5px 12px;">
-                        <div style="width:7px;height:7px;border-radius:50%;background:#4ADE80;box-shadow:0 0 6px rgba(74,222,128,0.8);animation:pulse 2s infinite;"></div>
-                        <span id="gchat-online-count" style="font-size:12px;font-family:var(--font-body);color:rgba(74,222,128,0.9);font-weight:600;">онлайн</span>
-                    </div>
-                </div>
-                <div style="max-width:680px;display:flex;flex-direction:column;height:calc(100vh - 220px);min-height:320px;">
-                    <!-- Шапка чата -->
-                    <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-bottom:none;border-radius:16px 16px 0 0;padding:10px 16px;display:flex;align-items:center;gap:8px;">
-                        <span style="font-size:18px;">🌍</span>
-                        <span style="font-size:12px;color:rgba(255,255,255,0.4);font-family:var(--font-body);">Общий канал — виден всем игрокам онлайн</span>
-                    </div>
-                    <!-- Сообщения -->
-                    <div id="gchat-msgs" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:6px;padding:14px 14px;background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);border-top:none;border-bottom:none;scrollbar-width:thin;scrollbar-color:rgba(255,149,0,0.15) transparent;">
-                        <div style="text-align:center;padding:24px 0;color:rgba(255,255,255,0.2);font-size:13px;font-family:var(--font-body);" id="gchat-empty">Пока никто ничего не написал. Будь первым! 👋</div>
-                    </div>
-                    <!-- Ввод -->
-                    <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-top:1px solid rgba(255,149,0,0.1);border-radius:0 0 16px 16px;padding:12px 14px;display:flex;gap:10px;align-items:center;">
-                        <div style="width:32px;height:32px;border-radius:10px;background:rgba(255,149,0,0.15);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;font-family:var(--font-head);color:#FF9500;flex-shrink:0;" id="gchat-my-avatar">?</div>
-                        <input id="gchat-input" type="text" maxlength="200" placeholder="Написать всем..." style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:10px 14px;color:#fff;font-family:var(--font-body);font-size:14px;outline:none;transition:border-color 0.2s;"
-                            onfocus="this.style.borderColor='rgba(255,149,0,0.4)'" onblur="this.style.borderColor='rgba(255,255,255,0.08)'"
-                            onkeydown="if(event.key==='Enter')app.sendGlobalChat()">
-                        <button onclick="app.sendGlobalChat()" style="background:linear-gradient(135deg,#FF9500,#E05000);border:none;border-radius:12px;padding:10px 18px;color:#fff;font-weight:700;font-family:var(--font-body);font-size:14px;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:opacity 0.15s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">➤</button>
-                    </div>
-                </div>
-            </div>
+
 
 
             <!-- ══════════════════ TAB: CASES ══════════════════ -->
@@ -1604,7 +1577,7 @@
 
                     <div style="background:rgba(255,149,0,0.05);border:1px solid rgba(255,149,0,0.12);border-radius:16px;padding:20px 22px;">
                         <div style="font-family:var(--font-head);font-size:12px;color:#FF9500;margin-bottom:10px;letter-spacing:1px;">🎮 МИРЫ</div>
-                        <div style="color:rgba(255,255,255,0.72);font-size:13.5px;line-height:1.85;font-family:var(--font-body);">Выбери мир и нажми чтобы войти. Управление: <b style="color:#FF9500">WASD</b> — движение, <b style="color:#FF9500">Пробел</b> — прыжок, <b style="color:#FF9500">мышь</b> — камера. На мобиле — джойстик и кнопка прыжка. В каждом мире свои монеты и секреты.</div>
+                        <div style="color:rgba(255,255,255,0.72);font-size:13.5px;line-height:1.85;font-family:var(--font-body);">Выбери мир и нажми чтобы войти. Управление: <b style="color:#FF9500">WASD</b> — движение, <b style="color:#FF9500">Пробел</b> — прыжок, <b style="color:#FF9500">мышь</b> — камера. На мобиле — джойстик и кнопка прыжка. В каждом мире свои цитрусы и секреты.</div>
                     </div>
                     <div style="background:rgba(255,149,0,0.05);border:1px solid rgba(255,149,0,0.12);border-radius:16px;padding:20px 22px;">
                         <div style="font-family:var(--font-head);font-size:12px;color:#FF4444;margin-bottom:10px;letter-spacing:1px;">🔫 АРЕНА ПВП</div>
@@ -1708,33 +1681,54 @@
                         </div>
                     </div>
 
-                    <div class="card world-card" onclick="app.launch('play','hideseek')">
-                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(0,200,100,0.12),#050510);">
-                            <span class="world-emoji">🙈</span>
-                            <div class="world-glow" style="background:rgba(0,200,100,0.15);"></div>
+
+                    <div class="card world-card" onclick="app.launch('play','race')">
+                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(255,200,0,0.2),#050510);">
+                            <span class="world-emoji">🏎️</span>
+                            <div class="world-glow" style="background:rgba(255,200,0,0.2);"></div>
                         </div>
                         <div class="card-info">
-                            <div><b>Прятки</b><br><small class="world-tag" style="color:rgba(0,230,118,0.8)">👁 Найди всех!</small></div>
+                            <div><b>Гонки на цитрусах</b><br><small class="world-tag" style="color:#FFD700">🍊 Собирай быстрее всех!</small></div>
                         </div>
                     </div>
 
-                    <div class="card world-card" onclick="app.launch('play','pvp')">
-                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(255,50,50,0.2),#050510);">
-                            <span class="world-emoji">🔫</span>
-                            <div class="world-glow" style="background:rgba(255,50,50,0.2);"></div>
+                    <div class="card world-card" onclick="app.launch('play','dropper')">
+                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(0,200,255,0.2),#050510);">
+                            <span class="world-emoji">🌊</span>
+                            <div class="world-glow" style="background:rgba(0,200,255,0.2);"></div>
                         </div>
                         <div class="card-info">
-                            <div><b>Арена ПВП</b><br><small class="world-tag" style="color:rgba(255,80,80,0.9)">💥 Стреляй в мишени!</small></div>
+                            <div><b>Дроппер</b><br><small class="world-tag" style="color:#00E5FF">💧 Упади в воду!</small></div>
                         </div>
                     </div>
 
-                    <div class="card world-card" onclick="app.launch('play','dungeon')">
-                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(150,0,200,0.18),#050510);">
-                            <span class="world-emoji">⚔️</span>
-                            <div class="world-glow" style="background:rgba(150,0,200,0.2);"></div>
+                    <div class="card world-card" onclick="app.launch('play','obby')">
+                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(255,100,0,0.2),#050510);">
+                            <span class="world-emoji">🔥</span>
+                            <div class="world-glow" style="background:rgba(255,100,0,0.2);"></div>
                         </div>
                         <div class="card-info">
-                            <div><b>Тёмное Подземелье</b><br><small class="world-tag" style="color:#c060ff">💀 Выберись живым</small></div>
+                            <div><b>Огненный Обби</b><br><small class="world-tag" style="color:#FF6600">🏃 Не упади в лаву!</small></div>
+                        </div>
+                    </div>
+
+                    <div class="card world-card" onclick="app.launch('play','maze')">
+                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(0,255,150,0.15),#050510);">
+                            <span class="world-emoji">🌀</span>
+                            <div class="world-glow" style="background:rgba(0,255,150,0.15);"></div>
+                        </div>
+                        <div class="card-info">
+                            <div><b>Лабиринт</b><br><small class="world-tag" style="color:#00FF96">🧩 Найди выход!</small></div>
+                        </div>
+                    </div>
+
+                    <div class="card world-card" onclick="app.launch('play','coins')">
+                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(255,220,50,0.2),#050510);">
+                            <span class="world-emoji">💰</span>
+                            <div class="world-glow" style="background:rgba(255,220,50,0.2);"></div>
+                        </div>
+                        <div class="card-info">
+                            <div><b>Золотая Лихорадка</b><br><small class="world-tag" style="color:#FFD700">🍊 Собирай цитрусы!</small></div>
                         </div>
                     </div>
 
@@ -3538,7 +3532,7 @@ const app = {
     async loadStats(){
         const wNames={gather:'🍊 Цитрусовый Лес',parkour:'🏃 Небесный Паркур',
             volcano:'🌋 Остров Вулкана',space:'🚀 Космическая База',
-            hideseek:'👀 Прятки',pvp:'🔫 Арена ПВП',
+            race:'🏎️ Гонки',dropper:'🌊 Дроппер',obby:'🔥 Обби',
             dungeon:'⚔️ Тёмное Подземелье'};
 
         // Проверяем статус хранилища
@@ -4100,17 +4094,21 @@ const app = {
         if(this._ac) return;
         try{
             this._ac = new (window.AudioContext||window.webkitAudioContext)();
+            // Хаб-музыка
             this._musicGain = this._ac.createGain();
             this._musicGain.gain.value = 0.13;
-            // Реверб для музыки
-            this._musicReverb = this._ac.createConvolver();
             const rLen = this._ac.sampleRate * 1.5;
             const rBuf = this._ac.createBuffer(2, rLen, this._ac.sampleRate);
             for(let c=0;c<2;c++){const d=rBuf.getChannelData(c);for(let i=0;i<rLen;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/rLen,2);}
-            this._musicReverb.buffer = rBuf;
+            this._musicReverb = this._ac.createConvolver(); this._musicReverb.buffer = rBuf;
             const reverbGain = this._ac.createGain(); reverbGain.gain.value = 0.25;
             this._musicGain.connect(this._musicReverb); this._musicReverb.connect(reverbGain); reverbGain.connect(this._ac.destination);
             this._musicGain.connect(this._ac.destination);
+            // Игровая музыка — отдельный gain
+            this._gameGain = this._ac.createGain();
+            this._gameGain.gain.value = 0.13;
+            this._gameGain.connect(this._ac.destination);
+            // SFX
             this._sfxGain = this._ac.createGain();
             this._sfxGain.gain.value = 0.28;
             this._sfxGain.connect(this._ac.destination);
@@ -4334,133 +4332,357 @@ const app = {
     },
 
     _restoreHubMusic(){
-        // Полностью сбрасываем и перезапускаем хаб-музыку
         this._musicPlaying=false;
         this._musicScheduled.forEach(id=>clearTimeout(id));
         this._musicScheduled=[];
+        // Восстанавливаем хаб-gain (он не трогался игровой музыкой)
         if(this._musicGain && this._ac){
-            try{ this._musicGain.gain.setTargetAtTime(0, this._ac.currentTime, 0.3); }catch(e){}
+            try{ this._musicGain.gain.setTargetAtTime(this._musicMuted ? 0 : 0.13, this._ac.currentTime, 0.1); }catch(e){}
         }
-        setTimeout(()=>{
-            if(this._musicGain && this._ac){
-                try{ this._musicGain.gain.value = this._musicMuted ? 0 : 0.13; }catch(e){}
-            }
-            this.startHubMusic();
-        }, 700);
+        setTimeout(()=>this.startHubMusic(), 400);
     },
 
-    // Музыка в игровых мирах
+    // Музыка в игровых мирах — длинные многослойные треки
     startGameMusic(mapId){
         this._initAudio();
         if(!this._ac) return;
         this._musicPlaying=true;
         const ctx=this._ac;
         if(ctx.state==='suspended') ctx.resume();
+        if(this._gameGain) this._gameGain.gain.setTargetAtTime(0.13, ctx.currentTime, 0.3);
 
-        // Мелодии и настройки для каждого мира
-        const worlds={
-            gather:{
-                bpm:85, melody:[523,659,784,659,523,440,523,0,523,659,784,880,784,659,0,523],
-                bass:[130,0,0,130,0,0,130,0,116,0,0,116,0,0,116,0],
-                wave:'triangle', bassWave:'triangle', vol:0.08, bassVol:0.15,
-            },
-            parkour:{
-                bpm:128, melody:[659,784,880,784,659,523,659,0,784,880,988,880,784,659,784,0],
-                bass:[165,0,165,0,174,0,174,0,196,0,196,0,185,0,185,0],
-                wave:'sawtooth', bassWave:'triangle', vol:0.06, bassVol:0.12,
-            },
-            volcano:{
-                bpm:95, melody:[220,0,246,220,196,0,220,0,174,0,196,174,164,0,174,0],
-                bass:[55,0,0,55,0,0,49,0,0,49,0,0,52,0,0,52],
-                wave:'sawtooth', bassWave:'sawtooth', vol:0.07, bassVol:0.14,
-            },
-            space:{
-                bpm:60, melody:[392,0,440,0,392,0,349,0,329,0,392,0,440,0,0,0],
-                bass:[98,0,0,0,98,0,0,0,87,0,0,0,87,0,0,0],
-                wave:'sine', bassWave:'sine', vol:0.06, bassVol:0.1,
-            },
-            hideseek:{
-                bpm:75, melody:[523,494,440,392,440,494,523,0,523,587,659,587,523,494,440,0],
-                bass:[130,0,0,0,116,0,0,0,130,0,0,0,98,0,0,0],
-                wave:'triangle', bassWave:'triangle', vol:0.07, bassVol:0.13,
-            },
-            dungeon:{
-                bpm:70, melody:[220,0,196,0,174,196,220,0,246,0,220,0,196,174,164,0],
-                bass:[55,0,0,0,49,0,0,0,52,0,0,0,49,0,0,0],
-                wave:'sawtooth', bassWave:'sawtooth', vol:0.07, bassVol:0.14,
-            },
-            pvp:{
-                bpm:140, melody:[440,494,523,587,523,494,440,0,392,440,494,523,494,440,392,0],
-                bass:[110,0,110,0,116,0,116,0,98,0,98,0,110,0,110,0],
-                wave:'square', bassWave:'triangle', vol:0.06, bassVol:0.13,
-            },
-            lobby:{
-                bpm:80, melody:[523,659,784,659,523,0,440,523,587,659,784,659,587,523,0,0],
-                bass:[130,0,0,130,0,0,116,0,0,116,0,0,130,0,0,0],
-                wave:'triangle', bassWave:'triangle', vol:0.08, bassVol:0.14,
-            },
+        const dest=this._gameGain;
+        const sched=this._musicScheduled;
+
+        // ── Утилиты ──
+        const note=(freq,t,dur,wave,vol,dest2)=>{
+            if(!freq||!this._musicPlaying) return;
+            const o=ctx.createOscillator(); o.type=wave; o.frequency.value=freq;
+            const f=ctx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=2000;
+            const g=ctx.createGain();
+            g.gain.setValueAtTime(0,t);
+            g.gain.linearRampToValueAtTime(vol,t+0.02);
+            g.gain.setValueAtTime(vol,t+dur*0.7);
+            g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+            o.connect(f);f.connect(g);g.connect(dest2||dest);
+            o.start(t);o.stop(t+dur+0.01);
         };
-        const cfg=worlds[mapId]||worlds.lobby;
-        const beat=60/cfg.bpm;
-        const loopLen=cfg.melody.length*beat*0.5;
+        const bass=(freq,t,dur,vol)=>{
+            if(!freq) return;
+            const o=ctx.createOscillator(); o.type='triangle'; o.frequency.value=freq;
+            const f=ctx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=400;
+            const g=ctx.createGain();
+            g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+0.04);
+            g.gain.exponentialRampToValueAtTime(0.001,t+dur*0.9);
+            o.connect(f);f.connect(g);g.connect(dest);o.start(t);o.stop(t+dur);
+        };
+        const pad=(freqs,t,dur,vol)=>{
+            freqs.forEach(freq=>{
+                const o=ctx.createOscillator(); o.type='sine'; o.frequency.value=freq;
+                const g=ctx.createGain();
+                g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+0.3);
+                g.gain.setValueAtTime(vol,t+dur-0.4);g.gain.linearRampToValueAtTime(0,t+dur);
+                o.connect(g);g.connect(dest);o.start(t);o.stop(t+dur+0.1);
+            });
+        };
+        const hihat=(t,vol)=>{
+            const buf=ctx.createBuffer(1,ctx.sampleRate*0.04,ctx.sampleRate);
+            const d=buf.getChannelData(0);
+            for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/(ctx.sampleRate*0.008));
+            const src=ctx.createBufferSource(); src.buffer=buf;
+            const hf=ctx.createBiquadFilter(); hf.type='highpass'; hf.frequency.value=9000;
+            const g=ctx.createGain(); g.gain.value=vol;
+            src.connect(hf);hf.connect(g);g.connect(dest);src.start(t);
+        };
+        const kick=(t,vol)=>{
+            const o=ctx.createOscillator(); o.type='sine';
+            o.frequency.setValueAtTime(160,t); o.frequency.exponentialRampToValueAtTime(40,t+0.15);
+            const g=ctx.createGain(); g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.2);
+            o.connect(g);g.connect(dest);o.start(t);o.stop(t+0.2);
+        };
+        const snare=(t,vol)=>{
+            const buf=ctx.createBuffer(1,ctx.sampleRate*0.15,ctx.sampleRate);
+            const d=buf.getChannelData(0);
+            for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/(ctx.sampleRate*0.05));
+            const src=ctx.createBufferSource(); src.buffer=buf;
+            const g=ctx.createGain(); g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.15);
+            src.connect(g);g.connect(dest);src.start(t);
+        };
 
-        // Реверб для атмосферы
-        const rLen=ctx.sampleRate*1.2;
-        const rBuf=ctx.createBuffer(2,rLen,ctx.sampleRate);
-        for(let c=0;c<2;c++){const d=rBuf.getChannelData(c);for(let i=0;i<rLen;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/rLen,2.5);}
-        const reverb=ctx.createConvolver(); reverb.buffer=rBuf;
-        const rvGain=ctx.createGain(); rvGain.gain.value=0.18;
-        reverb.connect(rvGain); rvGain.connect(this._musicGain);
+        // ══════════════════════════════════════════
+        // ТРЕКИ ПО МИРАМ
+        // ══════════════════════════════════════════
+
+        const tracks={
+
+        // 🍊 ЦИТРУСОВЫЙ ЛЕС — весёлый lo-fi поп, ~90 сек петля
+        gather:(t0)=>{
+            const B=60/88; // beat
+            // 4 секции по 16 бит = 64 бита (~43 сек)
+            // Секция A — вступление (бас + мелодия)
+            const mA=[523,523,659,784,659,523,440,523, 659,784,880,784,659,523,659,0,
+                      523,659,784,880,784,659,523,440, 392,440,523,659,523,440,392,0];
+            const bA=[130,0,130,0,116,0,116,0, 130,0,130,0,98,0,98,0,
+                      130,0,130,0,116,0,116,0, 98,0,98,0,130,0,130,0];
+            // Секция B — припев (выше октавой + аккорды)
+            const mB=[1046,1046,1318,1568,1318,1046,880,1046, 1318,1568,1760,1568,1318,1046,1318,0,
+                      784,880,1046,1318,1046,880,784,659,  784,880,1046,880,784,659,784,0];
+            const bB=[130,0,0,130,0,0,116,0, 116,0,0,116,0,0,98,0,
+                      130,0,0,130,0,0,116,0, 98,0,0,98,0,0,130,0];
+            // Секция C — бридж (другая тональность)
+            const mC=[440,494,523,587,659,587,523,440, 392,440,523,440,392,349,392,0,
+                      349,392,440,523,587,659,784,659, 587,523,494,440,392,349,392,0];
+            // Секция D — аутро (тихо, только бас и хайхэт)
+            const mD=[523,0,659,0,784,0,659,0, 523,0,440,0,523,0,0,0,
+                      523,0,659,0,784,0,880,0, 784,0,659,0,523,0,0,0];
+
+            const sections=[mA,mB,mC,mD];
+            const bassSecs=[bA,bB,bA,bB];
+            const padChords=[[261,329,392],[220,277,330],[196,247,294],[261,329,392]];
+
+            let t=t0;
+            sections.forEach((mel,si)=>{
+                const bss=bassSecs[si];
+                // Пэд на всю секцию
+                pad(padChords[si], t, mel.length*B*0.5, si===1?0.035:0.022);
+                mel.forEach((freq,i)=>{
+                    note(freq, t+i*B*0.5, B*0.55, si===1?'sawtooth':'triangle', si===1?0.07:0.09);
+                });
+                bss.forEach((freq,i)=>{
+                    bass(freq, t+i*B*0.5, B*0.88, 0.16);
+                });
+                // Перкуссия
+                for(let i=0;i<mel.length;i++){
+                    if(i%8===0||i%8===4) kick(t+i*B*0.5, 0.3);
+                    if(i%8===2||i%8===6) snare(t+i*B*0.5, 0.15);
+                    if(i%2===1) hihat(t+i*B*0.5, 0.04);
+                }
+                t+=mel.length*B*0.5;
+            });
+            return t-t0;
+        },
+
+        // 🏃 ПАРКУР — энергичный drum&bass, ~70 сек
+        parkour:(t0)=>{
+            const B=60/155;
+            const mA=[659,784,880,0,659,784,880,988, 880,784,659,0,523,659,784,0,
+                      659,784,880,988,1047,988,880,784, 659,523,659,784,659,0,523,0];
+            const mB=[988,988,1047,0,880,988,1047,1175, 1047,988,880,0,784,880,988,0,
+                      1047,1175,1318,0,1175,1047,988,880, 784,659,784,880,784,0,659,0];
+            const mC=[523,659,784,659,523,440,523,659, 784,659,523,440,392,440,523,0,
+                      659,784,880,784,659,523,659,784, 880,988,1047,880,784,659,784,0];
+            const bassA=[165,0,165,165,0,174,0,174, 196,0,196,0,185,0,185,0,
+                         165,0,165,165,0,174,0,174, 185,0,185,0,165,0,165,0];
+
+            let t=t0;
+            [mA,mB,mC,mA].forEach((mel,si)=>{
+                bassA.forEach((freq,i)=>{ bass(freq,t+i*B*0.5,B*0.45,0.18); });
+                mel.forEach((freq,i)=>{ note(freq,t+i*B*0.5,B*0.4,'sawtooth',0.065); });
+                // Быстрая перкуссия dnb
+                for(let i=0;i<mel.length;i++){
+                    if(i%8===0||i%8===3||i%8===6) kick(t+i*B*0.5,0.35);
+                    if(i%8===2||i%8===5||i%8===7) snare(t+i*B*0.5,0.18);
+                    if(i%1===0) hihat(t+i*B*0.5,0.03);
+                }
+                t+=mel.length*B*0.5;
+            });
+            return t-t0;
+        },
+
+        // 🌋 ВУЛКАН — тёмный металл/синтвейв, ~80 сек
+        volcano:(t0)=>{
+            const B=60/100;
+            const mA=[220,0,0,196,0,174,196,220, 0,246,0,220,196,0,174,0,
+                      164,0,0,174,0,164,147,0,    164,174,196,174,164,0,0,0];
+            const mB=[220,247,277,247,220,0,196,220, 247,277,311,277,247,220,196,0,
+                      174,196,220,247,277,247,220,196, 174,164,147,164,174,0,0,0];
+            const mC=[330,0,294,0,262,0,247,0, 262,294,330,294,262,247,220,0,
+                      196,220,247,220,196,174,196,220, 247,262,294,262,247,0,220,0];
+            const bassV=[55,0,0,55,0,49,0,0, 49,0,0,52,0,52,0,0,
+                         55,0,0,55,0,49,0,0, 46,0,0,49,0,0,52,0];
+            // Тяжёлые пэды
+            const darkPads=[[110,138,165],[98,123,147],[87,110,131]];
+
+            let t=t0;
+            [mA,mB,mC,mA,mB].forEach((mel,si)=>{
+                pad(darkPads[si%3], t, mel.length*B*0.5, 0.04);
+                bassV.forEach((freq,i)=>{ bass(freq,t+i*B*0.5,B*0.9,0.22); });
+                mel.forEach((freq,i)=>{ note(freq,t+i*B*0.5,B*0.6,'sawtooth',0.08); });
+                for(let i=0;i<mel.length;i++){
+                    if(i%8===0) kick(t+i*B*0.5,0.4);
+                    if(i%8===4) kick(t+i*B*0.5,0.25);
+                    if(i%8===2||i%8===6) snare(t+i*B*0.5,0.2);
+                    if(i%4===2||i%4===3) hihat(t+i*B*0.5,0.025);
+                }
+                t+=mel.length*B*0.5;
+            });
+            return t-t0;
+        },
+
+        // 🚀 КОСМОС — эмбиент/синтвейв, ~100 сек
+        space:(t0)=>{
+            const B=60/62;
+            // Длинные плавающие мелодии
+            const mA=[392,0,0,0,440,0,0,0, 392,0,0,0,349,0,0,0,
+                      329,0,0,0,349,0,0,0, 392,0,0,0,440,0,0,0,
+                      494,0,0,0,523,0,0,0, 494,0,0,0,440,0,0,0];
+            const mB=[784,0,0,0,880,0,0,0, 784,0,0,0,698,0,0,0,
+                      659,0,0,0,698,0,0,0, 784,0,0,0,880,0,0,0,
+                      988,0,0,0,1047,0,0,0, 988,0,0,0,880,0,0,0];
+            const bassS=[98,0,0,0,0,0,0,0, 87,0,0,0,0,0,0,0,
+                         82,0,0,0,0,0,0,0, 87,0,0,0,0,0,0,0,
+                         98,0,0,0,0,0,0,0, 87,0,0,0,0,0,0,0];
+            const spacePads=[[196,247,294,370],[174,220,261,329],[164,207,247,311]];
+
+            let t=t0;
+            // 4 полные секции
+            [mA,mB,mA,mB].forEach((mel,si)=>{
+                pad(spacePads[si%3], t, mel.length*B*0.5, 0.03);
+                bassS.forEach((freq,i)=>{ bass(freq,t+i*B*0.5,B*3.5,0.12); });
+                mel.forEach((freq,i)=>{ note(freq,t+i*B*0.5,B*3,'sine',0.065); });
+                // Редкий хайхэт
+                for(let i=0;i<mel.length;i+=4) hihat(t+i*B*0.5,0.02);
+                t+=mel.length*B*0.5;
+            });
+            return t-t0;
+        },
+
+        // 🕵️ ПРЯТКИ — таинственный, джазовый, ~75 сек
+        hideseek:(t0)=>{
+            const B=60/80;
+            const mA=[523,494,440,0,392,440,494,523, 587,659,587,523,494,440,494,0,
+                      440,494,523,587,659,587,523,494, 440,392,349,392,440,494,523,0];
+            const mB=[659,698,784,698,659,587,659,0,  784,880,784,698,659,587,659,0,
+                      523,587,659,698,784,698,659,587, 523,494,440,494,523,587,659,0];
+            const mC=[392,440,494,523,587,523,494,440, 392,349,330,349,392,440,494,0,
+                      523,494,440,392,349,330,294,330,  349,392,440,494,523,494,440,0];
+            const bassH=[130,0,0,0,116,0,116,0, 130,0,0,0,110,0,110,0,
+                         116,0,0,0,98,0,98,0,   104,0,0,0,116,0,116,0];
+
+            let t=t0;
+            [mA,mB,mC,mA,mB].forEach((mel,si)=>{
+                pad([[261,329,392],[220,277,330],[196,247,294]][si%3], t, mel.length*B*0.5, 0.025);
+                bassH.forEach((freq,i)=>{ bass(freq,t+i*B*0.5,B*0.75,0.14); });
+                mel.forEach((freq,i)=>{ note(freq,t+i*B*0.5,B*0.6,'triangle',0.075); });
+                for(let i=0;i<mel.length;i++){
+                    if(i%8===0||i%8===5) kick(t+i*B*0.5,0.2);
+                    if(i%8===3||i%8===7) snare(t+i*B*0.5,0.1);
+                    if(i%2===1) hihat(t+i*B*0.5,0.025);
+                }
+                t+=mel.length*B*0.5;
+            });
+            return t-t0;
+        },
+
+        // ⚔️ ПОДЗЕМЕЛЬЕ — мрачный дарк-эмбиент с угрожающими мотивами, ~90 сек
+        dungeon:(t0)=>{
+            const B=60/72;
+            const mA=[220,0,0,196,174,0,0,164, 147,0,0,164,174,0,0,0,
+                      196,0,0,220,246,0,0,220,  196,174,164,0,147,0,0,0];
+            const mB=[165,0,185,0,196,0,185,0,  174,0,164,0,147,0,0,0,
+                      155,0,174,0,185,0,174,0,  164,0,147,0,138,0,0,0];
+            const mC=[330,0,0,294,0,277,294,0,  330,370,330,0,294,0,277,0,
+                      247,0,0,277,0,294,277,0,  247,220,207,0,196,0,0,0];
+            const bassD=[55,0,0,0,49,0,0,0, 52,0,0,0,46,0,0,0,
+                         55,0,0,0,49,0,0,0, 46,0,0,0,52,0,0,0];
+            const darkC=[[110,138,165],[98,123,147],[82,104,123],[87,110,131]];
+
+            let t=t0;
+            [mA,mB,mC,mA,mB,mC].forEach((mel,si)=>{
+                pad(darkC[si%4], t, mel.length*B*0.5, 0.045);
+                bassD.forEach((freq,i)=>{ bass(freq,t+i*B*0.5,B*1.8,0.2); });
+                mel.forEach((freq,i)=>{ note(freq,t+i*B*0.5,B*0.7,'sawtooth',0.07); });
+                for(let i=0;i<mel.length;i++){
+                    if(i%16===0||i%16===8) kick(t+i*B*0.5,0.35);
+                    if(i%16===6||i%16===14) snare(t+i*B*0.5,0.12);
+                    if(i%4===3) hihat(t+i*B*0.5,0.015);
+                }
+                t+=mel.length*B*0.5;
+            });
+            return t-t0;
+        },
+
+        // 🔫 ПВП — агрессивный электро, ~65 сек
+        pvp:(t0)=>{
+            const B=60/145;
+            const mA=[440,494,523,0,587,523,494,0, 440,392,440,494,523,494,440,0,
+                      494,523,587,0,659,587,523,0, 494,440,392,440,494,523,587,0];
+            const mB=[880,988,1047,0,880,784,880,0, 988,1047,1175,0,988,880,784,0,
+                      880,784,880,988,1047,988,880,0, 784,659,784,880,988,880,784,0];
+            const mC=[659,0,784,0,880,0,784,659, 523,0,659,0,784,0,659,523,
+                      440,0,523,0,659,0,784,0,   880,784,659,523,440,392,440,0];
+            const bassP=[110,0,110,0,116,0,116,0, 98,0,98,0,110,0,110,0,
+                         116,0,116,0,123,0,123,0, 110,0,110,0,116,0,116,0];
+
+            let t=t0;
+            [mA,mB,mC,mA,mB].forEach((mel,si)=>{
+                bassP.forEach((freq,i)=>{ bass(freq,t+i*B*0.5,B*0.45,0.18); });
+                mel.forEach((freq,i)=>{ note(freq,t+i*B*0.5,B*0.35,'square',si===1?0.05:0.065); });
+                for(let i=0;i<mel.length;i++){
+                    if(i%4===0) kick(t+i*B*0.5,0.38);
+                    if(i%4===2) snare(t+i*B*0.5,0.2);
+                    if(i%2===1) hihat(t+i*B*0.5,0.035);
+                }
+                t+=mel.length*B*0.5;
+            });
+            return t-t0;
+        },
+
+        // 🏙️ ЛОББИ/ОСТАЛЬНЫЕ — дружелюбный чилл, ~80 сек
+        lobby:(t0)=>{
+            const B=60/85;
+            const mA=[523,659,784,659,523,0,440,523, 659,784,880,784,659,523,659,0,
+                      440,523,659,784,880,784,659,523, 440,392,440,523,659,0,523,0];
+            const mB=[784,880,1046,880,784,659,784,0, 880,1046,1175,1046,880,784,880,0,
+                      659,784,880,1046,1175,1046,880,784, 659,523,659,784,880,0,784,0];
+            const mC=[523,587,659,698,784,698,659,587, 523,494,523,587,659,698,784,0,
+                      698,784,880,784,698,659,587,523,  494,440,494,523,587,659,698,0];
+            const bassL=[130,0,0,130,0,0,116,0, 116,0,0,116,0,0,98,0,
+                         130,0,0,130,0,0,116,0,  98,0,0,98,0,0,130,0];
+
+            let t=t0;
+            [mA,mB,mC,mA,mB].forEach((mel,si)=>{
+                pad([[261,329,392],[220,277,330],[196,247,294]][si%3], t, mel.length*B*0.5, 0.028);
+                bassL.forEach((freq,i)=>{ bass(freq,t+i*B*0.5,B*0.85,0.15); });
+                mel.forEach((freq,i)=>{ note(freq,t+i*B*0.5,B*0.55,'triangle',0.085); });
+                for(let i=0;i<mel.length;i++){
+                    if(i%8===0||i%8===4) kick(t+i*B*0.5,0.28);
+                    if(i%8===2||i%8===6) snare(t+i*B*0.5,0.14);
+                    if(i%2===1) hihat(t+i*B*0.5,0.035);
+                }
+                t+=mel.length*B*0.5;
+            });
+            return t-t0;
+        },
+
+        };
+
+        const trackFn=tracks[mapId]||tracks.lobby;
 
         const playLoop=(t0)=>{
             if(!this._musicPlaying) return;
-
-            cfg.melody.forEach((freq,i)=>{
-                if(!freq) return;
-                const t=t0+i*beat*0.5;
-                const o=ctx.createOscillator(); o.type=cfg.wave; o.frequency.value=freq;
-                const f=ctx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=1400;
-                const gn=ctx.createGain();
-                gn.gain.setValueAtTime(0,t);
-                gn.gain.linearRampToValueAtTime(cfg.vol,t+0.03);
-                gn.gain.exponentialRampToValueAtTime(0.001,t+beat*0.55);
-                o.connect(f); f.connect(gn); gn.connect(this._musicGain);
-                o.connect(f); f.connect(reverb);
-                o.start(t); o.stop(t+beat*0.6);
-            });
-
-            cfg.bass.forEach((freq,i)=>{
-                if(!freq) return;
-                const t=t0+i*beat*0.5;
-                const o=ctx.createOscillator(); o.type=cfg.bassWave; o.frequency.value=freq;
-                const f=ctx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=350;
-                const gn=ctx.createGain();
-                gn.gain.setValueAtTime(0,t);
-                gn.gain.linearRampToValueAtTime(cfg.bassVol,t+0.04);
-                gn.gain.exponentialRampToValueAtTime(0.001,t+beat*0.85);
-                o.connect(f); f.connect(gn); gn.connect(this._musicGain);
-                o.start(t); o.stop(t+beat*0.9);
-            });
-
-            // Лёгкий хайхэт только для быстрых миров
-            if(cfg.bpm>=110){
-                for(let i=0;i<cfg.melody.length;i+=2){
-                    const t=t0+i*beat*0.5;
-                    const buf=ctx.createBuffer(1,ctx.sampleRate*0.03,ctx.sampleRate);
-                    const d=buf.getChannelData(0);
-                    for(let j=0;j<d.length;j++) d[j]=(Math.random()*2-1)*Math.exp(-j/(ctx.sampleRate*0.006));
-                    const src=ctx.createBufferSource(); src.buffer=buf;
-                    const hf=ctx.createBiquadFilter(); hf.type='highpass'; hf.frequency.value=10000;
-                    const gn=ctx.createGain(); gn.gain.setValueAtTime(0.03,t);
-                    src.connect(hf); hf.connect(gn); gn.connect(this._musicGain); src.start(t);
-                }
-            }
-
-            const nid=setTimeout(()=>playLoop(t0+loopLen),(loopLen-0.2)*1000);
-            this._musicScheduled.push(nid);
+            const dur=trackFn(t0);
+            const nid=setTimeout(()=>playLoop(t0+dur),(dur-0.3)*1000);
+            sched.push(nid);
         };
 
-        playLoop(ctx.currentTime+0.1);
+        playLoop(ctx.currentTime+0.2);
+    },
+
+    stopGameMusic(){
+        this._musicPlaying=false;
+        this._musicScheduled.forEach(id=>clearTimeout(id));
+        this._musicScheduled=[];
+        if(this._gameGain && this._ac){
+            try{
+                // Отключаем старый нод — все ноты привязанные к нему замолкают
+                this._gameGain.disconnect();
+                // Создаём новый чистый gameGain
+                this._gameGain = this._ac.createGain();
+                this._gameGain.gain.value = 0;
+                this._gameGain.connect(this._ac.destination);
+            }catch(e){}
+        }
     },
 
     toggleNavGroup(){
@@ -4473,7 +4695,7 @@ const app = {
 
         switchTab(id){
         this._sfx('nav');
-        ['games','avatar','shop','friends','studio','quests','roulette','credits','gifts','nft','stats','leaderboard','admin','help','chat','cases'].forEach(t=>{
+        ['games','avatar','shop','friends','studio','quests','roulette','credits','gifts','nft','stats','leaderboard','admin','help','cases'].forEach(t=>{
             document.getElementById('tab-'+t)?.classList.add('hidden');
             document.getElementById('nav-'+t)?.classList.remove('active');
         });
@@ -4798,7 +5020,7 @@ const app = {
         }
         else if(msg.type==='invite'&&String(msg.to)===String(this.userId)){
             const wNames={lobby:'Главная Площадь',gather:'Цитрусовый Лес',parkour:'Небесный Паркур',
-                volcano:'Остров Вулкана',space:'Космическая База',hideseek:'Прятки',
+                volcano:'Остров Вулкана',space:'Космическая База',race:'Гонки',dropper:'Дроппер',obby:'Обби',
                 pvp:'Арена ПВП',dungeon:'Тёмное Подземелье',march8:'🌸 8 Марта'};
             const wn=wNames[msg.world]||msg.worldName||msg.world;
             const n=document.createElement('div');n.className='notif';
@@ -5139,8 +5361,8 @@ const app = {
             const p=findPeer(fid);
             const on=online.find(x=>x.id===fid);
             const wNames={gather:'Цитрусовый Лес',parkour:'Небесный Паркур',
-                volcano:'Остров Вулкана',space:'Космическая База',hideseek:'Прятки',
-                pvp:'Арена ПВП',dungeon:'Тёмное Подземелье'};
+                volcano:'Остров Вулкана',space:'Космическая База',race:'Гонки',dropper:'Дроппер',obby:'Обби',
+                pvp:'Арена ПВП',maze:'Лабиринт',coins:'Золотая Лихорадка'};
             const friendMapId = on && on.status==='ingame' ? on.world : null;
             const friendMapName = friendMapId ? (wNames[friendMapId] || friendMapId) : null;
             const st = on ? (friendMapId ? '🎮 '+friendMapName : '● Онлайн') : '○ Оффлайн';
@@ -6112,10 +6334,11 @@ const app = {
         }
         this.velocity.set(0,0,0);this.canJump=false;this.loopFn=null;this.spaceGrav=false;
         this.stopHubMusic();
+        this.stopGameMusic();
         this._sfx('launch');
         if(mode==='play') setTimeout(()=>this.startGameMusic(mapId),600);
         const wNames={lobby:'Главная Площадь',gather:'Цитрусовый Лес',parkour:'Небесный Паркур',
-            volcano:'Остров Вулкана',space:'Космическая База',hideseek:'Прятки',
+            volcano:'Остров Вулкана',space:'Космическая База',race:'Гонки',dropper:'Дроппер',obby:'Обби',
             pvp:'Арена ПВП',dungeon:'Тёмное Подземелье',march8:'🌸 8 Марта'};
         this._worldName=wNames[mapId]||'Мир игрока';
         if(mode==='play'){
@@ -6128,11 +6351,11 @@ const app = {
         
         document.getElementById('ui-hub').classList.add('hidden');
         document.getElementById('engine-view').style.display='block';
-        document.getElementById('crosshair').style.display=(mode==='studio'||mapId==='pvp')?'block':'none';
+        document.getElementById('crosshair').style.display=(mode==='studio')?'block':'none';
         document.getElementById('studio-ui').classList.toggle('hidden',mode!=='studio');
         const stTouch = document.getElementById('studio-touch-btns');
         if(stTouch) stTouch.classList.toggle('hidden', mode!=='studio');
-        document.getElementById('ingame-ui').style.display=(mode==='play'&&(mapId==='gather'||mapId==='hideseek'||mapId==='pvp'||mapId==='dungeon'||mapId==='march8'))?'flex':'none';
+        document.getElementById('ingame-ui').style.display=(mode==='play'&&(mapId==='gather'||mapId==='race'||mapId==='coins'||mapId==='march8'))?'flex':'none';
         document.getElementById('mp-panel').classList.toggle('hidden',mode!=='play');
 
         
@@ -6152,7 +6375,7 @@ const app = {
     setupScene(){
         const canvas=document.getElementById('gl-canvas');canvas.innerHTML='';
         this.scene=new THREE.Scene();
-        const bgs={lobby:0x0a0a18,gather:0x0d1f0a,parkour:0x87CEEB,volcano:0x1a0800,space:0x000005,hideseek:0x0d1a0d,pvp:0x100a06,dungeon:0x050508,march8:0x1a0a1a};
+        const bgs={lobby:0x0a0a18,gather:0x0d1f0a,parkour:0x87CEEB,volcano:0x1a0800,space:0x000005,race:0x0a0a0a,dropper:0x001133,obby:0x1a0500,maze:0x0a0f0a,coins:0x0d0800,march8:0x1a0a1a};
         const bg=bgs[this.currentMap]||0x0a0a10;
         this.scene.background=new THREE.Color(bg);
         this.scene.fog=new THREE.FogExp2(bg,0.016);
@@ -6178,15 +6401,64 @@ const app = {
         if(this.mode==='play'){
             this.playerGroup=this.buildCharacter(true);
             // Спавн выше земли для всех миров
-            const spawnY = {parkour:8, march8:5, dungeon:3, volcano:4, space:4, pvp:2, hideseek:4, gather:3, lobby:3};
+            const spawnY = {parkour:8, march8:5, maze:2,  coins:2, dropper:6, obby:2, race:1, volcano:4, space:4, gather:3, lobby:3};
             const baseY = this._joinSpawn ? 15 : (spawnY[this.currentMap] || (typeof this.currentMap==='number' ? 12 : 5));
             this._joinSpawn = false;
             this.playerGroup.position.set(0, baseY, 0);
             if(this.velocity) this.velocity.set(0,0,0);
             this.scene.add(this.playerGroup);
-            this.renderMpPanel();
+            // В гонках — ставим на трассу (горизонтальная прямая z=-40)
+            if(this.currentMap==='race') this.playerGroup.position.set(0, 1, -40);
 
-        if(typeof this.currentMap==='number'){
+            // 🏎️ В режиме гонок — скрываем персонажа, машина отдельно в сцене
+            if(this.currentMap==='race'){
+                // Скрываем все меши персонажа
+                this.playerGroup.traverse(obj=>{ if(obj.isMesh) obj.visible=false; });
+
+                // Строим машину как отдельный объект сцены
+                const car=new THREE.Group();
+                const bodyMat=new THREE.MeshStandardMaterial({color:0xFF3300,roughness:0.3,metalness:0.6});
+                const body=new THREE.Mesh(new THREE.BoxGeometry(2.4,0.7,4.5),bodyMat);
+                body.position.y=0.35; car.add(body);
+                const cabMat=new THREE.MeshStandardMaterial({color:0xDD2200,roughness:0.3,metalness:0.5});
+                const cab=new THREE.Mesh(new THREE.BoxGeometry(1.8,1.0,2.2),cabMat);
+                cab.position.set(0,1.15,0.2); car.add(cab);
+                const glassMat=new THREE.MeshStandardMaterial({color:0x88ccff,transparent:true,opacity:0.5,roughness:0,metalness:0.2});
+                const windshield=new THREE.Mesh(new THREE.BoxGeometry(1.6,0.6,0.1),glassMat);
+                windshield.position.set(0,1.1,-0.9); windshield.rotation.x=0.3; car.add(windshield);
+                const rearWin=new THREE.Mesh(new THREE.BoxGeometry(1.6,0.6,0.1),glassMat);
+                rearWin.position.set(0,1.1,1.3); rearWin.rotation.x=-0.3; car.add(rearWin);
+                const wheelMat=new THREE.MeshStandardMaterial({color:0x111111,roughness:0.9});
+                const rimMat=new THREE.MeshStandardMaterial({color:0xcccccc,metalness:0.8,roughness:0.2});
+                [[-1.3,0,-1.4],[1.3,0,-1.4],[-1.3,0,1.4],[1.3,0,1.4]].forEach(([wx,wy,wz])=>{
+                    const w=new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.5,0.4,16),wheelMat);
+                    w.rotation.z=Math.PI/2; w.position.set(wx,wy,wz); car.add(w);
+                    const r=new THREE.Mesh(new THREE.CylinderGeometry(0.28,0.28,0.42,8),rimMat);
+                    r.rotation.z=Math.PI/2; r.position.set(wx,wy,wz); car.add(r);
+                });
+                const hlMat=new THREE.MeshStandardMaterial({color:0xffffee,emissive:0xffffaa,emissiveIntensity:2});
+                [[-0.7,0.4,-2.3],[0.7,0.4,-2.3]].forEach(([fx,fy,fz])=>{
+                    const fl=new THREE.Mesh(new THREE.BoxGeometry(0.4,0.25,0.1),hlMat);
+                    fl.position.set(fx,fy,fz); car.add(fl);
+                    const pl=new THREE.PointLight(0xffffaa,2,8); pl.position.set(fx,fy,fz-0.5); car.add(pl);
+                });
+                const tlMat=new THREE.MeshStandardMaterial({color:0xff0000,emissive:0xff0000,emissiveIntensity:1.5});
+                [[-0.7,0.4,2.3],[0.7,0.4,2.3]].forEach(([fx,fy,fz])=>{
+                    const tl=new THREE.Mesh(new THREE.BoxGeometry(0.4,0.25,0.1),tlMat);
+                    tl.position.set(fx,fy,fz); car.add(tl);
+                });
+                const spMat=new THREE.MeshStandardMaterial({color:0x111111,roughness:0.5});
+                const sp=new THREE.Mesh(new THREE.BoxGeometry(2,0.1,0.5),spMat); sp.position.set(0,1.8,2.0); car.add(sp);
+                const sp1=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.6,0.5),spMat); sp1.position.set(-0.9,1.5,2.0); car.add(sp1);
+                const sp2=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.6,0.5),spMat); sp2.position.set(0.9,1.5,2.0); car.add(sp2);
+
+                // Добавляем машину прямо в сцену (не в playerGroup!)
+                this.scene.add(car);
+                this._raceCar=car;
+                this._raceSpeed=true;
+            }
+            this.renderMpPanel();
+            if(typeof this.currentMap==='number'){
                 const m=this.customMaps[this.currentMap];
                 if(m&&m.script&&m.script.includes('// @loop')){
                     try{
@@ -6371,158 +6643,282 @@ const app = {
             sg.setAttribute('position',new THREE.Float32BufferAttribute(sp,3));
             this.scene.add(new THREE.Points(sg,new THREE.PointsMaterial({color:0xffffff,size:0.5})));
         }
-        else if(this.currentMap==='hideseek'){
-            // ПРЯТКИ: лесная поляна с кустами и деревьями для укрытий
-            this.scene.background=new THREE.Color(0x0d1a0d);
-            this.scene.fog=new THREE.FogExp2(0x0d1a0d,0.022);
-            addGround(0x1a3010);
-            // Деревья — укрытия
-            for(let i=0;i<60;i++){
-                const tx=(Math.random()-0.5)*160,tz=(Math.random()-0.5)*160;
-                if(Math.abs(tx)<8&&Math.abs(tz)<8)continue;
-                const h=4+Math.random()*5;
-                const trunk=new THREE.Mesh(new THREE.CylinderGeometry(0.3,0.5,h),new THREE.MeshStandardMaterial({color:0x4a2a0a,roughness:0.9}));
-                trunk.position.set(tx,h/2,tz);trunk.castShadow=true;
-                this.scene.add(trunk);this.objectsToIntersect.push(trunk);
-                const foliage=new THREE.Mesh(new THREE.SphereGeometry(2.5+Math.random(),8,8),new THREE.MeshStandardMaterial({color:0x1a5e20,roughness:0.9}));
-                foliage.position.set(tx,h+1,tz);foliage.castShadow=true;this.scene.add(foliage);this.objectsToIntersect.push(foliage);
-            }
-            // Кусты
-            for(let i=0;i<40;i++){
-                const bx=(Math.random()-0.5)*140,bz=(Math.random()-0.5)*140;
-                const bush=new THREE.Mesh(new THREE.SphereGeometry(1.2+Math.random()*0.8,7,7),new THREE.MeshStandardMaterial({color:0x2e7d32,roughness:1}));
-                bush.position.set(bx,0.8,bz);bush.scale.y=0.6;this.scene.add(bush);this.objectsToIntersect.push(bush);
-            }
-            // Деревянные домики (укрытия)
-            const housePos=[[15,0,15],[-20,0,10],[25,0,-18],[-10,0,-25],[0,0,30]];
-            housePos.forEach(([hx,hy,hz])=>{
-                const walls=new THREE.Mesh(new THREE.BoxGeometry(6,4,6),new THREE.MeshStandardMaterial({color:0x8d6e63,roughness:0.9}));
-                walls.position.set(hx,2,hz);walls.castShadow=true;this.scene.add(walls);this.objectsToIntersect.push(walls);
-                const roof=new THREE.Mesh(new THREE.ConeGeometry(5,3,4),new THREE.MeshStandardMaterial({color:0x5d4037,roughness:0.8}));
-                roof.position.set(hx,5.5,hz);roof.rotation.y=Math.PI/4;this.scene.add(roof);
+        else if(this.currentMap==='race'){
+            // 🏎️ ГОНКИ НА МОНЕТАХ — круговая трасса с монетами
+            this.scene.background=new THREE.Color(0x0a0a0a);
+            this.scene.fog=new THREE.Fog(0x0a0a0a,80,220);
+            // Асфальт
+            const road=new THREE.Mesh(new THREE.BoxGeometry(300,0.3,300),new THREE.MeshStandardMaterial({color:0x222222,roughness:0.9}));
+            road.position.y=-0.15; road.receiveShadow=true; this.scene.add(road); this.objectsToIntersect.push(road);
+            // Трасса — квадратное кольцо из платформ
+            const trackMat=new THREE.MeshStandardMaterial({color:0x333333,roughness:0.8});
+            const lineMat=new THREE.MeshStandardMaterial({color:0xFFD700,emissive:0xCC9900,emissiveIntensity:0.4});
+            const trackSegs=[
+                [0,0,-40,60,0.4,8],[0,0,40,60,0.4,8], // горизонтальные
+                [-30,0,0,8,0.4,80],[ 30,0,0,8,0.4,80], // вертикальные
+            ];
+            trackSegs.forEach(([x,y,z,w,h,d])=>{
+                const s=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),trackMat);
+                s.position.set(x,y,z); this.scene.add(s); this.objectsToIntersect.push(s);
+                // Жёлтая линия по центру
+                const l=new THREE.Mesh(new THREE.BoxGeometry(w*0.05,h+0.05,d*0.05),lineMat);
+                l.position.set(x,y+0.2,z); this.scene.add(l);
             });
-            // Фонари
-            for(let i=0;i<6;i++){
-                const a=(i/6)*Math.PI*2;
-                const lamp=new THREE.PointLight(0xFFE080,1.2,14);lamp.position.set(Math.cos(a)*20,4,Math.sin(a)*20);this.scene.add(lamp);
-            }
-            // Инфо HUD
-            if(!this._hsTimer){
-                this._hsTimer=60;this._hsFound=0;this._hsTotal=5;
-                this._hsInterval=setInterval(()=>{
-                    this._hsTimer--;
-                    if(this._hsTimer<=0){clearInterval(this._hsInterval);this._hsInterval=null;this._hsTimer=null;
-                        this.showNotif('🙈','Время вышло!','Водящий победил! Игра окончена');}
-                    this.showHideSeekHud();
-                },1000);
-                this.showHideSeekHud();
-            }
-        }
-        else if(this.currentMap==='pvp'){
-            this.scene.background=new THREE.Color(0x100a06);
-            this.scene.fog=new THREE.Fog(0x100a06,60,180);
-            this._pvpBullets=[];this._pvpTargets=[];this._pvpScore=0;this._pvpAmmo=30;
-
-            // Пол
-            const floor=new THREE.Mesh(new THREE.BoxGeometry(120,1,120),new THREE.MeshStandardMaterial({color:0x4a4035,roughness:0.9}));
-            floor.position.y=-0.5;floor.receiveShadow=true;this.scene.add(floor);this.objectsToIntersect.push(floor);
-
-            // Стены
-            const wm=new THREE.MeshStandardMaterial({color:0x3a3028,roughness:0.8});
-            [[0,4,-60,120,9,2],[0,4,60,120,9,2],[-60,4,0,2,9,120],[60,4,0,2,9,120]].forEach(([x,y,z,w,h,d])=>{
-                const wall=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),wm);
-                wall.position.set(x,y,z);wall.castShadow=true;wall.receiveShadow=true;
-                this.scene.add(wall);this.objectsToIntersect.push(wall);
+            // Трибуны по краям
+            const tribMat=new THREE.MeshStandardMaterial({color:0x1a1a2e,roughness:0.9});
+            [[-50,0,0],[50,0,0],[0,0,-60],[0,0,60]].forEach(([x,y,z])=>{
+                const trib=new THREE.Mesh(new THREE.BoxGeometry(15,4,20),tribMat);
+                trib.position.set(x,2,z); this.scene.add(trib); this.objectsToIntersect.push(trib);
+                // Огни
+                const l=new THREE.PointLight(0xffffff,1.5,30); l.position.set(x,8,z); this.scene.add(l);
             });
-
-            // Укрытия (ящики и барьеры)
-            const bm=new THREE.MeshStandardMaterial({color:0x5c4a30,roughness:0.7});
-            const mm=new THREE.MeshStandardMaterial({color:0x607080,roughness:0.5,metalness:0.3});
-            [[-15,1,-15,4,3,4,bm],[15,1,-15,4,3,4,bm],[-15,1,15,4,3,4,bm],[15,1,15,4,3,4,bm],
-             [0,1,-25,12,2.5,1.5,mm],[0,1,25,12,2.5,1.5,mm],
-             [-25,1,0,1.5,2.5,12,mm],[25,1,0,1.5,2.5,12,mm],
-             [-8,1.5,0,3,3,3,bm],[8,1.5,0,3,3,3,bm],
-             [0,1,-8,6,1.5,1.5,mm],[0,1,8,6,1.5,1.5,mm],
-            ].forEach(([x,y,z,w,h,d,mat])=>{
-                const box=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
-                box.position.set(x,y,z);box.castShadow=true;box.receiveShadow=true;
-                this.scene.add(box);this.objectsToIntersect.push(box);
-            });
-
-            // Мишени
-            const tPos=[[-40,2.5,0],[40,2.5,0],[0,2.5,-50],[0,2.5,50],[-35,2.5,-35],[35,2.5,-35],[-35,2.5,35],[35,2.5,35]];
-            tPos.forEach(([x,y,z],i)=>{
-                const pole=new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.1,y),new THREE.MeshStandardMaterial({color:0x333333}));
-                pole.position.set(x,y/2,z);this.scene.add(pole);
-                [1.5,1.0,0.6,0.3].forEach((r,ri)=>{
-                    const ring=new THREE.Mesh(new THREE.CylinderGeometry(r,r,0.15,24),
-                        new THREE.MeshStandardMaterial({color:ri%2===0?0xdd2222:0xeeeeee,emissive:ri%2===0?0x550000:0x111111,emissiveIntensity:0.4}));
-                    ring.rotation.x=Math.PI/2;ring.position.set(x,y,z);
-                    ring.userData.isTarget=true;ring.userData.targetIdx=i;
-                    ring.userData.points=[5,15,30,50][ri];
-                    this.scene.add(ring);this.objectsToIntersect.push(ring);this._pvpTargets.push(ring);
-                });
-            });
-
-            // Лампы
-            [[-30,8,-30],[30,8,-30],[-30,8,30],[30,8,30],[0,10,0]].forEach(([x,y,z])=>{
-                const l=new THREE.PointLight(0xffcc88,2.5,50);l.position.set(x,y,z);this.scene.add(l);
-                const b=new THREE.Mesh(new THREE.SphereGeometry(0.3,8,8),new THREE.MeshStandardMaterial({color:0xffeeaa,emissive:0xffcc66,emissiveIntensity:3}));
-                b.position.set(x,y,z);this.scene.add(b);
-            });
-
-            // PVP HUD
-            const showPvpHud=()=>{
-                let h=document.getElementById('pvp-hud');
-                if(!h){h=document.createElement('div');h.id='pvp-hud';
-                    h.style.cssText='position:fixed;top:80px;right:20px;z-index:200;font-family:Orbitron,sans-serif;text-align:right;pointer-events:none;';
-                    document.body.appendChild(h);}
-                h.innerHTML='<div style="font-size:24px;font-weight:900;color:#ff4444;text-shadow:0 0 20px rgba(255,68,68,0.7);">💥 '+this._pvpScore+' очков</div>'+
-                    '<div style="font-size:13px;color:rgba(255,200,100,0.85);margin-top:4px;">🔫 Патроны: '+this._pvpAmmo+'</div>'+
-                    '<div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:2px;">ЛКМ / кнопка — выстрел</div>';
+            // Монеты вдоль трассы
+            const coinPositions=[
+                [-25,1,-40],[-15,1,-40],[-5,1,-40],[5,1,-40],[15,1,-40],[25,1,-40],
+                [-25,1,40], [-15,1,40], [-5,1,40], [5,1,40],  [15,1,40], [25,1,40],
+                [-30,1,-30],[-30,1,-20],[-30,1,-10],[-30,1,0],[-30,1,10],[-30,1,20],[-30,1,30],
+                [30,1,-30], [30,1,-20], [30,1,-10], [30,1,0],  [30,1,10], [30,1,20], [30,1,30],
+                [0,3,-40],[0,3,40],[-30,3,0],[30,3,0], // бонусные монеты повыше
+            ];
+            const citrusMat=new THREE.MeshStandardMaterial({color:0xFF8C00,emissive:0xFF6000,emissiveIntensity:0.6,roughness:0.6});
+            const mkCitrus=(x,y,z)=>{
+                const g=new THREE.Group();
+                const fruit=new THREE.Mesh(new THREE.SphereGeometry(0.35,10,10),citrusMat);
+                g.add(fruit);
+                const leafMat=new THREE.MeshStandardMaterial({color:0x22aa22,roughness:0.8});
+                const leaf=new THREE.Mesh(new THREE.SphereGeometry(0.12,6,6),leafMat);
+                leaf.position.set(0,0.38,0); g.add(leaf);
+                g.position.set(x,y,z); return g;
             };
-            this._pvpShowHud=showPvpHud;showPvpHud();
-
-            // Мобильная кнопка
-            if('ontouchstart' in window){
-                let sb=document.getElementById('pvp-shoot-btn');
-                if(!sb){sb=document.createElement('button');sb.id='pvp-shoot-btn';sb.innerHTML='🔫';
-                    sb.style.cssText='position:fixed;right:24px;bottom:140px;z-index:300;width:70px;height:70px;border-radius:50%;background:rgba(255,50,50,0.2);border:2px solid rgba(255,80,80,0.4);font-size:30px;cursor:pointer;backdrop-filter:blur(8px);';
-                    document.body.appendChild(sb);}
-                sb.style.display='block';
-                sb.ontouchstart=(e)=>{e.preventDefault();this._pvpShoot();};
+            coinPositions.forEach(([x,y,z])=>{
+                const c=mkCitrus(x,y,z); this.scene.add(c); this.collectibles.push(c);
+            });
+            // Финишная черта
+            const finMat=new THREE.MeshStandardMaterial({color:0xffffff});
+            for(let i=0;i<6;i++){
+                const sq=new THREE.Mesh(new THREE.BoxGeometry(1,0.05,1),new THREE.MeshStandardMaterial({color:i%2===0?0xffffff:0x000000}));
+                sq.position.set(-2.5+i,0.02,-40); this.scene.add(sq);
             }
+            // Старт HUD
+            this._raceScore=0; this._raceTotal=coinPositions.length;
+            const showRaceHud=()=>{};
+            this._raceShowHud=showRaceHud;
+            this.scene.add(new THREE.AmbientLight(0xffffff,0.5));
         }
-        else if(this.currentMap==='dungeon'){
-            // ТЁМНОЕ ПОДЗЕМЕЛЬЕ
-            this.scene.background=new THREE.Color(0x050508);
-            this.scene.fog=new THREE.FogExp2(0x050508,0.04);
-            addGround(0x1a1218);
-            const wallMat=new THREE.MeshStandardMaterial({color:0x2a1f2a,roughness:0.95});
-            // Коридоры
-            const corridors=[[0,0,0,4,3,30],[0,0,-30,30,3,4],[20,0,-30,4,3,40],[-20,0,-30,4,3,40],[0,0,-60,40,3,4]];
-            corridors.forEach(([x,y,z,w,h,d])=>{
-                const wall=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),wallMat);
-                wall.position.set(x,h/2,z);wall.castShadow=true;this.scene.add(wall);this.objectsToIntersect.push(wall);
+
+        else if(this.currentMap==='dropper'){
+            // 🌊 ДРОППЕР — падай точно в воду
+            this.scene.background=new THREE.Color(0x001133);
+            this.scene.fog=new THREE.FogExp2(0x001133,0.008);
+            this.scene.add(new THREE.AmbientLight(0x4488ff,0.8));
+            const sunL=new THREE.DirectionalLight(0xffffff,1.2); sunL.position.set(10,30,10); this.scene.add(sunL);
+            // Вода внизу (бассейн)
+            const waterMat=new THREE.MeshStandardMaterial({color:0x0066cc,emissive:0x003388,emissiveIntensity:0.4,transparent:true,opacity:0.85,roughness:0,metalness:0.3});
+            const water=new THREE.Mesh(new THREE.BoxGeometry(20,1,20),waterMat);
+            water.position.set(0,-80,0); this.scene.add(water); this.objectsToIntersect.push(water);
+            // Бортики бассейна
+            const bMat=new THREE.MeshStandardMaterial({color:0xffffff,roughness:0.3});
+            [[-11,0,0,2,2,22],[11,0,0,2,2,22],[0,0,-11,22,2,2],[0,0,11,22,2,2]].forEach(([x,y,z,w,h,d])=>{
+                const b=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),bMat); b.position.set(x,-80,z); this.scene.add(b); this.objectsToIntersect.push(b);
             });
-            // Факелы
-            const torchPos=[[5,2.5,-10],[-5,2.5,-10],[10,2.5,-30],[-10,2.5,-30],[0,2.5,-55]];
-            torchPos.forEach(([tx,ty,tz])=>{
-                const tl=new THREE.PointLight(0xFF6600,2,10);tl.position.set(tx,ty,tz);this.scene.add(tl);
-                const flame=new THREE.Mesh(new THREE.SphereGeometry(0.2,6,6),new THREE.MeshStandardMaterial({emissive:0xFF4400,emissiveIntensity:2}));
-                flame.position.set(tx,ty,tz);this.scene.add(flame);
+            // Этажи с дырками — нужно попасть в дыру
+            const floors=[
+                {y:-15, hole:[0,0,4,4]},
+                {y:-28, hole:[-3,-3,4,4]},
+                {y:-41, hole:[4,2,4,4]},
+                {y:-54, hole:[-2,4,4,4]},
+                {y:-67, hole:[1,-3,4,4]},
+            ];
+            const floorMat=new THREE.MeshStandardMaterial({color:0x334455,roughness:0.7});
+            const holeMat=new THREE.MeshStandardMaterial({color:0x0044aa,emissive:0x002266,emissiveIntensity:0.5,transparent:true,opacity:0.3});
+            floors.forEach(({y,hole:[hx,hz,hw,hd]})=>{
+                // 4 блока вокруг дырки
+                [[-7,0,0,6,0.6,20],[7,0,0,6,0.6,20],[0,0,-7+(hd/2),20,0.6,6-(hd/2)],[0,0,7-(hd/2),20,0.6,6-(hd/2)]].forEach(([x,fy,z,w,fh,d])=>{
+                    const f=new THREE.Mesh(new THREE.BoxGeometry(w,fh,d),floorMat); f.position.set(x+hx*0.3,y,z+hz*0.3); this.scene.add(f); this.objectsToIntersect.push(f);
+                });
+                // Подсветка дырки
+                const gl=new THREE.Mesh(new THREE.PlaneGeometry(hw,hd),holeMat);
+                gl.position.set(hx,y+0.31,hz); gl.rotation.x=-Math.PI/2; this.scene.add(gl);
+                const pl=new THREE.PointLight(0x0088ff,2,15); pl.position.set(hx,y+2,hz); this.scene.add(pl);
             });
-            // Кристаллы для сбора
-            const crystalMat=new THREE.MeshStandardMaterial({color:0xaa00ff,emissive:0x7700cc,emissiveIntensity:1,transparent:true,opacity:0.85});
-            for(let i=0;i<12;i++){
-                const cr=new THREE.Mesh(new THREE.OctahedronGeometry(0.35),crystalMat);
-                const pts=[[-2,1,-8],[2,1,-12],[-8,1,-30],[8,1,-30],[-8,1,-40],[8,1,-50],[-5,1,-55],[5,1,-55],[0,1,-25],[-3,1,-20],[3,1,-45],[0,1,-48]];
-                cr.position.set(...pts[i]);this.scene.add(cr);this.collectibles.push(cr);
+            // Стартовая платформа наверху
+            const startPlat=new THREE.Mesh(new THREE.BoxGeometry(8,1,8),new THREE.MeshStandardMaterial({color:0x22aa44,roughness:0.6}));
+            startPlat.position.set(0,5,0); this.scene.add(startPlat); this.objectsToIntersect.push(startPlat);
+            // HUD
+            let dh=document.getElementById('dropper-hud');
+            if(!dh){dh=document.createElement('div');dh.id='dropper-hud';
+                dh.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:200;font-family:Orbitron,sans-serif;text-align:center;pointer-events:none;font-size:18px;color:#00E5FF;text-shadow:0 0 20px rgba(0,229,255,0.8);font-weight:800;';
+                dh.textContent='🌊 Упади точно в воду!'; document.body.appendChild(dh);}
+            setTimeout(()=>{if(dh)dh.textContent='';},3000);
+        }
+
+        else if(this.currentMap==='obby'){
+            // 🔥 ОГНЕННЫЙ ОББИ — прыжки над лавой
+            this.scene.background=new THREE.Color(0x1a0500);
+            this.scene.fog=new THREE.Fog(0x1a0500,40,150);
+            this.scene.add(new THREE.AmbientLight(0xff4400,0.5));
+            this.scene.add(new THREE.DirectionalLight(0xffaa44,1.5));
+            // Лава на дне
+            const lavaMat=new THREE.MeshStandardMaterial({color:0xff3300,emissive:0xff1100,emissiveIntensity:1.5,roughness:0.8});
+            const lava=new THREE.Mesh(new THREE.PlaneGeometry(300,300),lavaMat);
+            lava.rotation.x=-Math.PI/2; lava.position.y=-10; this.scene.add(lava);
+            this.scene.add(new THREE.PointLight(0xff4400,3,50));
+            // Платформы — путь через лаву
+            const platMat=new THREE.MeshStandardMaterial({color:0x4a3020,roughness:0.8});
+            const redMat=new THREE.MeshStandardMaterial({color:0x880000,emissive:0x440000,emissiveIntensity:0.5,roughness:0.7});
+            const platforms=[
+                [0,0,0,6,0.8,6,platMat],  // старт
+                [8,0,-2,3,0.8,3,platMat],[15,1,-5,3,0.8,3,platMat],[22,2,-2,2,0.8,2,platMat],
+                [28,1,3,4,0.8,2,redMat],[34,2,6,2,0.8,4,platMat],[38,3,12,3,0.8,3,platMat],
+                [34,2,18,2,0.8,2,platMat],[28,3,22,2,0.8,2,platMat],[22,4,26,3,0.8,3,platMat],
+                [15,3,28,2,0.8,2,platMat],[8,4,26,2,0.8,2,redMat],[2,5,22,3,0.8,3,platMat],
+                [-4,6,18,2,0.8,2,platMat],[-8,7,12,2,0.8,2,platMat],[-10,8,6,3,0.8,3,platMat],
+                [-8,9,0,2,0.8,2,platMat],[-4,10,-6,2,0.8,2,redMat],[0,11,-10,4,0.8,4,platMat], // финиш
+            ];
+            platforms.forEach(([x,y,z,w,h,d,mat])=>{
+                const p=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
+                p.position.set(x,y,z); p.castShadow=true; p.receiveShadow=true;
+                this.scene.add(p); this.objectsToIntersect.push(p);
+            });
+            // Монеты над платформами
+            const obbyCoins=[[8,2,-2],[15,3,-5],[22,4,-2],[34,4,6],[38,5,12],[22,6,26],[2,7,22],[-10,10,6],[0,13,-10]];
+            obbyCoins.forEach(([x,y,z])=>{
+                const c=new THREE.Group();
+                c.add(new THREE.Mesh(new THREE.SphereGeometry(0.32,10,10),new THREE.MeshStandardMaterial({color:0xFF8C00,emissive:0xFF6000,emissiveIntensity:0.6,roughness:0.6})));
+                const l=new THREE.Mesh(new THREE.SphereGeometry(0.1,6,6),new THREE.MeshStandardMaterial({color:0x22aa22})); l.position.set(0,0.34,0); c.add(l);
+                c.position.set(x,y,z); this.scene.add(c); this.collectibles.push(c);
+            });
+            // Трофей на финише
+            const trophy=new THREE.Mesh(new THREE.OctahedronGeometry(0.8),new THREE.MeshStandardMaterial({color:0xFFD700,emissive:0xFFAA00,emissiveIntensity:1.5,metalness:0.8}));
+            trophy.position.set(0,12.5,-10); this.scene.add(trophy);
+            const tL=new THREE.PointLight(0xFFD700,4,10); tL.position.set(0,14,-10); this.scene.add(tL);
+        }
+
+        else if(this.currentMap==='maze'){
+            // 🌀 ЛАБИРИНТ — найди выход
+            this.scene.background=new THREE.Color(0x0a0f0a);
+            this.scene.fog=new THREE.FogExp2(0x0a0f0a,0.025);
+            this.scene.add(new THREE.AmbientLight(0x44ff88,0.4));
+            addGround(0x112211);
+            const wallM=new THREE.MeshStandardMaterial({color:0x1a3322,roughness:0.9,emissive:0x001100,emissiveIntensity:0.2});
+            // Генерация лабиринта — сетка 9x9
+            const CELL=7, SIZE=9;
+            const grid=[
+                [1,1,1,1,1,1,1,1,1],
+                [1,0,0,0,1,0,0,0,1],
+                [1,0,1,0,1,0,1,0,1],
+                [1,0,1,0,0,0,1,0,1],
+                [1,0,1,1,1,0,1,0,1],
+                [1,0,0,0,0,0,0,0,1],
+                [1,1,1,0,1,1,1,0,1],
+                [1,0,0,0,0,0,0,0,1],
+                [1,1,1,1,1,1,1,1,1],
+            ];
+            const off=(SIZE*CELL)/2;
+            grid.forEach((row,rz)=>row.forEach((cell,rx)=>{
+                if(!cell) return;
+                const w=new THREE.Mesh(new THREE.BoxGeometry(CELL,5,CELL),wallM);
+                w.position.set(rx*CELL-off+CELL/2,2.5,rz*CELL-off+CELL/2);
+                w.castShadow=true; this.scene.add(w); this.objectsToIntersect.push(w);
+            }));
+            // Фонари вдоль прохода
+            [[1,1],[1,3],[3,3],[3,5],[5,5],[5,7],[7,7],[7,5],[7,3]].forEach(([rx,rz])=>{
+                const l=new THREE.PointLight(0x44ff88,1.5,12); l.position.set(rx*CELL-off+CELL/2,3,rz*CELL-off+CELL/2); this.scene.add(l);
+            });
+            // Цитрусы по лабиринту
+            const _cMat=new THREE.MeshStandardMaterial({color:0xFF8C00,emissive:0xFF6000,emissiveIntensity:0.6,roughness:0.6});
+            const _lMat=new THREE.MeshStandardMaterial({color:0x22aa22,roughness:0.8});
+            [[1,1],[1,3],[3,3],[3,5],[5,5],[7,5],[7,3],[5,3]].forEach(([rx,rz])=>{
+                const c=new THREE.Group();
+                const f=new THREE.Mesh(new THREE.SphereGeometry(0.32,10,10),_cMat); c.add(f);
+                const l=new THREE.Mesh(new THREE.SphereGeometry(0.1,6,6),_lMat); l.position.set(0,0.34,0); c.add(l);
+                c.position.set(rx*CELL-off+CELL/2,1,rz*CELL-off+CELL/2);
+                this.scene.add(c); this.collectibles.push(c);
+            });
+            // Выход — светящийся портал
+            const exitGlow=new THREE.Mesh(new THREE.TorusGeometry(2,0.3,12,48),new THREE.MeshStandardMaterial({color:0x00ff88,emissive:0x00cc66,emissiveIntensity:3}));
+            exitGlow.position.set(7*CELL-off+CELL/2,2,1*CELL-off+CELL/2); exitGlow.rotation.x=Math.PI/2; this.scene.add(exitGlow);
+            const eL=new THREE.PointLight(0x00ff88,5,20); eL.position.set(7*CELL-off+CELL/2,3,1*CELL-off+CELL/2); this.scene.add(eL);
+            // HUD
+            let mh=document.getElementById('maze-hud');
+            if(!mh){mh=document.createElement('div');mh.id='maze-hud';
+                mh.style.cssText='position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:200;font-family:Orbitron,sans-serif;text-align:center;pointer-events:none;color:#00ff88;font-size:14px;font-weight:700;text-shadow:0 0 15px rgba(0,255,136,0.8);';
+                mh.textContent='🌀 Найди зелёный выход!'; document.body.appendChild(mh);}
+        }
+
+        
+
+        else if(this.currentMap==='coins'){
+            // 💰 ЗОЛОТАЯ ЛИХОРАДКА — шахта с монетами
+            this.scene.background=new THREE.Color(0x0d0800);
+            this.scene.fog=new THREE.FogExp2(0x0d0800,0.02);
+            addGround(0x2a1a00);
+            this.scene.add(new THREE.AmbientLight(0xffaa44,0.5));
+            const rockMat=new THREE.MeshStandardMaterial({color:0x3a2a1a,roughness:0.95});
+            const goldMat=new THREE.MeshStandardMaterial({color:0xFFD700,emissive:0xCC8800,emissiveIntensity:0.8,metalness:0.8,roughness:0.2});
+            const goldSeamMat=new THREE.MeshStandardMaterial({color:0xFFAA00,emissive:0xFF8800,emissiveIntensity:1.2,metalness:0.9,roughness:0.1});
+            // Горы/скалы по краям
+            for(let i=0;i<18;i++){
+                const a=i/18*Math.PI*2, r=35+Math.random()*15;
+                const rock=new THREE.Mesh(new THREE.ConeGeometry(4+Math.random()*4,8+Math.random()*12,6),rockMat);
+                rock.position.set(Math.cos(a)*r,0,Math.sin(a)*r); rock.castShadow=true;
+                this.scene.add(rock); this.objectsToIntersect.push(rock);
             }
-            // Выход (портал)
-            const portal=new THREE.Mesh(new THREE.TorusGeometry(2.5,0.4,12,48),new THREE.MeshStandardMaterial({color:0xaa00ff,emissive:0x7700ff,emissiveIntensity:2}));
-            portal.position.set(0,2.5,-62);portal.rotation.x=Math.PI/2;this.scene.add(portal);
-            const portalLight=new THREE.PointLight(0xaa00ff,4,15);portalLight.position.set(0,2,-62);this.scene.add(portalLight);
+            // Шахтные платформы — уровни вниз
+            for(let level=0;level<5;level++){
+                const y=-level*5, r=12-level*1.5;
+                const platform=new THREE.Mesh(new THREE.CylinderGeometry(r,r,0.5,12),rockMat);
+                platform.position.set(0,y,0); this.scene.add(platform); this.objectsToIntersect.push(platform);
+                // Жилы золота в стенах
+                for(let j=0;j<6;j++){
+                    const a=j/6*Math.PI*2;
+                    const seam=new THREE.Mesh(new THREE.BoxGeometry(0.8,0.4,0.3),goldSeamMat);
+                    seam.position.set(Math.cos(a)*(r-0.5),y+0.5,Math.sin(a)*(r-0.5));
+                    seam.rotation.y=a; seam.castShadow=false; this.scene.add(seam);
+                }
+            }
+            // Лестницы между уровнями
+            for(let level=0;level<4;level++){
+                const y=-level*5, r=8-level;
+                const ladder=new THREE.Mesh(new THREE.BoxGeometry(0.5,5.5,0.5),new THREE.MeshStandardMaterial({color:0x8B6914,roughness:0.8}));
+                ladder.position.set(r-2,y-2.5,0); this.scene.add(ladder); this.objectsToIntersect.push(ladder);
+            }
+            // МНОГО монет на всех уровнях
+            const coinPositions2=[];
+            for(let level=0;level<5;level++){
+                const y=-level*5+1.5, r=8-level*1.2;
+                for(let j=0;j<3;j++){
+                    const a=j/3*Math.PI*2+(level*0.4);
+                    coinPositions2.push([Math.cos(a)*r,y,Math.sin(a)*r]);
+                }
+            }
+            // Бонусные золотые самородки в центре каждого уровня
+            for(let level=0;level<5;level++){
+                coinPositions2.push([0,-level*5+2,0]); // большая монета в центре
+            }
+            coinPositions2.forEach(([x,y,z])=>{
+                const c=new THREE.Group();
+                const f=new THREE.Mesh(new THREE.SphereGeometry(0.35,10,10),new THREE.MeshStandardMaterial({color:0xFF8C00,emissive:0xFF6000,emissiveIntensity:0.7,roughness:0.5})); c.add(f);
+                const l=new THREE.Mesh(new THREE.SphereGeometry(0.11,6,6),new THREE.MeshStandardMaterial({color:0x22aa22})); l.position.set(0,0.37,0); c.add(l);
+                c.position.set(x,y,z); this.scene.add(c); this.collectibles.push(c);
+            });
+            // Факелы на каждом уровне
+            for(let level=0;level<5;level++){
+                const y=-level*5+2, r=10-level;
+                [0,Math.PI/2,Math.PI,Math.PI*1.5].forEach(a=>{
+                    const tl=new THREE.PointLight(0xFF8800,2,12); tl.position.set(Math.cos(a)*r,y,Math.sin(a)*r); this.scene.add(tl);
+                    const fl=new THREE.Mesh(new THREE.SphereGeometry(0.18,6,6),new THREE.MeshStandardMaterial({emissive:0xFF5500,emissiveIntensity:2}));
+                    fl.position.set(Math.cos(a)*r,y,Math.sin(a)*r); this.scene.add(fl);
+                });
+            }
+            // HUD
+            let ch=document.getElementById('coins-hud');
+            if(!ch){ch=document.createElement('div');ch.id='coins-hud';
+                ch.style.cssText='position:fixed;top:80px;right:20px;z-index:200;font-family:Orbitron,sans-serif;text-align:right;pointer-events:none;';
+                document.body.appendChild(ch);}
+            this._coinsTotal=coinPositions2.length; this._coinsFound=0;
+            const showCoinsHud=()=>{};
+            this._coinsShowHud=showCoinsHud;
         }
 
 
@@ -6786,7 +7182,7 @@ const app = {
         const rp=pos.clone();rp.y+=0.5;
         this.raycaster.set(rp,new THREE.Vector3(0,-1,0));
         const hits=this.raycaster.intersectObjects(this.objectsToIntersect,true);
-        if(hits.length>0&&hits[0].distance<=1.5)return hits[0].point.y + 0.44;
+        if(hits.length>0&&hits[0].distance<=2.5)return hits[0].point.y + 0.44;
         return -999;
     },
     checkCollision(pos,moveStep){
@@ -6873,16 +7269,26 @@ const app = {
 
             const moving = move.length() > 0;
             if(moving){
-                move.normalize().multiplyScalar(14 * delta);
+                const spd = this._raceSpeed ? 28 : 14;
+                move.normalize().multiplyScalar(spd * delta);
                 
                 const tgtAngle = Math.atan2(move.x, move.z);
                 let diff = tgtAngle - this.playerGroup.rotation.y;
                 while(diff >  Math.PI) diff -= Math.PI*2;
                 while(diff < -Math.PI) diff += Math.PI*2;
-                this.playerGroup.rotation.y += diff * 0.2;
+                this.playerGroup.rotation.y += diff * (this._raceSpeed ? 0.12 : 0.2);
                 
-                if(!this.checkCollision(this.playerGroup.position, move)) {
-                    this.playerGroup.position.add(move);
+                if(this._raceSpeed){
+                    // В гонках — двигаем без checkCollision, но только по трассе
+                    const np = this.playerGroup.position.clone().add(move);
+                    // Трасса: горизонтальные z=±40 (|x|<=30), вертикальные x=±30 (|z|<=40)
+                    const onH = Math.abs(np.z) >= 36 && Math.abs(np.z) <= 44 && Math.abs(np.x) <= 32;
+                    const onV = Math.abs(np.x) >= 26 && Math.abs(np.x) <= 34 && Math.abs(np.z) <= 42;
+                    if(onH || onV) this.playerGroup.position.copy(np);
+                } else {
+                    if(!this.checkCollision(this.playerGroup.position, move)){
+                        this.playerGroup.position.add(move);
+                    }
                 }
             } else {
                 let diff = (camYaw + Math.PI) - this.playerGroup.rotation.y;
@@ -6891,18 +7297,38 @@ const app = {
                 this.playerGroup.rotation.y += diff * 0.1;
             }
 
+            // Синхронизируем машину с позицией игрока
+            if(this._raceCar){
+                this._raceCar.position.set(
+                    this.playerGroup.position.x,
+                    this.playerGroup.position.y + 0.5,
+                    this.playerGroup.position.z
+                );
+                this._raceCar.rotation.y = this.playerGroup.rotation.y + Math.PI;
+            }
+
             const grav = this.spaceGrav ? 14 : 40;
             this.velocity.y -= grav * delta;
             this.playerGroup.position.y += this.velocity.y * delta;
             const gy = this.checkGround(this.playerGroup.position);
             if(this.playerGroup.position.y <= gy){
-                this.playerGroup.position.y = gy;
-                this.velocity.y = 0;
-                this.canJump = true;
+                if(this.currentMap==='dropper' && gy > -78 && gy < 4){
+                    // Коснулся блока этажа — возврат на старт
+                    this.playerGroup.position.set(0,7,0);
+                    this.velocity.y=0;
+                    this.canJump=false;
+                    this._sfx('error');
+                } else {
+                    this.playerGroup.position.y = gy;
+                    this.velocity.y = 0;
+                    this.canJump = true;
+                }
             } else this.canJump = false;
             const jumpH = this.spaceGrav ? 10 : 16;
             if(this.keys['Space'] && this.canJump){this.velocity.y=jumpH; this.canJump=false; this._sfx('jump'); this._questProgress('jumps',1);}
-            if(this.playerGroup.position.y < -5){this.playerGroup.position.set(0,5,0); this.velocity.y=0;}
+            const fallLimit = this.currentMap==='dropper' ? -90 : -5;
+            const fallSpawn = this.currentMap==='dropper' ? new THREE.Vector3(0,7,0) : new THREE.Vector3(0,5,0);
+            if(this.playerGroup.position.y < fallLimit){this.playerGroup.position.copy(fallSpawn); this.velocity.y=0;}
 
             if(this._camMode === 'first') {
                 // Вид от первого лица — камера в голове
@@ -6914,8 +7340,8 @@ const app = {
                 // Скрываем своего персонажа
                 this.playerGroup.traverse(c=>{ if(c.isMesh) c.visible=false; });
             } else {
-                // Вид от третьего лица
-                this.playerGroup.traverse(c=>{ if(c.isMesh) c.visible=true; });
+                // Вид от третьего лица — восстанавливаем видимость только если не гонки
+                this.playerGroup.traverse(c=>{ if(c.isMesh) c.visible=(this.currentMap!=='race'); });
                 const dist = this._camMode === 'far' ? 9.0 : 5.0;
                 const pitch = this._camPitch || 0.2;
                 const offset = new THREE.Vector3(0, 0, dist);
@@ -6938,14 +7364,21 @@ const app = {
                 for(let i=1;i<pos.length;i+=3){pos[i]-=delta*4;if(pos[i]<-5)pos[i]=95;}
                 this._snowParticles.geometry.attributes.position.needsUpdate=true;
             }
-            // Подземелье: кристаллы вращаются
-            if(this.currentMap==='dungeon'){
+            // Монеты в новых мирах — вращаются и подбираются
+            if(['race','obby','maze','coins'].includes(this.currentMap)){
                 for(let i=this.collectibles.length-1;i>=0;i--){
                     const c=this.collectibles[i];
-                    c.rotation.y+=1.5*delta;c.position.y=1+Math.sin(time*2+i)*0.15;
-                    if(c.position.distanceTo(this.playerGroup.position)<1.4){
-                        this.scene.remove(c);this.collectibles.splice(i,1);this.balance+=50;this.saveData();
-                        this.showNotif('💎','Кристалл!','+50 🍊');
+                    c.rotation.z+=2*delta;
+                    if(c.position.distanceTo(this.playerGroup.position)<1.6){
+                        this.scene.remove(c);this.collectibles.splice(i,1);
+                        this.balance+=30;this.saveData();
+                        this._sfx('coin');
+                        if(this.currentMap==='race'){this._raceScore=(this._raceScore||0)+1;if(this._raceShowHud)this._raceShowHud();}
+                        if(this.currentMap==='coins'){this._coinsFound=(this._coinsFound||0)+1;if(this._coinsShowHud)this._coinsShowHud();}
+                        if(this.collectibles.length===0){
+                            setTimeout(()=>this.showNotif('🏆','Все собрано!','Ты собрал все цитрусы! +500 🍊'),200);
+                            this.balance+=500;this.saveData();
+                        }
                     }
                 }
             }
@@ -7698,15 +8131,16 @@ const app = {
         if(this._hsInterval){clearInterval(this._hsInterval);this._hsInterval=null;}this._hsTimer=null;
         if(this._mtInterval){clearInterval(this._mtInterval);this._mtInterval=null;}this._mtSeconds=null;this._mtReached=false;
         this._snowParticles=null;
-        const pvpHud=document.getElementById('pvp-hud');if(pvpHud)pvpHud.remove();
-        const pvpBtn=document.getElementById('pvp-shoot-btn');if(pvpBtn)pvpBtn.style.display='none';
-        if(this._pvpBullets){this._pvpBullets.forEach(b=>this.scene&&this.scene.remove(b));this._pvpBullets=[];}
+        // Чистим HUD всех игр
+        ['race-hud','dropper-hud','maze-hud','coins-hud'].forEach(id=>{const el=document.getElementById(id);if(el)el.remove();});
+        this._raceCar=null; this._raceSpeed=false;
         document.exitPointerLock();
         document.getElementById('engine-view').style.display='none';
         document.getElementById('eng-script-ov').style.display='none';
         document.getElementById('ui-hub').classList.remove('hidden');
         if(this.renderer){this.renderer.dispose();this.renderer=null;}
         this.renderMyGames();this.updateUI();
+        this.stopGameMusic();
         this._restoreHubMusic();
         this._sfx('exit');
     }
