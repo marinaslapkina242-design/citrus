@@ -3540,10 +3540,19 @@ const app = {
     _statsAllAccounts: [],
 
     async loadStats(){
-        const wNames={gather:'🍊 Цитрусовый Лес',parkour:'🏃 Небесный Паркур',
-            volcano:'🌋 Остров Вулкана',space:'🚀 Космическая База',
-            race:'🏎️ Гонки',dropper:'🌊 Дроппер',obby:'🔥 Обби',
-            dungeon:'⚔️ Тёмное Подземелье'};
+        // Только официальные миры — остальное фильтруем
+        const wNames={
+            gather:  '🍊 Цитрусовый Лес',
+            parkour: '🏃 Небесный Паркур',
+            volcano: '🌋 Остров Вулкана',
+            space:   '🚀 Космическая База',
+            race:    '🏎️ Гонки на цитрусах',
+            dropper: '🌊 Дроппер',
+            obby:    '🔥 Огненный Обби',
+            maze:    '🌀 Лабиринт',
+            coins:   '💰 Золотая Лихорадка',
+        };
+        const KNOWN_WORLDS = new Set(Object.keys(wNames));
 
         // Проверяем статус хранилища
         try {
@@ -3590,13 +3599,16 @@ const app = {
             const wEl = document.getElementById('stats-worlds');
             if(wEl){
                 const plays = d.worldPlays||{};
-                const sorted = Object.entries(plays).sort((a,b)=>b[1]-a[1]);
+                // Показываем только официальные миры, остальное скрываем
+                const sorted = Object.entries(plays)
+                    .filter(([w]) => KNOWN_WORLDS.has(w))
+                    .sort((a,b)=>b[1]-a[1]);
                 const maxPlays = sorted[0]?.[1]||1;
                 if(!sorted.length){ wEl.innerHTML='<div style="color:rgba(255,255,255,0.2);font-size:12px;text-align:center;padding:16px;">Пока нет данных</div>'; }
                 else { wEl.innerHTML = sorted.map(([w,cnt])=>`
                     <div>
                         <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
-                            <span style="font-size:12px;color:rgba(255,255,255,0.7);font-family:var(--font-body);">${wNames[w]||w}</span>
+                            <span style="font-size:12px;color:rgba(255,255,255,0.7);font-family:var(--font-body);">${wNames[w]}</span>
                             <span style="font-size:12px;color:var(--c-main);font-family:var(--font-head);font-weight:700;">${cnt}</span>
                         </div>
                         <div style="height:4px;background:rgba(255,255,255,0.05);border-radius:4px;overflow:hidden;">
