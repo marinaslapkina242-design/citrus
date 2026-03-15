@@ -1835,6 +1835,13 @@
                             <ul id="inventory-list" style="list-style:none;padding:0;display:flex;flex-direction:column;gap:7px;"></ul>
                         </div>
                         <button onclick="app.resetAvatar()" class="btn-ghost">🗑 Снять всё</button>
+                        <div class="panel-box" style="margin-top:0;">
+                            <div class="panel-box-title">🎂 День рождения</div>
+                            <div style="font-size:12px;color:rgba(255,255,255,0.35);margin-bottom:10px;font-family:var(--font-ui);">Установи свою дату — в этот день все увидят праздничный баннер!</div>
+                            <input type="date" id="bday-input" style="width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,149,0,0.2);border-radius:10px;padding:9px 12px;color:#fff;font-family:var(--font-body);font-size:13px;outline:none;cursor:pointer;color-scheme:dark;">
+                            <button onclick="app.saveBirthday()" style="width:100%;margin-top:8px;padding:10px;background:linear-gradient(135deg,rgba(255,105,180,0.3),rgba(255,20,147,0.2));border:1px solid rgba(255,105,180,0.3);border-radius:10px;color:#FF69B4;font-weight:700;font-family:var(--font-body);font-size:13px;cursor:pointer;">🎂 Сохранить</button>
+                            <div id="bday-saved" style="font-size:11px;color:rgba(255,105,180,0.5);margin-top:6px;text-align:center;"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -2607,7 +2614,8 @@ const app = {
             });
             const d = await res.json();
             if(d.ok){
-                this.balance = d.balance !== undefined ? d.balance : this.balance + d.amount;
+                // Просто прибавляем сумму локально — не берём баланс с сервера
+                this.balance += d.amount;
                 this.saveData();
                 document.getElementById('balance-val').textContent = this.balance;
                 this.showNotif('✅','Кредит отозван',`+${d.amount} 🍊 возвращено`);
@@ -5259,7 +5267,7 @@ const app = {
         });
         document.getElementById('tab-'+id)?.classList.remove('hidden');
         document.getElementById('nav-'+id)?.classList.add('active');
-        if(id==='avatar')this.updateAvatarPreview();
+        if(id==='avatar'){this.updateAvatarPreview();setTimeout(()=>this._initBirthdayInput(),50);}
         if(id==='help'){}
         if(id==='chat'){ this._pollGlobalChat(); }
         if(id==='cases'){}
@@ -5335,6 +5343,32 @@ const app = {
         this.updateAvatarPreview();
     },
     resetAvatar(){this.inventory=[];this.saveData();this.renderShop();this.updateAvatarPreview();},
+
+    saveBirthday(){
+        const inp = document.getElementById('bday-input');
+        if(!inp||!inp.value){ this.showNotif('❌','Выбери дату',''); return; }
+        const date = inp.value; // YYYY-MM-DD
+        this.myBirthday = date;
+        // Сохраняем в localStorage и на сервер
+        const ls = JSON.parse(localStorage.getItem('citrus_v5_pro')||'{}');
+        ls.myBirthday = date;
+        localStorage.setItem('citrus_v5_pro', JSON.stringify(ls));
+        fetch(this._API+'/players/'+this.userId, {method:'POST',headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({...ls, birthday:date})}).catch(()=>{});
+        const saved = document.getElementById('bday-saved');
+        const parts = date.split('-');
+        if(saved) saved.textContent = '✓ Дата рождения: '+parts[2]+'.'+parts[1];
+        this.showNotif('🎂','День рождения сохранён!','В этот день все увидят праздничный баннер');
+    },
+
+    _initBirthdayInput(){
+        const inp = document.getElementById('bday-input');
+        const saved = document.getElementById('bday-saved');
+        if(!inp) return;
+        // Загружаем сохранённую дату
+        const ls = JSON.parse(localStorage.getItem('citrus_v5_pro')||'{}');
+        if(ls.myBirthday){ inp.value=ls.myBirthday; const p=ls.myBirthday.split('-'); if(saved) saved.textContent='✓ Дата: '+p[2]+'.'+p[1]; }
+    },
 
     // ── MULTIPLAYER / WEBSOCKET / CHAT
     _wsConnect(){
@@ -7126,10 +7160,22 @@ const app = {
                 rock.position.set((Math.random()-0.5)*120,0.2,(Math.random()-0.5)*120);rock.scale.y=0.6;this.scene.add(rock);
             }
             const cm=new THREE.MeshStandardMaterial({color:0xFF9800,emissive:0xFF5500,emissiveIntensity:0.6});
-            for(let i=0;i<60;i++){
+            // Спавним цитрусы только на открытых местах — не внутри деревьев
+            let spawned=0, attempts=0;
+            while(spawned<60 && attempts<600){
+                attempts++;
+                const cx=(Math.random()-0.5)*110, cz=(Math.random()-0.5)*110;
+                // Проверяем расстояние до всех деревьев (хранятся в objectsToIntersect)
+                let tooClose=false;
+                for(const obj of this.objectsToIntersect){
+                    const dx=obj.position.x-cx, dz=obj.position.z-cz;
+                    if(Math.sqrt(dx*dx+dz*dz)<3.5){ tooClose=true; break; }
+                }
+                if(tooClose) continue;
                 const c=new THREE.Mesh(new THREE.SphereGeometry(0.5,12,12),cm);
-                c.position.set((Math.random()-0.5)*120,0.5,(Math.random()-0.5)*120);
+                c.position.set(cx,0.5,cz);
                 this.scene.add(c);this.collectibles.push(c);
+                spawned++;
             }
         }
         else if(this.currentMap==='parkour'){
