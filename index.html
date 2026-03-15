@@ -1807,15 +1807,6 @@
                         </div>
                     </div>
 
-                    <div class="card world-card" onclick="app.launch('play','coins')">
-                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(255,220,50,0.2),#050510);">
-                            <span class="world-emoji">💰</span>
-                            <div class="world-glow" style="background:rgba(255,220,50,0.2);"></div>
-                        </div>
-                        <div class="card-info">
-                            <div><b>Золотая Лихорадка</b><br><small class="world-tag" style="color:#FFD700">🍊 Собирай цитрусы!</small></div>
-                        </div>
-                    </div>
 
 
 
@@ -3730,7 +3721,6 @@ const app = {
             dropper: '🌊 Дроппер',
             obby:    '🔥 Огненный Обби',
             maze:    '🌀 Лабиринт',
-            coins:   '💰 Золотая Лихорадка',
             pvp:     '🔫 Арена ПВП',
             hideseek:'👀 Прятки',
             dungeon: '⚔️ Тёмное Подземелье',
@@ -5998,7 +5988,7 @@ const app = {
             const on=online.find(x=>x.id===fid);
             const wNames={gather:'Цитрусовый Лес',parkour:'Небесный Паркур',
                 volcano:'Остров Вулкана',space:'Космическая База',race:'Гонки',dropper:'Дроппер',obby:'Обби',
-                pvp:'Арена ПВП',maze:'Лабиринт',coins:'Золотая Лихорадка'};
+                pvp:'Арена ПВП',maze:'Лабиринт',};
             const friendMapId = on && on.status==='ingame' ? on.world : null;
             const friendMapName = friendMapId ? (wNames[friendMapId] || friendMapId) : null;
             const st = on ? (friendMapId ? '🎮 '+friendMapName : '● Онлайн') : '○ Оффлайн';
@@ -6992,7 +6982,7 @@ const app = {
         document.getElementById('studio-ui').classList.toggle('hidden',mode!=='studio');
         const stTouch = document.getElementById('studio-touch-btns');
         if(stTouch) stTouch.classList.toggle('hidden', mode!=='studio');
-        document.getElementById('ingame-ui').style.display=(mode==='play'&&(mapId==='gather'||mapId==='race'||mapId==='coins'||mapId==='march8'))?'flex':'none';
+        document.getElementById('ingame-ui').style.display=(mode==='play'&&(mapId==='gather'||mapId==='race'||mapId==='march8'))?'flex':'none';
         document.getElementById('mp-panel').classList.toggle('hidden',mode!=='play');
 
         
@@ -7012,7 +7002,7 @@ const app = {
     setupScene(){
         const canvas=document.getElementById('gl-canvas');canvas.innerHTML='';
         this.scene=new THREE.Scene();
-        const bgs={lobby:0x0a0a18,gather:0x0d1f0a,parkour:0x87CEEB,volcano:0x1a0800,space:0x000005,race:0x0a0a0a,dropper:0x001133,obby:0x1a0500,maze:0x0a0f0a,coins:0x0d0800,march8:0x1a0a1a};
+        const bgs={lobby:0x0a0a18,gather:0x0d1f0a,parkour:0x87CEEB,volcano:0x1a0800,space:0x000005,race:0x0a0a0a,dropper:0x001133,obby:0x1a0500,maze:0x0a0f0a,coins:0x0a0a12,march8:0x1a0a1a};
         const bg=bgs[this.currentMap]||0x0a0a10;
         this.scene.background=new THREE.Color(bg);
         this.scene.fog=new THREE.FogExp2(bg,0.016);
@@ -7034,7 +7024,15 @@ const app = {
         // Переинициализируем touch после запуска сцены
         this._touchLook = null;
         this._touchMove = null;
-        this.buildWorld();
+        console.log('[setupScene] building world:', this.currentMap);
+        try{ this.buildWorld(); }
+        catch(e){
+            console.error('[buildWorld] ERROR:', e);
+            // Аварийный фолбэк — хотя бы земля
+            const g=new THREE.Mesh(new THREE.PlaneGeometry(300,300),new THREE.MeshStandardMaterial({color:0x111122,roughness:0.9,side:THREE.DoubleSide}));
+            g.rotation.x=-Math.PI/2; this.scene.add(g); this.objectsToIntersect.push(g);
+            this.scene.add(new THREE.AmbientLight(0x334466,1.5));
+        }
         if(this.mode==='play'){
             this.playerGroup=this.buildCharacter(true);
             // Спавн выше земли для всех миров
@@ -7497,81 +7495,6 @@ const app = {
 
         
 
-        else if(this.currentMap==='coins'){
-            // 💰 ЗОЛОТАЯ ЛИХОРАДКА — шахта с монетами
-            this.scene.background=new THREE.Color(0x0d0800);
-            this.scene.fog=new THREE.FogExp2(0x0d0800,0.02);
-            addGround(0x2a1a00);
-            this.scene.add(new THREE.AmbientLight(0xffaa44,0.5));
-            const rockMat=new THREE.MeshStandardMaterial({color:0x3a2a1a,roughness:0.95});
-            const goldMat=new THREE.MeshStandardMaterial({color:0xFFD700,emissive:0xCC8800,emissiveIntensity:0.8,metalness:0.8,roughness:0.2});
-            const goldSeamMat=new THREE.MeshStandardMaterial({color:0xFFAA00,emissive:0xFF8800,emissiveIntensity:1.2,metalness:0.9,roughness:0.1});
-            // Горы/скалы по краям
-            for(let i=0;i<18;i++){
-                const a=i/18*Math.PI*2, r=35+Math.random()*15;
-                const rock=new THREE.Mesh(new THREE.ConeGeometry(4+Math.random()*4,8+Math.random()*12,6),rockMat);
-                rock.position.set(Math.cos(a)*r,0,Math.sin(a)*r); rock.castShadow=true;
-                this.scene.add(rock); this.objectsToIntersect.push(rock);
-            }
-            // Шахтные платформы — уровни вниз
-            for(let level=0;level<5;level++){
-                const y=-level*5, r=12-level*1.5;
-                const platform=new THREE.Mesh(new THREE.CylinderGeometry(r,r,0.5,12),rockMat);
-                platform.position.set(0,y,0); this.scene.add(platform); this.objectsToIntersect.push(platform);
-                // Жилы золота в стенах
-                for(let j=0;j<6;j++){
-                    const a=j/6*Math.PI*2;
-                    const seam=new THREE.Mesh(new THREE.BoxGeometry(0.8,0.4,0.3),goldSeamMat);
-                    seam.position.set(Math.cos(a)*(r-0.5),y+0.5,Math.sin(a)*(r-0.5));
-                    seam.rotation.y=a; seam.castShadow=false; this.scene.add(seam);
-                }
-            }
-            // Лестницы между уровнями
-            for(let level=0;level<4;level++){
-                const y=-level*5, r=8-level;
-                const ladder=new THREE.Mesh(new THREE.BoxGeometry(0.5,5.5,0.5),new THREE.MeshStandardMaterial({color:0x8B6914,roughness:0.8}));
-                ladder.position.set(r-2,y-2.5,0); this.scene.add(ladder); this.objectsToIntersect.push(ladder);
-            }
-            // МНОГО монет на всех уровнях
-            const coinPositions2=[];
-            for(let level=0;level<5;level++){
-                const y=-level*5+1.5, r=8-level*1.2;
-                for(let j=0;j<3;j++){
-                    const a=j/3*Math.PI*2+(level*0.4);
-                    coinPositions2.push([Math.cos(a)*r,y,Math.sin(a)*r]);
-                }
-            }
-            // Бонусные золотые самородки в центре каждого уровня
-            for(let level=0;level<5;level++){
-                coinPositions2.push([0,-level*5+2,0]); // большая монета в центре
-            }
-            coinPositions2.forEach(([x,y,z])=>{
-                const c=new THREE.Group();
-                const f=new THREE.Mesh(new THREE.SphereGeometry(0.35,10,10),new THREE.MeshStandardMaterial({color:0xFF8C00,emissive:0xFF6000,emissiveIntensity:0.7,roughness:0.5})); c.add(f);
-                const l=new THREE.Mesh(new THREE.SphereGeometry(0.11,6,6),new THREE.MeshStandardMaterial({color:0x22aa22})); l.position.set(0,0.37,0); c.add(l);
-                c.position.set(x,y,z); this.scene.add(c); this.collectibles.push(c);
-            });
-            // Факелы на каждом уровне
-            for(let level=0;level<5;level++){
-                const y=-level*5+2, r=10-level;
-                [0,Math.PI/2,Math.PI,Math.PI*1.5].forEach(a=>{
-                    const tl=new THREE.PointLight(0xFF8800,2,12); tl.position.set(Math.cos(a)*r,y,Math.sin(a)*r); this.scene.add(tl);
-                    const fl=new THREE.Mesh(new THREE.SphereGeometry(0.18,6,6),new THREE.MeshStandardMaterial({emissive:0xFF5500,emissiveIntensity:2}));
-                    fl.position.set(Math.cos(a)*r,y,Math.sin(a)*r); this.scene.add(fl);
-                });
-            }
-            // HUD
-            let ch=document.getElementById('coins-hud');
-            if(!ch){ch=document.createElement('div');ch.id='coins-hud';
-                ch.style.cssText='position:fixed;top:80px;right:20px;z-index:200;font-family:Orbitron,sans-serif;text-align:right;pointer-events:none;';
-                document.body.appendChild(ch);}
-            this._coinsTotal=coinPositions2.length; this._coinsFound=0;
-            const showCoinsHud=()=>{};
-            this._coinsShowHud=showCoinsHud;
-        }
-
-
-
         else if(this.currentMap==='march8'){
             // 🌸 МИР 8 МАРТА
             this.scene.background = new THREE.Color(0x2d0a2d);
@@ -7660,6 +7583,11 @@ const app = {
             addGround(0x111118);
             this.scene.add(new THREE.GridHelper(100,50,0x222244,0x111133));
         }
+        else if(this.currentMap==='hideseek'||this.currentMap==='dungeon'){
+            addGround(0x111122);
+            this.scene.add(new THREE.AmbientLight(0x334455,1));
+            this.scene.add(new THREE.GridHelper(100,50,0x222244,0x111133));
+        }
         else if(typeof this.currentMap==='number'){
             addGround(0x1a1a1a);
             this.scene.add(new THREE.GridHelper(100,50,0x222244,0x111133));
@@ -7682,6 +7610,13 @@ const app = {
             } else {
                 console.warn('[buildWorld] no blocks found for map', this.currentMap, m);
             }
+        } else {
+            // Фолбэк — любой неизвестный мир получает хотя бы землю и свет
+            addGround(0x111122);
+            this.scene.add(new THREE.AmbientLight(0x334466,1.2));
+            const pl=new THREE.PointLight(0x4488ff,3,40); pl.position.set(0,8,0); this.scene.add(pl);
+            this.scene.add(new THREE.GridHelper(100,50,0x222244,0x111133));
+            console.warn('[buildWorld] unknown map, using fallback:', this.currentMap);
         }
     },
 
@@ -8048,10 +7983,9 @@ const app = {
                     c.rotation.z+=2*delta;
                     if(c.position.distanceTo(this.playerGroup.position)<1.6){
                         this.scene.remove(c);this.collectibles.splice(i,1);
-                        this.balance+=30;this.saveData();
                         this._sfx('coin');
+                        this.balance=(this.balance||0)+30; this.saveData();
                         if(this.currentMap==='race'){this._raceScore=(this._raceScore||0)+1;if(this._raceShowHud)this._raceShowHud();}
-                        if(this.currentMap==='coins'){this._coinsFound=(this._coinsFound||0)+1;if(this._coinsShowHud)this._coinsShowHud();}
                         if(this.collectibles.length===0){
                             setTimeout(()=>this.showNotif('🏆','Все собрано!','Ты собрал все цитрусы! +500 🍊'),200);
                             this.balance+=500;this.saveData();
@@ -8890,7 +8824,7 @@ const app = {
         if(this._mtInterval){clearInterval(this._mtInterval);this._mtInterval=null;}this._mtSeconds=null;this._mtReached=false;
         this._snowParticles=null;
         // Чистим HUD всех игр
-        ['race-hud','dropper-hud','maze-hud','coins-hud'].forEach(id=>{const el=document.getElementById(id);if(el)el.remove();});
+        ['race-hud','dropper-hud','maze-hud'].forEach(id=>{const el=document.getElementById(id);if(el)el.remove();});
         this._raceCar=null; this._raceSpeed=false;
         document.exitPointerLock();
         document.getElementById('engine-view').style.display='none';
