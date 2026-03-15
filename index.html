@@ -7788,27 +7788,23 @@ const app = {
                 if(mb){ mb.x+=dx*2; mb.y+=dy*2; mb.z+=dz*2; bd.x=mb.x; bd.y=mb.y; bd.z=mb.z; }
             }
         } else if(mode==='scale'){
-            // Масштабируем через obj.scale
-            obj.scale.x = Math.max(0.1, obj.scale.x + dx*0.25);
-            obj.scale.y = Math.max(0.1, obj.scale.y + dy*0.25);
-            obj.scale.z = Math.max(0.1, obj.scale.z + dz*0.25);
-            // Сохраняем реальные размеры = базовый размер * scale
-            const baseSize = 2; // spawnBlock создаёт BoxGeometry(2,2,2)
-            const realSx = +(obj.scale.x * baseSize).toFixed(3);
-            const realSy = +(obj.scale.y * baseSize).toFixed(3);
-            const realSz = +(obj.scale.z * baseSize).toFixed(3);
-            // Обновляем userData
-            if(obj.userData.blockData){
-                obj.userData.blockData.sx = realSx;
-                obj.userData.blockData.sy = realSy;
-                obj.userData.blockData.sz = realSz;
-            }
-            // Обновляем mapBlocks по позиции
-            const bpos = obj.position;
+            // Получаем текущие размеры из blockData (геометрия уже нужного размера)
+            const bd2 = obj.userData.blockData;
+            if(!bd2) return;
+            const newSx = Math.max(0.1, (bd2.sx||2) + dx*0.5);
+            const newSy = Math.max(0.1, (bd2.sy||2) + dy*0.5);
+            const newSz = Math.max(0.1, (bd2.sz||2) + dz*0.5);
+            // Пересоздаём геометрию с новыми размерами
+            obj.geometry.dispose();
+            obj.geometry = new THREE.BoxGeometry(newSx, newSy, newSz);
+            // Обновляем blockData
+            bd2.sx = newSx; bd2.sy = newSy; bd2.sz = newSz;
+            // Обновляем mapBlocks
+            const bpos2 = obj.position;
             const mb2 = this.mapBlocks.find(b=>
-                Math.abs(b.x-bpos.x)<0.1 && Math.abs(b.y-bpos.y)<0.1 && Math.abs(b.z-bpos.z)<0.1
+                Math.abs(b.x-bpos2.x)<0.5 && Math.abs(b.y-bpos2.y)<0.5 && Math.abs(b.z-bpos2.z)<0.5
             );
-            if(mb2){ mb2.sx=realSx; mb2.sy=realSy; mb2.sz=realSz; }
+            if(mb2){ mb2.sx=newSx; mb2.sy=newSy; mb2.sz=newSz; }
         }
     },
 
@@ -8361,21 +8357,18 @@ const app = {
         document.exitPointerLock();
         this.modalCb=async name=>{
             const sc=document.getElementById('eng-script-ta')?.value||'';
-            // Собираем блоки из сцены — objectsToIntersect содержит актуальные THREE.Mesh с scale
-            // mapBlocks содержит простые объекты для позиций/цветов
+            // Читаем из userData.blockData — там всегда актуальные размеры
             const sceneBlocks = this.objectsToIntersect.filter(o=>o.userData&&o.userData.removable&&o.userData.blockData);
             const blocks = sceneBlocks.map(obj=>{
                 const bd = obj.userData.blockData;
-                const baseSize = 2;
                 return {
                     x: +(obj.position.x.toFixed(2)),
                     y: +(obj.position.y.toFixed(2)),
                     z: +(obj.position.z.toFixed(2)),
                     color: bd.color || 0xCCCCCC,
-                    // Реальный размер = scale * baseGeometry
-                    sx: +(Math.max(0.1, obj.scale.x * baseSize).toFixed(3)),
-                    sy: +(Math.max(0.1, obj.scale.y * baseSize).toFixed(3)),
-                    sz: +(Math.max(0.1, obj.scale.z * baseSize).toFixed(3)),
+                    sx: +(bd.sx||2),
+                    sy: +(bd.sy||2),
+                    sz: +(bd.sz||2),
                 };
             });
             console.log('[publish] blocks:', blocks.length, 'map:', this.mapBlocks?.length);
