@@ -7625,10 +7625,10 @@ const app = {
                     const bx = b.x ?? b.px ?? 0;
                     const by = b.y ?? b.py ?? 0;
                     const bz = b.z ?? b.pz ?? 0;
-                    // Цвет: число или строка #hex
                     let col = b.color;
                     if(typeof col === 'string' && col.startsWith('#')) col = parseInt(col.replace('#',''), 16);
                     if(!col) col = 0xCCCCCC;
+                    // sx/sy/sz — реальный размер блока (уже с учётом scale)
                     const sx = b.sx || b.scale || 2;
                     const sy = b.sy || b.scale || 2;
                     const sz = b.sz || b.scale || 2;
@@ -7788,13 +7788,27 @@ const app = {
                 if(mb){ mb.x+=dx*2; mb.y+=dy*2; mb.z+=dz*2; bd.x=mb.x; bd.y=mb.y; bd.z=mb.z; }
             }
         } else if(mode==='scale'){
-            // Масштабируем через scale (не нужен blockData)
-            obj.scale.x = Math.max(0.5, obj.scale.x + dx*0.25);
-            obj.scale.y = Math.max(0.5, obj.scale.y + dy*0.25);
-            obj.scale.z = Math.max(0.5, obj.scale.z + dz*0.25);
-            if(obj.userData) { obj.userData.scale = obj.scale.x; }
-            const mb = this.mapBlocks.find(b=>b.x===bd.x&&b.y===bd.y&&b.z===bd.z);
-            if(mb){ mb.sx=bd.sx; mb.sy=bd.sy; mb.sz=bd.sz; }
+            // Масштабируем через obj.scale
+            obj.scale.x = Math.max(0.1, obj.scale.x + dx*0.25);
+            obj.scale.y = Math.max(0.1, obj.scale.y + dy*0.25);
+            obj.scale.z = Math.max(0.1, obj.scale.z + dz*0.25);
+            // Сохраняем реальные размеры = базовый размер * scale
+            const baseSize = 2; // spawnBlock создаёт BoxGeometry(2,2,2)
+            const realSx = +(obj.scale.x * baseSize).toFixed(3);
+            const realSy = +(obj.scale.y * baseSize).toFixed(3);
+            const realSz = +(obj.scale.z * baseSize).toFixed(3);
+            // Обновляем userData
+            if(obj.userData.blockData){
+                obj.userData.blockData.sx = realSx;
+                obj.userData.blockData.sy = realSy;
+                obj.userData.blockData.sz = realSz;
+            }
+            // Обновляем mapBlocks по позиции
+            const bpos = obj.position;
+            const mb2 = this.mapBlocks.find(b=>
+                Math.abs(b.x-bpos.x)<0.1 && Math.abs(b.y-bpos.y)<0.1 && Math.abs(b.z-bpos.z)<0.1
+            );
+            if(mb2){ mb2.sx=realSx; mb2.sy=realSy; mb2.sz=realSz; }
         }
     },
 
@@ -8347,16 +8361,23 @@ const app = {
         document.exitPointerLock();
         this.modalCb=async name=>{
             const sc=document.getElementById('eng-script-ta')?.value||'';
-            // mapBlocks содержит простые объекты {x,y,z,color,sx,sy,sz}
-            const blocks = (this.mapBlocks||[]).filter(b=>b!=null).map(b=>({
-                x: +(Number(b.x||0).toFixed(2)),
-                y: +(Number(b.y||0).toFixed(2)),
-                z: +(Number(b.z||0).toFixed(2)),
-                color: b.color || 0xCCCCCC,
-                sx: +(Number(b.sx||b.scale||2).toFixed(2)),
-                sy: +(Number(b.sy||b.scale||2).toFixed(2)),
-                sz: +(Number(b.sz||b.scale||2).toFixed(2)),
-            }));
+            // Собираем блоки из сцены — objectsToIntersect содержит актуальные THREE.Mesh с scale
+            // mapBlocks содержит простые объекты для позиций/цветов
+            const sceneBlocks = this.objectsToIntersect.filter(o=>o.userData&&o.userData.removable&&o.userData.blockData);
+            const blocks = sceneBlocks.map(obj=>{
+                const bd = obj.userData.blockData;
+                const baseSize = 2;
+                return {
+                    x: +(obj.position.x.toFixed(2)),
+                    y: +(obj.position.y.toFixed(2)),
+                    z: +(obj.position.z.toFixed(2)),
+                    color: bd.color || 0xCCCCCC,
+                    // Реальный размер = scale * baseGeometry
+                    sx: +(Math.max(0.1, obj.scale.x * baseSize).toFixed(3)),
+                    sy: +(Math.max(0.1, obj.scale.y * baseSize).toFixed(3)),
+                    sz: +(Math.max(0.1, obj.scale.z * baseSize).toFixed(3)),
+                };
+            });
             console.log('[publish] blocks:', blocks.length, 'map:', this.mapBlocks?.length);
             // Сохраняем локально
             const localId='custom_'+Date.now();
