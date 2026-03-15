@@ -3516,8 +3516,6 @@ const app = {
         this._myColor   = user.color || this._myColor;
         this.fullTag    = `${this.username}#${this.userId}`;
 
-        this.saveData();
-
         // Проверяем не забанен ли игрок
         const banEntry = this._checkIfBanned();
         if(banEntry){
@@ -3526,12 +3524,40 @@ const app = {
             return;
         }
 
-        this.showHub();
-        this._wsConnect();
-        setTimeout(()=>{
-            try{ fetch(this._API+'/players/'+this.userId,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:String(this.userId),name:this.username,tag:this.fullTag,color:this._myColor})}); }catch(e){}
+        // Сначала загружаем данные с сервера, потом показываем хаб
+        const loginBtn = document.querySelector('.btn-primary');
+        if(loginBtn){ loginBtn.textContent='⏳ Загрузка...'; loginBtn.disabled=true; }
+
+        fetch(this._API+'/players/'+this.userId).then(r=>r.json()).then(srv=>{
+            if(srv && !srv.error){
+                // Восстанавливаем всё с сервера
+                this.balance = srv.balance||0;
+                this.inventory = srv.inventory||[];
+                this.friends = srv.friends||[];
+                this.friendRequests = srv.friendRequests||[];
+                this.sentReqs = srv.sentReqs||[];
+                this.customMaps = srv.customMaps||[];
+                this.questData = srv.questData||{};
+                this.rouletteUsed = srv.rouletteUsed||false;
+                this.rouletteTotal = srv.rouletteTotal||0;
+                this.visitedMaps = srv.visitedMaps||[];
+                this.coins = srv.coins||0;
+                this.questRotation = srv.questRotation||null;
+            }
+            this.saveData();
+            this.showHub();
+            this._wsConnect();
             this._readMailbox();
-        }, 1500);
+            if(typeof this.updateAvatarPreview==='function') setTimeout(()=>this.updateAvatarPreview(), 300);
+        }).catch(()=>{
+            // Если сервер недоступен — всё равно входим с пустым аккаунтом
+            this.saveData();
+            this.showHub();
+            this._wsConnect();
+            this._readMailbox();
+        }).finally(()=>{
+            if(loginBtn){ loginBtn.textContent='ВОЙТИ'; loginBtn.disabled=false; }
+        });
     },
 
     isAdmin(name){ const n=(name||'').toLowerCase().trim(); return n==='admin'; },
@@ -8614,6 +8640,10 @@ const app = {
 
     // ── СИСТЕМА ЗАДАНИЙ ──
     _initQuests(){
+        // Защита: гарантируем что questData и questRotation всегда объекты
+        if(!this.questData || typeof this.questData !== 'object') this.questData = {};
+        if(!this.questRotation || typeof this.questRotation !== 'object') this.questRotation = {};
+
         const ALL_QUESTS = [
             {id:'play30',  title:'Игрок дня',       desc:'Поиграй 30 минут',           reward:50,  type:'playtime', goal:30,  icon:'⏱️'},
             // ── Время в игре ──
@@ -8661,7 +8691,7 @@ const app = {
         const rot = this.questRotation;
 
         // Если слот пустой или время вышло — выбираем новые 5 заданий
-        if(!rot.nextAt || now >= rot.nextAt) {
+        if(!rot.nextAt || now >= rot.nextAt || !Array.isArray(rot.ids) || rot.ids.length === 0) {
             rot.nextAt = now + ROTATE_MS;
             // Выбираем 5 случайных непересекающихся заданий
             const shuffled = [...ALL_QUESTS].sort(()=>Math.random()-0.5);
@@ -8675,8 +8705,8 @@ const app = {
             this.saveData();
         }
 
-        // Активные задания
-        this._questDefs = rot.ids.map(id => ALL_QUESTS.find(q=>q.id===id)).filter(Boolean);
+        // Активные задания (фильтруем невалидные id на случай повреждённых данных)
+        this._questDefs = (rot.ids||[]).map(id => ALL_QUESTS.find(q=>q.id===id)).filter(Boolean);
         // Инициализируем данные для каждого задания если нет
         this._questDefs.forEach(q=>{
             if(!this.questData[q.id]) this.questData[q.id]={progress:0,done:false,claimed:false};
