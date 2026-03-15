@@ -3541,7 +3541,7 @@ const app = {
     isCitrus(name){ const n=(name||'').toLowerCase().trim(); return n==='citrus'; },
     isDev(name){ const n=(name||'').toLowerCase().trim(); return n==='разраб' || n==='razrab'; },
     isOwner(name){ return this.isCitrus(name) || this.isDev(name); },
-    isVerified(name){ const n=(name||'').toLowerCase().trim(); return ['ft77799','dantiyt_official','твинк','tвинк'].includes(n); },
+    isVerified(name){ const n=(name||'').toLowerCase().trim(); return ['ft77799','dantiyt_official'].includes(n); },
     isSpecial(name){ const n=(name||'').toLowerCase().trim().split('#')[0]; return n==='добрый разраб'; },
     isStaff(name){ return this.isAdmin(name) || this.isOwner(name); },
 
@@ -3553,7 +3553,7 @@ const app = {
         if(this.isSpecial(name))  return '<svg width="16" height="16" viewBox="0 0 16 16" style="display:inline-block;vertical-align:middle;margin-left:3px;flex-shrink:0;" title="Друг разраба"><circle cx="8" cy="8" r="8" fill="#00C896"/><text x="8" y="11.5" text-anchor="middle" font-size="9" fill="#000">🤝</text></svg>';
         if(this.isOwner(name))    return '<svg width="16" height="16" viewBox="0 0 16 16" style="display:inline-block;vertical-align:middle;margin-left:3px;flex-shrink:0;" title="Владелец"><circle cx="8" cy="8" r="8" fill="#FFD700"/><path d="M4.5 8.2l2.3 2.3 4.2-4.2" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>';
         if(this.isAdmin(name))    return '<svg width="16" height="16" viewBox="0 0 16 16" style="display:inline-block;vertical-align:middle;margin-left:3px;flex-shrink:0;" title="Администратор"><circle cx="8" cy="8" r="8" fill="#4fc3f7"/><path d="M4.5 8.2l2.3 2.3 4.2-4.2" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>';
-        if(n==='твинк'||n==='tвинк') return '<svg width="16" height="16" viewBox="0 0 16 16" style="display:inline-block;vertical-align:middle;margin-left:3px;flex-shrink:0;" title="Разраб"><circle cx="8" cy="8" r="8" fill="#1D9BF0"/><path d="M4.5 8.2l2.3 2.3 4.2-4.2" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>';
+        if(n==='твинк разраба'||n==='твинк'||n==='tвинк'||n==='twink'||n==='twink разраба') return '<svg width="16" height="16" viewBox="0 0 16 16" style="display:inline-block;vertical-align:middle;margin-left:3px;flex-shrink:0;" title="Разраб"><circle cx="8" cy="8" r="8" fill="#1D9BF0"/><path d="M4.5 8.2l2.3 2.3 4.2-4.2" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>';
         if(this.isVerified(name)) return '<svg width="16" height="16" viewBox="0 0 16 16" style="display:inline-block;vertical-align:middle;margin-left:3px;flex-shrink:0;" title="Верифицирован"><circle cx="8" cy="8" r="8" fill="#aaaaaa"/><path d="M4.5 8.2l2.3 2.3 4.2-4.2" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>';
         return '';
     },
