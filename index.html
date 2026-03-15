@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>CITRUS | ONLINE</title>
+    <title>👻 CITRUS | ПРИЗРАЧНЫЙ МИР</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&family=Rajdhani:wght@500;600;700&family=Orbitron:wght@600;700;900&display=swap" rel="stylesheet">
     <style>
@@ -10,15 +10,15 @@
            CITRUS ONLINE — ULTRA REDESIGN v2.0
            ═══════════════════════════════════════════════════ */
         :root {
-            --c-main: #FF9500;
-            --c-glow: #FFBA45;
-            --c-deep: #E05000;
-            --c-bg: #0A0608;
-            --c-surface: #0F0C10;
-            --c-surface2: #161018;
-            --c-surface3: #1C1520;
-            --c-border: rgba(255,149,0,0.1);
-            --c-border2: rgba(255,149,0,0.22);
+            --c-main: #9D4EDD;
+            --c-glow: #C77DFF;
+            --c-deep: #5A189A;
+            --c-bg: #050508;
+            --c-surface: #0A080F;
+            --c-surface2: #100D18;
+            --c-surface3: #160F22;
+            --c-border: rgba(157,78,221,0.12);
+            --c-border2: rgba(157,78,221,0.28);
             --c-blue: #38BDF8;
             --c-green: #4ADE80;
             --c-pink: #F472B6;
@@ -27,7 +27,7 @@
             --font-body: 'Plus Jakarta Sans', sans-serif;
             --font-ui: 'Plus Jakarta Sans', sans-serif;
             --font-accent: 'Syne', sans-serif;
-            --shadow-glow: 0 0 60px rgba(255,149,0,0.18), 0 0 120px rgba(255,149,0,0.06);
+            --shadow-glow: 0 0 60px rgba(157,78,221,0.22), 0 0 120px rgba(100,20,200,0.1);
             --shadow-card: 0 2px 20px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04) inset;
             --radius-card: 20px;
             --radius-btn: 14px;
@@ -122,7 +122,7 @@
         .login-box::before {
             content: '';
             position: absolute; top: 0; left: 10%; right: 10%; height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255,149,0,0.6), rgba(255,183,77,0.8), rgba(255,149,0,0.6), transparent);
+            background: linear-gradient(90deg, transparent, rgba(157,78,221,0.7), rgba(199,125,255,0.9), rgba(157,78,221,0.7), transparent);
             border-radius: 1px;
         }
 
@@ -130,10 +130,10 @@
             font-family: var(--font-head);
             font-size: 52px; font-weight: 900;
             margin: 0 0 4px;
-            background: linear-gradient(135deg, #FF9800 0%, #FFD54F 40%, #FF6D00 100%);
+            background: linear-gradient(135deg, #C77DFF 0%, #E0AAFF 40%, #9D4EDD 100%);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             background-clip: text;
-            filter: drop-shadow(0 0 30px rgba(255,149,0,0.4));
+            filter: drop-shadow(0 0 40px rgba(157,78,221,0.7)) drop-shadow(0 0 60px rgba(100,20,200,0.4));
             letter-spacing: 6px;
             position: relative;
         }
@@ -197,7 +197,7 @@
         .login-box input::placeholder { color: rgba(255,255,255,0.2); }
 
         .btn-primary {
-            background: linear-gradient(135deg, #FF8F00, #FF6D00);
+            background: linear-gradient(135deg, #7B2FBE, #5A189A);
             color: #fff;
             padding: 16px;
             border-radius: 14px;
@@ -208,7 +208,7 @@
             font-weight: 800;
             font-family: var(--font-head);
             margin-top: 10px;
-            box-shadow: 0 4px 20px rgba(255,109,0,0.4), 0 0 0 1px rgba(255,183,77,0.2) inset;
+            box-shadow: 0 4px 20px rgba(122,47,190,0.4), 0 0 0 1px rgba(199,125,255,0.2) inset;
             position: relative; overflow: hidden;
         }
         .btn-primary::before {
@@ -238,17 +238,17 @@
         .hub-header::after {
             content: '';
             position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255,149,0,0.4), rgba(255,183,77,0.6), rgba(255,149,0,0.4), transparent);
+            background: linear-gradient(90deg, transparent, rgba(157,78,221,0.5), rgba(199,125,255,0.7), rgba(157,78,221,0.5), transparent);
         }
 
         .header-logo {
             font-family: var(--font-head);
             font-size: 22px; font-weight: 900;
             letter-spacing: 5px;
-            background: linear-gradient(135deg, #FF9800, #FFD54F);
+            background: linear-gradient(135deg, #C77DFF, #E0AAFF);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             background-clip: text;
-            filter: drop-shadow(0 0 12px rgba(255,149,0,0.5));
+            filter: drop-shadow(0 0 16px rgba(157,78,221,0.8)) drop-shadow(0 0 30px rgba(100,20,200,0.5));
             position: relative;
         }
         .header-logo::after {
@@ -908,11 +908,11 @@
 
         .btn-orange-full {
             width: 100%; padding: 13px;
-            background: linear-gradient(135deg, #FF8F00, #FF5722);
+            background: linear-gradient(135deg, #7B2FBE, #5A189A);
             color: #fff; border-radius: 12px;
             font-size: 14px; font-weight: 700;
             font-family: var(--font-body); letter-spacing: 0.5px;
-            box-shadow: 0 4px 16px rgba(255,87,34,0.3);
+            box-shadow: 0 4px 16px rgba(122,47,190,0.35);
             transition: all 0.2s;
         }
         .btn-orange-full:hover { box-shadow: 0 6px 24px rgba(255,87,34,0.5); transform: translateY(-1px); }
@@ -1006,7 +1006,7 @@
             font-family: var(--font-head);
             font-size: 22px; font-weight: 900;
             letter-spacing: 3px;
-            background: linear-gradient(135deg, #FF9800, #FFD54F);
+            background: linear-gradient(135deg, #C77DFF, #E0AAFF);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             background-clip: text;
             filter: drop-shadow(0 0 16px rgba(255,149,0,0.4));
@@ -1023,8 +1023,8 @@
             100% { transform: translateY(110vh) rotate(720deg); opacity:0; }
         }
         @keyframes bday-glow {
-            0%,100% { box-shadow: 0 0 20px rgba(255,105,180,0.4), 0 0 40px rgba(255,215,0,0.2); }
-            50%      { box-shadow: 0 0 40px rgba(255,105,180,0.8), 0 0 80px rgba(255,215,0,0.4); }
+            0%,100% { box-shadow: 0 0 20px rgba(157,78,221,0.5), 0 0 40px rgba(0,255,160,0.15); }
+            50%      { box-shadow: 0 0 50px rgba(199,125,255,0.9), 0 0 90px rgba(0,255,160,0.3); }
         }
         @keyframes bday-text {
             0%,100% { background-position: 0% 50%; }
@@ -1039,8 +1039,8 @@
             50%      { transform: scale(1.15) rotate(3deg); }
         }
         .bday-banner {
-            background: linear-gradient(135deg, rgba(255,20,147,0.12), rgba(255,215,0,0.08), rgba(255,105,180,0.1));
-            border: 1px solid rgba(255,105,180,0.3);
+            background: linear-gradient(135deg, rgba(90,0,180,0.25), rgba(0,200,100,0.06), rgba(157,78,221,0.18));
+            border: 1px solid rgba(157,78,221,0.45);
             border-radius: 16px;
             padding: 12px 20px;
             display: flex;
@@ -1068,7 +1068,7 @@
             font-family: var(--font-head);
             font-size: 13px;
             letter-spacing: 1.5px;
-            background: linear-gradient(90deg, #FF69B4, #FFD700, #FF1493, #FFD700, #FF69B4);
+            background: linear-gradient(90deg, #C77DFF, #00FFB2, #E0AAFF, #00FFB2, #C77DFF);
             background-size: 300% 300%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -1099,7 +1099,7 @@
             position: relative;
             padding: 6px;
             border-radius: 50%;
-            background: conic-gradient(from 0deg, rgba(255,149,0,0.3), rgba(255,183,77,0.1), rgba(255,149,0,0.3), rgba(255,109,0,0.2), rgba(255,149,0,0.3));
+            background: conic-gradient(from 0deg, rgba(157,78,221,0.4), rgba(0,255,160,0.1), rgba(199,125,255,0.35), rgba(90,24,154,0.2), rgba(157,78,221,0.4));
             box-shadow: 0 0 30px rgba(255,149,0,0.2), 0 0 60px rgba(255,149,0,0.08);
         }
         .roulette-ring canvas { border-radius: 50%; }
@@ -1112,12 +1112,12 @@
         }
         .btn-spin {
             padding: 14px 44px;
-            background: linear-gradient(135deg, #FF8F00, #E65100);
+            background: linear-gradient(135deg, #7B2FBE, #4A0E8F);
             border: none; border-radius: 50px;
             color: #fff; font-size: 15px; font-weight: 900;
             letter-spacing: 2px; cursor: pointer;
             font-family: var(--font-head);
-            box-shadow: 0 6px 24px rgba(255,109,0,0.4), 0 0 0 1px rgba(255,183,77,0.2) inset;
+            box-shadow: 0 6px 24px rgba(122,47,190,0.5), 0 0 0 1px rgba(199,125,255,0.25) inset;
             transition: all 0.25s;
             position: relative; overflow: hidden;
         }
@@ -1550,6 +1550,36 @@
         .gchat-time { font-size:10px;color:rgba(255,255,255,0.2);margin-top:3px; }
         /* Daily banner hover */
         #daily-banner:hover { background:linear-gradient(135deg,rgba(255,149,0,0.16),rgba(255,60,0,0.1)) !important; transform:translateY(-2px); }
+
+        /* ═══════════════════════════════════════════════════
+           👻 ПРИЗРАЧНОЕ ИЗМЕРЕНИЕ — эффекты
+           ═══════════════════════════════════════════════════ */
+        .ghost-particle { position:fixed;pointer-events:none;z-index:9998;font-size:18px;animation:ghostFloat linear infinite;opacity:0;user-select:none; }
+        @keyframes ghostFloat {
+            0%   { transform:translateY(100vh) translateX(0) rotate(0deg); opacity:0; }
+            5%   { opacity:0.6; }
+            90%  { opacity:0.4; }
+            100% { transform:translateY(-120px) translateX(60px) rotate(360deg); opacity:0; }
+        }
+        @keyframes ghostFlicker {
+            0%,100% { opacity:1; } 92% { opacity:1; } 93% { opacity:0.4; } 94% { opacity:1; } 97% { opacity:0.7; } 98% { opacity:1; }
+        }
+        .header-logo { animation:ghostFlicker 7s ease-in-out infinite; }
+        .world-card:hover::after { content:'👁️';position:absolute;top:8px;right:10px;font-size:16px;animation:eyeGlow 1.2s ease-in-out infinite;z-index:5; }
+        @keyframes eyeGlow { 0%,100%{opacity:0.3;transform:scale(1);} 50%{opacity:1;transform:scale(1.3);} }
+        .balance-chip { animation:ghostFlicker 12s ease-in-out infinite 3s; }
+        ::-webkit-scrollbar-thumb { background:rgba(157,78,221,0.25)!important; }
+        ::-webkit-scrollbar-thumb:hover { background:rgba(157,78,221,0.45)!important; }
+        .nav-item.active { background:rgba(90,24,154,0.15)!important; }
+        .nav-item:hover { background:rgba(157,78,221,0.07)!important; color:rgba(199,125,255,0.9)!important; }
+        .panel-box { border-color:rgba(157,78,221,0.18)!important; box-shadow:var(--shadow-card),0 0 20px rgba(90,24,154,0.08)!important; }
+        .panel-box-title { color:rgba(157,78,221,0.7)!important; }
+        .section-title { color:rgba(157,78,221,0.7)!important; text-shadow:0 0 20px rgba(157,78,221,0.4); }
+        .section-title::after { background:linear-gradient(90deg,rgba(157,78,221,0.3),transparent)!important; }
+        .roulette-result { color:#C77DFF!important; filter:drop-shadow(0 0 16px rgba(157,78,221,0.6))!important; }
+        #avatar-container { background:radial-gradient(ellipse at 50% 40%,rgba(90,24,154,0.12) 0%,#050008 60%)!important; border-color:rgba(157,78,221,0.18)!important; }
+        .card:hover { border-color:rgba(157,78,221,0.35)!important; box-shadow:0 18px 48px rgba(0,0,0,0.7),0 0 0 1px rgba(157,78,221,0.2),0 0 35px rgba(90,24,154,0.15)!important; }
+
     </style>
 </head>
 <body>
@@ -1558,8 +1588,8 @@
 
 <div id="ui-login">
     <div class="login-box">
-        <div class="login-logo">CITRUS</div>
-        <p class="login-sub">Online · Creator Edition</p>
+        <div class="login-logo">👻 CITRUS</div>
+        <p class="login-sub">Призрачное измерение</p>
 
         <!-- Табы -->
         <div class="auth-tabs">
@@ -1595,11 +1625,11 @@
 
 <div id="ui-hub" class="hidden">
     <div class="hub-header">
-        <div class="header-logo">CITRUS</div>
+        <div class="header-logo">👻 CITRUS</div>
         <div class="header-divider"></div>
         <div class="header-right">
             <span id="display-name" class="header-username"></span>
-            <div class="balance-chip">🍊 <span id="balance-val">0</span></div>
+            <div class="balance-chip">💀 <span id="balance-val">0</span></div>
             <button onclick="app.logout()" class="btn-logout">Сменить аккаунт</button>
             <button id="support-btn" onclick="app.openSupport()" title="Срочная помощь и идеи" style="position:relative;background:linear-gradient(135deg,rgba(255,80,80,0.15),rgba(255,40,40,0.08));border:1px solid rgba(255,80,80,0.35);border-radius:10px;padding:6px 14px;color:#ff6b6b;font-size:13px;font-weight:700;font-family:var(--font-body);cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:6px;">
                 🆘 Помощь / Идеи
@@ -1714,96 +1744,96 @@
             <!-- ══════════════════ TAB: GAMES ══════════════════ -->
             <div id="tab-games">
                 <!-- БАННЕР ДНЯ РОЖДЕНИЯ -->
-                <div id="bday-banner" class="bday-banner" onclick="app.openBdayModal()" style="margin-bottom:20px;">
-                    <div class="bday-cake">🎂</div>
+                <div id="bday-banner" class="bday-banner" onclick="app.openGhostEventModal()" style="margin-bottom:20px;">
+                    <div class="bday-cake">👻</div>
                     <div style="flex:1;">
-                        <div class="bday-title">🎉 СЕГОДНЯ ДЕНЬ РОЖДЕНИЯ! 🎉</div>
-                        <div class="bday-sub">У игрока <b style="color:#FF69B4;">firefox#6368</b> сегодня праздник — поздравь его!</div>
+                        <div class="bday-title">👻 ПРИЗРАЧНЫЙ ИВЕНТ 👻</div>
+                        <div class="bday-sub">Призрачные духи проникли в Citrus Online — собирай награды!</div>
                     </div>
-                    <div style="display:flex;gap:4px;font-size:18px;animation:float-emoji 2s ease-in-out infinite;">🎈🎁🥳</div>
+                    <div style="display:flex;gap:4px;font-size:18px;animation:float-emoji 2s ease-in-out infinite;">💀🦇☠️</div>
                 </div>
-                <div class="section-title">Официальные миры</div>
+                <div class="section-title">👻 Проклятые Миры</div>
                 <div class="grid" style="margin-bottom:32px;">
 
                     <div class="card world-card featured-world" onclick="app.launch('play','gather')">
-                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(255,149,0,0.2),#050510);">
-                            <span class="world-emoji">🍊</span>
-                            <div class="world-glow" style="background:rgba(255,149,0,0.2);"></div>
+                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(0,255,180,0.12),#050508);">
+                            <span class="world-emoji">💀</span>
+                            <div class="world-glow" style="background:rgba(0,255,180,0.15);"></div>
                         </div>
                         <div class="card-info">
-                            <div><b>Цитрусовый Лес</b><br><small class="world-tag" style="color:var(--c-main)">💰 Фарм монет!</small></div>
-                            <span class="hot-badge">HOT</span>
+                            <div><b>Лес Мёртвых Душ</b><br><small class="world-tag" style="color:#00FFB2">👻 Собери души!</small></div>
+                            <span class="hot-badge">СТРАХ</span>
                         </div>
                     </div>
 
                     <div class="card world-card" onclick="app.launch('play','parkour')">
-                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(0,229,255,0.1),#050510);">
-                            <span class="world-emoji">🏃</span>
-                            <div class="world-glow" style="background:rgba(0,229,255,0.1);"></div>
+                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(157,78,221,0.15),#050508);">
+                            <span class="world-emoji">🕸️</span>
+                            <div class="world-glow" style="background:rgba(157,78,221,0.18);"></div>
                         </div>
                         <div class="card-info">
-                            <div><b>Небесный Паркур</b><br><small class="world-tag" style="color:rgba(0,229,255,0.7)">⚡ Испытай себя</small></div>
+                            <div><b>Паутина Призраков</b><br><small class="world-tag" style="color:#C77DFF">🕷️ Беги от проклятия!</small></div>
                         </div>
                     </div>
 
                     <div class="card world-card" onclick="app.launch('play','volcano')">
-                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(255,80,0,0.18),#050510);">
-                            <span class="world-emoji">🌋</span>
-                            <div class="world-glow" style="background:rgba(255,80,0,0.2);"></div>
+                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(180,0,0,0.2),#050508);">
+                            <span class="world-emoji">🩸</span>
+                            <div class="world-glow" style="background:rgba(180,0,0,0.2);"></div>
                         </div>
                         <div class="card-info">
-                            <div><b>Остров Вулкана</b><br><small class="world-tag" style="color:#ff7040">🔥 Горячо!</small></div>
+                            <div><b>Кровавый Алтарь</b><br><small class="world-tag" style="color:#FF4444">🩸 Беги или умри!</small></div>
                         </div>
                     </div>
 
                     <div class="card world-card" onclick="app.launch('play','space')">
-                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(100,0,255,0.15),#050510);">
-                            <span class="world-emoji">🚀</span>
-                            <div class="world-glow" style="background:rgba(100,0,255,0.18);"></div>
+                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(20,0,80,0.35),#050508);">
+                            <span class="world-emoji">🌑</span>
+                            <div class="world-glow" style="background:rgba(60,0,180,0.2);"></div>
                         </div>
                         <div class="card-info">
-                            <div><b>Космическая База</b><br><small class="world-tag" style="color:#b090ff">🌌 Невесомость</small></div>
+                            <div><b>Пустота Тьмы</b><br><small class="world-tag" style="color:#9090FF">🌑 Тебя здесь нет...</small></div>
                         </div>
                     </div>
 
 
                     <div class="card world-card" onclick="app.launch('play','race')">
-                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(255,200,0,0.2),#050510);">
-                            <span class="world-emoji">🏎️</span>
-                            <div class="world-glow" style="background:rgba(255,200,0,0.2);"></div>
+                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(157,78,221,0.2),#050508);">
+                            <span class="world-emoji">💨</span>
+                            <div class="world-glow" style="background:rgba(157,78,221,0.18);"></div>
                         </div>
                         <div class="card-info">
-                            <div><b>Гонки на цитрусах</b><br><small class="world-tag" style="color:#FFD700">🍊 Собирай быстрее всех!</small></div>
+                            <div><b>Гонки Призраков</b><br><small class="world-tag" style="color:#C77DFF">💨 Никто не выживает!</small></div>
                         </div>
                     </div>
 
                     <div class="card world-card" onclick="app.launch('play','dropper')">
-                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(0,200,255,0.2),#050510);">
-                            <span class="world-emoji">🌊</span>
-                            <div class="world-glow" style="background:rgba(0,200,255,0.2);"></div>
+                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(0,50,100,0.3),#050508);">
+                            <span class="world-emoji">🖤</span>
+                            <div class="world-glow" style="background:rgba(0,50,100,0.25);"></div>
                         </div>
                         <div class="card-info">
-                            <div><b>Дроппер</b><br><small class="world-tag" style="color:#00E5FF">💧 Упади в воду!</small></div>
+                            <div><b>Бездна</b><br><small class="world-tag" style="color:#4488FF">🖤 Падай в вечную тьму!</small></div>
                         </div>
                     </div>
 
                     <div class="card world-card" onclick="app.launch('play','obby')">
-                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(255,100,0,0.2),#050510);">
-                            <span class="world-emoji">🔥</span>
-                            <div class="world-glow" style="background:rgba(255,100,0,0.2);"></div>
+                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(80,0,0,0.3),#050508);">
+                            <span class="world-emoji">☠️</span>
+                            <div class="world-glow" style="background:rgba(120,0,0,0.22);"></div>
                         </div>
                         <div class="card-info">
-                            <div><b>Огненный Обби</b><br><small class="world-tag" style="color:#FF6600">🏃 Не упади в лаву!</small></div>
+                            <div><b>Проклятый Обби</b><br><small class="world-tag" style="color:#FF3333">☠️ Смерть на каждом шагу!</small></div>
                         </div>
                     </div>
 
                     <div class="card world-card" onclick="app.launch('play','maze')">
-                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(0,255,150,0.15),#050510);">
-                            <span class="world-emoji">🌀</span>
-                            <div class="world-glow" style="background:rgba(0,255,150,0.15);"></div>
+                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(0,80,60,0.25),#050508);">
+                            <span class="world-emoji">👁️</span>
+                            <div class="world-glow" style="background:rgba(0,120,80,0.18);"></div>
                         </div>
                         <div class="card-info">
-                            <div><b>Лабиринт</b><br><small class="world-tag" style="color:#00FF96">🧩 Найди выход!</small></div>
+                            <div><b>Лабиринт Кошмаров</b><br><small class="world-tag" style="color:#00CC77">👁️ Выхода нет...</small></div>
                         </div>
                     </div>
 
@@ -2160,7 +2190,7 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
 <div id="engine-view" style="touch-action:none;">
     <div class="hud-overlay">
         <div id="crosshair" class="crosshair"></div>
-        <div id="ingame-ui" class="hidden">🍊 <span id="ingame-balance">0</span></div>
+        <div id="ingame-ui" class="hidden">💀 <span id="ingame-balance">0</span></div>
         <div id="studio-ui" class="studio-panel hidden">
             <div id="palette" style="display:flex;gap:4px;"></div>
             <div style="width:1px;height:20px;background:#333;"></div>
@@ -2447,26 +2477,11 @@ const app = {
                 if(!srv||srv.error) return;
                 // Берём самый большой баланс (защита от перезаписи)
                 if((srv.balance||0) > this.balance){ this.balance=srv.balance; }
-                // Объединяем инвентарь: берём все уникальные элементы из обоих источников
-                if(srv.inventory&&srv.inventory.length>0){
-                    const merged=Array.from(new Set([...(this.inventory||[]),...srv.inventory]));
-                    this.inventory=merged;
-                }
-                // Объединяем друзей: берём все уникальные ID
-                if(srv.friends&&srv.friends.length>0){
-                    const localIds=(this.friends||[]).map(f=>String(typeof f==='object'?f.id:f));
-                    const toAdd=(srv.friends).filter(f=>!localIds.includes(String(typeof f==='object'?f.id:f)));
-                    this.friends=[...(this.friends||[]),...toAdd];
-                }
-                // Объединяем запросы в друзья
-                if(srv.friendRequests&&srv.friendRequests.length>0){
-                    const localReqIds=(this.friendRequests||[]).map(f=>String(typeof f==='object'?f.id:f));
-                    const toAdd=(srv.friendRequests).filter(f=>!localReqIds.includes(String(typeof f==='object'?f.id:f)));
-                    this.friendRequests=[...(this.friendRequests||[]),...toAdd];
-                }
+                if(srv.inventory&&srv.inventory.length>this.inventory.length) this.inventory=srv.inventory;
+                if(srv.friends&&srv.friends.length>this.friends.length) this.friends=srv.friends;
                 if(srv.rouletteUsed) this.rouletteUsed=true;
                 if((srv.rouletteTotal||0)>this.rouletteTotal) this.rouletteTotal=srv.rouletteTotal;
-                if(srv.questData&&Object.keys(srv.questData||{}).length>Object.keys(this.questData||{}).length) this.questData=srv.questData;
+                if(srv.questData&&Object.keys(srv.questData).length>Object.keys(this.questData||{}).length) this.questData=srv.questData;
                 if(srv.customMaps&&srv.customMaps.length>this.customMaps.length) this.customMaps=srv.customMaps;
                 // Сохраняем объединённое в localStorage
                 localStorage.setItem('citrus_v5_pro', JSON.stringify({
@@ -2478,9 +2493,6 @@ const app = {
                     coins:this.coins,questRotation:this.questRotation
                 }));
                 this.updateUI();
-                // Перерисовываем аксессуары и аватар после загрузки с сервера
-                if(typeof this.updateAvatarPreview==='function') this.updateAvatarPreview();
-                if(typeof this.renderShop==='function') this.renderShop();
             }).catch(()=>{});
         }
     },
@@ -3507,6 +3519,8 @@ const app = {
         this._myColor   = user.color || this._myColor;
         this.fullTag    = `${this.username}#${this.userId}`;
 
+        this.saveData();
+
         // Проверяем не забанен ли игрок
         const banEntry = this._checkIfBanned();
         if(banEntry){
@@ -3515,40 +3529,12 @@ const app = {
             return;
         }
 
-        // Сначала загружаем данные с сервера, потом показываем хаб
-        const loginBtn = document.querySelector('.btn-primary');
-        if(loginBtn){ loginBtn.textContent='⏳ Загрузка...'; loginBtn.disabled=true; }
-
-        fetch(this._API+'/players/'+this.userId).then(r=>r.json()).then(srv=>{
-            if(srv && !srv.error){
-                // Восстанавливаем всё с сервера
-                this.balance = srv.balance||0;
-                this.inventory = srv.inventory||[];
-                this.friends = srv.friends||[];
-                this.friendRequests = srv.friendRequests||[];
-                this.sentReqs = srv.sentReqs||[];
-                this.customMaps = srv.customMaps||[];
-                this.questData = srv.questData||{};
-                this.rouletteUsed = srv.rouletteUsed||false;
-                this.rouletteTotal = srv.rouletteTotal||0;
-                this.visitedMaps = srv.visitedMaps||[];
-                this.coins = srv.coins||0;
-                this.questRotation = srv.questRotation||null;
-            }
-            this.saveData();
-            this.showHub();
-            this._wsConnect();
+        this.showHub();
+        this._wsConnect();
+        setTimeout(()=>{
+            try{ fetch(this._API+'/players/'+this.userId,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:String(this.userId),name:this.username,tag:this.fullTag,color:this._myColor})}); }catch(e){}
             this._readMailbox();
-            if(typeof this.updateAvatarPreview==='function') setTimeout(()=>this.updateAvatarPreview(), 300);
-        }).catch(()=>{
-            // Если сервер недоступен — всё равно входим с пустым аккаунтом
-            this.saveData();
-            this.showHub();
-            this._wsConnect();
-            this._readMailbox();
-        }).finally(()=>{
-            if(loginBtn){ loginBtn.textContent='ВОЙТИ'; loginBtn.disabled=false; }
-        });
+        }, 1500);
     },
 
     isAdmin(name){ const n=(name||'').toLowerCase().trim(); return n==='admin'; },
@@ -3562,7 +3548,7 @@ const app = {
     isBirthday(name){ const n=(name||'').toLowerCase().trim().split('#')[0]; return n==='firefox'; },
 
     devBadge(name){
-        if(this.isBirthday(name)) return '<span style="display:inline-block;vertical-align:middle;margin-left:3px;font-size:14px;animation:cake-bounce 1.5s ease-in-out infinite;cursor:default;" title="🎂 День рождения!">🎂</span>';
+        if(this.isBirthday(name)) return '<span style="display:inline-block;vertical-align:middle;margin-left:3px;font-size:14px;animation:float-emoji 2s ease-in-out infinite;cursor:default;" title="👻 Призрак!">👻</span>';
         if(this.isSpecial(name))  return '<svg width="16" height="16" viewBox="0 0 16 16" style="display:inline-block;vertical-align:middle;margin-left:3px;flex-shrink:0;" title="Друг разраба"><circle cx="8" cy="8" r="8" fill="#00C896"/><text x="8" y="11.5" text-anchor="middle" font-size="9" fill="#000">🤝</text></svg>';
         if(this.isOwner(name))    return '<svg width="16" height="16" viewBox="0 0 16 16" style="display:inline-block;vertical-align:middle;margin-left:3px;flex-shrink:0;" title="Владелец"><circle cx="8" cy="8" r="8" fill="#FFD700"/><path d="M4.5 8.2l2.3 2.3 4.2-4.2" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>';
         if(this.isAdmin(name))    return '<svg width="16" height="16" viewBox="0 0 16 16" style="display:inline-block;vertical-align:middle;margin-left:3px;flex-shrink:0;" title="Администратор"><circle cx="8" cy="8" r="8" fill="#4fc3f7"/><path d="M4.5 8.2l2.3 2.3 4.2-4.2" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>';
@@ -3718,12 +3704,12 @@ const app = {
             volcano: '🌋 Остров Вулкана',
             space:   '🚀 Космическая База',
             race:    '🏎️ Гонки на цитрусах',
-            dropper: '🌊 Дроппер',
+            dropper: '🖤 Бездна',
             obby:    '🔥 Огненный Обби',
             maze:    '🌀 Лабиринт',
             pvp:     '🔫 Арена ПВП',
             hideseek:'👀 Прятки',
-            dungeon: '⚔️ Тёмное Подземелье',
+            dungeon: '🕯️ Склеп',
         };
         const KNOWN_WORLDS = new Set(Object.keys(wNames));
 
@@ -4423,28 +4409,29 @@ const app = {
         const ctx=this._ac;
         if(ctx.state==='suspended') ctx.resume();
 
-        const BPM=75, beat=60/BPM;
+        // 👻 ПРИЗРАЧНЫЙ ХАБ — жуткий медленный эмбиент
+        const beat=60/48; // очень медленно
 
-        // Мягкая мелодия — пентатоника
+        // Нисходящая минорная мелодия — зловещая
         const melody=[
-            0,523,0,659,784,0,659,523,
-            0,440,0,523,659,0,523,440,
-            0,392,0,523,659,784,659,0,
-            0,523,659,0,784,659,523,0,
+            0,0,220,0,0,0,196,0,
+            0,0,174,0,0,0,164,0,
+            0,0,147,0,0,0,164,0,
+            0,0,174,0,0,0,196,0,
         ];
-        // Тихий бас
-        const bass=[
-            130,0,0,0,130,0,0,0,
-            116,0,0,0,116,0,0,0,
-            98, 0,0,0,98, 0,0,0,
-            130,0,0,0,130,0,0,0,
+        // Глубокий гудящий бас
+        const bassNotes=[
+            55,0,0,0,0,0,0,0,
+            49,0,0,0,0,0,0,0,
+            46,0,0,0,0,0,0,0,
+            49,0,0,0,0,0,0,0,
         ];
-        // Лёгкие пэды (аккорды)
-        const pads=[
-            [261,329,392], null, null, null, null, null, null, null,
-            [220,277,349], null, null, null, null, null, null, null,
-            [196,247,294], null, null, null, null, null, null, null,
-            [261,329,392], null, null, null, null, null, null, null,
+        // Диссонирующие пэды
+        const ghostChords=[
+            [110,130,155], null,null,null,null,null,null,null,
+            [98,116,138],  null,null,null,null,null,null,null,
+            [87,104,116],  null,null,null,null,null,null,null,
+            [98,116,138],  null,null,null,null,null,null,null,
         ];
 
         const totalBeats=melody.length;
@@ -4453,37 +4440,42 @@ const app = {
         const playLoop=(startTime)=>{
             if(!this._musicPlaying) return;
 
-            // Мелодия — мягкий синус
+            // Мелодия — дрожащий синус
             melody.forEach((freq,i)=>{
                 if(!freq) return;
                 const t=startTime+i*beat*0.5;
                 const o=ctx.createOscillator(); o.type='sine';
                 o.frequency.value=freq;
+                // Лёгкое вибрато — призрачный эффект
+                const lfo=ctx.createOscillator(); lfo.type='sine'; lfo.frequency.value=4.5;
+                const lfoGain=ctx.createGain(); lfoGain.gain.value=3;
+                lfo.connect(lfoGain); lfoGain.connect(o.frequency);
                 const gn=ctx.createGain();
                 gn.gain.setValueAtTime(0,t);
-                gn.gain.linearRampToValueAtTime(0.09,t+0.04);
-                gn.gain.exponentialRampToValueAtTime(0.001,t+beat*0.6);
+                gn.gain.linearRampToValueAtTime(0.08,t+0.3);
+                gn.gain.exponentialRampToValueAtTime(0.001,t+beat*1.8);
                 o.connect(gn); gn.connect(this._musicGain);
-                o.start(t); o.stop(t+beat*0.65);
+                lfo.start(t); o.start(t); o.stop(t+beat*2); lfo.stop(t+beat*2);
             });
 
-            // Бас — мягкий с фильтром
-            bass.forEach((freq,i)=>{
+            // Бас — тяжёлый и долгий
+            bassNotes.forEach((freq,i)=>{
                 if(!freq) return;
                 const t=startTime+i*beat*0.5;
                 const o=ctx.createOscillator(); o.type='triangle';
                 o.frequency.value=freq;
-                const f=ctx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=400; f.Q.value=0.5;
+                const f=ctx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=200; f.Q.value=0.8;
                 const gn=ctx.createGain();
                 gn.gain.setValueAtTime(0,t);
-                gn.gain.linearRampToValueAtTime(0.18,t+0.05);
-                gn.gain.exponentialRampToValueAtTime(0.001,t+beat*0.9);
+                gn.gain.linearRampToValueAtTime(0.22,t+0.2);
+                gn.gain.setValueAtTime(0.18,t+beat*3);
+                gn.gain.exponentialRampToValueAtTime(0.001,t+beat*4);
                 o.connect(f); f.connect(gn); gn.connect(this._musicGain);
-                o.start(t); o.stop(t+beat);
+                o.start(t); o.stop(t+beat*4.5);
             });
 
-            // Пэды — долгие мягкие аккорды
-            pads.forEach((chord,i)=>{
+            // Призрачные пэды — длинные диссонирующие аккорды
+            ghostChords.forEach((chord,i)=>{
                 if(!chord) return;
                 const t=startTime+i*beat*0.5;
                 chord.forEach(freq=>{
@@ -4491,32 +4483,38 @@ const app = {
                     o.frequency.value=freq;
                     const gn=ctx.createGain();
                     gn.gain.setValueAtTime(0,t);
-                    gn.gain.linearRampToValueAtTime(0.04,t+0.3);
-                    gn.gain.linearRampToValueAtTime(0.03,t+loopLen/2-0.3);
-                    gn.gain.linearRampToValueAtTime(0,t+loopLen/2);
+                    gn.gain.linearRampToValueAtTime(0.045,t+1.2);
+                    gn.gain.setValueAtTime(0.04,t+loopLen/2-1.0);
+                    gn.gain.linearRampToValueAtTime(0,t+loopLen/2+0.5);
                     o.connect(gn); gn.connect(this._musicGain);
-                    o.start(t); o.stop(t+loopLen/2+0.1);
+                    o.start(t); o.stop(t+loopLen/2+0.8);
                 });
             });
 
-            // Лёгкая перкуссия — только тихий хайхэт
-            for(let i=0;i<totalBeats;i++){
-                if(i%2!==0) continue;
+            // Редкие жуткие удары — далёкий гулкий том
+            for(let i=0;i<totalBeats;i+=8){
                 const t=startTime+i*beat*0.5;
-                const buf=ctx.createBuffer(1,ctx.sampleRate*0.04,ctx.sampleRate);
-                const d=buf.getChannelData(0);
-                for(let j=0;j<d.length;j++) d[j]=(Math.random()*2-1)*Math.exp(-j/(ctx.sampleRate*0.008));
-                const src=ctx.createBufferSource(); src.buffer=buf;
-                const f=ctx.createBiquadFilter(); f.type='highpass'; f.frequency.value=9000;
-                const gn=ctx.createGain(); gn.gain.setValueAtTime(0.04,t); gn.gain.exponentialRampToValueAtTime(0.001,t+0.04);
-                src.connect(f); f.connect(gn); gn.connect(this._musicGain); src.start(t);
+                const o=ctx.createOscillator(); o.type='sine';
+                o.frequency.setValueAtTime(80,t); o.frequency.exponentialRampToValueAtTime(30,t+0.6);
+                const gn=ctx.createGain(); gn.gain.setValueAtTime(0.18,t); gn.gain.exponentialRampToValueAtTime(0.001,t+0.7);
+                o.connect(gn); gn.connect(this._musicGain); o.start(t); o.stop(t+0.75);
             }
 
-            const nextId=setTimeout(()=>playLoop(startTime+loopLen),(loopLen-0.2)*1000);
+            // Шум ветра — постоянный фон
+            const windBuf=ctx.createBuffer(1,ctx.sampleRate*loopLen,ctx.sampleRate);
+            const wd=windBuf.getChannelData(0);
+            for(let j=0;j<wd.length;j++) wd[j]=(Math.random()*2-1)*0.15;
+            const wSrc=ctx.createBufferSource(); wSrc.buffer=windBuf;
+            const wf=ctx.createBiquadFilter(); wf.type='bandpass'; wf.frequency.value=400; wf.Q.value=0.4;
+            const wg=ctx.createGain(); wg.gain.setValueAtTime(0,startTime); wg.gain.linearRampToValueAtTime(0.03,startTime+2);
+            wg.gain.setValueAtTime(0.03,startTime+loopLen-2); wg.gain.linearRampToValueAtTime(0,startTime+loopLen);
+            wSrc.connect(wf); wf.connect(wg); wg.connect(this._musicGain); wSrc.start(startTime);
+
+            const nextId=setTimeout(()=>playLoop(startTime+loopLen),(loopLen-0.3)*1000);
             this._musicScheduled.push(nextId);
         };
 
-        playLoop(ctx.currentTime+0.1);
+        playLoop(ctx.currentTime+0.15);
     },
 
     stopHubMusic(){
@@ -4614,158 +4612,199 @@ const app = {
 
         const tracks={
 
-        // 🍊 ЦИТРУСОВЫЙ ЛЕС — весёлый lo-fi поп, ~90 сек петля
+        // 💀 ЛЕС МЁРТВЫХ ДУШ — жуткий тёмный эмбиент с шёпотом
         gather:(t0)=>{
-            const B=60/88; // beat
-            // 4 секции по 16 бит = 64 бита (~43 сек)
-            // Секция A — вступление (бас + мелодия)
-            const mA=[523,523,659,784,659,523,440,523, 659,784,880,784,659,523,659,0,
-                      523,659,784,880,784,659,523,440, 392,440,523,659,523,440,392,0];
-            const bA=[130,0,130,0,116,0,116,0, 130,0,130,0,98,0,98,0,
-                      130,0,130,0,116,0,116,0, 98,0,98,0,130,0,130,0];
-            // Секция B — припев (выше октавой + аккорды)
-            const mB=[1046,1046,1318,1568,1318,1046,880,1046, 1318,1568,1760,1568,1318,1046,1318,0,
-                      784,880,1046,1318,1046,880,784,659,  784,880,1046,880,784,659,784,0];
-            const bB=[130,0,0,130,0,0,116,0, 116,0,0,116,0,0,98,0,
-                      130,0,0,130,0,0,116,0, 98,0,0,98,0,0,130,0];
-            // Секция C — бридж (другая тональность)
-            const mC=[440,494,523,587,659,587,523,440, 392,440,523,440,392,349,392,0,
-                      349,392,440,523,587,659,784,659, 587,523,494,440,392,349,392,0];
-            // Секция D — аутро (тихо, только бас и хайхэт)
-            const mD=[523,0,659,0,784,0,659,0, 523,0,440,0,523,0,0,0,
-                      523,0,659,0,784,0,880,0, 784,0,659,0,523,0,0,0];
+            const B=60/52;
+            // Минорная гамма Am: A B C D E F G
+            // Медленные зловещие ноты + дрожащий пэд
+            const mA=[220,0,0,0,196,0,0,0, 174,0,0,0,164,0,0,0,
+                      147,0,0,0,164,0,0,0, 174,0,0,0,196,0,0,0];
+            const mB=[440,0,0,0,415,0,0,0, 392,0,0,0,370,0,0,0,
+                      330,0,0,0,349,0,0,0, 392,0,0,0,415,0,0,0];
+            const mC=[330,0,294,0,0,0,277,0, 262,0,0,0,247,0,0,0,
+                      220,0,0,0,207,0,247,0, 262,0,277,0,294,0,0,0];
+            const bassG=[55,0,0,0,0,0,0,0, 49,0,0,0,0,0,0,0,
+                         46,0,0,0,0,0,0,0, 49,0,0,0,0,0,0,0];
+            // Жуткие аккорды
+            const ghostPads=[[110,130,155],[98,116,138],[82,98,116],[87,104,123]];
 
-            const sections=[mA,mB,mC,mD];
-            const bassSecs=[bA,bB,bA,bB];
-            const padChords=[[261,329,392],[220,277,330],[196,247,294],[261,329,392]];
+            // Шум ветра
+            const wind=(t,dur,vol)=>{
+                const buf=ctx.createBuffer(1,ctx.sampleRate*dur,ctx.sampleRate);
+                const d=buf.getChannelData(0);
+                for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*0.3*Math.exp(-i/(ctx.sampleRate*dur*0.8));
+                const src=ctx.createBufferSource(); src.buffer=buf;
+                const f=ctx.createBiquadFilter(); f.type='bandpass'; f.frequency.value=300+Math.random()*200; f.Q.value=0.5;
+                const g=ctx.createGain(); g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(vol,t+0.5);
+                g.gain.setValueAtTime(vol,t+dur-0.5); g.gain.linearRampToValueAtTime(0,t+dur);
+                src.connect(f); f.connect(g); g.connect(dest); src.start(t);
+            };
 
             let t=t0;
-            sections.forEach((mel,si)=>{
-                const bss=bassSecs[si];
-                // Пэд на всю секцию
-                pad(padChords[si], t, mel.length*B*0.5, si===1?0.035:0.022);
-                mel.forEach((freq,i)=>{
-                    note(freq, t+i*B*0.5, B*0.55, si===1?'sawtooth':'triangle', si===1?0.07:0.09);
-                });
-                bss.forEach((freq,i)=>{
-                    bass(freq, t+i*B*0.5, B*0.88, 0.16);
-                });
-                // Перкуссия
-                for(let i=0;i<mel.length;i++){
-                    if(i%8===0||i%8===4) kick(t+i*B*0.5, 0.3);
-                    if(i%8===2||i%8===6) snare(t+i*B*0.5, 0.15);
-                    if(i%2===1) hihat(t+i*B*0.5, 0.04);
+            [mA,mB,mC,mA,mB].forEach((mel,si)=>{
+                pad(ghostPads[si%4], t, mel.length*B*0.5, 0.05);
+                wind(t, mel.length*B*0.5, 0.04);
+                bassG.forEach((freq,i)=>{ bass(freq,t+i*B*0.5,B*3.5,0.15); });
+                mel.forEach((freq,i)=>{ note(freq,t+i*B*0.5,B*3,'sine',0.07); });
+                // Редкие жуткие удары
+                for(let i=0;i<mel.length;i+=16){
+                    kick(t+i*B*0.5,0.2);
                 }
                 t+=mel.length*B*0.5;
             });
             return t-t0;
         },
 
-        // 🏃 ПАРКУР — энергичный drum&bass, ~70 сек
+        // 🕸️ ПАУТИНА ПРИЗРАКОВ — быстрый тревожный, стаккато
         parkour:(t0)=>{
-            const B=60/155;
-            const mA=[659,784,880,0,659,784,880,988, 880,784,659,0,523,659,784,0,
-                      659,784,880,988,1047,988,880,784, 659,523,659,784,659,0,523,0];
-            const mB=[988,988,1047,0,880,988,1047,1175, 1047,988,880,0,784,880,988,0,
-                      1047,1175,1318,0,1175,1047,988,880, 784,659,784,880,784,0,659,0];
-            const mC=[523,659,784,659,523,440,523,659, 784,659,523,440,392,440,523,0,
-                      659,784,880,784,659,523,659,784, 880,988,1047,880,784,659,784,0];
-            const bassA=[165,0,165,165,0,174,0,174, 196,0,196,0,185,0,185,0,
-                         165,0,165,165,0,174,0,174, 185,0,185,0,165,0,165,0];
+            const B=60/110;
+            // Хроматические нисходящие мотивы — напряжение
+            const mA=[523,494,466,440,415,392,370,349, 330,311,294,277,262,247,233,220,
+                      233,247,262,277,294,311,330,349, 370,392,415,440,466,494,523,0];
+            const mB=[880,831,784,740,698,659,622,587, 554,523,494,466,440,415,392,0,
+                      440,466,494,523,554,587,622,659, 698,740,784,831,880,0,0,0];
+            const bassP=[110,0,110,0,104,0,98,0, 87,0,87,0,98,0,98,0,
+                         104,0,104,0,110,0,110,0, 116,0,116,0,110,0,104,0];
+
+            let t=t0;
+            [mA,mB,mA,mB,mA].forEach((mel,si)=>{
+                bassP.forEach((freq,i)=>{ bass(freq,t+i*B*0.5,B*0.5,0.16); });
+                mel.forEach((freq,i)=>{ note(freq,t+i*B*0.5,B*0.38,'sawtooth',0.06); });
+                for(let i=0;i<mel.length;i++){
+                    if(i%8===0||i%8===3||i%8===5) kick(t+i*B*0.5,0.3);
+                    if(i%8===2||i%8===6) snare(t+i*B*0.5,0.15);
+                    if(i%2===0) hihat(t+i*B*0.5,0.025);
+                }
+                t+=mel.length*B*0.5;
+            });
+            return t-t0;
+        },
+
+        // 🩸 КРОВАВЫЙ АЛТАРЬ — тяжёлый ритуальный дарк-метал
+        volcano:(t0)=>{
+            const B=60/90;
+            const mA=[110,0,0,116,0,0,98,0, 98,0,0,104,0,0,87,0,
+                      82,0,0,87,0,0,98,0,   82,77,0,82,0,0,87,0];
+            const mB=[220,0,196,0,174,0,164,0, 147,0,164,0,174,0,196,0,
+                      220,246,0,220,0,196,174,0, 164,174,196,174,164,0,147,0];
+            const mC=[330,0,294,311,0,294,277,0, 262,277,294,0,262,247,220,0,
+                      247,262,277,294,311,294,277,0, 247,220,196,207,220,0,196,0];
+            const bassV=[55,0,0,55,0,0,49,0, 49,0,0,49,0,0,46,0,
+                         41,0,0,41,0,0,46,0, 41,0,0,44,0,0,46,0];
+            const bloodPads=[[55,69,82],[49,61,73],[41,52,61],[46,58,69]];
+
+            let t=t0;
+            [mA,mB,mC,mA,mB,mC].forEach((mel,si)=>{
+                pad(bloodPads[si%4], t, mel.length*B*0.5, 0.055);
+                bassV.forEach((freq,i)=>{ bass(freq,t+i*B*0.5,B*1.5,0.25); });
+                mel.forEach((freq,i)=>{ note(freq,t+i*B*0.5,B*0.7,'sawtooth',0.085); });
+                for(let i=0;i<mel.length;i++){
+                    if(i%8===0) kick(t+i*B*0.5,0.45);
+                    if(i%8===4) kick(t+i*B*0.5,0.28);
+                    if(i%8===2||i%8===6) snare(t+i*B*0.5,0.22);
+                    if(i%4===1||i%4===3) hihat(t+i*B*0.5,0.02);
+                }
+                t+=mel.length*B*0.5;
+            });
+            return t-t0;
+        },
+
+        // 🌑 ПУСТОТА ТЬМЫ — бесконечный холодный дроун, нет ритма
+        space:(t0)=>{
+            const B=60/40;
+            // Очень медленные диссонирующие интервалы
+            const mA=[110,0,0,0,0,0,0,0, 116,0,0,0,0,0,0,0,
+                      104,0,0,0,0,0,0,0, 98,0,0,0,0,0,0,0];
+            const mB=[165,0,0,0,0,0,0,0, 155,0,0,0,0,0,0,0,
+                      146,0,0,0,0,0,0,0, 138,0,0,0,0,0,0,0];
+            const mC=[220,0,0,0,0,0,0,0, 233,0,0,0,0,0,0,0,
+                      207,0,0,0,0,0,0,0, 196,0,0,0,0,0,0,0];
+            const voidPads=[[55,82,116],[49,73,104],[41,61,87],[46,69,98]];
+            const bassVoid=[27,0,0,0,0,0,0,0, 29,0,0,0,0,0,0,0,
+                            26,0,0,0,0,0,0,0, 24,0,0,0,0,0,0,0];
 
             let t=t0;
             [mA,mB,mC,mA].forEach((mel,si)=>{
-                bassA.forEach((freq,i)=>{ bass(freq,t+i*B*0.5,B*0.45,0.18); });
-                mel.forEach((freq,i)=>{ note(freq,t+i*B*0.5,B*0.4,'sawtooth',0.065); });
-                // Быстрая перкуссия dnb
+                pad(voidPads[si%4], t, mel.length*B*0.5, 0.06);
+                bassVoid.forEach((freq,i)=>{ bass(freq,t+i*B*0.5,B*7,0.12); });
+                mel.forEach((freq,i)=>{ note(freq,t+i*B*0.5,B*6,'sine',0.055); });
+                // Один далёкий удар раз в такт
+                for(let i=0;i<mel.length;i+=8) kick(t+i*B*0.5,0.15);
+                t+=mel.length*B*0.5;
+            });
+            return t-t0;
+        },
+
+        // 💨 ГОНКИ ПРИЗРАКОВ — дикий индастриал, злой и быстрый
+        race:(t0)=>{
+            const B=60/160;
+            const mA=[220,220,0,246,0,220,196,0, 196,196,0,220,0,196,174,0,
+                      174,174,0,196,0,174,164,0, 164,174,196,174,164,0,147,0];
+            const mB=[440,440,494,440,0,415,392,0, 392,440,415,392,0,370,349,0,
+                      330,349,370,349,0,330,311,0, 294,311,330,311,294,277,0,0];
+            const mC=[659,0,622,0,587,0,554,523, 494,0,466,0,440,0,415,0,
+                      392,415,440,466,494,523,554,587, 622,659,698,659,622,0,587,0];
+            const bassR=[55,0,55,0,49,0,49,0, 52,0,52,0,46,0,46,0,
+                         55,0,55,0,49,0,49,0, 46,0,52,0,55,0,55,0];
+
+            let t=t0;
+            [mA,mB,mC,mA,mB].forEach((mel,si)=>{
+                bassR.forEach((freq,i)=>{ bass(freq,t+i*B*0.5,B*0.4,0.2); });
+                mel.forEach((freq,i)=>{ note(freq,t+i*B*0.5,B*0.3,'square',0.065); });
                 for(let i=0;i<mel.length;i++){
-                    if(i%8===0||i%8===3||i%8===6) kick(t+i*B*0.5,0.35);
-                    if(i%8===2||i%8===5||i%8===7) snare(t+i*B*0.5,0.18);
-                    if(i%1===0) hihat(t+i*B*0.5,0.03);
+                    if(i%4===0) kick(t+i*B*0.5,0.4);
+                    if(i%4===2) snare(t+i*B*0.5,0.22);
+                    hihat(t+i*B*0.5,0.03);
                 }
                 t+=mel.length*B*0.5;
             });
             return t-t0;
         },
 
-        // 🌋 ВУЛКАН — тёмный металл/синтвейв, ~80 сек
-        volcano:(t0)=>{
-            const B=60/100;
-            const mA=[220,0,0,196,0,174,196,220, 0,246,0,220,196,0,174,0,
-                      164,0,0,174,0,164,147,0,    164,174,196,174,164,0,0,0];
-            const mB=[220,247,277,247,220,0,196,220, 247,277,311,277,247,220,196,0,
-                      174,196,220,247,277,247,220,196, 174,164,147,164,174,0,0,0];
-            const mC=[330,0,294,0,262,0,247,0, 262,294,330,294,262,247,220,0,
-                      196,220,247,220,196,174,196,220, 247,262,294,262,247,0,220,0];
-            const bassV=[55,0,0,55,0,49,0,0, 49,0,0,52,0,52,0,0,
-                         55,0,0,55,0,49,0,0, 46,0,0,49,0,0,52,0];
-            // Тяжёлые пэды
-            const darkPads=[[110,138,165],[98,123,147],[87,110,131]];
+        // 🖤 БЕЗДНА — тревожный дроппер, хаотичные падающие ноты
+        dropper:(t0)=>{
+            const B=60/95;
+            const mA=[880,784,698,622,554,494,440,392, 349,311,277,247,220,196,174,155,
+                      138,123,110,98,87,77,69,61,  55,49,44,39,37,33,29,0];
+            const mB=[440,392,349,311,277,247,220,196, 174,155,138,123,110,98,87,77,
+                      880,784,698,622,554,494,440,392, 349,311,277,247,220,0,196,0];
+            const bassD=[55,0,0,49,0,0,0,0, 46,0,0,0,41,0,0,0,
+                         37,0,0,0,33,0,0,0, 29,0,0,0,33,0,0,0];
+            const fallPads=[[110,138,165],[87,110,131],[69,87,104],[55,69,82]];
 
             let t=t0;
-            [mA,mB,mC,mA,mB].forEach((mel,si)=>{
-                pad(darkPads[si%3], t, mel.length*B*0.5, 0.04);
-                bassV.forEach((freq,i)=>{ bass(freq,t+i*B*0.5,B*0.9,0.22); });
-                mel.forEach((freq,i)=>{ note(freq,t+i*B*0.5,B*0.6,'sawtooth',0.08); });
+            [mA,mB,mA,mB,mA].forEach((mel,si)=>{
+                pad(fallPads[si%4], t, mel.length*B*0.5, 0.04);
+                bassD.forEach((freq,i)=>{ bass(freq,t+i*B*0.5,B*1.2,0.15); });
+                mel.forEach((freq,i)=>{ note(freq,t+i*B*0.5,B*0.55,'sawtooth',0.06); });
                 for(let i=0;i<mel.length;i++){
-                    if(i%8===0) kick(t+i*B*0.5,0.4);
-                    if(i%8===4) kick(t+i*B*0.5,0.25);
-                    if(i%8===2||i%8===6) snare(t+i*B*0.5,0.2);
-                    if(i%4===2||i%4===3) hihat(t+i*B*0.5,0.025);
+                    if(i%16===0||i%16===9) kick(t+i*B*0.5,0.3);
+                    if(i%16===5||i%16===13) snare(t+i*B*0.5,0.13);
                 }
                 t+=mel.length*B*0.5;
             });
             return t-t0;
         },
 
-        // 🚀 КОСМОС — эмбиент/синтвейв, ~100 сек
-        space:(t0)=>{
-            const B=60/62;
-            // Длинные плавающие мелодии
-            const mA=[392,0,0,0,440,0,0,0, 392,0,0,0,349,0,0,0,
-                      329,0,0,0,349,0,0,0, 392,0,0,0,440,0,0,0,
-                      494,0,0,0,523,0,0,0, 494,0,0,0,440,0,0,0];
-            const mB=[784,0,0,0,880,0,0,0, 784,0,0,0,698,0,0,0,
-                      659,0,0,0,698,0,0,0, 784,0,0,0,880,0,0,0,
-                      988,0,0,0,1047,0,0,0, 988,0,0,0,880,0,0,0];
-            const bassS=[98,0,0,0,0,0,0,0, 87,0,0,0,0,0,0,0,
-                         82,0,0,0,0,0,0,0, 87,0,0,0,0,0,0,0,
-                         98,0,0,0,0,0,0,0, 87,0,0,0,0,0,0,0];
-            const spacePads=[[196,247,294,370],[174,220,261,329],[164,207,247,311]];
-
-            let t=t0;
-            // 4 полные секции
-            [mA,mB,mA,mB].forEach((mel,si)=>{
-                pad(spacePads[si%3], t, mel.length*B*0.5, 0.03);
-                bassS.forEach((freq,i)=>{ bass(freq,t+i*B*0.5,B*3.5,0.12); });
-                mel.forEach((freq,i)=>{ note(freq,t+i*B*0.5,B*3,'sine',0.065); });
-                // Редкий хайхэт
-                for(let i=0;i<mel.length;i+=4) hihat(t+i*B*0.5,0.02);
-                t+=mel.length*B*0.5;
-            });
-            return t-t0;
-        },
-
-        // 🕵️ ПРЯТКИ — таинственный, джазовый, ~75 сек
-        hideseek:(t0)=>{
-            const B=60/80;
-            const mA=[523,494,440,0,392,440,494,523, 587,659,587,523,494,440,494,0,
-                      440,494,523,587,659,587,523,494, 440,392,349,392,440,494,523,0];
-            const mB=[659,698,784,698,659,587,659,0,  784,880,784,698,659,587,659,0,
-                      523,587,659,698,784,698,659,587, 523,494,440,494,523,587,659,0];
-            const mC=[392,440,494,523,587,523,494,440, 392,349,330,349,392,440,494,0,
-                      523,494,440,392,349,330,294,330,  349,392,440,494,523,494,440,0];
-            const bassH=[130,0,0,0,116,0,116,0, 130,0,0,0,110,0,110,0,
-                         116,0,0,0,98,0,98,0,   104,0,0,0,116,0,116,0];
+        // ☠️ ПРОКЛЯТЫЙ ОББИ — злобный хардкор, рваный ритм
+        obby:(t0)=>{
+            const B=60/130;
+            const mA=[220,0,246,0,196,220,0,164, 174,0,196,0,164,174,0,147,
+                      164,174,196,174,164,147,0,138, 147,164,174,196,174,0,164,0];
+            const mB=[330,0,311,0,294,0,277,0, 262,0,247,0,220,0,196,0,
+                      220,247,262,277,294,277,262,247, 220,196,174,196,220,247,262,0];
+            const mC=[440,0,415,440,0,392,0,370, 349,370,392,0,370,349,330,0,
+                      311,330,349,330,311,294,277,0, 294,311,330,349,330,311,0,0];
+            const bassO=[55,0,0,55,49,0,0,49, 46,0,0,46,41,0,0,41,
+                         44,0,0,44,46,0,0,46, 49,0,0,49,55,0,0,55];
 
             let t=t0;
             [mA,mB,mC,mA,mB].forEach((mel,si)=>{
-                pad([[261,329,392],[220,277,330],[196,247,294]][si%3], t, mel.length*B*0.5, 0.025);
-                bassH.forEach((freq,i)=>{ bass(freq,t+i*B*0.5,B*0.75,0.14); });
-                mel.forEach((freq,i)=>{ note(freq,t+i*B*0.5,B*0.6,'triangle',0.075); });
+                bassO.forEach((freq,i)=>{ bass(freq,t+i*B*0.5,B*0.6,0.2); });
+                mel.forEach((freq,i)=>{ note(freq,t+i*B*0.5,B*0.45,'sawtooth',0.075); });
                 for(let i=0;i<mel.length;i++){
-                    if(i%8===0||i%8===5) kick(t+i*B*0.5,0.2);
-                    if(i%8===3||i%8===7) snare(t+i*B*0.5,0.1);
+                    if(i%8===0||i%8===5) kick(t+i*B*0.5,0.38);
+                    if(i%8===3||i%8===6) snare(t+i*B*0.5,0.18);
                     if(i%2===1) hihat(t+i*B*0.5,0.025);
                 }
                 t+=mel.length*B*0.5;
@@ -4773,88 +4812,141 @@ const app = {
             return t-t0;
         },
 
-        // ⚔️ ПОДЗЕМЕЛЬЕ — мрачный дарк-эмбиент с угрожающими мотивами, ~90 сек
-        dungeon:(t0)=>{
-            const B=60/72;
-            const mA=[220,0,0,196,174,0,0,164, 147,0,0,164,174,0,0,0,
-                      196,0,0,220,246,0,0,220,  196,174,164,0,147,0,0,0];
-            const mB=[165,0,185,0,196,0,185,0,  174,0,164,0,147,0,0,0,
-                      155,0,174,0,185,0,174,0,  164,0,147,0,138,0,0,0];
-            const mC=[330,0,0,294,0,277,294,0,  330,370,330,0,294,0,277,0,
-                      247,0,0,277,0,294,277,0,  247,220,207,0,196,0,0,0];
-            const bassD=[55,0,0,0,49,0,0,0, 52,0,0,0,46,0,0,0,
-                         55,0,0,0,49,0,0,0, 46,0,0,0,52,0,0,0];
-            const darkC=[[110,138,165],[98,123,147],[82,104,123],[87,110,131]];
+        // 👁️ ЛАБИРИНТ КОШМАРОВ — дезориентирующий, атональный
+        maze:(t0)=>{
+            const B=60/70;
+            // Атональные кластеры — диссонанс и напряжение
+            const mA=[233,0,0,220,0,207,0,196, 185,0,0,196,0,185,0,174,
+                      164,0,174,0,185,0,174,164, 155,0,164,174,185,174,164,0];
+            const mB=[466,0,440,415,0,440,466,0, 440,415,392,0,415,440,0,415,
+                      392,370,392,0,370,349,370,0, 392,415,440,415,392,0,370,0];
+            const mC=[311,0,294,277,0,262,277,0, 294,311,294,0,277,262,247,0,
+                      262,277,294,277,262,247,233,0, 247,262,277,294,277,262,0,0];
+            const bassM=[55,0,0,0,52,0,0,0, 49,0,0,0,46,0,0,0,
+                         44,0,0,0,46,0,0,0, 49,0,0,0,52,0,0,0];
+            const mazePads=[[116,138,155],[104,123,138],[87,104,116],[98,116,131]];
 
             let t=t0;
             [mA,mB,mC,mA,mB,mC].forEach((mel,si)=>{
-                pad(darkC[si%4], t, mel.length*B*0.5, 0.045);
-                bassD.forEach((freq,i)=>{ bass(freq,t+i*B*0.5,B*1.8,0.2); });
-                mel.forEach((freq,i)=>{ note(freq,t+i*B*0.5,B*0.7,'sawtooth',0.07); });
+                pad(mazePads[si%4], t, mel.length*B*0.5, 0.045);
+                bassM.forEach((freq,i)=>{ bass(freq,t+i*B*0.5,B*1.8,0.17); });
+                mel.forEach((freq,i)=>{ note(freq,t+i*B*0.5,B*0.65,'triangle',0.07); });
                 for(let i=0;i<mel.length;i++){
-                    if(i%16===0||i%16===8) kick(t+i*B*0.5,0.35);
-                    if(i%16===6||i%16===14) snare(t+i*B*0.5,0.12);
-                    if(i%4===3) hihat(t+i*B*0.5,0.015);
+                    if(i%16===0||i%16===7||i%16===11) kick(t+i*B*0.5,0.28);
+                    if(i%16===4||i%16===13) snare(t+i*B*0.5,0.12);
+                    if(i%3===2) hihat(t+i*B*0.5,0.015);
                 }
                 t+=mel.length*B*0.5;
             });
             return t-t0;
         },
 
-        // 🔫 ПВП — агрессивный электро, ~65 сек
+        // 🕵️ ПРЯТКИ — таинственный призрачный шёпот
+        hideseek:(t0)=>{
+            const B=60/65;
+            const mA=[220,0,0,196,0,0,174,0, 164,0,0,174,0,0,196,0,
+                      185,0,0,196,0,185,174,0, 164,155,0,164,174,0,185,0];
+            const mB=[330,0,311,0,294,311,0,294, 277,0,262,0,247,262,0,247,
+                      233,247,0,247,262,0,247,233, 220,233,247,262,277,0,262,0];
+            const bassH=[55,0,0,0,49,0,0,0, 46,0,0,0,44,0,0,0,
+                         41,0,0,0,44,0,0,0, 46,0,0,0,49,0,0,0];
+            const hideP=[[110,131,155],[98,116,138],[82,98,116],[87,104,123]];
+
+            let t=t0;
+            [mA,mB,mA,mB,mA].forEach((mel,si)=>{
+                pad(hideP[si%4], t, mel.length*B*0.5, 0.04);
+                bassH.forEach((freq,i)=>{ bass(freq,t+i*B*0.5,B*2,0.13); });
+                mel.forEach((freq,i)=>{ note(freq,t+i*B*0.5,B*1.5,'sine',0.06); });
+                for(let i=0;i<mel.length;i++){
+                    if(i%16===0||i%16===9) kick(t+i*B*0.5,0.18);
+                    if(i%16===6||i%16===14) snare(t+i*B*0.5,0.09);
+                    if(i%4===3) hihat(t+i*B*0.5,0.012);
+                }
+                t+=mel.length*B*0.5;
+            });
+            return t-t0;
+        },
+
+        // ⚔️ АРЕНА ТЬМЫ — агрессивный демонический, злой и быстрый
         pvp:(t0)=>{
-            const B=60/145;
-            const mA=[440,494,523,0,587,523,494,0, 440,392,440,494,523,494,440,0,
-                      494,523,587,0,659,587,523,0, 494,440,392,440,494,523,587,0];
-            const mB=[880,988,1047,0,880,784,880,0, 988,1047,1175,0,988,880,784,0,
-                      880,784,880,988,1047,988,880,0, 784,659,784,880,988,880,784,0];
-            const mC=[659,0,784,0,880,0,784,659, 523,0,659,0,784,0,659,523,
-                      440,0,523,0,659,0,784,0,   880,784,659,523,440,392,440,0];
-            const bassP=[110,0,110,0,116,0,116,0, 98,0,98,0,110,0,110,0,
-                         116,0,116,0,123,0,123,0, 110,0,110,0,116,0,116,0];
+            const B=60/150;
+            const mA=[220,220,246,0,220,196,0,174, 196,196,220,0,196,174,0,164,
+                      174,196,220,246,220,196,0,174, 164,174,196,174,164,147,0,0];
+            const mB=[440,0,466,440,0,415,392,0, 415,0,440,415,0,392,370,0,
+                      349,370,392,415,440,415,0,392, 370,349,330,349,370,392,0,0];
+            const mC=[660,0,622,587,554,523,494,466, 440,415,392,370,349,330,311,294,
+                      311,330,349,370,392,415,440,466, 494,523,554,587,622,0,587,0];
+            const bassP2=[55,0,55,49,0,49,55,0, 52,0,52,46,0,46,52,0,
+                          49,0,49,44,0,44,49,0, 46,0,52,0,55,0,55,0];
 
             let t=t0;
             [mA,mB,mC,mA,mB].forEach((mel,si)=>{
-                bassP.forEach((freq,i)=>{ bass(freq,t+i*B*0.5,B*0.45,0.18); });
-                mel.forEach((freq,i)=>{ note(freq,t+i*B*0.5,B*0.35,'square',si===1?0.05:0.065); });
+                bassP2.forEach((freq,i)=>{ bass(freq,t+i*B*0.5,B*0.4,0.22); });
+                mel.forEach((freq,i)=>{ note(freq,t+i*B*0.5,B*0.3,'square',si===1?0.045:0.06); });
                 for(let i=0;i<mel.length;i++){
-                    if(i%4===0) kick(t+i*B*0.5,0.38);
-                    if(i%4===2) snare(t+i*B*0.5,0.2);
-                    if(i%2===1) hihat(t+i*B*0.5,0.035);
+                    if(i%4===0) kick(t+i*B*0.5,0.42);
+                    if(i%4===2) snare(t+i*B*0.5,0.22);
+                    if(i%2===1) hihat(t+i*B*0.5,0.03);
                 }
                 t+=mel.length*B*0.5;
             });
             return t-t0;
         },
 
-        // 🏙️ ЛОББИ/ОСТАЛЬНЫЕ — дружелюбный чилл, ~80 сек
+        // 🕯️ СКЛЕП — самый страшный, медленный ритуал с гудением
+        dungeon:(t0)=>{
+            const B=60/55;
+            const mA=[110,0,0,0,116,0,0,0, 98,0,0,0,104,0,0,0,
+                      87,0,0,0,98,0,0,0,   82,0,0,0,87,0,0,0];
+            const mB=[165,0,0,155,0,0,146,0, 138,0,0,146,0,0,155,0,
+                      138,0,0,130,0,0,123,0, 130,138,0,146,0,0,138,0];
+            const mC=[220,0,207,0,196,0,185,0, 174,0,185,0,196,0,207,0,
+                      196,185,174,0,164,174,0,185, 196,207,220,0,207,196,0,0];
+            const bassD2=[27,0,0,0,0,0,0,0, 29,0,0,0,0,0,0,0,
+                          24,0,0,0,0,0,0,0, 26,0,0,0,0,0,0,0];
+            const tombPads=[[55,69,82,110],[49,61,73,98],[41,52,61,82],[46,58,69,92]];
+
+            let t=t0;
+            [mA,mB,mC,mA,mB,mC].forEach((mel,si)=>{
+                pad(tombPads[si%4], t, mel.length*B*0.5, 0.06);
+                bassD2.forEach((freq,i)=>{ bass(freq,t+i*B*0.5,B*7,0.22); });
+                mel.forEach((freq,i)=>{ note(freq,t+i*B*0.5,B*1.2,'sawtooth',0.075); });
+                for(let i=0;i<mel.length;i++){
+                    if(i%16===0||i%16===8) kick(t+i*B*0.5,0.4);
+                    if(i%16===5||i%16===13) snare(t+i*B*0.5,0.14);
+                    if(i%8===7) hihat(t+i*B*0.5,0.012);
+                }
+                t+=mel.length*B*0.5;
+            });
+            return t-t0;
+        },
+
+        // 👻 ХАБ — призрачный медленный эмбиент с воющим ветром
         lobby:(t0)=>{
-            const B=60/85;
-            const mA=[523,659,784,659,523,0,440,523, 659,784,880,784,659,523,659,0,
-                      440,523,659,784,880,784,659,523, 440,392,440,523,659,0,523,0];
-            const mB=[784,880,1046,880,784,659,784,0, 880,1046,1175,1046,880,784,880,0,
-                      659,784,880,1046,1175,1046,880,784, 659,523,659,784,880,0,784,0];
-            const mC=[523,587,659,698,784,698,659,587, 523,494,523,587,659,698,784,0,
-                      698,784,880,784,698,659,587,523,  494,440,494,523,587,659,698,0];
-            const bassL=[130,0,0,130,0,0,116,0, 116,0,0,116,0,0,98,0,
-                         130,0,0,130,0,0,116,0,  98,0,0,98,0,0,130,0];
+            const B=60/58;
+            const mA=[196,0,0,0,220,0,0,0, 207,0,0,0,196,0,0,0,
+                      174,0,0,0,185,0,0,0, 196,0,0,0,220,0,0,0];
+            const mB=[392,0,0,0,415,0,0,0, 392,0,0,0,370,0,0,0,
+                      349,0,0,0,370,0,0,0, 392,0,0,0,415,0,0,0];
+            const mC=[293,0,0,277,0,0,262,0, 247,0,0,262,0,0,277,0,
+                      262,247,233,0,247,262,0,277, 293,0,277,0,262,247,0,0];
+            const bassL=[49,0,0,0,0,0,0,0, 52,0,0,0,0,0,0,0,
+                         46,0,0,0,0,0,0,0, 44,0,0,0,0,0,0,0];
+            const hubPads=[[98,116,138],[87,104,123],[82,98,116],[92,110,131]];
 
             let t=t0;
             [mA,mB,mC,mA,mB].forEach((mel,si)=>{
-                pad([[261,329,392],[220,277,330],[196,247,294]][si%3], t, mel.length*B*0.5, 0.028);
-                bassL.forEach((freq,i)=>{ bass(freq,t+i*B*0.5,B*0.85,0.15); });
-                mel.forEach((freq,i)=>{ note(freq,t+i*B*0.5,B*0.55,'triangle',0.085); });
-                for(let i=0;i<mel.length;i++){
-                    if(i%8===0||i%8===4) kick(t+i*B*0.5,0.28);
-                    if(i%8===2||i%8===6) snare(t+i*B*0.5,0.14);
-                    if(i%2===1) hihat(t+i*B*0.5,0.035);
-                }
+                pad(hubPads[si%4], t, mel.length*B*0.5, 0.05);
+                bassL.forEach((freq,i)=>{ bass(freq,t+i*B*0.5,B*6,0.12); });
+                mel.forEach((freq,i)=>{ note(freq,t+i*B*0.5,B*4,'sine',0.06); });
+                for(let i=0;i<mel.length;i+=8) kick(t+i*B*0.5,0.14);
                 t+=mel.length*B*0.5;
             });
             return t-t0;
         },
 
         };
+
 
         const trackFn=tracks[mapId]||tracks.lobby;
 
@@ -5144,72 +5236,37 @@ const app = {
         }
     },
 
-    openBdayModal(){
+    openGhostEventModal(){
         this._launchConfetti();
-        const existing = document.getElementById('bday-modal');
+        const existing=document.getElementById('ghost-event-modal');
         if(existing) existing.remove();
-
-        // Ищем ID именинника в кэше игроков
-        const pc = this._pc||[];
-        let globalDB = [];
-        try{ globalDB = JSON.parse(localStorage.getItem('citrus_global_users')||'[]'); }catch(e){}
-        const firefoxUser = [...pc, ...globalDB].find(u=>(u.name||'').toLowerCase()==='firefox');
-        const firefoxId = firefoxUser?.id || '6368';
-
-        const overlay = document.createElement('div');
-        overlay.id = 'bday-modal';
-        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
-        overlay.onclick = e=>{ if(e.target===overlay) overlay.remove(); };
-
-        overlay.innerHTML = `
-        <div style="background:linear-gradient(145deg,#1a0d1a,#0d0d1a);border:1px solid rgba(255,105,180,0.4);border-radius:24px;width:100%;max-width:480px;overflow:hidden;position:relative;">
-            <!-- Праздничная шапка -->
-            <div style="background:linear-gradient(135deg,rgba(255,20,147,0.2),rgba(255,215,0,0.1),rgba(255,105,180,0.15));padding:28px 24px 20px;text-align:center;position:relative;border-bottom:1px solid rgba(255,105,180,0.2);">
-                <div style="font-size:60px;animation:cake-bounce 1.5s ease-in-out infinite;display:inline-block;margin-bottom:10px;">🎂</div>
-                <div style="font-family:var(--font-head);font-size:20px;font-weight:900;background:linear-gradient(90deg,#FF69B4,#FFD700,#FF1493);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:2px;animation:bday-text 3s ease infinite;background-size:300%;">ДЕНЬ РОЖДЕНИЯ!</div>
-                <div style="font-size:16px;color:rgba(255,255,255,0.8);margin-top:8px;font-family:var(--font-body);">Поздравим <b style="color:#FF69B4;">firefox</b> <span style="font-size:13px;color:rgba(255,255,255,0.4);">#6368</span> 🎉</div>
-                <div style="font-size:24px;margin-top:8px;animation:float-emoji 2s ease-in-out infinite;">🎈 🥳 🎁 🎊 🎈</div>
-                <button onclick="document.getElementById('bday-modal').remove()" style="position:absolute;top:14px;right:14px;background:none;border:none;color:rgba(255,255,255,0.3);font-size:22px;cursor:pointer;">✕</button>
+        const overlay=document.createElement('div');
+        overlay.id='ghost-event-modal';
+        overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+        overlay.onclick=e=>{ if(e.target===overlay) overlay.remove(); };
+        overlay.innerHTML=`
+        <div style="background:linear-gradient(145deg,#08030F,#0A0520);border:1px solid rgba(157,78,221,0.45);border-radius:24px;width:100%;max-width:460px;overflow:hidden;position:relative;box-shadow:0 0 60px rgba(90,24,154,0.35);">
+            <div style="background:linear-gradient(135deg,rgba(90,24,154,0.3),rgba(0,200,100,0.06),rgba(157,78,221,0.2));padding:28px 24px 20px;text-align:center;border-bottom:1px solid rgba(157,78,221,0.2);">
+                <div style="font-size:64px;animation:float-emoji 2s ease-in-out infinite;display:inline-block;margin-bottom:10px;">👻</div>
+                <div style="font-family:var(--font-head);font-size:22px;font-weight:900;background:linear-gradient(90deg,#C77DFF,#00FFB2,#E0AAFF,#C77DFF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:2px;animation:bday-text 3s ease infinite;background-size:300%;">👻 ПРИЗРАЧНЫЙ ИВЕНТ</div>
+                <div style="font-size:14px;color:rgba(199,125,255,0.8);margin-top:8px;font-family:var(--font-body);">Духи пришли в Citrus Online! Участвуй в ивенте 🕸️</div>
+                <div style="font-size:22px;margin-top:8px;animation:float-emoji 2s ease-in-out infinite;">💀 🦇 ☠️ 👁️ 🕯️</div>
+                <button onclick="document.getElementById('ghost-event-modal').remove()" style="position:absolute;top:14px;right:14px;background:none;border:none;color:rgba(255,255,255,0.3);font-size:22px;cursor:pointer;">✕</button>
             </div>
-
-            <!-- Действия -->
             <div style="padding:20px 24px;display:flex;flex-direction:column;gap:12px;">
-
-                <!-- Отправить поздравление -->
-                <div style="background:rgba(255,105,180,0.06);border:1px solid rgba(255,105,180,0.15);border-radius:14px;padding:16px;">
-                    <div style="font-size:12px;color:#FF69B4;font-family:var(--font-head);letter-spacing:1px;margin-bottom:10px;">💌 НАПИСАТЬ ПОЗДРАВЛЕНИЕ</div>
-                    <textarea id="bday-msg" placeholder="С днём рождения, firefox! 🎂🎉" maxlength="300"
-                        style="width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,105,180,0.2);border-radius:10px;padding:10px 13px;color:#fff;font-family:var(--font-body);font-size:13px;resize:none;height:80px;outline:none;transition:border-color 0.2s;"
-                        onfocus="this.style.borderColor='rgba(255,105,180,0.5)'" onblur="this.style.borderColor='rgba(255,105,180,0.2)'">С днём рождения, firefox! 🎂🎉</textarea>
-                    <button onclick="app.sendBdayMessage()" style="width:100%;margin-top:8px;padding:11px;background:linear-gradient(135deg,#FF1493,#FF69B4);border:none;border-radius:10px;color:#fff;font-weight:700;font-family:var(--font-body);font-size:14px;cursor:pointer;">🎉 Отправить поздравление</button>
+                <div style="background:rgba(157,78,221,0.08);border:1px solid rgba(157,78,221,0.2);border-radius:14px;padding:16px;">
+                    <div style="font-size:12px;color:#C77DFF;font-family:var(--font-head);letter-spacing:1px;margin-bottom:10px;">👻 ЧТО ПРОИСХОДИТ?</div>
+                    <div style="color:rgba(255,255,255,0.7);font-size:13px;line-height:1.6;font-family:var(--font-body);">• Все миры стали призрачными 🌑<br>• Новая жуткая музыка в каждом мире 🎵<br>• Призраки летают по интерфейсу 💀<br>• Тёмный фиолетовый дизайн везде 🕸️</div>
                 </div>
-
-                <!-- Отправить подарок цитрусы -->
-                <div style="background:rgba(255,215,0,0.05);border:1px solid rgba(255,215,0,0.15);border-radius:14px;padding:16px;">
-                    <div style="font-size:12px;color:#FFD700;font-family:var(--font-head);letter-spacing:1px;margin-bottom:10px;">🍊 ПОДАРИТЬ ЦИТРУСЫ</div>
-                    <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;">
-                        ${[50,100,200,500,1000].map(v=>`<button onclick="document.getElementById('bday-amount').value=${v};this.parentNode.querySelectorAll('button').forEach(b=>b.style.background='rgba(255,215,0,0.08)');this.style.background='rgba(255,215,0,0.25)';" style="padding:6px 12px;background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.2);border-radius:8px;color:#FFD700;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-body);">${v} 🍊</button>`).join('')}
-                    </div>
-                    <div style="display:flex;gap:8px;">
-                        <input id="bday-amount" type="number" placeholder="Своя сумма" min="1" max="100000"
-                            style="flex:1;background:rgba(255,255,255,0.04);border:1px solid rgba(255,215,0,0.2);border-radius:10px;padding:9px 13px;color:#fff;font-family:var(--font-body);font-size:13px;outline:none;">
-                        <button onclick="app.sendBdayGift()" style="padding:9px 18px;background:linear-gradient(135deg,#FFD700,#FF8C00);border:none;border-radius:10px;color:#000;font-weight:700;font-family:var(--font-body);font-size:13px;cursor:pointer;white-space:nowrap;">🎁 Подарить</button>
-                    </div>
+                <div style="background:rgba(0,255,160,0.05);border:1px solid rgba(0,255,160,0.15);border-radius:14px;padding:16px;">
+                    <div style="font-size:12px;color:#00FFB2;font-family:var(--font-head);letter-spacing:1px;margin-bottom:10px;">🏆 НАГРАДЫ ИВЕНТА</div>
+                    <div style="color:rgba(255,255,255,0.7);font-size:13px;line-height:1.8;font-family:var(--font-body);">💀 Собирай призрачные души в <b style="color:#C77DFF;">Лесу Мёртвых Душ</b><br>🌑 Исследуй <b style="color:#C77DFF;">Пустоту Тьмы</b><br>👁️ Выберись из <b style="color:#C77DFF;">Лабиринта Кошмаров</b></div>
                 </div>
-
-                <!-- Быстрые поздравления -->
-                <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:14px;">
-                    <div style="font-size:12px;color:rgba(255,255,255,0.35);font-family:var(--font-head);letter-spacing:1px;margin-bottom:10px;">⚡ БЫСТРЫЕ СТИКЕРЫ</div>
-                    <div style="display:flex;flex-wrap:wrap;gap:6px;">
-                        ${['🎂','🎉','🥳','🎈','🎁','🎊','🍰','❤️','🌟','🥂'].map(e=>`<button onclick="app.sendBdaySticker('${e}')" style="width:40px;height:40px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:10px;font-size:20px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform=''">${e}</button>`).join('')}
-                    </div>
-                </div>
+                <button onclick="document.getElementById('ghost-event-modal').remove();app.launch('play','gather')" style="width:100%;padding:14px;background:linear-gradient(135deg,#7B2FBE,#4A0E8F);border:none;border-radius:12px;color:#fff;font-weight:700;font-family:var(--font-head);font-size:14px;cursor:pointer;letter-spacing:1px;box-shadow:0 4px 20px rgba(122,47,190,0.4);">👻 ВОЙТИ В ПРИЗРАЧНЫЙ МИР</button>
             </div>
         </div>`;
-
         document.body.appendChild(overlay);
     },
-
     async sendBdayMessage(){
         const text = document.getElementById('bday-msg')?.value?.trim();
         if(!text) return;
@@ -5645,9 +5702,9 @@ const app = {
             setTimeout(()=>{n.classList.remove('show');setTimeout(()=>n.remove(),400)},20000);
         }
         else if(msg.type==='invite'&&String(msg.to)===String(this.userId)){
-            const wNames={lobby:'Главная Площадь',gather:'Цитрусовый Лес',parkour:'Небесный Паркур',
-                volcano:'Остров Вулкана',space:'Космическая База',race:'Гонки',dropper:'Дроппер',obby:'Обби',
-                pvp:'Арена ПВП',dungeon:'Тёмное Подземелье',march8:'🌸 8 Марта'};
+            const wNames={lobby:'Призрачный Хаб',gather:'Лес Мёртвых Душ',parkour:'Паутина Призраков',
+                volcano:'Кровавый Алтарь',space:'Пустота Тьмы',race:'Гонки Призраков',dropper:'Бездна',obby:'Проклятый Обби',
+                pvp:'Арена Тьмы',dungeon:'Тёмное Подземелье',march8:'🌸 8 Марта'};
             const wn=wNames[msg.world]||msg.worldName||msg.world;
             const n=document.createElement('div');n.className='notif';
             n.innerHTML=`<div class="nh">🎮 Приглашение в игру</div>
@@ -5986,9 +6043,9 @@ const app = {
             fid=String(fid);
             const p=findPeer(fid);
             const on=online.find(x=>x.id===fid);
-            const wNames={gather:'Цитрусовый Лес',parkour:'Небесный Паркур',
-                volcano:'Остров Вулкана',space:'Космическая База',race:'Гонки',dropper:'Дроппер',obby:'Обби',
-                pvp:'Арена ПВП',maze:'Лабиринт',};
+            const wNames={gather:'Лес Мёртвых Душ',parkour:'Паутина Призраков',
+                volcano:'Кровавый Алтарь',space:'Пустота Тьмы',race:'Гонки Призраков',dropper:'Бездна',obby:'Проклятый Обби',
+                pvp:'Арена Тьмы',maze:'Лабиринт Кошмаров',};
             const friendMapId = on && on.status==='ingame' ? on.world : null;
             const friendMapName = friendMapId ? (wNames[friendMapId] || friendMapId) : null;
             const st = on ? (friendMapId ? '🎮 '+friendMapName : '● Онлайн') : '○ Оффлайн';
@@ -6964,9 +7021,9 @@ const app = {
         this.stopGameMusic();
         this._sfx('launch');
         if(mode==='play') setTimeout(()=>this.startGameMusic(mapId),600);
-        const wNames={lobby:'Главная Площадь',gather:'Цитрусовый Лес',parkour:'Небесный Паркур',
-            volcano:'Остров Вулкана',space:'Космическая База',race:'Гонки',dropper:'Дроппер',obby:'Обби',
-            pvp:'Арена ПВП',dungeon:'Тёмное Подземелье',march8:'🌸 8 Марта'};
+        const wNames={lobby:'Призрачный Хаб',gather:'Лес Мёртвых Душ',parkour:'Паутина Призраков',
+            volcano:'Кровавый Алтарь',space:'Пустота Тьмы',race:'Гонки Призраков',dropper:'Бездна',obby:'Проклятый Обби',
+            pvp:'Арена Тьмы',dungeon:'Тёмное Подземелье',march8:'🌸 8 Марта'};
         this._worldName=wNames[mapId]||'Мир игрока';
         if(mode==='play'){
             this._updateStatus('ingame', mapId);
@@ -7002,7 +7059,7 @@ const app = {
     setupScene(){
         const canvas=document.getElementById('gl-canvas');canvas.innerHTML='';
         this.scene=new THREE.Scene();
-        const bgs={lobby:0x0a0a18,gather:0x0d1f0a,parkour:0x87CEEB,volcano:0x1a0800,space:0x000005,race:0x0a0a0a,dropper:0x001133,obby:0x1a0500,maze:0x0a0f0a,coins:0x0a0a12,march8:0x1a0a1a};
+        const bgs={lobby:0x050010,gather:0x030308,parkour:0x08020F,volcano:0x0a0003,space:0x000003,race:0x030010,dropper:0x000510,obby:0x080003,maze:0x020008,march8:0x06020A};
         const bg=bgs[this.currentMap]||0x0a0a10;
         this.scene.background=new THREE.Color(bg);
         this.scene.fog=new THREE.FogExp2(bg,0.016);
@@ -7024,19 +7081,11 @@ const app = {
         // Переинициализируем touch после запуска сцены
         this._touchLook = null;
         this._touchMove = null;
-        console.log('[setupScene] building world:', this.currentMap);
-        try{ this.buildWorld(); }
-        catch(e){
-            console.error('[buildWorld] ERROR:', e);
-            // Аварийный фолбэк — хотя бы земля
-            const g=new THREE.Mesh(new THREE.PlaneGeometry(300,300),new THREE.MeshStandardMaterial({color:0x111122,roughness:0.9,side:THREE.DoubleSide}));
-            g.rotation.x=-Math.PI/2; this.scene.add(g); this.objectsToIntersect.push(g);
-            this.scene.add(new THREE.AmbientLight(0x334466,1.5));
-        }
+        this.buildWorld();
         if(this.mode==='play'){
             this.playerGroup=this.buildCharacter(true);
             // Спавн выше земли для всех миров
-            const spawnY = {parkour:8, march8:5, maze:2,  coins:2, dropper:6, obby:2, race:1, volcano:4, space:4, gather:3, lobby:3};
+            const spawnY = {parkour:8, march8:5, maze:2,  dropper:6, obby:2, race:1, volcano:4, space:4, gather:3, lobby:3};
             const baseY = this._joinSpawn ? 15 : (spawnY[this.currentMap] || (typeof this.currentMap==='number' ? 12 : 5));
             this._joinSpawn = false;
             this.playerGroup.position.set(0, baseY, 0);
@@ -7153,13 +7202,15 @@ const app = {
             }
             const fb=new THREE.Mesh(new THREE.CylinderGeometry(3.5,3.5,0.4,32),new THREE.MeshStandardMaterial({color:0x3a3a5a}));
             fb.position.y=0.2;this.scene.add(fb);this.objectsToIntersect.push(fb);
-            const fw=new THREE.Mesh(new THREE.CylinderGeometry(3,3,0.2,32),new THREE.MeshStandardMaterial({color:0x00B8D9,transparent:true,opacity:0.85,roughness:0}));
+            const fw=new THREE.Mesh(new THREE.CylinderGeometry(3,3,0.2,32),new THREE.MeshStandardMaterial({color:0x5500CC,transparent:true,opacity:0.75,roughness:0,emissive:0x3300AA,emissiveIntensity:0.5}));
             fw.position.y=0.5;this.scene.add(fw);
             const pillar=new THREE.Mesh(new THREE.CylinderGeometry(0.3,0.4,2.5),new THREE.MeshStandardMaterial({color:0xCCBB88,metalness:0.3}));
             pillar.position.y=1.5;this.scene.add(pillar);
-            const orb=new THREE.Mesh(new THREE.SphereGeometry(0.7,16,16),new THREE.MeshStandardMaterial({color:0xFF9800,emissive:0xFF6600,emissiveIntensity:0.9}));
+            const orb=new THREE.Mesh(new THREE.SphereGeometry(0.7,16,16),new THREE.MeshStandardMaterial({color:0xAA44FF,emissive:0x7700DD,emissiveIntensity:1.4}));
             orb.position.y=3;this.scene.add(orb);
-            const pl=new THREE.PointLight(0xFF9800,3,12);pl.position.set(0,4,0);this.scene.add(pl);
+            const pl=new THREE.PointLight(0x9D4EDD,3,20);pl.position.set(0,4,0);this.scene.add(pl);
+            const ghostPl=new THREE.PointLight(0x00FFAA,1.5,30); ghostPl.position.set(5,6,-5); this.scene.add(ghostPl);
+            const ghostPl2=new THREE.PointLight(0x5500AA,2,25); ghostPl2.position.set(-8,5,8); this.scene.add(ghostPl2);
             const bcs=[0x1a1a3a,0x1a2a1a,0x2a1a1a,0x2a2a1a];
             for(let i=0;i<3;i++){
                 const a=(i/8)*Math.PI*2,h=10+Math.random()*14,w=5+Math.random()*3;
@@ -7183,25 +7234,36 @@ const app = {
             }
         }
         else if(this.currentMap==='gather'){
-            addGround(0x1a3010);
+            // 👻 ЛЕС МЁРТВЫХ ДУШ
+            this.scene.background=new THREE.Color(0x030308);
+            this.scene.fog=new THREE.FogExp2(0x030308,0.022);
+            addGround(0x050510);
+            // Призрачное освещение
+            this.scene.add(new THREE.AmbientLight(0x2A0850,0.7));
+            const ghostLight=new THREE.PointLight(0x9D4EDD,2.5,80); ghostLight.position.set(0,15,0); this.scene.add(ghostLight);
+            const ghostLight2=new THREE.PointLight(0x00FF88,1.2,60); ghostLight2.position.set(30,10,-30); this.scene.add(ghostLight2);
+            // Мёртвые деревья — чёрные стволы, тёмно-фиолетовая листва
             for(let i=0;i<45;i++){
                 const tx=(Math.random()-0.5)*140,tz=(Math.random()-0.5)*140;
                 if(Math.abs(tx)<6&&Math.abs(tz)<6)continue;
                 const h=3+Math.random()*3;
-                const trunk=new THREE.Mesh(new THREE.CylinderGeometry(0.35,0.5,h),new THREE.MeshStandardMaterial({color:0x5D3A1A,roughness:0.9}));
+                const trunk=new THREE.Mesh(new THREE.CylinderGeometry(0.35,0.5,h),new THREE.MeshStandardMaterial({color:0x0A0810,roughness:0.95}));
                 trunk.position.set(tx,h/2,tz);trunk.castShadow=true;
                 this.scene.add(trunk);this.objectsToIntersect.push(trunk);
                 for(let j=0;j<3;j++){
                     const fol=new THREE.Mesh(new THREE.SphereGeometry(2.2-j*0.4,8,8),
-                        new THREE.MeshStandardMaterial({color:[0x2E7D32,0x388E3C,0x43A047][j],roughness:0.8}));
+                        new THREE.MeshStandardMaterial({color:[0x1A0A2E,0x2A1045,0x0D1520][j],roughness:0.8,transparent:true,opacity:0.9}));
                     fol.position.set(tx,h+j*1.4,tz);fol.castShadow=true;this.scene.add(fol);
                 }
             }
+            // Призрачные камни — светятся
             for(let i=0;i<35;i++){
-                const rock=new THREE.Mesh(new THREE.SphereGeometry(0.3+Math.random()*0.5,6,6),new THREE.MeshStandardMaterial({color:0x607060,roughness:0.9}));
+                const rock=new THREE.Mesh(new THREE.SphereGeometry(0.3+Math.random()*0.5,6,6),
+                    new THREE.MeshStandardMaterial({color:0x1A1030,emissive:0x330055,emissiveIntensity:0.3,roughness:0.9}));
                 rock.position.set((Math.random()-0.5)*120,0.2,(Math.random()-0.5)*120);rock.scale.y=0.6;this.scene.add(rock);
             }
-            const cm=new THREE.MeshStandardMaterial({color:0xFF9800,emissive:0xFF5500,emissiveIntensity:0.6});
+            // Души — фиолетово-синие светящиеся сферы вместо цитрусов
+            const cm=new THREE.MeshStandardMaterial({color:0xAA88FF,emissive:0x7744DD,emissiveIntensity:1.4,transparent:true,opacity:0.88});
             // Спавним цитрусы только на открытых местах — не внутри деревьев
             let spawned=0, attempts=0;
             while(spawned<60 && attempts<600){
@@ -7221,7 +7283,9 @@ const app = {
             }
         }
         else if(this.currentMap==='parkour'){
-            this.scene.fog=new THREE.Fog(0x87CEEB,40,250);
+            this.scene.background=new THREE.Color(0x08020F);
+            this.scene.fog=new THREE.Fog(0x180830,12,110);
+            this.scene.add(new THREE.AmbientLight(0x3A1060,0.8));
             for(let i=0;i<18;i++){
                 const cg=new THREE.Group();
                 for(let j=0;j<5;j++){
@@ -7232,7 +7296,7 @@ const app = {
             }
             const start=new THREE.Mesh(new THREE.BoxGeometry(12,1.5,12),new THREE.MeshStandardMaterial({color:0x334455,roughness:0.7}));
             this.scene.add(start);this.objectsToIntersect.push(start);
-            const pc=[0x00E5FF,0xFF9800,0xFF4081,0x69F0AE,0xFFD740,0xE040FB];
+            const pc=[0x9D4EDD,0x5A189A,0xC77DFF,0x240046,0x7B2FBE,0x3C096C];
             for(let i=1;i<=25;i++){
                 const w=3+Math.random()*4,d=3+Math.random()*3;
                 const plat=new THREE.Mesh(new THREE.BoxGeometry(w,1,d),new THREE.MeshStandardMaterial({color:pc[i%pc.length],roughness:0.5}));
@@ -7243,7 +7307,8 @@ const app = {
             fin.position.set(Math.sin(25*1.3)*9,25*2,-(25*7));this.scene.add(fin);this.objectsToIntersect.push(fin);
         }
         else if(this.currentMap==='volcano'){
-            addGround(0x2a1008);
+            addGround(0x0F0003);
+            this.scene.add(new THREE.AmbientLight(0x440000,0.6));
             for(let i=0;i<6;i++){
                 const lv=new THREE.Mesh(new THREE.CylinderGeometry(3+Math.random()*4,3+Math.random()*4,0.2,24),
                     new THREE.MeshStandardMaterial({color:0xFF3300,emissive:0xFF1100,emissiveIntensity:0.8,roughness:0}));
@@ -7357,7 +7422,8 @@ const app = {
             // 🌊 ДРОППЕР — падай точно в воду
             this.scene.background=new THREE.Color(0x001133);
             this.scene.fog=new THREE.FogExp2(0x001133,0.008);
-            this.scene.add(new THREE.AmbientLight(0x4488ff,0.8));
+            this.scene.add(new THREE.AmbientLight(0x110033,0.5));
+            const voidLight=new THREE.PointLight(0x220044,2,100); voidLight.position.set(0,20,0); this.scene.add(voidLight);
             const sunL=new THREE.DirectionalLight(0xffffff,1.2); sunL.position.set(10,30,10); this.scene.add(sunL);
             // Вода внизу (бассейн)
             const waterMat=new THREE.MeshStandardMaterial({color:0x0066cc,emissive:0x003388,emissiveIntensity:0.4,transparent:true,opacity:0.85,roughness:0,metalness:0.3});
@@ -7403,7 +7469,8 @@ const app = {
             // 🔥 ОГНЕННЫЙ ОББИ — прыжки над лавой
             this.scene.background=new THREE.Color(0x1a0500);
             this.scene.fog=new THREE.Fog(0x1a0500,40,150);
-            this.scene.add(new THREE.AmbientLight(0xff4400,0.5));
+            this.scene.add(new THREE.AmbientLight(0x330000,0.6));
+            const bloodLight=new THREE.PointLight(0xFF0000,2,50); bloodLight.position.set(0,10,0); this.scene.add(bloodLight);
             this.scene.add(new THREE.DirectionalLight(0xffaa44,1.5));
             // Лава на дне
             const lavaMat=new THREE.MeshStandardMaterial({color:0xff3300,emissive:0xff1100,emissiveIntensity:1.5,roughness:0.8});
@@ -7445,8 +7512,9 @@ const app = {
             // 🌀 ЛАБИРИНТ — найди выход
             this.scene.background=new THREE.Color(0x0a0f0a);
             this.scene.fog=new THREE.FogExp2(0x0a0f0a,0.025);
-            this.scene.add(new THREE.AmbientLight(0x44ff88,0.4));
-            addGround(0x112211);
+            this.scene.add(new THREE.AmbientLight(0x0A2010,0.5));
+            const mazeLight=new THREE.PointLight(0x00FF66,1.5,40); mazeLight.position.set(0,8,0); this.scene.add(mazeLight);
+            addGround(0x050A05);
             const wallM=new THREE.MeshStandardMaterial({color:0x1a3322,roughness:0.9,emissive:0x001100,emissiveIntensity:0.2});
             // Генерация лабиринта — сетка 9x9
             const CELL=7, SIZE=9;
@@ -7583,11 +7651,6 @@ const app = {
             addGround(0x111118);
             this.scene.add(new THREE.GridHelper(100,50,0x222244,0x111133));
         }
-        else if(this.currentMap==='hideseek'||this.currentMap==='dungeon'){
-            addGround(0x111122);
-            this.scene.add(new THREE.AmbientLight(0x334455,1));
-            this.scene.add(new THREE.GridHelper(100,50,0x222244,0x111133));
-        }
         else if(typeof this.currentMap==='number'){
             addGround(0x1a1a1a);
             this.scene.add(new THREE.GridHelper(100,50,0x222244,0x111133));
@@ -7610,13 +7673,6 @@ const app = {
             } else {
                 console.warn('[buildWorld] no blocks found for map', this.currentMap, m);
             }
-        } else {
-            // Фолбэк — любой неизвестный мир получает хотя бы землю и свет
-            addGround(0x111122);
-            this.scene.add(new THREE.AmbientLight(0x334466,1.2));
-            const pl=new THREE.PointLight(0x4488ff,3,40); pl.position.set(0,8,0); this.scene.add(pl);
-            this.scene.add(new THREE.GridHelper(100,50,0x222244,0x111133));
-            console.warn('[buildWorld] unknown map, using fallback:', this.currentMap);
         }
     },
 
@@ -7977,14 +8033,14 @@ const app = {
                 this._snowParticles.geometry.attributes.position.needsUpdate=true;
             }
             // Монеты в новых мирах — вращаются и подбираются
-            if(['race','obby','maze','coins'].includes(this.currentMap)){
+            if(['race','obby','maze'].includes(this.currentMap)){
                 for(let i=this.collectibles.length-1;i>=0;i--){
                     const c=this.collectibles[i];
                     c.rotation.z+=2*delta;
                     if(c.position.distanceTo(this.playerGroup.position)<1.6){
                         this.scene.remove(c);this.collectibles.splice(i,1);
+                        this.balance+=30;this.saveData();
                         this._sfx('coin');
-                        this.balance=(this.balance||0)+30; this.saveData();
                         if(this.currentMap==='race'){this._raceScore=(this._raceScore||0)+1;if(this._raceShowHud)this._raceShowHud();}
                         if(this.collectibles.length===0){
                             setTimeout(()=>this.showNotif('🏆','Все собрано!','Ты собрал все цитрусы! +500 🍊'),200);
@@ -8574,10 +8630,6 @@ const app = {
 
     // ── СИСТЕМА ЗАДАНИЙ ──
     _initQuests(){
-        // Защита: гарантируем что questData и questRotation всегда объекты
-        if(!this.questData || typeof this.questData !== 'object') this.questData = {};
-        if(!this.questRotation || typeof this.questRotation !== 'object') this.questRotation = {};
-
         const ALL_QUESTS = [
             {id:'play30',  title:'Игрок дня',       desc:'Поиграй 30 минут',           reward:50,  type:'playtime', goal:30,  icon:'⏱️'},
             // ── Время в игре ──
@@ -8625,7 +8677,7 @@ const app = {
         const rot = this.questRotation;
 
         // Если слот пустой или время вышло — выбираем новые 5 заданий
-        if(!rot.nextAt || now >= rot.nextAt || !Array.isArray(rot.ids) || rot.ids.length === 0) {
+        if(!rot.nextAt || now >= rot.nextAt) {
             rot.nextAt = now + ROTATE_MS;
             // Выбираем 5 случайных непересекающихся заданий
             const shuffled = [...ALL_QUESTS].sort(()=>Math.random()-0.5);
@@ -8639,8 +8691,8 @@ const app = {
             this.saveData();
         }
 
-        // Активные задания (фильтруем невалидные id на случай повреждённых данных)
-        this._questDefs = (rot.ids||[]).map(id => ALL_QUESTS.find(q=>q.id===id)).filter(Boolean);
+        // Активные задания
+        this._questDefs = rot.ids.map(id => ALL_QUESTS.find(q=>q.id===id)).filter(Boolean);
         // Инициализируем данные для каждого задания если нет
         this._questDefs.forEach(q=>{
             if(!this.questData[q.id]) this.questData[q.id]={progress:0,done:false,claimed:false};
@@ -8838,7 +8890,24 @@ const app = {
     }
 };
 
-window.onload = () => app.init();
+window.onload = () => {
+    app.init();
+    const ghosts=['👻','💀','🕸️','👁️','🦇','☠️','🕯️','🩸'];
+    function spawnGhost(){
+        const el=document.createElement('div');
+        el.className='ghost-particle';
+        el.textContent=ghosts[Math.floor(Math.random()*ghosts.length)];
+        el.style.left=(Math.random()*100)+'vw';
+        el.style.fontSize=(12+Math.random()*16)+'px';
+        const dur=8+Math.random()*14;
+        el.style.animationDuration=dur+'s';
+        el.style.animationDelay=(Math.random()*3)+'s';
+        document.body.appendChild(el);
+        setTimeout(()=>el.remove(),(dur+3)*1000);
+    }
+    for(let i=0;i<6;i++) setTimeout(spawnGhost,i*600);
+    setInterval(spawnGhost,2200);
+};
 </script>
 </body>
 </html>
