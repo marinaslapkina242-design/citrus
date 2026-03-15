@@ -2456,11 +2456,26 @@ const app = {
                 if(!srv||srv.error) return;
                 // Берём самый большой баланс (защита от перезаписи)
                 if((srv.balance||0) > this.balance){ this.balance=srv.balance; }
-                if(srv.inventory&&srv.inventory.length>this.inventory.length) this.inventory=srv.inventory;
-                if(srv.friends&&srv.friends.length>this.friends.length) this.friends=srv.friends;
+                // Объединяем инвентарь: берём все уникальные элементы из обоих источников
+                if(srv.inventory&&srv.inventory.length>0){
+                    const merged=Array.from(new Set([...(this.inventory||[]),...srv.inventory]));
+                    this.inventory=merged;
+                }
+                // Объединяем друзей: берём все уникальные ID
+                if(srv.friends&&srv.friends.length>0){
+                    const localIds=(this.friends||[]).map(f=>String(typeof f==='object'?f.id:f));
+                    const toAdd=(srv.friends).filter(f=>!localIds.includes(String(typeof f==='object'?f.id:f)));
+                    this.friends=[...(this.friends||[]),...toAdd];
+                }
+                // Объединяем запросы в друзья
+                if(srv.friendRequests&&srv.friendRequests.length>0){
+                    const localReqIds=(this.friendRequests||[]).map(f=>String(typeof f==='object'?f.id:f));
+                    const toAdd=(srv.friendRequests).filter(f=>!localReqIds.includes(String(typeof f==='object'?f.id:f)));
+                    this.friendRequests=[...(this.friendRequests||[]),...toAdd];
+                }
                 if(srv.rouletteUsed) this.rouletteUsed=true;
                 if((srv.rouletteTotal||0)>this.rouletteTotal) this.rouletteTotal=srv.rouletteTotal;
-                if(srv.questData&&Object.keys(srv.questData).length>Object.keys(this.questData||{}).length) this.questData=srv.questData;
+                if(srv.questData&&Object.keys(srv.questData||{}).length>Object.keys(this.questData||{}).length) this.questData=srv.questData;
                 if(srv.customMaps&&srv.customMaps.length>this.customMaps.length) this.customMaps=srv.customMaps;
                 // Сохраняем объединённое в localStorage
                 localStorage.setItem('citrus_v5_pro', JSON.stringify({
@@ -2472,6 +2487,9 @@ const app = {
                     coins:this.coins,questRotation:this.questRotation
                 }));
                 this.updateUI();
+                // Перерисовываем аксессуары и аватар после загрузки с сервера
+                if(typeof this.updateAvatarPreview==='function') this.updateAvatarPreview();
+                if(typeof this.renderShop==='function') this.renderShop();
             }).catch(()=>{});
         }
     },
