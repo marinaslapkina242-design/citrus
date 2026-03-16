@@ -1676,6 +1676,15 @@
 
             <!-- ══════════════════ TAB: GAMES ══════════════════ -->
             <div id="tab-games">
+                <!-- ПРИЗРАЧНЫЙ ИВЕНТ -->
+                <div id="ghost-banner" onclick="app.openGhostEventModal()" style="margin-bottom:20px;background:linear-gradient(135deg,rgba(90,0,180,0.25),rgba(0,200,100,0.06),rgba(157,78,221,0.18));border:1px solid rgba(157,78,221,0.45);border-radius:16px;padding:12px 20px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all 0.2s;animation:bday-glow 2s ease-in-out infinite;position:relative;overflow:hidden;">
+                    <div style="font-size:28px;animation:float-emoji 2s ease-in-out infinite;flex-shrink:0;">👻</div>
+                    <div style="flex:1;">
+                        <div style="font-family:var(--font-head);font-size:13px;letter-spacing:1.5px;background:linear-gradient(90deg,#C77DFF,#00FFB2,#E0AAFF,#C77DFF);background-size:300% 300%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:bday-text 3s ease infinite;font-weight:900;">👻 ПРИЗРАЧНЫЙ ИВЕНТ 👻</div>
+                        <div style="font-size:11px;color:rgba(255,255,255,0.45);font-family:var(--font-body);margin-top:2px;">Призрачные духи проникли в Citrus Online — собирай награды!</div>
+                    </div>
+                    <div style="display:flex;gap:4px;font-size:18px;animation:float-emoji 2s ease-in-out infinite;">💀🦇☠️</div>
+                </div>
                 <div class="section-title">👻 Проклятые Миры</div>
                 <div class="grid" style="margin-bottom:32px;">
 
@@ -4320,28 +4329,26 @@ const app = {
         const ctx=this._ac;
         if(ctx.state==='suspended') ctx.resume();
 
-        const BPM=75, beat=60/BPM;
+        // 👻 ПРИЗРАЧНЫЙ ХАБ — жуткий медленный эмбиент с воем ветра
+        const beat=60/48;
 
-        // Мягкая мелодия — пентатоника
         const melody=[
-            0,523,0,659,784,0,659,523,
-            0,440,0,523,659,0,523,440,
-            0,392,0,523,659,784,659,0,
-            0,523,659,0,784,659,523,0,
+            0,0,220,0,0,0,196,0,
+            0,0,174,0,0,0,164,0,
+            0,0,147,0,0,0,164,0,
+            0,0,174,0,0,0,196,0,
         ];
-        // Тихий бас
-        const bass=[
-            130,0,0,0,130,0,0,0,
-            116,0,0,0,116,0,0,0,
-            98, 0,0,0,98, 0,0,0,
-            130,0,0,0,130,0,0,0,
+        const bassNotes=[
+            55,0,0,0,0,0,0,0,
+            49,0,0,0,0,0,0,0,
+            46,0,0,0,0,0,0,0,
+            49,0,0,0,0,0,0,0,
         ];
-        // Лёгкие пэды (аккорды)
-        const pads=[
-            [261,329,392], null, null, null, null, null, null, null,
-            [220,277,349], null, null, null, null, null, null, null,
-            [196,247,294], null, null, null, null, null, null, null,
-            [261,329,392], null, null, null, null, null, null, null,
+        const ghostChords=[
+            [110,130,155], null,null,null,null,null,null,null,
+            [98,116,138],  null,null,null,null,null,null,null,
+            [87,104,116],  null,null,null,null,null,null,null,
+            [98,116,138],  null,null,null,null,null,null,null,
         ];
 
         const totalBeats=melody.length;
@@ -4350,37 +4357,41 @@ const app = {
         const playLoop=(startTime)=>{
             if(!this._musicPlaying) return;
 
-            // Мелодия — мягкий синус
+            // Мелодия с вибрато — призрачный эффект
             melody.forEach((freq,i)=>{
                 if(!freq) return;
                 const t=startTime+i*beat*0.5;
                 const o=ctx.createOscillator(); o.type='sine';
                 o.frequency.value=freq;
+                const lfo=ctx.createOscillator(); lfo.type='sine'; lfo.frequency.value=4.5;
+                const lfoGain=ctx.createGain(); lfoGain.gain.value=3;
+                lfo.connect(lfoGain); lfoGain.connect(o.frequency);
                 const gn=ctx.createGain();
                 gn.gain.setValueAtTime(0,t);
-                gn.gain.linearRampToValueAtTime(0.09,t+0.04);
-                gn.gain.exponentialRampToValueAtTime(0.001,t+beat*0.6);
+                gn.gain.linearRampToValueAtTime(0.08,t+0.3);
+                gn.gain.exponentialRampToValueAtTime(0.001,t+beat*1.8);
                 o.connect(gn); gn.connect(this._musicGain);
-                o.start(t); o.stop(t+beat*0.65);
+                lfo.start(t); o.start(t); o.stop(t+beat*2); lfo.stop(t+beat*2);
             });
 
-            // Бас — мягкий с фильтром
-            bass.forEach((freq,i)=>{
+            // Тяжёлый гудящий бас
+            bassNotes.forEach((freq,i)=>{
                 if(!freq) return;
                 const t=startTime+i*beat*0.5;
                 const o=ctx.createOscillator(); o.type='triangle';
                 o.frequency.value=freq;
-                const f=ctx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=400; f.Q.value=0.5;
+                const f=ctx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=200; f.Q.value=0.8;
                 const gn=ctx.createGain();
                 gn.gain.setValueAtTime(0,t);
-                gn.gain.linearRampToValueAtTime(0.18,t+0.05);
-                gn.gain.exponentialRampToValueAtTime(0.001,t+beat*0.9);
+                gn.gain.linearRampToValueAtTime(0.22,t+0.2);
+                gn.gain.setValueAtTime(0.18,t+beat*3);
+                gn.gain.exponentialRampToValueAtTime(0.001,t+beat*4);
                 o.connect(f); f.connect(gn); gn.connect(this._musicGain);
-                o.start(t); o.stop(t+beat);
+                o.start(t); o.stop(t+beat*4.5);
             });
 
-            // Пэды — долгие мягкие аккорды
-            pads.forEach((chord,i)=>{
+            // Диссонирующие призрачные пэды
+            ghostChords.forEach((chord,i)=>{
                 if(!chord) return;
                 const t=startTime+i*beat*0.5;
                 chord.forEach(freq=>{
@@ -4388,34 +4399,42 @@ const app = {
                     o.frequency.value=freq;
                     const gn=ctx.createGain();
                     gn.gain.setValueAtTime(0,t);
-                    gn.gain.linearRampToValueAtTime(0.04,t+0.3);
-                    gn.gain.linearRampToValueAtTime(0.03,t+loopLen/2-0.3);
-                    gn.gain.linearRampToValueAtTime(0,t+loopLen/2);
+                    gn.gain.linearRampToValueAtTime(0.045,t+1.2);
+                    gn.gain.setValueAtTime(0.04,t+loopLen/2-1.0);
+                    gn.gain.linearRampToValueAtTime(0,t+loopLen/2+0.5);
                     o.connect(gn); gn.connect(this._musicGain);
-                    o.start(t); o.stop(t+loopLen/2+0.1);
+                    o.start(t); o.stop(t+loopLen/2+0.8);
                 });
             });
 
-            // Лёгкая перкуссия — только тихий хайхэт
-            for(let i=0;i<totalBeats;i++){
-                if(i%2!==0) continue;
+            // Редкие гулкие удары
+            for(let i=0;i<totalBeats;i+=8){
                 const t=startTime+i*beat*0.5;
-                const buf=ctx.createBuffer(1,ctx.sampleRate*0.04,ctx.sampleRate);
-                const d=buf.getChannelData(0);
-                for(let j=0;j<d.length;j++) d[j]=(Math.random()*2-1)*Math.exp(-j/(ctx.sampleRate*0.008));
-                const src=ctx.createBufferSource(); src.buffer=buf;
-                const f=ctx.createBiquadFilter(); f.type='highpass'; f.frequency.value=9000;
-                const gn=ctx.createGain(); gn.gain.setValueAtTime(0.04,t); gn.gain.exponentialRampToValueAtTime(0.001,t+0.04);
-                src.connect(f); f.connect(gn); gn.connect(this._musicGain); src.start(t);
+                const o=ctx.createOscillator(); o.type='sine';
+                o.frequency.setValueAtTime(80,t); o.frequency.exponentialRampToValueAtTime(30,t+0.6);
+                const gn=ctx.createGain(); gn.gain.setValueAtTime(0.18,t); gn.gain.exponentialRampToValueAtTime(0.001,t+0.7);
+                o.connect(gn); gn.connect(this._musicGain); o.start(t); o.stop(t+0.75);
             }
 
-            const nextId=setTimeout(()=>playLoop(startTime+loopLen),(loopLen-0.2)*1000);
+            // Вой ветра — постоянный фон
+            const windBuf=ctx.createBuffer(1,ctx.sampleRate*loopLen,ctx.sampleRate);
+            const wd=windBuf.getChannelData(0);
+            for(let j=0;j<wd.length;j++) wd[j]=(Math.random()*2-1)*0.15;
+            const wSrc=ctx.createBufferSource(); wSrc.buffer=windBuf;
+            const wf=ctx.createBiquadFilter(); wf.type='bandpass'; wf.frequency.value=400; wf.Q.value=0.4;
+            const wg=ctx.createGain();
+            wg.gain.setValueAtTime(0,startTime);
+            wg.gain.linearRampToValueAtTime(0.03,startTime+2);
+            wg.gain.setValueAtTime(0.03,startTime+loopLen-2);
+            wg.gain.linearRampToValueAtTime(0,startTime+loopLen);
+            wSrc.connect(wf); wf.connect(wg); wg.connect(this._musicGain); wSrc.start(startTime);
+
+            const nextId=setTimeout(()=>playLoop(startTime+loopLen),(loopLen-0.3)*1000);
             this._musicScheduled.push(nextId);
         };
 
-        playLoop(ctx.currentTime+0.1);
+        playLoop(ctx.currentTime+0.15);
     },
-
     stopHubMusic(){
         this._musicPlaying=false;
         this._musicScheduled.forEach(id=>clearTimeout(id));
