@@ -3538,12 +3538,14 @@ const app = {
         const raw = quickName || document.getElementById('ban-input')?.value?.trim();
         const reason = document.getElementById('ban-reason')?.value?.trim() || 'Нарушение правил';
         if(!raw){ this.showNotif('❌','Ошибка','Введи ник или тег игрока'); return; }
-        const key = raw.toLowerCase();
+        // Ключ — только ник без #id, в нижнем регистре
+        const key = raw.toLowerCase().split('#')[0].trim();
+        if(!key){ this.showNotif('❌','Ошибка','Пустой ник'); return; }
         const bans = this._getBans();
         if(bans.find(b=>b.key===key)){ this.showNotif('⚠️','Уже забанен',`${raw} уже в бан-листе`); return; }
         bans.push({ key, name: raw, reason, by: this.username, ts: Date.now() });
         this._saveBans(bans);
-        try { fetch(this._API+'/bans', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name: raw, reason, by: this.username, adminKey: 'citrus_admin_2025' }) }); } catch(e){}
+        try { fetch(this._API+'/bans', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name: key, reason, by: this.username, adminKey: 'citrus_admin_2025' }) }); } catch(e){}
         const inp = document.getElementById('ban-input'); if(inp) inp.value='';
         const rin = document.getElementById('ban-reason'); if(rin) rin.value='';
         this.showNotif('🔨','Забанен!',`${raw} добавлен в бан-лист`);
@@ -3680,7 +3682,6 @@ const app = {
             dropper: '🌊 Дроппер',
             obby:    '🔥 Огненный Обби',
             maze:    '🌀 Лабиринт',
-            coins:   '💰 Золотая Лихорадка',
             pvp:     '🔫 Арена ПВП',
             hideseek:'👀 Прятки',
             dungeon: '⚔️ Тёмное Подземелье',
