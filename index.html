@@ -2344,17 +2344,49 @@ const app = {
         this._loadPeerInfo();
         setTimeout(()=>this._readMailbox(), 1000);
         setInterval(()=>this._readMailbox(), 5000);
-        // АВТО-ВХОД
+        // АВТО-ВХОД с проверкой бана
         if (this.username && this.username !== '') {
-            document.getElementById('ui-login').classList.add('hidden');
-            document.getElementById('ui-hub').classList.remove('hidden');
-            this.renderMyGames(); this.renderFriends(); this.renderOnline(); this.initAvatarPreview(); this.renderShop();
-            const adminNav = document.getElementById('nav-admin');
-            if(adminNav) adminNav.classList.toggle('hidden', !this.canBan(this.username));
-
-            this.updateUI();
-            this._wsConnect();
-            setInterval(()=>this.renderOnline(), 30000);
+            // Сначала проверяем бан на сервере
+            fetch(this._API+'/checkban/'+encodeURIComponent(this.username.toLowerCase()))
+                .then(r=>r.ok?r.json():null)
+                .then(bdata=>{
+                    if(bdata && bdata.banned){
+                        // Забанен — показываем экран логина с ошибкой
+                        this.username=''; this.userId=null;
+                        localStorage.removeItem('citrus_v5_pro');
+                        const err = document.getElementById('auth-error');
+                        if(err){ err.textContent=`🚫 Ты забанен. Причина: ${bdata.reason||'Нарушение правил'}`; err.style.display='block'; }
+                        return;
+                    }
+                    // Не забанен — входим
+                    document.getElementById('ui-login').classList.add('hidden');
+                    document.getElementById('ui-hub').classList.remove('hidden');
+                    this.renderMyGames(); this.renderFriends(); this.renderOnline(); this.initAvatarPreview(); this.renderShop();
+                    const adminNav = document.getElementById('nav-admin');
+                    if(adminNav) adminNav.classList.toggle('hidden', !this.canBan(this.username));
+                    this.updateUI();
+                    this._wsConnect();
+                    setInterval(()=>this.renderOnline(), 30000);
+                })
+                .catch(()=>{
+                    // Нет связи — проверяем локально
+                    const banEntry = this._checkIfBanned();
+                    if(banEntry){
+                        this.username=''; this.userId=null;
+                        localStorage.removeItem('citrus_v5_pro');
+                        const err = document.getElementById('auth-error');
+                        if(err){ err.textContent=`🚫 Ты забанен. Причина: ${banEntry.reason||'Нарушение правил'}`; err.style.display='block'; }
+                        return;
+                    }
+                    document.getElementById('ui-login').classList.add('hidden');
+                    document.getElementById('ui-hub').classList.remove('hidden');
+                    this.renderMyGames(); this.renderFriends(); this.renderOnline(); this.initAvatarPreview(); this.renderShop();
+                    const adminNav = document.getElementById('nav-admin');
+                    if(adminNav) adminNav.classList.toggle('hidden', !this.canBan(this.username));
+                    this.updateUI();
+                    this._wsConnect();
+                    setInterval(()=>this.renderOnline(), 30000);
+                });
         }
 
         // ОБНОВЛЕННЫЕ СОБЫТИЯ КЛАВИАТУРЫ (Защита при вводе в чат)
