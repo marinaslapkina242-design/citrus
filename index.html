@@ -8838,11 +8838,66 @@ const app = {
 
     initMine(){
         if(!this._mine) this._mine = { depth:1, bag:{}, totalEarned:0 };
+        // Проверяем бан из localStorage
+        const savedBan = localStorage.getItem('citrus_mine_ban');
+        if(savedBan){
+            const banUntil = parseInt(savedBan);
+            if(Date.now() < banUntil){
+                this._mineBanned = true;
+                this._mineBanUntil = banUntil;
+            } else {
+                localStorage.removeItem('citrus_mine_ban');
+                this._mineBanned = false;
+            }
+        }
         const g = document.getElementById('mine-game');
         const s = document.getElementById('mine-start');
         if(g) g.style.display = 'none';
         if(s) s.style.display = 'flex';
         this._mineRenderBagPreview();
+        // Если забанен — сразу показываем экран бана
+        if(this._mineBanned) this._mineShowBanScreen();
+    },
+
+    _mineShowBanScreen(){
+        const game = document.getElementById('mine-game');
+        const start = document.getElementById('mine-start');
+        if(!game) return;
+        // Скрываем стартовый экран, показываем игровой (для бан-оверлея)
+        if(start) start.style.display = 'none';
+        game.style.display = 'flex'; game.style.flexDirection = 'column';
+        let banDiv = document.getElementById('mine-ban-screen');
+        if(!banDiv){
+            banDiv = document.createElement('div');
+            banDiv.id = 'mine-ban-screen';
+            banDiv.style.cssText = 'position:absolute;inset:0;background:rgba(0,0,0,0.92);z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;backdrop-filter:blur(8px);';
+            game.appendChild(banDiv);
+        }
+        banDiv.style.display = 'flex';
+        const tick = () => {
+            const left = Math.max(0, Math.ceil((this._mineBanUntil - Date.now()) / 1000));
+            const m = Math.floor(left/60), s = left%60;
+            banDiv.innerHTML = `
+                <div style="font-size:48px;">🔨</div>
+                <div style="font-family:var(--font-head);font-size:26px;letter-spacing:3px;color:#FF4545;">ВЫ ОТСТРАНЕНЫ</div>
+                <div style="font-family:var(--font-ui);font-size:14px;color:rgba(255,255,255,0.6);text-align:center;max-width:300px;line-height:1.6;">
+                    Обнаружен автокликер.<br>Используй кирку честно!
+                </div>
+                <div style="font-family:var(--font-mono);font-size:32px;color:#FF6B6B;">${m}:${String(s).padStart(2,'0')}</div>
+                <div style="font-family:var(--font-mono);font-size:11px;color:rgba(255,255,255,0.25);">осталось до разбана</div>`;
+            if(left > 0){
+                this._mineBanTimer = setTimeout(tick, 1000);
+            } else {
+                localStorage.removeItem('citrus_mine_ban');
+                this._mineBanned = false;
+                this._mineClickTimes = [];
+                banDiv.style.display = 'none';
+                game.style.display = 'none';
+                if(start) start.style.display = 'flex';
+            }
+        };
+        if(this._mineBanTimer) clearTimeout(this._mineBanTimer);
+        tick();
     },
 
     _mineRenderBagPreview(){
@@ -9266,45 +9321,13 @@ const app = {
         this._mineClickTimes.push(now);
 
         if(this._mineClickTimes.length > 10){
-            // Отстранение на 3 минуты
+            // Отстранение на 3 минуты — сохраняем в localStorage
             if(this._mineRAF){ cancelAnimationFrame(this._mineRAF); this._mineRAF = null; }
             this._mineBanned = true;
-            this._mineBanUntil = now + 3 * 60 * 1000;
+            this._mineBanUntil = Date.now() + 3 * 60 * 1000;
+            localStorage.setItem('citrus_mine_ban', String(this._mineBanUntil));
             this._mineClickTimes = [];
-
-            // Показываем экран бана
-            const canvas = document.getElementById('mine-canvas');
-            const game = document.getElementById('mine-game');
-            if(game){
-                let banDiv = document.getElementById('mine-ban-screen');
-                if(!banDiv){
-                    banDiv = document.createElement('div');
-                    banDiv.id = 'mine-ban-screen';
-                    banDiv.style.cssText = 'position:absolute;inset:0;background:rgba(0,0,0,0.92);z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;backdrop-filter:blur(8px);';
-                    game.appendChild(banDiv);
-                }
-                banDiv.style.display = 'flex';
-                const tick = () => {
-                    const left = Math.max(0, Math.ceil((this._mineBanUntil - Date.now()) / 1000));
-                    const m = Math.floor(left/60), s = left%60;
-                    banDiv.innerHTML = `
-                        <div style="font-size:48px;">🔨</div>
-                        <div style="font-family:var(--font-head);font-size:26px;letter-spacing:3px;color:#FF4545;">ВЫ ОТСТРАНЕНЫ</div>
-                        <div style="font-family:var(--font-ui);font-size:14px;color:rgba(255,255,255,0.6);text-align:center;max-width:300px;line-height:1.6;">
-                            Обнаружен автокликер.<br>Используй кирку честно!
-                        </div>
-                        <div style="font-family:var(--font-mono);font-size:32px;color:#FF6B6B;">${m}:${String(s).padStart(2,'0')}</div>
-                        <div style="font-family:var(--font-mono);font-size:11px;color:rgba(255,255,255,0.25);">осталось до разбана</div>`;
-                    if(left > 0) setTimeout(tick, 1000);
-                    else {
-                        banDiv.style.display = 'none';
-                        this._mineBanned = false;
-                        this._mineClickTimes = [];
-                        this.mineStart();
-                    }
-                };
-                tick();
-            }
+            this._mineShowBanScreen();
             return;
         }
 
