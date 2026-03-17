@@ -9265,7 +9265,7 @@ const app = {
         this._mineClickTimes = this._mineClickTimes.filter(t => now - t < 1000);
         this._mineClickTimes.push(now);
 
-        if(this._mineClickTimes.length > 5){
+        if(this._mineClickTimes.length > 10){
             // Отстранение на 3 минуты
             if(this._mineRAF){ cancelAnimationFrame(this._mineRAF); this._mineRAF = null; }
             this._mineBanned = true;
