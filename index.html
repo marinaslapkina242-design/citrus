@@ -1017,6 +1017,84 @@
             filter: drop-shadow(0 0 10px rgba(255,149,0,0.7));
             animation: arrow-bounce 1s ease-in-out infinite;
         }
+        /* ══ ДЕНЬ РОЖДЕНИЯ ══ */
+        @keyframes confetti-fall {
+            0%   { transform: translateY(-20px) rotate(0deg);   opacity:1; }
+            100% { transform: translateY(110vh) rotate(720deg); opacity:0; }
+        }
+        @keyframes bday-glow {
+            0%,100% { box-shadow: 0 0 20px rgba(255,105,180,0.4), 0 0 40px rgba(255,215,0,0.2); }
+            50%      { box-shadow: 0 0 40px rgba(255,105,180,0.8), 0 0 80px rgba(255,215,0,0.4); }
+        }
+        @keyframes bday-text {
+            0%,100% { background-position: 0% 50%; }
+            50%      { background-position: 100% 50%; }
+        }
+        @keyframes float-emoji {
+            0%,100% { transform: translateY(0px) rotate(-5deg); }
+            50%      { transform: translateY(-8px) rotate(5deg); }
+        }
+        @keyframes cake-bounce {
+            0%,100% { transform: scale(1) rotate(-3deg); }
+            50%      { transform: scale(1.15) rotate(3deg); }
+        }
+        .bday-banner {
+            background: linear-gradient(135deg, rgba(255,20,147,0.12), rgba(255,215,0,0.08), rgba(255,105,180,0.1));
+            border: 1px solid rgba(255,105,180,0.3);
+            border-radius: 16px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            animation: bday-glow 2s ease-in-out infinite;
+            position: relative;
+            overflow: hidden;
+        }
+        .bday-banner:hover { transform: translateY(-2px); }
+        .bday-banner::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
+            animation: shimmer 2s infinite;
+        }
+        .bday-cake {
+            font-size: 28px;
+            animation: cake-bounce 1.5s ease-in-out infinite;
+            flex-shrink: 0;
+        }
+        .bday-title {
+            font-family: var(--font-head);
+            font-size: 13px;
+            letter-spacing: 1.5px;
+            background: linear-gradient(90deg, #FF69B4, #FFD700, #FF1493, #FFD700, #FF69B4);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: bday-text 3s ease infinite;
+            font-weight: 900;
+        }
+        .bday-sub {
+            font-size: 11px;
+            color: rgba(255,255,255,0.45);
+            font-family: var(--font-body);
+            margin-top: 2px;
+        }
+        .confetti-piece {
+            position: fixed;
+            width: 10px; height: 10px;
+            top: -20px;
+            border-radius: 2px;
+            pointer-events: none;
+            z-index: 9998;
+            animation: confetti-fall linear forwards;
+        }
+        @keyframes arrow-bounce {
+            0%,100% { transform: translateY(0); }
+            50% { transform: translateY(4px); }
+        }
         .roulette-ring {
             position: relative;
             padding: 6px;
@@ -1635,6 +1713,15 @@
 
             <!-- ══════════════════ TAB: GAMES ══════════════════ -->
             <div id="tab-games">
+                <!-- БАННЕР ДНЯ РОЖДЕНИЯ -->
+                <div id="bday-banner" class="bday-banner" onclick="app.openBdayModal()" style="margin-bottom:20px;">
+                    <div class="bday-cake">🎂</div>
+                    <div style="flex:1;">
+                        <div class="bday-title">🎉 СЕГОДНЯ ДЕНЬ РОЖДЕНИЯ! 🎉</div>
+                        <div class="bday-sub">У игрока <b style="color:#FF69B4;">firefox#6368</b> сегодня праздник — поздравь его!</div>
+                    </div>
+                    <div style="display:flex;gap:4px;font-size:18px;animation:float-emoji 2s ease-in-out infinite;">🎈🎁🥳</div>
+                </div>
                 <div class="section-title">Официальные миры</div>
                 <div class="grid" style="margin-bottom:32px;">
 
@@ -1720,6 +1807,15 @@
                         </div>
                     </div>
 
+                    <div class="card world-card" onclick="app.launch('play','coins')">
+                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(255,220,50,0.2),#050510);">
+                            <span class="world-emoji">💰</span>
+                            <div class="world-glow" style="background:rgba(255,220,50,0.2);"></div>
+                        </div>
+                        <div class="card-info">
+                            <div><b>Золотая Лихорадка</b><br><small class="world-tag" style="color:#FFD700">🍊 Собирай цитрусы!</small></div>
+                        </div>
+                    </div>
 
 
 
@@ -2668,7 +2764,7 @@ const app = {
             el.innerHTML = data.slice(0,10).map((p,i)=>`
                 <div style="display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid #1a1a1a;${i===0?'background:#1a1200':''}">
                     <span style="font-size:15px;width:22px;text-align:center">${medals[i]||'#'+(i+1)}</span>
-                    <span style="flex:1;color:#ccc;font-size:13px">${p.name}${app.devBadge(p.name)}</span>
+                    <span style="flex:1;color:#ccc;font-size:13px">${p.name}</span>
                     <span style="color:#FFD700;font-weight:bold;font-size:13px">+${p.total} 🍊</span>
                 </div>`).join('');
         } catch(e){ el.innerHTML='<div style="color:#444;text-align:center;padding:12px;font-size:12px;">Ошибка загрузки</div>'; }
@@ -2846,14 +2942,36 @@ const app = {
     async _loadGiftsInbox(){
         const inbox=document.getElementById('gifts-inbox');
         if(!inbox) return;
+        inbox.innerHTML='';
         try{
             const r=await fetch(this._API+'/mail/'+this.userId);
+            if(!r.ok) throw new Error('bad response');
             const msgs=await r.json();
-            if(!gifts.length){ inbox.innerHTML='<div style="color:#444;font-size:12px;">Нет подарков</div>'; return; }
-            inbox.innerHTML='';
+            if(!Array.isArray(msgs)) throw new Error('bad data');
+            const bdayMsgs=msgs.filter(m=>m.type==='bday_msg');
+            const gifts=msgs.filter(m=>m.type==='gift');
+            // Показываем поздравления отдельно если есть
+            if(bdayMsgs.length){
+                const bdayDiv = document.createElement('div');
+                bdayDiv.style.cssText='background:rgba(255,105,180,0.08);border:1px solid rgba(255,105,180,0.2);border-radius:12px;padding:12px 14px;margin-bottom:10px;';
+                bdayDiv.innerHTML='<div style="font-size:11px;color:#FF69B4;font-family:var(--font-head);letter-spacing:1px;margin-bottom:8px;">🎂 ПОЗДРАВЛЕНИЯ С ДР ('+bdayMsgs.length+')</div>'+
+                    bdayMsgs.map(m=>`<div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
+                        <div style="font-size:18px;">${m.text.match(/^[\u{1F300}-\u{1FFFF}]/u)?.[0]||'🎉'}</div>
+                        <div><div style="font-size:12px;color:rgba(255,255,255,0.7);">${(m.text||'').replace(/</g,'&lt;')}</div>
+                        <div style="font-size:10px;color:rgba(255,255,255,0.25);">от ${m.from_name||m.from_id}</div></div>
+                    </div>`).join('');
+                inbox.appendChild(bdayDiv);
+            }
+            if(!gifts.length){
+                const empty=document.createElement('div');
+                empty.style.cssText='color:#444;font-size:12px;';
+                empty.textContent='Нет подарков';
+                inbox.appendChild(empty);
+                return;
+            }
             for(const g of gifts){
                 const div=document.createElement('div');
-                div.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#111;border-radius:8px;border:1px solid #1a1a1a;';
+                div.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#111;border-radius:8px;border:1px solid #1a1a1a;margin-bottom:6px;';
                 div.innerHTML=`<div><b style="color:#FF9800">+${g.amount} 🍊</b><br><span style="color:#666;font-size:12px;">от ${g.from_name||g.from_id}</span></div>
                     <button onclick="app._claimGift(${g.amount},'${g.from_id}',this)" style="padding:7px 14px;background:rgba(255,149,0,0.2);border:1px solid #FF9800;border-radius:8px;color:#FF9800;font-size:13px;cursor:pointer;">Забрать</button>`;
                 inbox.appendChild(div);
@@ -3371,7 +3489,7 @@ const app = {
         document.getElementById('login-password').focus();
     },
 
-    login() {
+    async login() {
         const v    = document.getElementById('login-username').value.trim();
         const pass = document.getElementById('login-password').value;
         if(v.length < 3) return this.showNotif('❌','Ник слишком короткий','Минимум 3 символа');
@@ -3390,7 +3508,25 @@ const app = {
 
         this.saveData();
 
-        // Проверяем не забанен ли игрок
+        // Проверяем не забанен ли игрок — сначала синхронизируем с сервером
+        try {
+            const br = await fetch(this._API+'/checkban/'+encodeURIComponent((this.username||'').toLowerCase()));
+            if(br.ok){
+                const bdata = await br.json();
+                if(bdata.banned){
+                    const bans = this._getBans();
+                    const k = (this.username||'').toLowerCase();
+                    if(!bans.find(b=>b.key===k)){
+                        bans.push({key:k, name:this.username, reason:bdata.reason, by:bdata.by||'?', ts:Date.now()});
+                        this._saveBans(bans);
+                    }
+                    document.getElementById('auth-error').textContent = `🚫 Ты забанен. Причина: ${bdata.reason||'Нарушение правил'}`;
+                    document.getElementById('auth-error').style.display='block';
+                    return;
+                }
+            }
+        } catch(e){}
+        // Fallback: проверяем локальный список
         const banEntry = this._checkIfBanned();
         if(banEntry){
             document.getElementById('auth-error').textContent = `🚫 Ты забанен. Причина: ${banEntry.reason||'Нарушение правил'}`;
@@ -3421,7 +3557,6 @@ const app = {
         if(this.isSpecial(name))  return '<svg width="16" height="16" viewBox="0 0 16 16" style="display:inline-block;vertical-align:middle;margin-left:3px;flex-shrink:0;" title="Друг разраба"><circle cx="8" cy="8" r="8" fill="#00C896"/><text x="8" y="11.5" text-anchor="middle" font-size="9" fill="#000">🤝</text></svg>';
         if(this.isOwner(name))    return '<svg width="16" height="16" viewBox="0 0 16 16" style="display:inline-block;vertical-align:middle;margin-left:3px;flex-shrink:0;" title="Владелец"><circle cx="8" cy="8" r="8" fill="#FFD700"/><path d="M4.5 8.2l2.3 2.3 4.2-4.2" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>';
         if(this.isAdmin(name))    return '<svg width="16" height="16" viewBox="0 0 16 16" style="display:inline-block;vertical-align:middle;margin-left:3px;flex-shrink:0;" title="Администратор"><circle cx="8" cy="8" r="8" fill="#4fc3f7"/><path d="M4.5 8.2l2.3 2.3 4.2-4.2" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>';
-        if((name||'').toLowerCase().split('#')[0].trim()==='твинк разраба'||(name||'').toLowerCase().split('#')[0].trim()==='твинк') return '<svg width="16" height="16" viewBox="0 0 16 16" style="display:inline-block;vertical-align:middle;margin-left:3px;flex-shrink:0;" title="Разраб"><circle cx="8" cy="8" r="8" fill="#1D9BF0"/><path d="M4.5 8.2l2.3 2.3 4.2-4.2" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>';
         if(this.isVerified(name)) return '<svg width="16" height="16" viewBox="0 0 16 16" style="display:inline-block;vertical-align:middle;margin-left:3px;flex-shrink:0;" title="Верифицирован"><circle cx="8" cy="8" r="8" fill="#aaaaaa"/><path d="M4.5 8.2l2.3 2.3 4.2-4.2" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>';
         return '';
     },
@@ -3498,7 +3633,7 @@ const app = {
             podium.innerHTML += `
             <div style="display:flex;flex-direction:column;align-items:center;gap:6px;cursor:default;">
                 <div style="font-size:${rank===0?'28px':'22px'};font-weight:900;font-family:var(--font-head);color:${col};text-shadow:0 0 16px ${col}88;">
-                    ${p.name}${app.devBadge(p.name)}${isMe?'<span style="font-size:10px;color:var(--c-main);margin-left:4px;">ты</span>':''}
+                    ${p.name}${isMe?'<span style="font-size:10px;color:var(--c-main);margin-left:4px;">ты</span>':''}
                 </div>
                 <div style="font-size:11px;color:rgba(255,255,255,0.35);font-family:var(--font-ui);">${p.tag||''}</div>
                 <div style="font-size:${rank===0?'20px':'16px'};font-weight:700;color:${podClr[rank]};font-family:var(--font-head);">
@@ -3540,7 +3675,7 @@ const app = {
                         display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;">${(p.name[0]||'?').toUpperCase()}</div>
                     <div style="flex:1;min-width:0;">
                         <div style="font-family:var(--font-body);font-weight:700;font-size:13px;color:rgba(255,255,255,${isMe?'1':'0.8'});">
-                            ${p.name}${app.devBadge(p.name)}${isMe?' <span style="font-size:10px;color:var(--c-main);">← ты</span>':''}
+                            ${p.name}${isMe?' <span style="font-size:10px;color:var(--c-main);">← ты</span>':''}
                         </div>
                         <div style="font-size:10px;color:rgba(255,255,255,0.2);font-family:var(--font-ui);">${p.tag||''}</div>
                     </div>
@@ -3577,6 +3712,7 @@ const app = {
             dropper: '🌊 Дроппер',
             obby:    '🔥 Огненный Обби',
             maze:    '🌀 Лабиринт',
+            coins:   '💰 Золотая Лихорадка',
             pvp:     '🔫 Арена ПВП',
             hideseek:'👀 Прятки',
             dungeon: '⚔️ Тёмное Подземелье',
@@ -4977,7 +5113,9 @@ const app = {
 
 
     // ════════════════════════════════════
+    // 🎂 ДЕНЬ РОЖДЕНИЯ
     // ════════════════════════════════════
+    _bdayTarget: { name: 'firefox', id: '6368', fullTag: 'firefox#6368' },
 
     _launchConfetti(){
         const colors = ['#FF69B4','#FFD700','#FF1493','#00CED1','#FF6347','#7B68EE','#00FA9A','#FF4500'];
@@ -4998,6 +5136,147 @@ const app = {
         }
     },
 
+    openBdayModal(){
+        this._launchConfetti();
+        const existing = document.getElementById('bday-modal');
+        if(existing) existing.remove();
+
+        // Ищем ID именинника в кэше игроков
+        const pc = this._pc||[];
+        let globalDB = [];
+        try{ globalDB = JSON.parse(localStorage.getItem('citrus_global_users')||'[]'); }catch(e){}
+        const firefoxUser = [...pc, ...globalDB].find(u=>(u.name||'').toLowerCase()==='firefox');
+        const firefoxId = firefoxUser?.id || '6368';
+
+        const overlay = document.createElement('div');
+        overlay.id = 'bday-modal';
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+        overlay.onclick = e=>{ if(e.target===overlay) overlay.remove(); };
+
+        overlay.innerHTML = `
+        <div style="background:linear-gradient(145deg,#1a0d1a,#0d0d1a);border:1px solid rgba(255,105,180,0.4);border-radius:24px;width:100%;max-width:480px;overflow:hidden;position:relative;">
+            <!-- Праздничная шапка -->
+            <div style="background:linear-gradient(135deg,rgba(255,20,147,0.2),rgba(255,215,0,0.1),rgba(255,105,180,0.15));padding:28px 24px 20px;text-align:center;position:relative;border-bottom:1px solid rgba(255,105,180,0.2);">
+                <div style="font-size:60px;animation:cake-bounce 1.5s ease-in-out infinite;display:inline-block;margin-bottom:10px;">🎂</div>
+                <div style="font-family:var(--font-head);font-size:20px;font-weight:900;background:linear-gradient(90deg,#FF69B4,#FFD700,#FF1493);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:2px;animation:bday-text 3s ease infinite;background-size:300%;">ДЕНЬ РОЖДЕНИЯ!</div>
+                <div style="font-size:16px;color:rgba(255,255,255,0.8);margin-top:8px;font-family:var(--font-body);">Поздравим <b style="color:#FF69B4;">firefox</b> <span style="font-size:13px;color:rgba(255,255,255,0.4);">#6368</span> 🎉</div>
+                <div style="font-size:24px;margin-top:8px;animation:float-emoji 2s ease-in-out infinite;">🎈 🥳 🎁 🎊 🎈</div>
+                <button onclick="document.getElementById('bday-modal').remove()" style="position:absolute;top:14px;right:14px;background:none;border:none;color:rgba(255,255,255,0.3);font-size:22px;cursor:pointer;">✕</button>
+            </div>
+
+            <!-- Действия -->
+            <div style="padding:20px 24px;display:flex;flex-direction:column;gap:12px;">
+
+                <!-- Отправить поздравление -->
+                <div style="background:rgba(255,105,180,0.06);border:1px solid rgba(255,105,180,0.15);border-radius:14px;padding:16px;">
+                    <div style="font-size:12px;color:#FF69B4;font-family:var(--font-head);letter-spacing:1px;margin-bottom:10px;">💌 НАПИСАТЬ ПОЗДРАВЛЕНИЕ</div>
+                    <textarea id="bday-msg" placeholder="С днём рождения, firefox! 🎂🎉" maxlength="300"
+                        style="width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,105,180,0.2);border-radius:10px;padding:10px 13px;color:#fff;font-family:var(--font-body);font-size:13px;resize:none;height:80px;outline:none;transition:border-color 0.2s;"
+                        onfocus="this.style.borderColor='rgba(255,105,180,0.5)'" onblur="this.style.borderColor='rgba(255,105,180,0.2)'">С днём рождения, firefox! 🎂🎉</textarea>
+                    <button onclick="app.sendBdayMessage()" style="width:100%;margin-top:8px;padding:11px;background:linear-gradient(135deg,#FF1493,#FF69B4);border:none;border-radius:10px;color:#fff;font-weight:700;font-family:var(--font-body);font-size:14px;cursor:pointer;">🎉 Отправить поздравление</button>
+                </div>
+
+                <!-- Отправить подарок цитрусы -->
+                <div style="background:rgba(255,215,0,0.05);border:1px solid rgba(255,215,0,0.15);border-radius:14px;padding:16px;">
+                    <div style="font-size:12px;color:#FFD700;font-family:var(--font-head);letter-spacing:1px;margin-bottom:10px;">🍊 ПОДАРИТЬ ЦИТРУСЫ</div>
+                    <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;">
+                        ${[50,100,200,500,1000].map(v=>`<button onclick="document.getElementById('bday-amount').value=${v};this.parentNode.querySelectorAll('button').forEach(b=>b.style.background='rgba(255,215,0,0.08)');this.style.background='rgba(255,215,0,0.25)';" style="padding:6px 12px;background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.2);border-radius:8px;color:#FFD700;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-body);">${v} 🍊</button>`).join('')}
+                    </div>
+                    <div style="display:flex;gap:8px;">
+                        <input id="bday-amount" type="number" placeholder="Своя сумма" min="1" max="100000"
+                            style="flex:1;background:rgba(255,255,255,0.04);border:1px solid rgba(255,215,0,0.2);border-radius:10px;padding:9px 13px;color:#fff;font-family:var(--font-body);font-size:13px;outline:none;">
+                        <button onclick="app.sendBdayGift()" style="padding:9px 18px;background:linear-gradient(135deg,#FFD700,#FF8C00);border:none;border-radius:10px;color:#000;font-weight:700;font-family:var(--font-body);font-size:13px;cursor:pointer;white-space:nowrap;">🎁 Подарить</button>
+                    </div>
+                </div>
+
+                <!-- Быстрые поздравления -->
+                <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:14px;">
+                    <div style="font-size:12px;color:rgba(255,255,255,0.35);font-family:var(--font-head);letter-spacing:1px;margin-bottom:10px;">⚡ БЫСТРЫЕ СТИКЕРЫ</div>
+                    <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                        ${['🎂','🎉','🥳','🎈','🎁','🎊','🍰','❤️','🌟','🥂'].map(e=>`<button onclick="app.sendBdaySticker('${e}')" style="width:40px;height:40px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:10px;font-size:20px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform=''">${e}</button>`).join('')}
+                    </div>
+                </div>
+            </div>
+        </div>`;
+
+        document.body.appendChild(overlay);
+    },
+
+    async sendBdayMessage(){
+        const text = document.getElementById('bday-msg')?.value?.trim();
+        if(!text) return;
+        // Ищем ID именинника
+        let firefoxId = null;
+        try{
+            const r = await fetch(this._API+'/players/search?q=firefox');
+            const players = await r.json();
+            const ff = players.find(p=>(p.name||'').toLowerCase()==='firefox');
+            if(ff) firefoxId = String(ff.id);
+        }catch(e){}
+        if(!firefoxId){
+            this.showNotif('❌','Не найден','firefox ещё не заходил в игру');
+            return;
+        }
+        try{
+            await fetch(this._API+'/mail/'+firefoxId, {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({type:'bday_msg', from_id:String(this.userId), from_name:this.username+'#'+this.userId, text, ts:Date.now()})
+            });
+            this._launchConfetti();
+            this.showNotif('🎉','Поздравление отправлено!','firefox получит твоё сообщение');
+            document.getElementById('bday-modal')?.remove();
+        }catch(e){ this.showNotif('❌','Ошибка','Нет связи'); }
+    },
+
+    async sendBdayGift(){
+        const amount = parseInt(document.getElementById('bday-amount')?.value||'0');
+        if(!amount||amount<1){ this.showNotif('❌','Ошибка','Введи сумму'); return; }
+        if(this.balance<amount){ this.showNotif('❌','Мало цитрусов',`Нужно ${amount} 🍊`); return; }
+        let firefoxId = null;
+        try{
+            const r = await fetch(this._API+'/players/search?q=firefox');
+            const players = await r.json();
+            const ff = players.find(p=>(p.name||'').toLowerCase()==='firefox');
+            if(ff) firefoxId = String(ff.id);
+        }catch(e){}
+        if(!firefoxId){ this.showNotif('❌','Не найден','firefox ещё не заходил в игру'); return; }
+        this.balance -= amount;
+        this.saveData();
+        document.getElementById('balance-val').textContent = this.balance;
+        try{
+            await fetch(this._API+'/mail/'+firefoxId, {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({type:'gift', from_id:String(this.userId), from_name:this.username+'#'+this.userId, amount, ts:Date.now()})
+            });
+            this._launchConfetti();
+            this.showNotif('🎁',`+${amount} 🍊 подарено!`,'firefox получит цитрусы');
+            document.getElementById('bday-modal')?.remove();
+        }catch(e){
+            this.balance += amount; this.saveData();
+            document.getElementById('balance-val').textContent = this.balance;
+            this.showNotif('❌','Ошибка','Нет связи');
+        }
+    },
+
+    async sendBdaySticker(emoji){
+        let firefoxId = null;
+        try{
+            const r = await fetch(this._API+'/players/search?q=firefox');
+            const players = await r.json();
+            const ff = players.find(p=>(p.name||'').toLowerCase()==='firefox');
+            if(ff) firefoxId = String(ff.id);
+        }catch(e){}
+        if(!firefoxId){ this.showNotif('❌','Не найден','firefox ещё не заходил в игру'); return; }
+        try{
+            await fetch(this._API+'/mail/'+firefoxId, {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({type:'bday_msg', from_id:String(this.userId), from_name:this.username+'#'+this.userId, text:emoji+' С днём рождения!', ts:Date.now()})
+            });
+            this._launchConfetti();
+            this.showNotif(emoji,'Стикер отправлен!','');
+        }catch(e){}
+    },
+
     toggleNavGroup(){
         const items = document.getElementById('nav-group-items');
         const arrow = document.getElementById('nav-group-arrow');
@@ -5014,7 +5293,7 @@ const app = {
         });
         document.getElementById('tab-'+id)?.classList.remove('hidden');
         document.getElementById('nav-'+id)?.classList.add('active');
-        if(id==='avatar'){this.updateAvatarPreview();}
+        if(id==='avatar'){this.updateAvatarPreview();setTimeout(()=>this._initBirthdayInput(),50);}
         if(id==='help'){}
         if(id==='chat'){ this._pollGlobalChat(); }
         if(id==='cases'){}
@@ -5091,6 +5370,33 @@ const app = {
     },
     resetAvatar(){this.inventory=[];this.saveData();this.renderShop();this.updateAvatarPreview();},
 
+    saveBirthday(){
+        const inp = document.getElementById('bday-input');
+        if(!inp||!inp.value){ this.showNotif('❌','Выбери дату',''); return; }
+        const date = inp.value; // YYYY-MM-DD
+        this.myBirthday = date;
+        // Сохраняем в localStorage и на сервер
+        const ls = JSON.parse(localStorage.getItem('citrus_v5_pro')||'{}');
+        ls.myBirthday = date;
+        localStorage.setItem('citrus_v5_pro', JSON.stringify(ls));
+        fetch(this._API+'/players/'+this.userId, {method:'POST',headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({...ls, birthday:date})}).catch(()=>{});
+        const saved = document.getElementById('bday-saved');
+        const parts = date.split('-');
+        if(saved) saved.textContent = '✓ Дата рождения: '+parts[2]+'.'+parts[1];
+        this.showNotif('🎂','День рождения сохранён!','В этот день все увидят праздничный баннер');
+    },
+
+    _initBirthdayInput(){
+        const inp = document.getElementById('bday-input');
+        const saved = document.getElementById('bday-saved');
+        if(!inp) return;
+        // Загружаем сохранённую дату
+        const ls = JSON.parse(localStorage.getItem('citrus_v5_pro')||'{}');
+        if(ls.myBirthday){ inp.value=ls.myBirthday; const p=ls.myBirthday.split('-'); if(saved) saved.textContent='✓ Дата: '+p[2]+'.'+p[1]; }
+    },
+
+    // ── MULTIPLAYER / WEBSOCKET / CHAT
     _wsConnect(){
         if(this._ws&&this._ws.readyState<2)return;
         // BroadcastChannel для игроков в одном браузере/вкладке
@@ -5503,7 +5809,6 @@ const app = {
             this.showNotif('🤝', 'Принята!', `${letter.from_name} теперь твой друг! 🎉`);
             return true;
         }
-        if(letter.type==='credit_repaid'){const amount=letter.amount||0;this.balance=(this.balance||0)+amount;this.saveData();const bv=document.getElementById('balance-val');if(bv)bv.textContent=this.balance;this.showNotif('💰','Долг возвращён!',`${letter.from_name} вернул ${amount} 🍊`);return true;}
         return false;
     },
 
@@ -5605,7 +5910,7 @@ const app = {
             res.innerHTML += `
                 <div class="fr">
                     <div class="fa2" style="background:${col}22;color:${col}">${(u.name[0]||'?').toUpperCase()}</div>
-                    <div class="fi"><div class="fn">${u.name}${app.devBadge(u.name)} <small style="color:#555">#${u.id}</small></div>
+                    <div class="fi"><div class="fn">${u.name} <small style="color:#555">#${u.id}</small></div>
                     <div class="fs ${isOnline?'on':''}"> ${isOnline ? '● Онлайн' : '○ Не в сети'}</div></div>
                     <div class="fb">
                         ${isFr ? '<span style="color:#00E676;font-size:11px">✓ В друзьях</span>' : 
@@ -5675,7 +5980,7 @@ const app = {
             const on=online.find(x=>x.id===fid);
             const wNames={gather:'Цитрусовый Лес',parkour:'Небесный Паркур',
                 volcano:'Остров Вулкана',space:'Космическая База',race:'Гонки',dropper:'Дроппер',obby:'Обби',
-                pvp:'Арена ПВП',maze:'Лабиринт'};
+                pvp:'Арена ПВП',maze:'Лабиринт',coins:'Золотая Лихорадка'};
             const friendMapId = on && on.status==='ingame' ? on.world : null;
             const friendMapName = friendMapId ? (wNames[friendMapId] || friendMapId) : null;
             const st = on ? (friendMapId ? '🎮 '+friendMapName : '● Онлайн') : '○ Оффлайн';
@@ -6669,7 +6974,7 @@ const app = {
         document.getElementById('studio-ui').classList.toggle('hidden',mode!=='studio');
         const stTouch = document.getElementById('studio-touch-btns');
         if(stTouch) stTouch.classList.toggle('hidden', mode!=='studio');
-        document.getElementById('ingame-ui').style.display=(mode==='play'&&(mapId==='gather'||mapId==='race'||mapId==='march8'))?'flex':'none';
+        document.getElementById('ingame-ui').style.display=(mode==='play'&&(mapId==='gather'||mapId==='race'||mapId==='coins'||mapId==='march8'))?'flex':'none';
         document.getElementById('mp-panel').classList.toggle('hidden',mode!=='play');
 
         
@@ -6689,7 +6994,7 @@ const app = {
     setupScene(){
         const canvas=document.getElementById('gl-canvas');canvas.innerHTML='';
         this.scene=new THREE.Scene();
-        const bgs={lobby:0x0a0a18,gather:0x0d1f0a,parkour:0x87CEEB,volcano:0x1a0800,space:0x000005,race:0x0a0a0a,dropper:0x001133,obby:0x1a0500,maze:0x0a0f0a,march8:0x1a0a1a};
+        const bgs={lobby:0x0a0a18,gather:0x0d1f0a,parkour:0x87CEEB,volcano:0x1a0800,space:0x000005,race:0x0a0a0a,dropper:0x001133,obby:0x1a0500,maze:0x0a0f0a,coins:0x0d0800,march8:0x1a0a1a};
         const bg=bgs[this.currentMap]||0x0a0a10;
         this.scene.background=new THREE.Color(bg);
         this.scene.fog=new THREE.FogExp2(bg,0.016);
@@ -6715,7 +7020,7 @@ const app = {
         if(this.mode==='play'){
             this.playerGroup=this.buildCharacter(true);
             // Спавн выше земли для всех миров
-            const spawnY = {parkour:8, march8:5, maze:2,  dropper:6, obby:2, race:1, volcano:4, space:4, gather:3, lobby:3};
+            const spawnY = {parkour:8, march8:5, maze:2,  coins:2, dropper:6, obby:2, race:1, volcano:4, space:4, gather:3, lobby:3};
             const baseY = this._joinSpawn ? 15 : (spawnY[this.currentMap] || (typeof this.currentMap==='number' ? 12 : 5));
             this._joinSpawn = false;
             this.playerGroup.position.set(0, baseY, 0);
@@ -7174,6 +7479,78 @@ const app = {
 
         
 
+        else if(this.currentMap==='coins'){
+            // 💰 ЗОЛОТАЯ ЛИХОРАДКА — шахта с монетами
+            this.scene.background=new THREE.Color(0x0d0800);
+            this.scene.fog=new THREE.FogExp2(0x0d0800,0.02);
+            addGround(0x2a1a00);
+            this.scene.add(new THREE.AmbientLight(0xffaa44,0.5));
+            const rockMat=new THREE.MeshStandardMaterial({color:0x3a2a1a,roughness:0.95});
+            const goldMat=new THREE.MeshStandardMaterial({color:0xFFD700,emissive:0xCC8800,emissiveIntensity:0.8,metalness:0.8,roughness:0.2});
+            const goldSeamMat=new THREE.MeshStandardMaterial({color:0xFFAA00,emissive:0xFF8800,emissiveIntensity:1.2,metalness:0.9,roughness:0.1});
+            // Горы/скалы по краям
+            for(let i=0;i<18;i++){
+                const a=i/18*Math.PI*2, r=35+Math.random()*15;
+                const rock=new THREE.Mesh(new THREE.ConeGeometry(4+Math.random()*4,8+Math.random()*12,6),rockMat);
+                rock.position.set(Math.cos(a)*r,0,Math.sin(a)*r); rock.castShadow=true;
+                this.scene.add(rock); this.objectsToIntersect.push(rock);
+            }
+            // Шахтные платформы — уровни вниз
+            for(let level=0;level<5;level++){
+                const y=-level*5, r=12-level*1.5;
+                const platform=new THREE.Mesh(new THREE.CylinderGeometry(r,r,0.5,12),rockMat);
+                platform.position.set(0,y,0); this.scene.add(platform); this.objectsToIntersect.push(platform);
+                // Жилы золота в стенах
+                for(let j=0;j<6;j++){
+                    const a=j/6*Math.PI*2;
+                    const seam=new THREE.Mesh(new THREE.BoxGeometry(0.8,0.4,0.3),goldSeamMat);
+                    seam.position.set(Math.cos(a)*(r-0.5),y+0.5,Math.sin(a)*(r-0.5));
+                    seam.rotation.y=a; seam.castShadow=false; this.scene.add(seam);
+                }
+            }
+            // Лестницы между уровнями
+            for(let level=0;level<4;level++){
+                const y=-level*5, r=8-level;
+                const ladder=new THREE.Mesh(new THREE.BoxGeometry(0.5,5.5,0.5),new THREE.MeshStandardMaterial({color:0x8B6914,roughness:0.8}));
+                ladder.position.set(r-2,y-2.5,0); this.scene.add(ladder); this.objectsToIntersect.push(ladder);
+            }
+            // МНОГО монет на всех уровнях
+            const coinPositions2=[];
+            for(let level=0;level<5;level++){
+                const y=-level*5+1.5, r=8-level*1.2;
+                for(let j=0;j<3;j++){
+                    const a=j/3*Math.PI*2+(level*0.4);
+                    coinPositions2.push([Math.cos(a)*r,y,Math.sin(a)*r]);
+                }
+            }
+            // Бонусные золотые самородки в центре каждого уровня
+            for(let level=0;level<5;level++){
+                coinPositions2.push([0,-level*5+2,0]); // большая монета в центре
+            }
+            coinPositions2.forEach(([x,y,z])=>{
+                const c=new THREE.Group();
+                const f=new THREE.Mesh(new THREE.SphereGeometry(0.35,10,10),new THREE.MeshStandardMaterial({color:0xFF8C00,emissive:0xFF6000,emissiveIntensity:0.7,roughness:0.5})); c.add(f);
+                const l=new THREE.Mesh(new THREE.SphereGeometry(0.11,6,6),new THREE.MeshStandardMaterial({color:0x22aa22})); l.position.set(0,0.37,0); c.add(l);
+                c.position.set(x,y,z); this.scene.add(c); this.collectibles.push(c);
+            });
+            // Факелы на каждом уровне
+            for(let level=0;level<5;level++){
+                const y=-level*5+2, r=10-level;
+                [0,Math.PI/2,Math.PI,Math.PI*1.5].forEach(a=>{
+                    const tl=new THREE.PointLight(0xFF8800,2,12); tl.position.set(Math.cos(a)*r,y,Math.sin(a)*r); this.scene.add(tl);
+                    const fl=new THREE.Mesh(new THREE.SphereGeometry(0.18,6,6),new THREE.MeshStandardMaterial({emissive:0xFF5500,emissiveIntensity:2}));
+                    fl.position.set(Math.cos(a)*r,y,Math.sin(a)*r); this.scene.add(fl);
+                });
+            }
+            // HUD
+            let ch=document.getElementById('coins-hud');
+            if(!ch){ch=document.createElement('div');ch.id='coins-hud';
+                ch.style.cssText='position:fixed;top:80px;right:20px;z-index:200;font-family:Orbitron,sans-serif;text-align:right;pointer-events:none;';
+                document.body.appendChild(ch);}
+            this._coinsTotal=coinPositions2.length; this._coinsFound=0;
+            const showCoinsHud=()=>{};
+            this._coinsShowHud=showCoinsHud;
+        }
 
 
 
@@ -7647,7 +8024,7 @@ const app = {
                 this._snowParticles.geometry.attributes.position.needsUpdate=true;
             }
             // Монеты в новых мирах — вращаются и подбираются
-            if(['race','obby','maze'].includes(this.currentMap)){
+            if(['race','obby','maze','coins'].includes(this.currentMap)){
                 for(let i=this.collectibles.length-1;i>=0;i--){
                     const c=this.collectibles[i];
                     c.rotation.z+=2*delta;
@@ -7656,6 +8033,7 @@ const app = {
                         this.balance+=30;this.saveData();
                         this._sfx('coin');
                         if(this.currentMap==='race'){this._raceScore=(this._raceScore||0)+1;if(this._raceShowHud)this._raceShowHud();}
+                        if(this.currentMap==='coins'){this._coinsFound=(this._coinsFound||0)+1;if(this._coinsShowHud)this._coinsShowHud();}
                         if(this.collectibles.length===0){
                             setTimeout(()=>this.showNotif('🏆','Все собрано!','Ты собрал все цитрусы! +500 🍊'),200);
                             this.balance+=500;this.saveData();
@@ -8244,8 +8622,6 @@ const app = {
 
     // ── СИСТЕМА ЗАДАНИЙ ──
     _initQuests(){
-        if(!this.questData||typeof this.questData!=='object') this.questData={};
-        if(!this.questRotation||typeof this.questRotation!=='object') this.questRotation={};
         const ALL_QUESTS = [
             {id:'play30',  title:'Игрок дня',       desc:'Поиграй 30 минут',           reward:50,  type:'playtime', goal:30,  icon:'⏱️'},
             // ── Время в игре ──
@@ -8293,7 +8669,7 @@ const app = {
         const rot = this.questRotation;
 
         // Если слот пустой или время вышло — выбираем новые 5 заданий
-        if(!rot.nextAt || now >= rot.nextAt || !Array.isArray(rot.ids) || rot.ids.length===0) {
+        if(!rot.nextAt || now >= rot.nextAt) {
             rot.nextAt = now + ROTATE_MS;
             // Выбираем 5 случайных непересекающихся заданий
             const shuffled = [...ALL_QUESTS].sort(()=>Math.random()-0.5);
@@ -8308,7 +8684,7 @@ const app = {
         }
 
         // Активные задания
-        this._questDefs = (rot.ids||[]).map(id => ALL_QUESTS.find(q=>q.id===id)).filter(Boolean);
+        this._questDefs = rot.ids.map(id => ALL_QUESTS.find(q=>q.id===id)).filter(Boolean);
         // Инициализируем данные для каждого задания если нет
         this._questDefs.forEach(q=>{
             if(!this.questData[q.id]) this.questData[q.id]={progress:0,done:false,claimed:false};
@@ -8492,7 +8868,7 @@ const app = {
         if(this._mtInterval){clearInterval(this._mtInterval);this._mtInterval=null;}this._mtSeconds=null;this._mtReached=false;
         this._snowParticles=null;
         // Чистим HUD всех игр
-        ['race-hud','dropper-hud','maze-hud'].forEach(id=>{const el=document.getElementById(id);if(el)el.remove();});
+        ['race-hud','dropper-hud','maze-hud','coins-hud'].forEach(id=>{const el=document.getElementById(id);if(el)el.remove();});
         this._raceCar=null; this._raceSpeed=false;
         document.exitPointerLock();
         document.getElementById('engine-view').style.display='none';
