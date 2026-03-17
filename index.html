@@ -1580,6 +1580,7 @@
             </div>
             <div id="nav-group-items">
                 <div class="nav-item active" id="nav-games"      onclick="app.switchTab('games')">      <div class="nav-icon"><i class="fas fa-gamepad"></i></div> Миры</div>
+                <div class="nav-item"        id="nav-mine"       onclick="app.switchTab('mine')">       <div class="nav-icon">⛏️</div> Шахта</div>
                 <div class="nav-item"        id="nav-avatar"      onclick="app.switchTab('avatar')">     <div class="nav-icon"><i class="fas fa-user-astronaut"></i></div> Аватар</div>
                 <div class="nav-item"        id="nav-shop"        onclick="app.switchTab('shop')">       <div class="nav-icon"><i class="fas fa-store"></i></div> Магазин</div>
                 <div class="nav-item"        id="nav-friends"     onclick="app.switchTab('friends')">    <div class="nav-icon"><i class="fas fa-users"></i></div> Друзья <span class="nav-badge hidden" id="fr-badge">0</span></div>
@@ -1855,6 +1856,79 @@
                         <div style="position:absolute;top:0;left:15%;right:15%;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.07),transparent);"></div>
                         <div style="font-size:8px;font-family:var(--font-mono);color:rgba(255,149,0,0.40);letter-spacing:3px;text-transform:uppercase;margin-bottom:16px;">МОИ ДРУЗЬЯ</div>
                         <div id="friends-list" style="display:flex;flex-direction:column;gap:6px;max-height:calc(100vh - 280px);overflow-y:auto;"></div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ══════════════════ TAB: MINE ══════════════════ -->
+            <div id="tab-mine" class="hidden" style="padding:0;overflow:hidden;height:calc(100vh - 64px);display:flex;flex-direction:column;background:#080508;">
+
+                <!-- ── СТАРТ ── -->
+                <div id="mine-start" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:32px;background:radial-gradient(ellipse 70% 60% at 50% 40%,rgba(180,100,20,0.07),transparent);">
+                    <div style="font-size:64px;filter:drop-shadow(0 0 24px rgba(200,130,30,0.5));">⛏️</div>
+                    <div style="text-align:center;">
+                        <div style="font-family:var(--font-head);font-size:44px;letter-spacing:8px;background:linear-gradient(135deg,#A07030,#E0B050,#7A4810);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">ШАХТА</div>
+                        <div style="font-size:10px;color:rgba(180,130,50,0.45);letter-spacing:4px;font-family:var(--font-mono);margin-top:3px;">ПЕРВОЕ ЛИЦО · КОПАЙ · ПРОДАВАЙ</div>
+                    </div>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;max-width:500px;">
+                        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:12px 18px;text-align:center;">
+                            <div style="font-size:22px;">🪨</div><div style="font-size:10px;color:rgba(255,255,255,0.4);font-family:var(--font-mono);margin-top:4px;">обычные</div>
+                        </div>
+                        <div style="background:rgba(56,180,255,0.04);border:1px solid rgba(56,180,255,0.10);border-radius:12px;padding:12px 18px;text-align:center;">
+                            <div style="font-size:22px;">💎</div><div style="font-size:10px;color:#38BDF8;font-family:var(--font-mono);margin-top:4px;">редкие</div>
+                        </div>
+                        <div style="background:rgba(255,149,0,0.04);border:1px solid rgba(255,149,0,0.12);border-radius:12px;padding:12px 18px;text-align:center;">
+                            <div style="font-size:22px;">🌟</div><div style="font-size:10px;color:#FF9500;font-family:var(--font-mono);margin-top:4px;">легендарные</div>
+                        </div>
+                        <div style="background:rgba(255,40,40,0.04);border:1px solid rgba(255,40,40,0.10);border-radius:12px;padding:12px 18px;text-align:center;">
+                            <div style="font-size:22px;">💀</div><div style="font-size:10px;color:#FF4545;font-family:var(--font-mono);margin-top:4px;">мифические</div>
+                        </div>
+                    </div>
+                    <button onclick="app.mineStart()" style="background:linear-gradient(135deg,#7A4810,#C88020,#7A4810);background-size:200%;color:#fff;border:none;border-radius:16px;padding:16px 52px;font-family:var(--font-head);font-size:24px;letter-spacing:5px;cursor:pointer;box-shadow:0 0 32px rgba(180,110,20,0.4),0 4px 20px rgba(0,0,0,0.6);transition:all 0.2s;"
+                        onmouseover="this.style.transform='scale(1.04)';this.style.boxShadow='0 0 48px rgba(200,130,30,0.55),0 4px 20px rgba(0,0,0,0.6)'"
+                        onmouseout="this.style.transform='';this.style.boxShadow='0 0 32px rgba(180,110,20,0.4),0 4px 20px rgba(0,0,0,0.6)'">
+                        ВОЙТИ В ШАХТУ
+                    </button>
+                    <!-- Рюкзак если есть что продать -->
+                    <div id="mine-bag-preview" style="display:none;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:14px 20px;text-align:center;max-width:520px;width:100%;">
+                        <div style="font-size:9px;color:rgba(255,255,255,0.25);font-family:var(--font-mono);letter-spacing:2px;margin-bottom:10px;">🎒 В РЮКЗАКЕ</div>
+                        <div id="mine-bag-items" style="display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-bottom:12px;max-height:220px;overflow-y:auto;padding:4px;"></div>
+                        <button onclick="app.mineSell()" style="background:linear-gradient(135deg,#FF9500,#C05000);color:#fff;border:none;border-radius:10px;padding:10px 32px;font-family:var(--font-ui);font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 0 16px rgba(255,149,0,0.35);">💰 Продать всё</button>
+                    </div>
+                </div>
+
+                <!-- ── ИГРА (первое лицо) ── -->
+                <div id="mine-game" style="display:none;flex:1;flex-direction:column;position:relative;overflow:hidden;">
+
+                    <!-- Canvas — кликай чтобы бить, кастомный курсор-кирка -->
+                    <canvas id="mine-canvas" onclick="app.mineHit()" style="position:absolute;inset:0;width:100%;height:100%;display:block;cursor:url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2232%22 height=%2232%22 viewBox=%220 0 32 32%22><text y=%2226%22 font-size=%2228%22>⛏️</text></svg>') 4 28, crosshair;"></canvas>
+
+                    <!-- HUD поверх canvas -->
+                    <div style="position:absolute;top:0;left:0;right:0;padding:12px 16px;display:flex;align-items:center;gap:10px;background:linear-gradient(180deg,rgba(0,0,0,0.7),transparent);pointer-events:none;">
+                        <button onclick="app.mineExit()" style="pointer-events:auto;background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.6);border-radius:8px;padding:6px 14px;font-family:var(--font-ui);font-size:12px;cursor:pointer;">← Выйти</button>
+                        <div style="width:1px;height:22px;background:rgba(255,255,255,0.1);"></div>
+                        <div style="font-family:var(--font-mono);font-size:11px;color:rgba(180,130,50,0.8);">ГЛУБИНА <span id="mine-hud-depth" style="color:#D4A84B;font-size:14px;font-weight:700;">1</span></div>
+                        <div style="flex:1;"></div>
+                        <div id="mine-hud-bag" style="font-family:var(--font-mono);font-size:11px;color:rgba(255,255,255,0.4);">🎒 <span id="mine-hud-items">0 пред.</span></div>
+                    </div>
+
+                    <!-- Полоска ударов убрана — показывается в canvas -->
+
+                    <!-- Кнопка убрана — кликай на экран -->
+
+                    <!-- Попап добычи -->
+                    <div id="mine-pickup-popup" style="position:absolute;top:35%;left:50%;transform:translateX(-50%);pointer-events:none;z-index:10;opacity:0;transition:opacity 0.15s,top 0.4s;text-align:center;"></div>
+
+                    <!-- Результат после 20 ударов -->
+                    <div id="mine-result" style="display:none;position:absolute;inset:0;background:rgba(0,0,0,0.88);backdrop-filter:blur(8px);flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:20;">
+                        <div style="font-family:var(--font-head);font-size:32px;letter-spacing:4px;color:#D4A84B;">ПОХОД ЗАВЕРШЁН</div>
+                        <div id="mine-result-items" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:500px;"></div>
+                        <div id="mine-result-total" style="font-family:var(--font-mono);font-size:18px;color:var(--c-glow);margin-top:4px;"></div>
+                        <div style="display:flex;gap:12px;margin-top:8px;">
+                            <button onclick="app.mineDeeper()" style="background:linear-gradient(135deg,#6A3808,#B06010);color:#fff;border:none;border-radius:14px;padding:13px 28px;font-family:var(--font-head);font-size:18px;letter-spacing:3px;cursor:pointer;box-shadow:0 0 20px rgba(150,90,10,0.4);">⬇️ ГЛУБЖЕ</button>
+                            <button onclick="app.mineExit()" style="background:rgba(255,149,0,0.12);border:1px solid rgba(255,149,0,0.25);color:#FF9500;border-radius:14px;padding:13px 28px;font-family:var(--font-head);font-size:18px;letter-spacing:3px;cursor:pointer;">← НА БАЗУ</button>
+                        </div>
                     </div>
 
                 </div>
@@ -5125,7 +5199,7 @@ const app = {
 
         switchTab(id){
         this._sfx('nav');
-        ['games','avatar','shop','friends','studio','quests','roulette','credits','gifts','nft','stats','leaderboard','admin','help','cases'].forEach(t=>{
+        ['games','mine','avatar','shop','friends','studio','quests','roulette','credits','gifts','nft','stats','leaderboard','admin','help','cases'].forEach(t=>{
             document.getElementById('tab-'+t)?.classList.add('hidden');
             document.getElementById('nav-'+t)?.classList.remove('active');
         });
@@ -5133,7 +5207,7 @@ const app = {
         document.getElementById('nav-'+id)?.classList.add('active');
         if(id==='avatar'){this.updateAvatarPreview();}
         if(id==='help'){}
-
+        if(id==='mine'){ this.initMine(); }
         if(id==='chat'){ this._pollGlobalChat(); }
         if(id==='cases'){}
         if(id==='games')this.renderMyGames();
@@ -8700,6 +8774,660 @@ const app = {
         this.stopGameMusic();
         this._restoreHubMusic();
         this._sfx('exit');
+    },
+
+    // ══════════════════════════════════════
+    // ⛏️ ШАХТА — вид от первого лица
+    // ══════════════════════════════════════
+    _MINE_RES: [
+        // ── COMMON (обычные) ──
+        { id:'stone',    emoji:'🪨', name:'Камень',           rarity:'common',    rc:'#888888', minV:1,   maxV:3,   hp:30  },
+        { id:'dirt',     emoji:'🟫', name:'Земля',             rarity:'common',    rc:'#8B6040', minV:1,   maxV:2,   hp:30  },
+        { id:'wood',     emoji:'🪵', name:'Дерево',            rarity:'common',    rc:'#A0602A', minV:2,   maxV:5,   hp:30  },
+        { id:'sand',     emoji:'🏖️', name:'Песок',            rarity:'common',    rc:'#C8A050', minV:1,   maxV:3,   hp:25  },
+        { id:'gravel',   emoji:'🪦', name:'Гравий',            rarity:'common',    rc:'#707070', minV:2,   maxV:4,   hp:28  },
+        // ── UNCOMMON (необычные) ──
+        { id:'coal',     emoji:'⬛', name:'Уголь',             rarity:'uncommon',  rc:'#6060AA', minV:5,   maxV:12,  hp:60  },
+        { id:'iron',     emoji:'🔩', name:'Железо',            rarity:'uncommon',  rc:'#8899BB', minV:6,   maxV:14,  hp:60  },
+        { id:'lapis',    emoji:'🔵', name:'Лазурит',           rarity:'uncommon',  rc:'#2266CC', minV:8,   maxV:18,  hp:60  },
+        { id:'copper',   emoji:'🟤', name:'Медь',              rarity:'uncommon',  rc:'#B06020', minV:7,   maxV:16,  hp:55  },
+        { id:'tin',      emoji:'🔘', name:'Олово',             rarity:'uncommon',  rc:'#AABBCC', minV:6,   maxV:15,  hp:58  },
+        { id:'sulfur',   emoji:'🌕', name:'Сера',              rarity:'uncommon',  rc:'#D4C010', minV:8,   maxV:18,  hp:60  },
+        // ── RARE (редкие) ──
+        { id:'gold',     emoji:'🟡', name:'Золото',            rarity:'rare',      rc:'#DDAA00', minV:15,  maxV:35,  hp:60  },
+        { id:'emerald',  emoji:'💚', name:'Изумруд',           rarity:'rare',      rc:'#22AA44', minV:20,  maxV:45,  hp:60  },
+        { id:'ruby',     emoji:'🔴', name:'Рубин',             rarity:'rare',      rc:'#DD2020', minV:25,  maxV:55,  hp:60  },
+        { id:'sapphire', emoji:'🔷', name:'Сапфир',            rarity:'rare',      rc:'#1144DD', minV:22,  maxV:50,  hp:60  },
+        { id:'topaz',    emoji:'🟠', name:'Топаз',             rarity:'rare',      rc:'#EE8800', minV:18,  maxV:42,  hp:60  },
+        { id:'silver',   emoji:'⚙️', name:'Серебро',          rarity:'rare',      rc:'#CCDDEE', minV:20,  maxV:45,  hp:60  },
+        // ── EPIC (эпические) ──
+        { id:'diamond',  emoji:'💎', name:'Алмаз',             rarity:'epic',      rc:'#00BBFF', minV:50,  maxV:110, hp:60  },
+        { id:'amethyst', emoji:'🔮', name:'Аметист',           rarity:'epic',      rc:'#9900FF', minV:60,  maxV:130, hp:60  },
+        { id:'opal',     emoji:'🫧', name:'Опал',              rarity:'epic',      rc:'#88EEFF', minV:55,  maxV:120, hp:60  },
+        { id:'obsidian', emoji:'🟣', name:'Обсидиан',          rarity:'epic',      rc:'#330044', minV:65,  maxV:140, hp:60  },
+        { id:'malachite',emoji:'🟢', name:'Малахит',           rarity:'epic',      rc:'#00AA55', minV:58,  maxV:125, hp:60  },
+        // ── LEGENDARY (легендарные) ──
+        { id:'citrite',  emoji:'🌟', name:'Цитрит',            rarity:'legendary', rc:'#FF9500', minV:150, maxV:320, hp:200 },
+        { id:'dracite',  emoji:'🔥', name:'Дракит',            rarity:'legendary', rc:'#FF4400', minV:180, maxV:380, hp:200 },
+        { id:'moonstone',emoji:'🌙', name:'Лунный камень',     rarity:'legendary', rc:'#AACCFF', minV:160, maxV:350, hp:200 },
+        { id:'sunstone', emoji:'☀️', name:'Солнечный камень',  rarity:'legendary', rc:'#FFCC00', minV:170, maxV:360, hp:200 },
+        // ── MYTHIC (мифические) ──
+        { id:'void',     emoji:'💀', name:'Чёрный кристалл',   rarity:'mythic',    rc:'#FF3030', minV:500, maxV:1000,hp:500 },
+        { id:'celestite',emoji:'⭐', name:'Небесит',           rarity:'mythic',    rc:'#FFFFFF', minV:600, maxV:1200,hp:500 },
+        { id:'soulstone',emoji:'🔮', name:'Камень душ',        rarity:'mythic',    rc:'#CC00FF', minV:700, maxV:1500,hp:500 },
+    ],
+    _MINE_W: [
+        // common
+        32,18,14,12,10,
+        // uncommon
+        9,8,7,6,5,5,
+        // rare
+        4,3,3,2.5,2.5,2,
+        // epic
+        1.5,1.2,1.0,0.8,0.7,
+        // legendary
+        0.4,0.3,0.25,0.2,
+        // mythic
+        0.1,0.07,0.05
+    ],
+
+    _mine: null,
+    _mineCtx: null,
+    _mineRAF: null,
+    _mineAnim: 0, // анимация удара 0..1
+
+    initMine(){
+        if(!this._mine) this._mine = { depth:1, bag:{}, totalEarned:0 };
+        const g = document.getElementById('mine-game');
+        const s = document.getElementById('mine-start');
+        if(g) g.style.display = 'none';
+        if(s) s.style.display = 'flex';
+        this._mineRenderBagPreview();
+    },
+
+    _mineRenderBagPreview(){
+        const bag = this._mine?.bag || {};
+        const items = Object.values(bag).filter(i=>i.count>0);
+        const preview = document.getElementById('mine-bag-preview');
+        const bagItems = document.getElementById('mine-bag-items');
+        if(!preview||!bagItems) return;
+        if(!items.length){ preview.style.display='none'; return; }
+        preview.style.display = 'block';
+        const total = items.reduce((s,i)=>s+i.totalVal,0);
+        bagItems.innerHTML = items.map(i=>`
+            <div style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:7px 12px;">
+                <span style="font-size:18px;">${i.emoji}</span>
+                <div><div style="font-size:12px;color:rgba(255,255,255,0.8);font-family:var(--font-ui);">${i.name} ×${i.count}</div>
+                <div style="font-size:10px;color:${i.rc};font-family:var(--font-mono);">${i.totalVal} 🍊</div></div>
+            </div>`).join('') +
+            `<div style="width:100%;text-align:center;font-size:14px;color:var(--c-glow);font-family:var(--font-mono);padding-top:2px;">Итого: ${total} 🍊</div>`;
+    },
+
+    mineStart(){
+        document.getElementById('mine-start').style.display = 'none';
+        const g = document.getElementById('mine-game');
+        g.style.display = 'flex'; g.style.flexDirection = 'column';
+        document.getElementById('mine-result').style.display = 'none';
+        // кнопка удалена
+
+        this._mineSession = {
+            hitsLeft: 999999,
+            blocks: this._mineGenBlocks(),
+            bi: 0,       // текущий блок
+            curHp: 0,    // HP текущего блока (устанавливается ниже)
+            curHpMax: 0,
+            collecting: [],  // анимированные частицы
+        };
+        // Установить HP первого блока
+        const first = this._mineSession.blocks[0];
+        this._mineSession.curHp = first.hpMax;
+        this._mineSession.curHpMax = first.hpMax;
+
+        // Инициализируем canvas
+        const canvas = document.getElementById('mine-canvas');
+        this._mineCtx = canvas.getContext('2d');
+        this._mineResizeCanvas();
+
+        this._mineRenderHitsBar();
+        this._mineUpdateHud();
+        this._mineLoop();
+    },
+
+    _mineResizeCanvas(){
+        const canvas = document.getElementById('mine-canvas');
+        if(!canvas) return;
+        canvas.width = canvas.offsetWidth || 800;
+        canvas.height = canvas.offsetHeight || 500;
+    },
+
+    _mineGenBlocks(){
+        const depth = this._mine.depth;
+        const count = 8 + Math.floor(Math.random()*5);
+        return Array.from({length:count}, ()=>{
+            const res = this._minePickRes(depth);
+            return { ...res, hpMax: res.hp };
+        });
+    },
+
+    _minePickRes(depth){
+        const w = this._MINE_W.map((v,i)=>{
+            const r = this._MINE_RES[i].rarity;
+            const b = depth*(r==='common'?-1.2 : r==='uncommon'?0.4 : r==='rare'?0.8 : r==='epic'?1.2 : r==='legendary'?1.6 : 2.0);
+            return Math.max(0.01, v+b);
+        });
+        const total = w.reduce((a,b)=>a+b,0);
+        let r = Math.random()*total;
+        for(let i=0;i<w.length;i++){ r-=w[i]; if(r<=0) return this._MINE_RES[i]; }
+        return this._MINE_RES[0];
+    },
+
+    _mineLoop(){
+        if(this._mineRAF) cancelAnimationFrame(this._mineRAF);
+        const draw = ()=>{
+            this._mineDraw();
+            this._mineRAF = requestAnimationFrame(draw);
+        };
+        this._mineRAF = requestAnimationFrame(draw);
+    },
+
+    _mineDraw(){
+        const ctx = this._mineCtx;
+        const canvas = document.getElementById('mine-canvas');
+        if(!ctx||!canvas) return;
+        const W = canvas.width, H = canvas.height;
+        const sess = this._mineSession;
+
+        // Базовый тёмно-коричневый фон (чтобы не было чёрных дыр)
+        ctx.fillStyle = '#1a0e06';
+        ctx.fillRect(0, 0, W, H);
+
+        // === ФОН — детализированный тоннель от первого лица ===
+        const eyeY = H * 0.48; // уровень глаз
+
+        // --- ПОТОЛОК ---
+        let gCeil = ctx.createLinearGradient(0,0,0,eyeY);
+        gCeil.addColorStop(0,'#0e0808'); gCeil.addColorStop(0.6,'#1e1008'); gCeil.addColorStop(1,'#2a1608');
+        ctx.fillStyle = gCeil; ctx.fillRect(0,0,W,eyeY);
+
+        // --- ПОЛ ---
+        let gFloor = ctx.createLinearGradient(0,eyeY,0,H);
+        gFloor.addColorStop(0,'#2a1608'); gFloor.addColorStop(0.5,'#1a0e05'); gFloor.addColorStop(1,'#0e0803');
+        ctx.fillStyle = gFloor; ctx.fillRect(0,eyeY,W,H-eyeY);
+
+        // --- БОКОВЫЕ СТЕНЫ (заполняем всё пространство) ---
+        // Левая стена — от края до границы тоннеля
+        const lx = W*0.22, rx = W*0.78;
+        const wallTop = eyeY*0.15, wallBot = eyeY + (H-eyeY)*0.85;
+
+        // Левая стена (трапеция)
+        let gWallL = ctx.createLinearGradient(0,0,lx,0);
+        gWallL.addColorStop(0,'#1e1208'); gWallL.addColorStop(1,'#2a1a0a');
+        ctx.fillStyle = gWallL;
+        ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(lx,wallTop); ctx.lineTo(lx,wallBot); ctx.lineTo(0,H); ctx.closePath(); ctx.fill();
+
+        // Правая стена (трапеция)
+        let gWallR = ctx.createLinearGradient(W,0,rx,0);
+        gWallR.addColorStop(0,'#1e1208'); gWallR.addColorStop(1,'#2a1a0a');
+        ctx.fillStyle = gWallR;
+        ctx.beginPath(); ctx.moveTo(W,0); ctx.lineTo(rx,wallTop); ctx.lineTo(rx,wallBot); ctx.lineTo(W,H); ctx.closePath(); ctx.fill();
+
+        // Текстура кирпичей на стенах
+        ctx.save();
+        const brickColors = ['#251508','#2d1a0a','#22120a','#1e1208'];
+        // Левая стена — кирпичи
+        for(let row=0;row<8;row++){
+            for(let col=0;col<3;col++){
+                const bw = lx*0.38, bh = H*0.085;
+                const bx2 = col*bw + (row%2===0?0:bw*0.5);
+                const by2 = row*bh;
+                if(bx2 > lx) continue;
+                ctx.fillStyle = brickColors[(row+col)%4];
+                ctx.strokeStyle = 'rgba(0,0,0,0.4)'; ctx.lineWidth = 1;
+                ctx.beginPath(); ctx.roundRect(bx2+2,by2+2,Math.min(bw-4,lx-bx2-2),bh-4,2); ctx.fill(); ctx.stroke();
+            }
+        }
+        // Правая стена — кирпичи
+        for(let row=0;row<8;row++){
+            for(let col=0;col<3;col++){
+                const bw = (W-rx)*0.38, bh = H*0.085;
+                const bx2 = rx + col*bw + (row%2===0?0:bw*0.5);
+                const by2 = row*bh;
+                if(bx2 > W) continue;
+                ctx.fillStyle = brickColors[(row+col+2)%4];
+                ctx.strokeStyle = 'rgba(0,0,0,0.4)'; ctx.lineWidth = 1;
+                ctx.beginPath(); ctx.roundRect(bx2+2,by2+2,Math.min(bw-4,W-bx2-2),bh-4,2); ctx.fill(); ctx.stroke();
+            }
+        }
+        ctx.restore();
+
+        // --- ТОННЕЛЬ В ГЛУБИНУ (арка + перспектива) ---
+        // Несколько арок перспективы
+        for(let d=4;d>=0;d--){
+            const t = d/4;
+            const ax = lx*(1-t) + W/2*t, aw = (rx-lx)*(1-t)*0.95;
+            const at = wallTop*(1-t)+eyeY*0.12*t, ab = wallBot*(1-t)+(eyeY+H*0.08)*t;
+            ctx.strokeStyle = `rgba(180,110,30,${0.06+t*0.08})`; ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(ax, at); ctx.lineTo(ax+aw, at);
+            ctx.lineTo(ax+aw, ab); ctx.lineTo(ax, ab);
+            ctx.closePath(); ctx.stroke();
+        }
+
+        // Центр тоннеля — коричнево-каменный, НЕ чёрный
+        // Сначала базовый коричневый фон внутри тоннеля
+        let gTunnelFill = ctx.createLinearGradient(W/2-100, 0, W/2+100, H);
+        gTunnelFill.addColorStop(0,'#3a2010');
+        gTunnelFill.addColorStop(0.3,'#2e1808');
+        gTunnelFill.addColorStop(0.7,'#261408');
+        gTunnelFill.addColorStop(1,'#1e1006');
+        ctx.fillStyle = gTunnelFill;
+        ctx.beginPath(); ctx.roundRect(lx, wallTop, rx-lx, wallBot-wallTop, 8); ctx.fill();
+
+        // Каменная текстура в глубине тоннеля (кирпичики вдали)
+        ctx.save();
+        const depthBrickColors = ['#2a1808','#321c0a','#261408','#2e1a08'];
+        for(let row=0;row<10;row++){
+            for(let col=0;col<6;col++){
+                const bw = (rx-lx)/6, bh = (wallBot-wallTop)/10;
+                const bx3 = lx + col*bw + (row%2===0?0:bw*0.5);
+                const by3 = wallTop + row*bh;
+                if(bx3+bw > rx+bw) continue;
+                ctx.fillStyle = depthBrickColors[(row*3+col)%4];
+                ctx.strokeStyle = 'rgba(0,0,0,0.25)'; ctx.lineWidth = 0.5;
+                ctx.beginPath(); ctx.roundRect(bx3+1,by3+1,Math.min(bw-2,rx-bx3-1),bh-2,1); ctx.fill(); ctx.stroke();
+            }
+        }
+        ctx.restore();
+
+        // Лёгкое затемнение к центру (глубина) — но НЕ чёрное
+        let gDepth = ctx.createRadialGradient(W/2,eyeY,0,W/2,eyeY,W*0.3);
+        gDepth.addColorStop(0,'rgba(0,0,0,0.0)');
+        gDepth.addColorStop(0.6,'rgba(0,0,0,0.25)');
+        gDepth.addColorStop(1,'rgba(0,0,0,0.55)');
+        ctx.fillStyle = gDepth;
+        ctx.beginPath(); ctx.roundRect(lx, wallTop, rx-lx, wallBot-wallTop, 8); ctx.fill();
+
+        // Линии пола (перспектива)
+        ctx.strokeStyle = 'rgba(120,70,20,0.15)'; ctx.lineWidth = 1;
+        for(let i=1;i<=5;i++){
+            const fy = eyeY + (H-eyeY)*i/5;
+            const fw = (W - (W-rx+lx)) * (1 - i/6);
+            ctx.beginPath(); ctx.moveTo(W/2-fw/2,fy); ctx.lineTo(W/2+fw/2,fy); ctx.stroke();
+        }
+        // Линии потолка (перспектива)
+        for(let i=1;i<=4;i++){
+            const cy = eyeY*i/5;
+            const cw = (W - (W-rx+lx)) * (1 - i/5);
+            ctx.beginPath(); ctx.moveTo(W/2-cw/2,cy); ctx.lineTo(W/2+cw/2,cy); ctx.stroke();
+        }
+
+        // --- ФАКЕЛЫ (на уровне глаз, реалистичные) ---
+        const torchFlicker = 0.85 + Math.sin(Date.now()*0.009)*0.08 + Math.sin(Date.now()*0.021)*0.07;
+        [[lx+8, eyeY*0.55], [rx-8, eyeY*0.55]].forEach(([tx,ty],si)=>{
+            // Ореол света
+            let gT = ctx.createRadialGradient(tx,ty,0,tx,ty,W*0.22*torchFlicker);
+            gT.addColorStop(0,`rgba(255,190,50,${0.28*torchFlicker})`);
+            gT.addColorStop(0.3,`rgba(255,120,10,${0.14*torchFlicker})`);
+            gT.addColorStop(1,'rgba(0,0,0,0)');
+            ctx.fillStyle = gT; ctx.fillRect(tx-W*0.22,ty-H*0.22,W*0.44,H*0.44);
+            // Кронштейн
+            ctx.fillStyle = '#5A3010'; ctx.fillRect(tx-2,ty-18,4,22);
+            ctx.fillStyle = '#3A1E08'; ctx.fillRect(tx-6,ty-2,12,6);
+            // Огонь
+            const fs = (8+torchFlicker*4);
+            for(let fl=0;fl<3;fl++){
+                const fc = fl===0?`rgba(255,240,80,${0.9*torchFlicker})`:fl===1?`rgba(255,140,20,${0.7*torchFlicker})`:`rgba(255,60,0,${0.5*torchFlicker})`;
+                ctx.fillStyle = fc;
+                ctx.beginPath(); ctx.ellipse(tx+(fl-1)*2, ty-18-fl*3, Math.max(0.1,fs*(1-fl*0.25)), Math.max(0.1,(fs*1.4)*(1-fl*0.2)),0,0,Math.PI*2); ctx.fill();
+            }
+        });
+
+        // --- ДЕТАЛИ ПОЛА — камни, осколки ---
+        ctx.save();
+        for(let r=0;r<12;r++){
+            const rx2 = lx + (rx-lx)*0.1 + Math.sin(r*137)*((rx-lx)*0.4);
+            const ry2 = eyeY + (H-eyeY)*0.15 + Math.cos(r*77)*((H-eyeY)*0.3);
+            const rs = Math.max(0.5, 3+Math.sin(r*53)*2.5);
+            ctx.fillStyle = `rgba(${60+r*5},${35+r*3},${20+r*2},0.5)`;
+            ctx.beginPath(); ctx.ellipse(rx2,ry2,Math.max(0.1,rs),Math.max(0.1,rs*0.5),0,0,Math.PI*2); ctx.fill();
+        }
+        ctx.restore();
+
+        // --- ПОТОЛОЧНЫЕ БАЛКИ ---
+        ctx.save();
+        [[lx+8,wallTop,lx+12,wallBot],[rx-12,wallTop,rx-8,wallBot]].forEach(([x1,y1,x2,y2])=>{
+            ctx.fillStyle = '#3A2010';
+            ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y1+10); ctx.lineTo(x2,y2-10); ctx.lineTo(x1,y2); ctx.closePath(); ctx.fill();
+        });
+        // Горизонтальная балка
+        ctx.fillStyle = '#3A2010';
+        ctx.beginPath(); ctx.roundRect(lx,wallTop,rx-lx,10,3); ctx.fill();
+        ctx.fillStyle = '#2a1608';
+        ctx.beginPath(); ctx.roundRect(lx,wallBot-8,rx-lx,8,3); ctx.fill();
+        ctx.restore();
+
+        // --- КИРКА убрана — она теперь курсор мыши ---
+        if(this._mineAnim > 0) this._mineAnim = Math.max(0, this._mineAnim - 0.07);
+
+        // === ТЕКУЩИЙ БЛОК — по центру на уровне глаз ===
+        if(sess && sess.bi < sess.blocks.length){
+            const block = sess.blocks[sess.bi];
+            const bx = W/2, by = eyeY * 0.52 + (H-eyeY)*0.08; // чуть выше центра
+            const bSize = Math.min(W,H) * 0.25;
+
+            // Большой ореол за блоком
+            let gBlock = ctx.createRadialGradient(bx,by,0,bx,by,bSize*2);
+            gBlock.addColorStop(0,block.rc+'44'); gBlock.addColorStop(0.5,block.rc+'11'); gBlock.addColorStop(1,'rgba(0,0,0,0)');
+            ctx.fillStyle = gBlock; ctx.fillRect(bx-bSize*2,by-bSize*2,bSize*4,bSize*4);
+
+            const crack = sess.curHp/sess.curHpMax;
+            const shakeX = this._mineAnim > 0.5 ? (Math.random()-0.5)*8 : 0;
+            const shakeY = this._mineAnim > 0.5 ? (Math.random()-0.5)*8 : 0;
+
+            ctx.save();
+            ctx.translate(bx+shakeX, by+shakeY);
+
+            // Тень блока на полу
+            ctx.fillStyle = 'rgba(0,0,0,0.35)';
+            ctx.beginPath(); ctx.ellipse(0, bSize/2+18, Math.max(0.1,bSize*0.55), Math.max(0.1,bSize*0.12), 0, 0, Math.PI*2); ctx.fill();
+
+            // Фон блока — каменная текстура
+            ctx.shadowColor = block.rc; ctx.shadowBlur = 28*(1-crack*0.3);
+            const grad = ctx.createLinearGradient(-bSize/2,-bSize/2,bSize/2,bSize/2);
+            grad.addColorStop(0,'#2a1e28'); grad.addColorStop(0.5,'#1a1018'); grad.addColorStop(1,'#12080f');
+            ctx.fillStyle = grad;
+            ctx.strokeStyle = block.rc+(crack>0.5?'88':'cc');
+            ctx.lineWidth = crack > 0.5 ? 2 : 3;
+            ctx.beginPath(); ctx.roundRect(-bSize/2,-bSize/2,bSize,bSize,14); ctx.fill(); ctx.stroke();
+            ctx.shadowBlur = 0;
+
+            // Засечки и текстура камня на блоке
+            ctx.strokeStyle = 'rgba(255,255,255,0.04)'; ctx.lineWidth = 1;
+            for(let tx2=0;tx2<4;tx2++){
+                for(let ty2=0;ty2<4;ty2++){
+                    const gx = -bSize/2 + bSize/4*tx2+bSize/8, gy = -bSize/2 + bSize/4*ty2+bSize/8;
+                    ctx.beginPath(); ctx.roundRect(gx,gy,bSize/5,bSize/5,3); ctx.stroke();
+                }
+            }
+
+            // Трещины (динамические, растут по мере урона)
+            if(crack < 0.95){
+                const crackCount = Math.floor((1-crack)*8)+1;
+                ctx.strokeStyle = `rgba(0,0,0,${Math.min(0.9,(1-crack)*1.2)})`; ctx.lineWidth = 1.5;
+                for(let c=0;c<crackCount;c++){
+                    const startX = (Math.sin(c*137)*0.3)*bSize, startY = (Math.cos(c*101)*0.3)*bSize;
+                    ctx.beginPath(); ctx.moveTo(startX,startY);
+                    let cx2=startX, cy2=startY;
+                    for(let seg=0;seg<3;seg++){
+                        cx2 += (Math.sin(c*53+seg*77)*0.15)*bSize;
+                        cy2 += (Math.cos(c*61+seg*89)*0.15)*bSize;
+                        ctx.lineTo(cx2,cy2);
+                    }
+                    ctx.stroke();
+                }
+                // Белые сколы
+                ctx.fillStyle = `rgba(255,255,255,${(1-crack)*0.15})`;
+                for(let s=0;s<crackCount;s++){
+                    const sx2 = (Math.sin(s*173)*0.25)*bSize, sy2 = (Math.cos(s*131)*0.25)*bSize;
+                    ctx.beginPath(); ctx.ellipse(sx2,sy2,3,2,Math.sin(s)*Math.PI,0,Math.PI*2); ctx.fill();
+                }
+            }
+
+            // Эмодзи ресурса (крупное)
+            ctx.font = `${Math.round(bSize*0.75)}px serif`;
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(block.emoji, 0, 0);
+            ctx.restore();
+
+            // HP-бар (красивый, под блоком)
+            const barW = bSize*1.4, barH = 10, barX = bx-barW/2, barY = by+bSize/2+16;
+            // Фон
+            ctx.fillStyle = 'rgba(0,0,0,0.6)';
+            ctx.beginPath(); ctx.roundRect(barX-2,barY-2,barW+4,barH+4,6); ctx.fill();
+            // Пустая часть
+            ctx.fillStyle = 'rgba(255,255,255,0.06)';
+            ctx.beginPath(); ctx.roundRect(barX,barY,barW,barH,5); ctx.fill();
+            // Заполненная
+            const pct = sess.curHp/sess.curHpMax;
+            const barColor = pct>0.6 ? block.rc : pct>0.3 ? '#DDAA00' : '#FF4545';
+            let gBar = ctx.createLinearGradient(barX,barY,barX+barW*pct,barY+barH);
+            gBar.addColorStop(0,barColor+'DD'); gBar.addColorStop(1,barColor+'88');
+            ctx.fillStyle = gBar;
+            ctx.beginPath(); ctx.roundRect(barX,barY,barW*pct,barH,5); ctx.fill();
+            // Блик сверху
+            ctx.fillStyle = 'rgba(255,255,255,0.15)';
+            ctx.beginPath(); ctx.roundRect(barX,barY,barW*pct,barH*0.4,5); ctx.fill();
+
+            // Счётчик HP
+            ctx.font = `600 ${Math.round(W*0.016)}px monospace`;
+            ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+            ctx.fillStyle = 'rgba(255,255,255,0.5)';
+            ctx.fillText(`${sess.curHp} / ${sess.curHpMax}`, bx, barY+barH+6);
+
+            // Название и редкость НАД блоком
+            ctx.font = `700 ${Math.round(W*0.022)}px sans-serif`;
+            ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+            ctx.fillStyle = 'rgba(255,255,255,0.9)';
+            ctx.fillText(block.name, bx, by - bSize/2 - 22);
+            ctx.font = `${Math.round(W*0.016)}px monospace`;
+            ctx.fillStyle = block.rc;
+            ctx.fillText(block.rarity.toUpperCase(), bx, by - bSize/2 - 6);
+
+            // Следующие блоки в перспективе (ЗА текущим, уменьшенные)
+            for(let n=1;n<=2;n++){
+                const nb = sess.blocks[sess.bi+n];
+                if(!nb) break;
+                const nScale = 0.45 - n*0.12;
+                const ns = bSize*nScale;
+                const nx = bx, ny = eyeY*0.4 + (by-eyeY*0.4)*(1-nScale*1.5);
+                ctx.globalAlpha = 0.35 - n*0.1;
+                ctx.fillStyle = '#1a1018';
+                ctx.strokeStyle = nb.rc+'44'; ctx.lineWidth = 1;
+                ctx.beginPath(); ctx.roundRect(nx-ns/2,ny-ns/2,ns,ns,6); ctx.fill(); ctx.stroke();
+                ctx.font = `${Math.round(ns*0.7)}px serif`;
+                ctx.textAlign='center'; ctx.textBaseline='middle';
+                ctx.fillText(nb.emoji,nx,ny);
+                ctx.globalAlpha = 1;
+            }
+
+        } else if(sess && sess.bi >= sess.blocks.length){
+            ctx.font = `700 ${Math.round(W*0.04)}px sans-serif`;
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillStyle = '#D4A84B';
+            ctx.shadowColor = '#D4A84B'; ctx.shadowBlur = 20;
+            ctx.fillText('ПРОХОД СВОБОДЕН!', W/2, eyeY);
+            ctx.shadowBlur = 0;
+        }
+
+        // Частицы при добыче
+        if(sess) this._mineDrawParticles(ctx, sess, W, H);
+    },
+
+    _mineDrawParticles(ctx, sess, W, H){
+        if(!sess.particles) return;
+        sess.particles = sess.particles.filter(p=>{
+            p.x += p.vx; p.y += p.vy; p.vy += 0.3; p.life -= 0.04;
+            if(p.life <= 0) return false;
+            ctx.globalAlpha = p.life;
+            ctx.font = `${p.size}px serif`;
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(p.emoji, p.x, p.y);
+            ctx.globalAlpha = 1;
+            return true;
+        });
+    },
+
+    mineHit(){
+        const now = Date.now();
+
+        // Защита от автокликера — максимум 5 ударов в секунду
+        if(!this._mineClickTimes) this._mineClickTimes = [];
+        this._mineClickTimes = this._mineClickTimes.filter(t => now - t < 1000);
+        this._mineClickTimes.push(now);
+
+        if(this._mineClickTimes.length > 5){
+            // Отстранение на 3 минуты
+            if(this._mineRAF){ cancelAnimationFrame(this._mineRAF); this._mineRAF = null; }
+            this._mineBanned = true;
+            this._mineBanUntil = now + 3 * 60 * 1000;
+            this._mineClickTimes = [];
+
+            // Показываем экран бана
+            const canvas = document.getElementById('mine-canvas');
+            const game = document.getElementById('mine-game');
+            if(game){
+                let banDiv = document.getElementById('mine-ban-screen');
+                if(!banDiv){
+                    banDiv = document.createElement('div');
+                    banDiv.id = 'mine-ban-screen';
+                    banDiv.style.cssText = 'position:absolute;inset:0;background:rgba(0,0,0,0.92);z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;backdrop-filter:blur(8px);';
+                    game.appendChild(banDiv);
+                }
+                banDiv.style.display = 'flex';
+                const tick = () => {
+                    const left = Math.max(0, Math.ceil((this._mineBanUntil - Date.now()) / 1000));
+                    const m = Math.floor(left/60), s = left%60;
+                    banDiv.innerHTML = `
+                        <div style="font-size:48px;">🔨</div>
+                        <div style="font-family:var(--font-head);font-size:26px;letter-spacing:3px;color:#FF4545;">ВЫ ОТСТРАНЕНЫ</div>
+                        <div style="font-family:var(--font-ui);font-size:14px;color:rgba(255,255,255,0.6);text-align:center;max-width:300px;line-height:1.6;">
+                            Обнаружен автокликер.<br>Используй кирку честно!
+                        </div>
+                        <div style="font-family:var(--font-mono);font-size:32px;color:#FF6B6B;">${m}:${String(s).padStart(2,'0')}</div>
+                        <div style="font-family:var(--font-mono);font-size:11px;color:rgba(255,255,255,0.25);">осталось до разбана</div>`;
+                    if(left > 0) setTimeout(tick, 1000);
+                    else {
+                        banDiv.style.display = 'none';
+                        this._mineBanned = false;
+                        this._mineClickTimes = [];
+                        this.mineStart();
+                    }
+                };
+                tick();
+            }
+            return;
+        }
+
+        if(this._mineBanned) return;
+
+        const sess = this._mineSession;
+        if(!sess || sess.hitsLeft <= 0) return;
+        if(sess.bi >= sess.blocks.length){ this._mineFinish(); return; }
+
+        sess.hitsLeft--;
+        sess.curHp--;
+        this._mineAnim = 1.0; // запускаем анимацию кирки
+
+        if(sess.curHp <= 0){
+            // Блок сломан!
+            const block = sess.blocks[sess.bi];
+            const val = block.minV + Math.floor(Math.random()*(block.maxV - block.minV + 1));
+            const bag = this._mine.bag;
+            if(!bag[block.id]) bag[block.id] = {...block, count:0, totalVal:0};
+            bag[block.id].count++;
+            bag[block.id].totalVal += val;
+
+            // Частицы
+            if(!sess.particles) sess.particles = [];
+            const bx = (document.getElementById('mine-canvas')?.width||800)/2;
+            const by = (document.getElementById('mine-canvas')?.height||500)/2;
+            for(let i=0;i<8;i++){
+                sess.particles.push({
+                    x:bx, y:by,
+                    vx:(Math.random()-0.5)*8, vy:-Math.random()*8-2,
+                    emoji: block.emoji, size: 16+Math.random()*12,
+                    life: 1
+                });
+            }
+
+            // Попап
+            const popup = document.getElementById('mine-pickup-popup');
+            if(popup){
+                popup.innerHTML = `<div style="background:rgba(0,0,0,0.8);border:1px solid ${block.rc}55;border-radius:14px;padding:10px 20px;font-family:var(--font-mono);font-size:15px;color:${block.rc};">${block.emoji} +${block.name}<span style="color:#FFB340;margin-left:8px;">+${val} 🍊</span></div>`;
+                popup.style.opacity='1'; popup.style.top='32%';
+                setTimeout(()=>{ if(popup){popup.style.opacity='0'; popup.style.top='28%';} }, 1400);
+            }
+
+            sess.bi++;
+            if(sess.bi < sess.blocks.length){
+                const next = sess.blocks[sess.bi];
+                sess.curHp = next.hpMax;
+                sess.curHpMax = next.hpMax;
+            }
+        }
+
+        this._mineRenderHitsBar();
+        this._mineUpdateHud();
+
+        if(sess.bi >= sess.blocks.length){ this._mineFinish(); return; }
+    },
+
+    _mineFinish(){
+        if(this._mineRAF){ cancelAnimationFrame(this._mineRAF); this._mineRAF = null; }
+        const bag = this._mine.bag;
+        const items = Object.values(bag).filter(i=>i.count>0);
+        const total = items.reduce((s,i)=>s+i.totalVal, 0);
+
+        const res = document.getElementById('mine-result');
+        const rItems = document.getElementById('mine-result-items');
+        const rTotal = document.getElementById('mine-result-total');
+        if(!res) return;
+        res.style.display = 'flex';
+
+        if(rItems) rItems.innerHTML = items.map(i=>`
+            <div style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.05);border:1px solid ${i.rc}44;border-radius:10px;padding:8px 14px;">
+                <span style="font-size:22px;">${i.emoji}</span>
+                <div><div style="font-size:13px;color:rgba(255,255,255,0.85);font-family:var(--font-ui);">${i.name} ×${i.count}</div>
+                <div style="font-size:11px;color:${i.rc};font-family:var(--font-mono);">${i.totalVal} 🍊</div></div>
+            </div>`).join('') || '<div style="color:rgba(255,255,255,0.3);font-family:var(--font-mono);">ничего не добыто</div>';
+
+        if(rTotal) rTotal.textContent = total > 0 ? `В рюкзаке: ${total} 🍊` : '';
+    },
+
+    mineDeeper(){
+        this._mine.depth++;
+        this._mineSession = null;
+        document.getElementById('mine-result').style.display = 'none';
+        this.mineStart();
+    },
+
+    mineExit(){
+        if(this._mineRAF){ cancelAnimationFrame(this._mineRAF); this._mineRAF = null; }
+        this._mineSession = null;
+        document.getElementById('mine-game').style.display = 'none';
+        document.getElementById('mine-start').style.display = 'flex';
+        this._mine.depth = 1;
+        this._mineRenderBagPreview();
+    },
+
+    mineSell(){
+        const bag = this._mine?.bag||{};
+        const items = Object.values(bag).filter(i=>i.count>0);
+        if(!items.length){ this._showToast('Рюкзак пустой!'); return; }
+        const total = items.reduce((s,i)=>s+i.totalVal,0);
+        this.balance += total;
+        this.saveData();
+        const bv = document.getElementById('balance-val');
+        if(bv) bv.textContent = this.balance;
+        this._mine.bag = {};
+        this._mine.totalEarned = (this._mine.totalEarned||0)+total;
+        this.showNotif('💰',`+${total} 🍊 продано!`,`${items.reduce((a,i)=>a+i.count,0)} ресурсов`);
+        this._mineRenderBagPreview();
+    },
+
+    _mineRenderHitsBar(){
+        // Полоска рисуется на canvas в _mineDraw
+    },
+
+    _mineUpdateHud(){
+        const d = document.getElementById('mine-hud-depth');
+        const h = document.getElementById('mine-hud-items');
+        if(d) d.textContent = this._mine?.depth||1;
+        if(h){
+            const bagCount = Object.values(this._mine?.bag||{}).reduce((a,b)=>a+b.count,0);
+            const bagVal = Object.values(this._mine?.bag||{}).reduce((a,b)=>a+b.totalVal,0);
+            h.textContent = bagCount > 0 ? `${bagCount} пред. · ${bagVal} 🍊` : 'пусто';
+        }
     }
 };
 
