@@ -1451,13 +1451,26 @@
             .login-logo { font-size: 58px; }
         }
         @media (max-width: 500px) {
-            .sidebar { width: 58px; }
+            .sidebar { width: 52px; }
             .nav-item span:not(.nav-badge) { display: none; }
             .sidebar-label { display: none; }
-            .nav-item { justify-content: center; padding: 13px; }
-            .nav-item .nav-icon { margin: 0; }
+            .nav-item { justify-content: center; padding: 12px; }
+            .nav-item .nav-icon { margin: 0; font-size: 16px; }
+            .content-area { padding: 14px 12px; }
+            /* Карточки в 2 колонки на мобиле */
+            .grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
         }
-        .sidebar { overflow-y: auto; }
+        /* Плавный тач-скролл везде */
+        .content-area {
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+            scroll-behavior: smooth;
+        }
+        /* Магазин — секции нормально листаются */
+        #shop-grid {
+            -webkit-overflow-scrolling: touch;
+        }
+        .sidebar { overflow-y: auto; -webkit-overflow-scrolling: touch; }
 
         /* Hover glow на карточках */
         .card:hover::after {
@@ -1567,7 +1580,7 @@
                 🆘 Помощь / Идеи
                 <span id="support-badge" style="display:none;position:absolute;top:-6px;right:-6px;background:linear-gradient(135deg,#FF4444,#CC0000);color:#fff;font-size:10px;font-weight:800;padding:2px 6px;border-radius:20px;font-family:var(--font-head);min-width:18px;text-align:center;box-shadow:0 0 8px rgba(255,50,50,0.6);">0</span>
             </button>
-            <button id="music-toggle" onclick="app._toggleMusic()" title="Музыка" style="background:rgba(255,149,0,0.1);border:1px solid rgba(255,149,0,0.2);border-radius:10px;padding:6px 10px;color:rgba(255,149,0,0.7);font-size:14px;cursor:pointer;transition:all 0.2s;">🎵</button>
+            <button id="music-toggle" onclick="app._toggleMusic()" title="Нажми чтобы включить музыку" style="background:rgba(255,149,0,0.1);border:1px solid rgba(255,149,0,0.2);border-radius:10px;padding:6px 10px;color:rgba(255,149,0,0.7);font-size:14px;cursor:pointer;transition:all 0.2s;">▶ 🎵</button>
         </div>
     </div>
     <div class="hub-body">
@@ -1791,7 +1804,7 @@
                     <div class="section-title" style="margin:0;">Магазин</div>
                     <span class="hint-tag">💡 Зарабатывай 🍊 в Цитрусовом Лесу</span>
                 </div>
-                <div class="grid" id="shop-grid"></div>
+                <div id="shop-grid"></div>
             </div>
 
             <!-- ══════════════════ TAB: FRIENDS ══════════════════ -->
@@ -2425,6 +2438,55 @@ const SHOP_ITEMS = [
     {id:'hair_spiky',  name:'Дыбом Волосы',        icon:'⚡',  price:250  },
     {id:'macaroni',    name:'Макарошки',            icon:'🍝',  price:10000},
     {id:'tvhead',      name:'Голова-Телевизор',     icon:'📺',  price:5000 },
+
+    // ── НОВЫЕ КРУТЫЕ АКСЕССУАРЫ ──
+    // Головные уборы
+    {id:'helmet_space',name:'Шлем Астронавта',      icon:'👨‍🚀', price:1800, category:'head'},
+    {id:'helmet_moto', name:'Мотошлем Неон',         icon:'🏍️',  price:2200, category:'head'},
+    {id:'crown_diamond',name:'Алмазная Корона',      icon:'💠',  price:8000, category:'head'},
+    {id:'cap_snapback', name:'Кепка Snapback',       icon:'🧢',  price:180,  category:'head'},
+    {id:'mask_gas',    name:'Противогаз',             icon:'😷',  price:1200, category:'head'},
+    {id:'skull_mask',  name:'Маска Черепа',           icon:'💀',  price:999,  category:'head'},
+    {id:'neon_visor',  name:'Неоновый Визор',         icon:'🥽',  price:1600, category:'head'},
+    {id:'headset_pro', name:'Про-Гарнитура',          icon:'🎮',  price:750,  category:'head'},
+
+    // Тело / плащи
+    {id:'armor_dark',  name:'Тёмная Броня',           icon:'🦾',  price:4500, category:'body'},
+    {id:'jacket_denim',name:'Джинсовая Куртка',      icon:'🧥',  price:320,  category:'body'},
+    {id:'hoodie_fire', name:'Огненное Худи',          icon:'🔥',  price:890,  category:'body'},
+    {id:'backpack',    name:'Рюкзак Авантюриста',     icon:'🎒',  price:420,  category:'body'},
+    {id:'jetpack',     name:'Джетпак',                icon:'🚀',  price:6000, category:'body'},
+    {id:'wings_angel', name:'Ангельские Крылья',      icon:'✨',  price:3500, category:'body'},
+    {id:'wings_devil', name:'Крылья Демона',          icon:'🦇',  price:3500, category:'body'},
+
+    // Оружие / в руках
+    {id:'katana',      name:'Катана',                 icon:'⚔️',  price:2800, category:'weapon'},
+    {id:'staff_magic', name:'Магический Посох',       icon:'🪄',  price:1900, category:'weapon'},
+    {id:'axe_battle',  name:'Боевой Топор',           icon:'🪓',  price:1700, category:'weapon'},
+    {id:'gun_laser',   name:'Лазерный Пистолет',      icon:'🔫',  price:2100, category:'weapon'},
+    {id:'scepter',     name:'Скипетр Короля',         icon:'🔱',  price:5500, category:'weapon'},
+    {id:'scythe',      name:'Коса Жнеца',             icon:'⚰️',  price:4200, category:'weapon'},
+
+    // Питомцы / компаньоны
+    {id:'pet_dragon',  name:'Дракончик',              icon:'🐉',  price:9999, category:'pet'},
+    {id:'pet_cat',     name:'Котик',                  icon:'🐱',  price:800,  category:'pet'},
+    {id:'pet_robot',   name:'Робот-Компаньон',        icon:'🤖',  price:3000, category:'pet'},
+    {id:'pet_ghost',   name:'Призрак',                icon:'👻',  price:1500, category:'pet'},
+
+    // Эффекты / аура
+    {id:'aura_fire',   name:'Огненная Аура',          icon:'🌋',  price:7000, category:'effect'},
+    {id:'aura_ice',    name:'Ледяная Аура',           icon:'❄️',  price:7000, category:'effect'},
+    {id:'aura_thunder',name:'Аура Грома',             icon:'⚡',  price:7000, category:'effect'},
+    {id:'trail_stars', name:'Звёздный След',          icon:'🌠',  price:4000, category:'effect'},
+    {id:'trail_hearts',name:'След из Сердечек',       icon:'💕',  price:2500, category:'effect'},
+    {id:'bubble',      name:'Пузырь Удачи',           icon:'🫧',  price:1100, category:'effect'},
+
+    // Редкие / мемные
+    {id:'donut',       name:'Пончик на Голове',       icon:'🍩',  price:420,  category:'rare'},
+    {id:'ufo_beam',    name:'НЛО над Головой',        icon:'🛸',  price:12000,category:'rare'},
+    {id:'toilet',      name:'Унитаз на Голове',       icon:'🚽',  price:1337, category:'rare'},
+    {id:'pizza_hat',   name:'Шляпа-Пицца',           icon:'🍕',  price:500,  category:'rare'},
+    {id:'cactus',      name:'Кактус-Шляпа',           icon:'🌵',  price:777,  category:'rare'},
 ];
 const COLORS=[
     {c:0xCCCCCC,n:'Камень'},{c:0xFF9800,n:'Апельсин'},{c:0x4CAF50,n:'Трава'},
@@ -2536,6 +2598,9 @@ const app = {
                     this.updateUI();
                     this._wsConnect();
                     setInterval(()=>this.renderOnline(), 30000);
+                    this._initAudio();
+                    const _tm1=()=>{ if(this._ac&&this._ac.state==='suspended') this._ac.resume().then(()=>this.startHubMusic()); else this.startHubMusic(); document.removeEventListener('click',_tm1); document.removeEventListener('touchstart',_tm1); };
+                    setTimeout(()=>{ if(this._ac&&this._ac.state!=='suspended') this.startHubMusic(); else { document.addEventListener('click',_tm1); document.addEventListener('touchstart',_tm1); } },300);
                 })
                 .catch(()=>{
                     // Нет связи — проверяем локально
@@ -2555,6 +2620,9 @@ const app = {
                     this.updateUI();
                     this._wsConnect();
                     setInterval(()=>this.renderOnline(), 30000);
+                    this._initAudio();
+                    const _tm2=()=>{ if(this._ac&&this._ac.state==='suspended') this._ac.resume().then(()=>this.startHubMusic()); else this.startHubMusic(); document.removeEventListener('click',_tm2); document.removeEventListener('touchstart',_tm2); };
+                    setTimeout(()=>{ if(this._ac&&this._ac.state!=='suspended') this.startHubMusic(); else { document.addEventListener('click',_tm2); document.addEventListener('touchstart',_tm2); } },300);
                 });
         }
 
@@ -2613,7 +2681,7 @@ const app = {
         this.questData=d.questData||{}; this.coins=d.coins||0; this.rouletteUsed=d.rouletteUsed||false; this.questRotation=d.questRotation||null; this.visitedMaps=d.visitedMaps||[];
         // Сбрасываем ротацию если в ней есть неизвестные ID — будет пересчитано в _initQuests
         if(this.questRotation && this.questRotation.ids){
-            const _validIds = new Set(['play5','play10','play30','play60','jump20','jump50','jump100','jump200','maps2','maps3','maps5','maps8','friend1','friend3','friend5','buy1','buy3','buy5','build10','build50','build100','publish1','publish3','roul1','roulwin','lend1','repay1']);
+            const _validIds = new Set(['play5','play10','play20','play30','play60','jump10','jump30','jump75','jump150','maps1','maps2','maps4','maps7','friend1','friend3','friend5','buy1','buy2','buy4','build5','build20','build60','publish1','publish2','roul1','roul3','roulwin','lend1','repay1','mine5','mine20','mine_sell','wear1','wear3','earn50','earn200']);
             if(this.questRotation.ids.some(id=>!_validIds.has(id))){
                 this.questRotation = null;
                 this.questData = {};
@@ -4439,13 +4507,20 @@ const app = {
     _musicMuted: false,
 
     _toggleMusic(){
+        this._initAudio();
+        // Если музыка ещё не запущена — запускаем (первый клик разблокирует AudioContext)
+        if(!this._musicPlaying){
+            if(this._ac && this._ac.state==='suspended') this._ac.resume().then(()=>this.startHubMusic());
+            else this.startHubMusic();
+            return;
+        }
         this._musicMuted=!this._musicMuted;
         const btn=document.getElementById('music-toggle');
         if(this._musicMuted){
             if(this._musicGain) this._musicGain.gain.setTargetAtTime(0,this._ac.currentTime,0.5);
             if(btn) btn.textContent='🔇';
         } else {
-            if(this._musicGain) this._musicGain.gain.setTargetAtTime(0.13,this._ac.currentTime,0.5);
+            if(this._musicGain) this._musicGain.gain.setTargetAtTime(0.22,this._ac.currentTime,0.5);
             if(btn) btn.textContent='🎵';
         }
     },
@@ -4583,299 +4658,300 @@ const app = {
         this._musicPlaying=true;
         const ctx=this._ac;
         if(ctx.state==='suspended') ctx.resume();
+        if(this._musicGain&&!this._musicMuted){
+            this._musicGain.gain.cancelScheduledValues(ctx.currentTime);
+            this._musicGain.gain.setValueAtTime(0.20,ctx.currentTime);
+        }
+        const btn=document.getElementById('music-toggle');
+        if(btn) btn.textContent='🎵';
 
-        // ═══════════════════════════════════════════════
-        // HUB MUSIC — Электронная, Clownparty-стиль
-        // BPM 130, ~81 секунда, потом луп
-        // Структура: Intro → Build → Drop → Break → Drop2 → Outro
-        // ═══════════════════════════════════════════════
-        const BPM = 130, b = 60/BPM, sr = ctx.sampleRate;
+        const sr=ctx.sampleRate;
+        // ═══ BRAZILIAN PHONK / FUNK AUTOMOTIVO ═══
+        // 155 BPM, tamborzão groove, 808 slides, cowbell, claps
+        const BPM=155, b=60/BPM;
 
-        // Мастер-цепочка: компрессор → ревер → выход
-        const master = ctx.createDynamicsCompressor();
-        master.threshold.value = -14; master.ratio.value = 4;
-        master.attack.value = 0.003; master.release.value = 0.15;
+        const comp=ctx.createDynamicsCompressor();
+        comp.threshold.value=-16; comp.ratio.value=4;
+        comp.attack.value=0.003; comp.release.value=0.10;
+        comp.connect(this._musicGain);
 
-        const revBuf = ctx.createBuffer(2, sr*2, sr);
-        for(let c=0;c<2;c++){const d=revBuf.getChannelData(c);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,3);}
-        const rev = ctx.createConvolver(); rev.buffer = revBuf;
-        const revG = ctx.createGain(); revG.gain.value = 0.18;
-        master.connect(rev); rev.connect(revG); revG.connect(this._musicGain);
-        master.connect(this._musicGain);
-
-        // Утилиты
-        const osc = (freq,type,t,dur,vol,dst,detune=0)=>{
-            const o=ctx.createOscillator(); o.type=type; o.frequency.value=freq;
-            if(detune) o.detune.value=detune;
-            const g=ctx.createGain(); g.gain.setValueAtTime(0,t);
-            g.gain.linearRampToValueAtTime(vol,t+0.01);
-            g.gain.exponentialRampToValueAtTime(0.001,t+dur);
-            o.connect(g); g.connect(dst); o.start(t); o.stop(t+dur+0.02);
+        // Лёгкий сатуратор (тепло, не агрессия)
+        const sat=(node,amt=3)=>{
+            const ws=ctx.createWaveShaper();
+            const c=new Float32Array(512);
+            for(let i=0;i<512;i++){const x=i*2/512-1; c[i]=Math.tanh(x*amt);}
+            ws.curve=c; node.connect(ws); return ws;
         };
-        const noise = (t,dur,vol,lpFreq,dst)=>{
+
+        const noiseBuf=(dur,dec)=>{
             const buf=ctx.createBuffer(1,Math.ceil(sr*dur),sr);
             const d=buf.getChannelData(0);
-            for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.exp(-i/(sr*dur*0.4));
-            const src=ctx.createBufferSource(); src.buffer=buf;
-            const f=ctx.createBiquadFilter(); f.type=lpFreq>5000?'highpass':'bandpass';
-            f.frequency.value=lpFreq;
+            for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/(sr*dec));
+            return buf;
+        };
+
+        // ── 808 КИК (глубокий, питч вниз) ──
+        const KICK=(t,vol=0.75,pEnd=38,dur=0.5)=>{try{
+            const o=ctx.createOscillator(); o.type='sine';
+            o.frequency.setValueAtTime(185,t);
+            o.frequency.exponentialRampToValueAtTime(pEnd,t+dur*0.8);
+            const g=ctx.createGain();
+            g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+            const sub=ctx.createOscillator(); sub.type='sine'; sub.frequency.value=pEnd*0.8;
+            const sg=ctx.createGain();
+            sg.gain.setValueAtTime(vol*0.45,t); sg.gain.exponentialRampToValueAtTime(0.001,t+dur*0.55);
+            o.connect(g); g.connect(comp); sub.connect(sg); sg.connect(comp);
+            o.start(t); sub.start(t); o.stop(t+dur+0.02); sub.stop(t+dur+0.02);
+        }catch(e){}};
+
+        // ── КЛЭП/СНЭР (tamborzão стиль) ──
+        const CLAP=(t,vol=0.55)=>{try{
+            // Белый шум (хлопок)
+            const src=ctx.createBufferSource(); src.buffer=noiseBuf(0.12,0.025);
+            const bp=ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=1800; bp.Q.value=1.5;
+            const g=ctx.createGain(); g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.10);
+            src.connect(bp); bp.connect(g); g.connect(comp); src.start(t);
+            // Второй слой — резкий
+            const src2=ctx.createBufferSource(); src2.buffer=noiseBuf(0.06,0.010);
+            const hp=ctx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=4000;
+            const g2=ctx.createGain(); g2.gain.setValueAtTime(vol*0.5,t+0.005); g2.gain.exponentialRampToValueAtTime(0.001,t+0.06);
+            src2.connect(hp); hp.connect(g2); g2.connect(comp); src2.start(t+0.005);
+        }catch(e){}};
+
+        // ── ХАЙХЭТ (быстрый, металлический) ──
+        const HAT=(t,vol,open=false)=>{try{
+            const dur=open?0.10:0.022;
+            const src=ctx.createBufferSource(); src.buffer=noiseBuf(dur,open?0.04:0.007);
+            const hp=ctx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=9500;
+            const bp=ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=12000; bp.Q.value=0.8;
             const g=ctx.createGain(); g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(0.001,t+dur);
-            src.connect(f); f.connect(g); g.connect(dst); src.start(t);
-        };
+            src.connect(hp); hp.connect(bp); bp.connect(g); g.connect(comp); src.start(t);
+        }catch(e){}};
 
-        // ───────────────────────────────────
-        // ГЛАВНАЯ МЕЛОДИЯ — запоминающаяся!
-        // Тема A: весёлая, скачущая
-        const themeA=[
-            [659,b*0.4],[784,b*0.2],[880,b*0.4],[1046,b*0.8],
-            [880,b*0.4],[784,b*0.4],[659,b*0.8],[0,b*0.4],
-            [523,b*0.4],[659,b*0.4],[784,b*0.4],[880,b*0.4],
-            [1046,b*0.4],[880,b*0.4],[784,b*0.4],[659,b*1.2],
-        ];
-        // Тема B: более насыщенная для Drop
-        const themeB=[
-            [1046,b*0.4],[1174,b*0.2],[1318,b*0.4],[1046,b*0.4],
-            [880,b*0.4],[1046,b*0.4],[784,b*0.8],[0,b*0.4],
-            [784,b*0.4],[880,b*0.4],[1046,b*0.4],[1174,b*0.4],
-            [1318,b*0.4],[1174,b*0.4],[1046,b*0.4],[784,b*1.2],
-        ];
-        // Контрмелодия (арпеджио)
-        const arpSeq=[1046,1318,1568,1318,1046,784,880,1046,1318,1046,880,784,659,784,1046,1318];
-
-        const playMelody=(notes,startT,vol,dst,detune=0)=>{
-            let t=startT;
-            notes.forEach(([f,d])=>{
-                if(f>0){
-                    // Основной синт (синус + пила с фильтром)
-                    osc(f,'sine',t,d*0.85,vol*0.7,dst,detune);
-                    const o2=ctx.createOscillator(); o2.type='sawtooth'; o2.frequency.value=f; o2.detune.value=detune+5;
-                    const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=2800; lp.Q.value=1.5;
-                    const g2=ctx.createGain(); g2.gain.setValueAtTime(0,t); g2.gain.linearRampToValueAtTime(vol*0.4,t+0.012);
-                    g2.gain.setValueAtTime(vol*0.3,t+d*0.5); g2.gain.exponentialRampToValueAtTime(0.001,t+d*0.9);
-                    o2.connect(lp); lp.connect(g2); g2.connect(dst); o2.start(t); o2.stop(t+d);
-                }
-                t+=d;
+        // ── COWBELL (сигнатура phonk) ──
+        const COWBELL=(f,t,dur,vol)=>{try{
+            [1.0,1.51].forEach((r,ri)=>{
+                const o=ctx.createOscillator(); o.type='square'; o.frequency.value=f*r;
+                const bp=ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=f*r*1.8; bp.Q.value=6;
+                const g=ctx.createGain();
+                g.gain.setValueAtTime(ri===0?vol:vol*0.55,t);
+                g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+                const ws=sat(o,8);
+                ws.connect(bp); bp.connect(g); g.connect(comp);
+                o.start(t); o.stop(t+dur+0.01);
             });
-            return t;
-        };
+        }catch(e){}};
 
-        const playArp=(startT,len,vol,dst)=>{
-            for(let i=0;i<len;i++){
-                const t=startT+i*b*0.25;
-                const f=arpSeq[i%arpSeq.length];
-                osc(f,'sine',t,b*0.2,vol,dst);
-            }
-        };
+        // ── 808 БАС (с фильтром, слайдами) ──
+        const BASS=(f,t,dur,vol,fEnd=0)=>{try{
+            const o=ctx.createOscillator(); o.type='sawtooth'; o.frequency.value=f;
+            if(fEnd) o.frequency.setValueAtTime(f,t), o.frequency.exponentialRampToValueAtTime(fEnd,t+dur*0.45);
+            const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.Q.value=3;
+            lp.frequency.setValueAtTime(900,t); lp.frequency.exponentialRampToValueAtTime(220,t+0.08);
+            const sub=ctx.createOscillator(); sub.type='sine'; sub.frequency.value=f*(fEnd?0.7:0.5);
+            const g=ctx.createGain();
+            g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(vol,t+0.007);
+            g.gain.setValueAtTime(vol*0.65,t+dur*0.5); g.gain.linearRampToValueAtTime(0.001,t+dur);
+            const sg=ctx.createGain();
+            sg.gain.setValueAtTime(0,t); sg.gain.linearRampToValueAtTime(vol*0.7,t+0.01);
+            sg.gain.linearRampToValueAtTime(0.001,t+dur*0.88);
+            const ws=sat(o,5);
+            ws.connect(lp); lp.connect(g); g.connect(comp);
+            sub.connect(sg); sg.connect(comp);
+            o.start(t); sub.start(t); o.stop(t+dur+0.02); sub.stop(t+dur+0.02);
+        }catch(e){}};
 
-        const playBass=(startT,bars,vol,dst)=>{
-            const bassPat=[130,0,130,0,116,0,116,130,98,0,98,0,110,98,0,0];
-            for(let bar=0;bar<bars;bar++){
-                bassPat.forEach((f,i)=>{
-                    if(!f) return;
-                    const t=startT+bar*b*8+i*b*0.5;
-                    // Бас: квадрат + сабсинус
-                    const o=ctx.createOscillator(); o.type='square'; o.frequency.value=f;
-                    const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=250; lp.Q.value=0.8;
-                    const g=ctx.createGain(); g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(vol,t+0.01);
-                    g.gain.exponentialRampToValueAtTime(0.001,t+b*0.4);
-                    o.connect(lp); lp.connect(g); g.connect(dst); o.start(t); o.stop(t+b*0.42);
-                    // Суббас (синус октавой ниже)
-                    osc(f*0.5,'sine',t,b*0.45,vol*0.6,dst);
-                });
-            }
-        };
+        // ── СИНТ (мелодия, тёмная) ──
+        const SY=(f,t,dur,vol)=>{try{
+            const o=ctx.createOscillator(); o.type='sawtooth'; o.frequency.value=f;
+            const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.Q.value=5;
+            lp.frequency.setValueAtTime(1800,t); lp.frequency.exponentialRampToValueAtTime(350,t+dur*0.35);
+            const g=ctx.createGain();
+            g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(vol,t+0.012);
+            g.gain.setValueAtTime(vol*0.6,t+dur*0.65); g.gain.linearRampToValueAtTime(0.001,t+dur);
+            o.connect(lp); lp.connect(g); g.connect(comp); o.start(t); o.stop(t+dur+0.02);
+        }catch(e){}};
 
-        const playDrums=(startT,bars,vol,withSnare=true,dst=master)=>{
-            for(let bar=0;bar<bars;bar++){
-                for(let i=0;i<16;i++){
-                    const t=startT+bar*b*8+i*b*0.5;
-                    const beat16=i%16;
-                    // Кик: 0,8 (сильные) + 4,12 (слабые)
-                    if(beat16===0||beat16===8){
-                        const ok=ctx.createOscillator(); ok.type='sine';
-                        ok.frequency.setValueAtTime(220,t); ok.frequency.exponentialRampToValueAtTime(35,t+0.12);
-                        const gk=ctx.createGain(); gk.gain.setValueAtTime(vol*0.9,t); gk.gain.exponentialRampToValueAtTime(0.001,t+0.16);
-                        ok.connect(gk); gk.connect(dst); ok.start(t); ok.stop(t+0.17);
-                    }
-                    if(beat16===4||beat16===12){
-                        const ok=ctx.createOscillator(); ok.type='sine';
-                        ok.frequency.setValueAtTime(160,t); ok.frequency.exponentialRampToValueAtTime(40,t+0.09);
-                        const gk=ctx.createGain(); gk.gain.setValueAtTime(vol*0.6,t); gk.gain.exponentialRampToValueAtTime(0.001,t+0.12);
-                        ok.connect(gk); gk.connect(dst); ok.start(t); ok.stop(t+0.13);
-                    }
-                    // Снэр: 4,12
-                    if(withSnare&&(beat16===4||beat16===12)){
-                        noise(t,0.14,vol*0.45,2500,dst);
-                        osc(220,'sine',t,0.07,vol*0.12,dst);
-                    }
-                    // Хайхэт — каждые 8th, открытый на 2,6,10,14
-                    const isOpen=beat16%4===2;
-                    noise(t,isOpen?0.08:0.035,isOpen?vol*0.10:vol*0.06,12000,dst);
-                    // Клэп на 4,12
-                    if(withSnare&&(beat16===4||beat16===12)){
-                        noise(t+0.01,0.06,vol*0.18,3500,dst);
-                    }
-                }
-            }
-        };
+        // ── ПАД (атмосфера) ──
+        const PAD=(f,t,dur,vol)=>{try{
+            [-6,0,6,12].forEach(det=>{
+                const o=ctx.createOscillator(); o.type='sine'; o.frequency.value=f; o.detune.value=det;
+                const g=ctx.createGain();
+                g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(vol/4,t+0.5);
+                g.gain.setValueAtTime(vol/4,t+dur-0.5); g.gain.linearRampToValueAtTime(0.001,t+dur);
+                o.connect(g); g.connect(comp); o.start(t); o.stop(t+dur+0.02);
+            });
+        }catch(e){}};
 
-        const playChords=(startT,bars,vol,dst)=>{
-            const prog=[[261,330,392],[220,277,330],[196,247,330],[220,261,330]];
-            for(let bar=0;bar<bars;bar++){
-                const chord=prog[bar%4];
-                chord.forEach(f=>{
-                    const t=startT+bar*b*8;
-                    const o=ctx.createOscillator(); o.type='sine'; o.frequency.value=f;
-                    const g=ctx.createGain(); g.gain.setValueAtTime(0,t);
-                    g.gain.linearRampToValueAtTime(vol,t+0.3);
-                    g.gain.setValueAtTime(vol*0.8,t+b*6);
-                    g.gain.linearRampToValueAtTime(0,t+b*8);
-                    o.connect(g); g.connect(dst); o.start(t); o.stop(t+b*8+0.05);
-                });
-            }
-        };
+        // ════════════════════════════════════
+        // ПАТТЕРНЫ
+        // ════════════════════════════════════
 
-        // Эффект нарастания (white noise sweep)
-        const playRiser=(startT,dur,dst)=>{
-            const buf=ctx.createBuffer(1,Math.ceil(sr*dur),sr);
-            const d=buf.getChannelData(0);
-            for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
-            const src=ctx.createBufferSource(); src.buffer=buf;
-            const f=ctx.createBiquadFilter(); f.type='bandpass'; f.frequency.value=200;
-            f.frequency.exponentialRampToValueAtTime(8000,ctx.currentTime+dur);
-            const g=ctx.createGain(); g.gain.setValueAtTime(0,startT); g.gain.linearRampToValueAtTime(0.22,startT+dur);
-            src.connect(f); f.connect(g); g.connect(dst); src.start(startT);
-        };
+        // TAMBORZÃO DRUMS — синкопированный грув (сердце жанра)
+        // 32 16-х ноты на 2 бара
+        // Кик: 0,3,6,9,12,16,19,22,25,28 — классика tamborzão
+        const KICK_PAT=[0,3,6,9,12,16,19,22,25,28];
+        const CLAP_PAT=[8,24]; // 2 и 4 доля
+        const HAT_PAT_CLOSED=[0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30]; // каждая 8-я
+        const HAT_PAT_OPEN=[4,12,20,28]; // каждая чётная четверть
 
-        // ───────────────────────────────────
-        // СТРУКТУРА ТРЕКА (81 секунда)
-        const T0 = ctx.currentTime+0.1;
-        let T = T0;
-
-        // INTRO (0-8s, 2 бара) — только мелодия и пэды, тихо
-        playChords(T,2,0.025,master);
-        playMelody(themeA,T,0.08,master);
-        T += b*16;
-
-        // BUILD-UP (8-16s, 2 бара) — добавляем бас + хайхэт
-        playChords(T,2,0.03,master);
-        playMelody(themeA,T,0.10,master);
-        playBass(T,2,0.12,master);
-        playDrums(T,2,0.55,false); // только кик и хэт
-        T += b*16;
-
-        // PRE-DROP (16-24s, 2 бара) — нарастание + арпеджио
-        playRiser(T,b*16,master);
-        playChords(T,2,0.035,master);
-        playMelody(themeA,T,0.11,master,-7); // чуть расстроена для напряжения
-        playBass(T,2,0.14,master);
-        playDrums(T,2,0.65,false);
-        playArp(T,32,0.05,master);
-        T += b*16;
-
-        // DROP 1 (24-48s, 6 баров) — полный звук, тема B
-        playChords(T,6,0.04,master);
-        playMelody(themeB,T,0.13,master);
-        playMelody(themeB,T+b*16,0.13,master,12); // вторая итерация чуть выше
-        playMelody(themeB,T+b*32,0.13,master);
-        playBass(T,6,0.18,master);
-        playDrums(T,6,0.80,true);
-        playArp(T,96,0.038,master);
-        T += b*48;
-
-        // BREAK (48-56s, 2 бара) — тихо, только пэды и мелодия
-        playChords(T,2,0.028,master);
-        playMelody(themeA,T,0.07,master);
-        T += b*16;
-
-        // BUILD 2 (56-64s, 2 бара) — снова нарастание
-        playRiser(T,b*16,master);
-        playChords(T,2,0.032,master);
-        playMelody(themeA,T,0.09,master);
-        playBass(T,2,0.13,master);
-        playDrums(T,2,0.6,false);
-        playArp(T,32,0.045,master);
-        T += b*16;
-
-        // DROP 2 (64-80s, 4 бара) — ещё мощнее, обе темы
-        playChords(T,4,0.045,master);
-        playMelody(themeB,T,0.15,master);
-        playMelody(themeA,T+b*16,0.12,master,7);
-        playBass(T,4,0.20,master);
-        playDrums(T,4,0.88,true);
-        playArp(T,64,0.042,master);
-        T += b*32;
-
-        // OUTRO (80-81s, ~1 бар) — затухание
-        playChords(T,1,0.02,master);
-        playMelody(themeA,T,0.06,master);
-        T += b*8;
-
-        // ───────────────────────────────────
-        // ЛУП: через 81 секунду начинаем снова
-        const totalLen = T - T0;
-        setTimeout(()=>{
-            if(this._musicPlaying) this.startHubMusic();
-        }, (totalLen - 0.3)*1000);
-
-        // Главная мелодия — яркая, прыгающая, запоминающаяся
-        // До-мажор, игривые скачки
-        const mel = [
-            523,0,659,784,1046,784,659,523,
-            659,0,784,880,1046,880,784,659,
-            784,523,659,784,880,784,659,523,
-            392,523,659,523,440,392,330,0,
-
-            523,659,784,1046,1174,1046,784,659,
-            880,784,659,523,659,784,880,0,
-            523,659,523,392,440,523,659,784,
-            880,784,659,523,392,0,523,0,
+        // Бас-линия (синкопа, слайды)
+        // [freq, beat(16th), dur(beats), slideFreq]
+        const BAS_A=[
+            [110,0,1.8,98],[98,2,0.8,0],[88,3,1.2,73],
+            [110,5,0.7,0],[110,6,0.5,0],[88,7,1.0,0],
+            [110,8,1.8,98],[98,10,0.8,0],[88,11,1.2,73],
+            [110,13,0.7,0],[73,14,1.5,65],
+        ];
+        const BAS_B=[
+            [110,0,1.4,0],[73,1.5,0.5,0],[88,2,0.8,0],[110,3,1.4,98],
+            [98,5,0.6,88],[88,6,0.8,73],[73,7,1.0,0],
+            [110,8,1.4,0],[73,9.5,0.5,0],[88,10,0.8,0],[110,11,1.4,98],
+            [98,13,0.6,88],[88,14,0.8,0],[73,15,1.0,65],
         ];
 
-        // Бас — синкопированный, живой
-        const bas = [
-            130,0,0,130,0,0,130,0,
-            116,0,0,116,0,0,116,0,
-            98, 0,0,98, 0,0,98, 0,
-            110,0,0,110,0,0,110,0,
-            130,0,0,130,0,0,130,0,
-            116,0,0,116,0,0,116,0,
-            98, 0,0,98, 0,0,98, 0,
-            130,0,0,0, 0,0,130,0,
+        // Cowbell мелодия (Am, Phrygian dominant)
+        // [freq, beat(16th), dur]
+        const CBL_A=[
+            [330,0,0.5],[294,1,0.4],[277,2,0.8],[233,3,0.4],[220,4,0.4],
+            [233,5,0.4],[277,6,0.4],[294,7,0.4],[330,8,0.6],[277,9,0.4],
+            [233,10,0.8],[220,11.5,0.3],[233,12,0.4],[277,13,0.4],[294,14,0.6],[330,15,0.5],
+        ];
+        const CBL_B=[
+            [349,0,0.5],[330,1,0.4],[294,2,0.8],[277,3,0.4],[233,4,0.6],
+            [277,5,0.4],[330,6,0.4],[349,7,0.6],[330,8,0.5],[294,9,0.4],
+            [277,10,0.8],[233,11.5,0.3],[277,12,0.4],[330,13,0.4],[349,14,0.4],[294,15,0.8],
         ];
 
-        // Аккорды (пэды) — каждые 2 бита
-        const chords = [
-            [261,330,392,523], // C maj
-            null,
-            [220,277,330,440], // A min
-            null,
-            [196,247,294,392], // G maj
-            null,
-            [220,277,330,440], // A min
-            null,
-            [261,330,392,523],
-            null,
-            [220,277,330,440],
-            null,
-            [196,247,294,392],
-            null,
-            [174,220,261,349], // F maj
-            null,
+        // Синт мелодия (тёмная, минорная)
+        const MEL_A=[
+            [220,0,1.5],[247,1.5,0.5],[261,2,1],[294,3,0.5],[330,3.5,0.5],
+            [294,4,1],[261,5,0.5],[247,5.5,0.5],[220,6,2],
+            [196,8,1.5],[220,9.5,0.5],[247,10,1],[220,11,0.5],[196,11.5,0.5],
+            [175,12,2],[196,14,0.5],[220,14.5,0.5],[196,15,1],
+        ];
+        const MEL_B=[
+            [261,0,1],[294,1,0.5],[330,1.5,0.5],[349,2,1],[330,3,0.5],[294,3.5,0.5],
+            [277,4,1.5],[247,5.5,0.5],[233,6,2],
+            [247,8,1],[261,9,0.5],[294,9.5,0.5],[330,10,1],[294,11,0.5],[261,11.5,0.5],
+            [247,12,2],[233,14,0.5],[220,14.5,0.5],[196,15,1],
         ];
 
-        // Весёлые арпеджио сверху (высокий голос)
-        const arp = [
-            1046,1174,1318,1046, 1174,1046,880,784,
-            880,1046,1174,880,  1046,880,784,659,
-            784,880,1046,784,   880,784,659,523,
-            659,784,880,659,    784,659,523,440,
-            1046,1318,1046,784, 1174,1046,880,659,
-            880,1046,880,659,   1046,880,784,523,
-            784,880,784,523,    880,784,659,440,
-            659,784,659,523,    784,0,523,0,
-        ];
+        // Пады (Am→F→G→Am)
+        const PADS=[[220,277,330],[175,220,261],[196,247,294],[220,277,330]];
 
+        // ════════════════════════════════════
+        // ФУНКЦИИ ОТРИСОВКИ БАРОВ
+        // ════════════════════════════════════
+        const drawDrums=(t0,vol=1)=>{
+            for(let i=0;i<32;i++){
+                const t=t0+i*b*0.5;
+                if(KICK_PAT.includes(i)) KICK(t,0.68*vol,36,0.48);
+                if(CLAP_PAT.includes(i)) CLAP(t,0.55*vol);
+                if(HAT_PAT_CLOSED.includes(i)) HAT(t,0.11*vol);
+                if(HAT_PAT_OPEN.includes(i)) HAT(t,0.16*vol,true);
+                // Синкопированные клэпы (tamborzão offbeats)
+                if(i===3||i===11||i===19||i===27) CLAP(t,0.30*vol);
+                // Ghost клэпы
+                if(i===6||i===14||i===22||i===30) CLAP(t,0.15*vol);
+            }
+        };
+        const drawBass=(t0,pat)=>{
+            pat.forEach(([f,beat,dur,sl])=>BASS(f,t0+beat*b*0.5,dur*b*0.5,0.28,sl||0));
+        };
+        const drawCowbell=(t0,pat,vol=0.18)=>{
+            pat.forEach(([f,beat,dur])=>COWBELL(f*2,t0+beat*b*0.5,dur*b*0.48,vol));
+        };
+        const drawMelody=(t0,pat,vol=0.09)=>{
+            pat.forEach(([f,beat,dur])=>SY(f,t0+beat*b*0.5,dur*b*0.88,vol));
+        };
+        const drawPads=(t0,vol=0.018)=>{
+            PADS.forEach((ch,ci)=>ch.forEach(f=>PAD(f,t0+ci*b*4,b*4.1,vol)));
+        };
+
+        // ════════════════════════════════════
+        // 6 РАЗНЫХ БАРОВ
+        // ════════════════════════════════════
+        const BAR=[];
+
+        // 0: INTRO — только барабаны + пады
+        BAR.push(t0=>{
+            drawDrums(t0,0.85);
+            drawPads(t0,0.025);
+        });
+
+        // 1: VERSE A — барабаны + бас A + пады
+        BAR.push(t0=>{
+            drawDrums(t0);
+            drawBass(t0,BAS_A);
+            drawPads(t0,0.022);
+        });
+
+        // 2: VERSE B — барабаны + бас A + cowbell A
+        BAR.push(t0=>{
+            drawDrums(t0);
+            drawBass(t0,BAS_A);
+            drawCowbell(t0,CBL_A);
+            drawPads(t0,0.018);
+        });
+
+        // 3: CHORUS A — всё! Барабаны + бас B + cowbell A + мелодия A
+        BAR.push(t0=>{
+            drawDrums(t0,1.0);
+            drawBass(t0,BAS_B);
+            drawCowbell(t0,CBL_A,0.20);
+            drawMelody(t0,MEL_A,0.10);
+            drawPads(t0,0.020);
+        });
+
+        // 4: CHORUS B — cowbell B + мелодия B (вариация)
+        BAR.push(t0=>{
+            drawDrums(t0,1.0);
+            drawBass(t0,BAS_B);
+            drawCowbell(t0,CBL_B,0.20);
+            drawMelody(t0,MEL_B,0.10);
+            drawPads(t0,0.020);
+        });
+
+        // 5: BRIDGE — только мелодия + пады, тихие барабаны
+        BAR.push(t0=>{
+            drawDrums(t0,0.55);
+            drawMelody(t0,MEL_A,0.12);
+            drawMelody(t0,MEL_B,0.08);
+            drawPads(t0,0.030);
+        });
+
+        // ════════════════════════════════════
+        // ПОСЛЕДОВАТЕЛЬНОСТЬ 32 БАРА (~2 мин)
+        // ════════════════════════════════════
+        // 0=intro,1=verseA,2=verseB,3=chorusA,4=chorusB,5=bridge
+        const SEQ=[
+            0,1,             // интро (0-13с)
+            2,2,             // verse с cowbell (13-26с)
+            3,3,             // chorus A (26-39с)
+            4,4,             // chorus B (39-52с)
+            5,5,             // bridge (52-64с)
+            1,2,             // verse снова (64-77с)
+            3,4,             // chorus mix (77-90с)
+            3,3,             // второй дроп (90-103с)
+            4,4,             // (103-116с)
+            5,2,             // спуск (116-129с)
+            3,4,             // финальный хорус (129-142с)
+            3,3,3,4,         // большой финал (142-168с)
+            0,1,             // аутро (168-180с)
+        ];
+        let si=0;
+
+        const playNext=(t0)=>{
+            if(!this._musicPlaying) return;
+            const barLen=b*16;
+            BAR[SEQ[si]](t0);
+            si=(si+1)%SEQ.length;
+            const id=setTimeout(()=>playNext(t0+barLen),(barLen-0.15)*1000);
+            this._musicScheduled.push(id);
+        };
+
+        playNext(ctx.currentTime+0.05);
     },
 
     stopHubMusic(){
@@ -4884,7 +4960,8 @@ const app = {
         this._musicScheduled=[];
         if(this._musicGain && this._ac){
             try{
-                this._musicGain.gain.setTargetAtTime(0, this._ac.currentTime, 0.4);
+                this._musicGain.gain.cancelScheduledValues(this._ac.currentTime);
+                this._musicGain.gain.setValueAtTime(0, this._ac.currentTime);
             }catch(e){}
         }
     },
@@ -4893,11 +4970,13 @@ const app = {
         this._musicPlaying=false;
         this._musicScheduled.forEach(id=>clearTimeout(id));
         this._musicScheduled=[];
-        // Восстанавливаем хаб-gain (он не трогался игровой музыкой)
         if(this._musicGain && this._ac){
-            try{ this._musicGain.gain.setTargetAtTime(this._musicMuted ? 0 : 0.13, this._ac.currentTime, 0.1); }catch(e){}
+            try{
+                this._musicGain.gain.cancelScheduledValues(this._ac.currentTime);
+                this._musicGain.gain.setValueAtTime(this._musicMuted ? 0 : 0.18, this._ac.currentTime);
+            }catch(e){}
         }
-        setTimeout(()=>this.startHubMusic(), 400);
+        setTimeout(()=>this.startHubMusic(), 200);
     },
 
     // Музыка в игровых мирах — длинные многослойные треки
@@ -5524,24 +5603,55 @@ const app = {
 
     // ── SHOP
     renderShop(){
-        const g=document.getElementById('shop-grid');if(!g)return;g.innerHTML='';
-        SHOP_ITEMS.forEach(it=>{
-            const b=this.inventory.includes(it.id);
-            g.innerHTML+=`<div class="card world-card" onclick="app.buyItem('${it.id}',${it.price})" ${b?'style="opacity:0.6"':''}>
-                <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(255,149,0,0.08),#050510);font-size:52px;position:relative;">
-                    <span class="world-emoji" style="z-index:2;position:relative;">${it.icon}</span>
-                    <div class="world-glow" style="background:rgba(255,149,0,0.08);"></div>
+        const g=document.getElementById('shop-grid'); if(!g) return;
+
+        const cats=[
+            {id:'head',   label:'👒 Головные уборы', color:'#FF9500'},
+            {id:'body',   label:'🧥 Одежда и крылья', color:'#00C8FF'},
+            {id:'weapon', label:'⚔️ Оружие',          color:'#FF4545'},
+            {id:'pet',    label:'🐾 Питомцы',          color:'#39E08A'},
+            {id:'effect', label:'✨ Эффекты и аура',   color:'#9D6FFF'},
+            {id:'rare',   label:'🎲 Редкие',           color:'#FFD700'},
+            {id:null,     label:'🎩 Остальное',        color:'#888'},
+        ];
+
+        g.innerHTML = cats.map(cat=>{
+            const items = SHOP_ITEMS.filter(it=>(it.category||null)===cat.id);
+            if(!items.length) return '';
+            const cards = items.map(it=>{
+                const owned = this.inventory.includes(it.id);
+                return `<div class="card world-card" onclick="app.buyItem('${it.id}',${it.price})"
+                    style="${owned?'opacity:0.7;':''}border-color:${owned?'rgba(57,224,138,0.25)':'rgba(255,255,255,0.06)'};transition:all 0.2s;"
+                    onmouseover="if(!${owned})this.style.borderColor='${cat.color}44'"
+                    onmouseout="this.style.borderColor='${owned?'rgba(57,224,138,0.25)':'rgba(255,255,255,0.06)'}'">
+                    <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,${cat.color}18,#050510);font-size:52px;position:relative;">
+                        <span class="world-emoji" style="z-index:2;position:relative;filter:drop-shadow(0 0 8px ${cat.color}66);">${it.icon}</span>
+                        <div class="world-glow" style="background:${cat.color}12;"></div>
+                        ${it.price>=5000?`<div style="position:absolute;top:6px;right:6px;background:linear-gradient(135deg,${cat.color},${cat.color}88);color:#000;font-size:8px;font-weight:800;padding:2px 6px;border-radius:20px;font-family:var(--font-head);letter-spacing:1px;">RARE</div>`:''}
+                    </div>
+                    <div class="card-info">
+                        <div><b style="font-family:var(--font-body);letter-spacing:0.3px;font-size:13px;">${it.name}</b></div>
+                        <span class="price-tag" style="${owned?'background:rgba(57,224,138,0.12);color:var(--c-green);border-color:rgba(57,224,138,0.2);':''}">
+                            ${owned?'✓ В гардеробе':it.price.toLocaleString()+' 🍊'}
+                        </span>
+                    </div>
+                </div>`;
+            }).join('');
+
+            return `<div style="margin-bottom:28px;">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+                    <div style="font-size:13px;font-weight:700;font-family:var(--font-ui);color:${cat.color};">${cat.label}</div>
+                    <div style="flex:1;height:1px;background:linear-gradient(90deg,${cat.color}33,transparent);"></div>
+                    <div style="font-size:10px;color:rgba(255,255,255,0.2);font-family:var(--font-mono);">${items.length} пред.</div>
                 </div>
-                <div class="card-info">
-                    <div><b style="font-family:var(--font-body);letter-spacing:0.3px;">${it.name}</b></div>
-                    <span class="price-tag" ${b?'style="background:rgba(0,230,118,0.12);color:var(--c-green);border-color:rgba(0,230,118,0.2);"':''}>${b?'✓ Надето':it.price+' 🍊'}</span>
-                </div></div>`;
-        });
+                <div class="grid">${cards}</div>
+            </div>`;
+        }).join('');
     },
     buyItem(id,price){
         if(this.inventory.includes(id))return;
         if(this.balance>=price){
-            this.balance-=price;this.inventory.push(id); this._questProgress('buys',1);
+            this.balance-=price;this.inventory.push(id); this._questProgress('buys',1); this._questProgress('wear',this.inventory.length);
             this.saveData();this.renderShop();this.updateAvatarPreview();
             // Обновляем персонажа сразу если в игре
             if(this.mode==='play' && this.playerGroup && this.scene){
@@ -7131,10 +7241,16 @@ const app = {
             }
         }
         this.velocity.set(0,0,0);this.canJump=false;this.loopFn=null;this.spaceGrav=false;
-        this.stopHubMusic();
-        this.stopGameMusic();
+        if(mode==='play'){
+            this.stopHubMusic();
+            this.stopGameMusic();
+            setTimeout(()=>this.startGameMusic(mapId),600);
+        } else {
+            // В студии хаб-музыка продолжает играть
+            this.stopGameMusic();
+            if(!this._musicPlaying) this.startHubMusic();
+        }
         this._sfx('launch');
-        if(mode==='play') setTimeout(()=>this.startGameMusic(mapId),600);
         const wNames={lobby:'Главная Площадь',gather:'Цитрусовый Лес',parkour:'Небесный Паркур',
             volcano:'Остров Вулкана',space:'Космическая База',race:'Гонки',dropper:'Дроппер',obby:'Обби',
             pvp:'Арена ПВП',dungeon:'Тёмное Подземелье',march8:'🌸 8 Марта'};
@@ -8813,63 +8929,93 @@ const app = {
     _initQuests(){
         const ALL_QUESTS = [
             // ── Время в игре ──
-            {id:'play5',   title:'Первый шаг',       desc:'Поиграй 5 минут',              reward:10,  type:'playtime', goal:5,    icon:'👟'},
-            {id:'play10',  title:'Разминка',          desc:'Поиграй 10 минут',             reward:20,  type:'playtime', goal:10,   icon:'🎮'},
-            {id:'play30',  title:'Завсегдатай',       desc:'Поиграй 30 минут',             reward:50,  type:'playtime', goal:30,   icon:'⏳'},
-            {id:'play60',  title:'Марафонец',         desc:'Поиграй 1 час',                reward:100, type:'playtime', goal:60,   icon:'🕐'},
+            {id:'play5',    title:'Первый шаг',        desc:'Поиграй 5 минут',               reward:15,  type:'playtime', goal:5,    icon:'👟'},
+            {id:'play10',   title:'Разминка',           desc:'Поиграй 10 минут',              reward:25,  type:'playtime', goal:10,   icon:'🎮'},
+            {id:'play20',   title:'Втянулся',           desc:'Поиграй 20 минут',              reward:40,  type:'playtime', goal:20,   icon:'⏱️'},
+            {id:'play30',   title:'Завсегдатай',        desc:'Поиграй 30 минут',              reward:60,  type:'playtime', goal:30,   icon:'⏳'},
+            {id:'play60',   title:'Марафонец',          desc:'Поиграй 1 час',                 reward:120, type:'playtime', goal:60,   icon:'🕐'},
             // ── Прыжки ──
-            {id:'jump20',  title:'Попрыгунчик',       desc:'Прыгни 20 раз',                reward:15,  type:'jumps',    goal:20,   icon:'🐸'},
-            {id:'jump50',  title:'Прыгун',            desc:'Прыгни 50 раз',                reward:30,  type:'jumps',    goal:50,   icon:'🦘'},
-            {id:'jump100', title:'Акробат',           desc:'Прыгни 100 раз',               reward:60,  type:'jumps',    goal:100,  icon:'🤸'},
-            {id:'jump200', title:'Батут',             desc:'Прыгни 200 раз',               reward:120, type:'jumps',    goal:200,  icon:'🏀'},
+            {id:'jump10',   title:'Попрыгунчик',        desc:'Прыгни 10 раз',                 reward:10,  type:'jumps',    goal:10,   icon:'🐸'},
+            {id:'jump30',   title:'Прыгун',             desc:'Прыгни 30 раз',                 reward:20,  type:'jumps',    goal:30,   icon:'🦘'},
+            {id:'jump75',   title:'Акробат',            desc:'Прыгни 75 раз',                 reward:45,  type:'jumps',    goal:75,   icon:'🤸'},
+            {id:'jump150',  title:'Батут',              desc:'Прыгни 150 раз',                reward:80,  type:'jumps',    goal:150,  icon:'🏀'},
             // ── Миры ──
-            {id:'maps2',   title:'Исследователь',     desc:'Посети 2 разных мира',          reward:20,  type:'maps',     goal:2,    icon:'🧭'},
-            {id:'maps3',   title:'Путешественник',    desc:'Посети 3 разных мира',          reward:40,  type:'maps',     goal:3,    icon:'🗺️'},
-            {id:'maps5',   title:'Турист',            desc:'Посети 5 разных миров',         reward:70,  type:'maps',     goal:5,    icon:'✈️'},
-            {id:'maps8',   title:'Глобтроттер',       desc:'Посети 8 разных миров',         reward:150, type:'maps',     goal:8,    icon:'🌍'},
+            {id:'maps1',    title:'Турист',             desc:'Посети любой мир',              reward:15,  type:'maps',     goal:1,    icon:'🗺️'},
+            {id:'maps2',    title:'Исследователь',      desc:'Посети 2 разных мира',          reward:25,  type:'maps',     goal:2,    icon:'🧭'},
+            {id:'maps4',    title:'Путешественник',     desc:'Посети 4 разных мира',          reward:55,  type:'maps',     goal:4,    icon:'✈️'},
+            {id:'maps7',    title:'Глобтроттер',        desc:'Посети 7 разных миров',         reward:110, type:'maps',     goal:7,    icon:'🌍'},
             // ── Друзья ──
-            {id:'friend1', title:'Найди друга',       desc:'Добавь 1 друга',               reward:25,  type:'friends',  goal:1,    icon:'🤝'},
-            {id:'friend3', title:'Компания',          desc:'Добавь 3 друзей',              reward:60,  type:'friends',  goal:3,    icon:'👫'},
-            {id:'friend5', title:'Популярный',        desc:'Добавь 5 друзей',              reward:100, type:'friends',  goal:5,    icon:'🌟'},
+            {id:'friend1',  title:'Найди друга',        desc:'Добавь 1 друга',                reward:30,  type:'friends',  goal:1,    icon:'🤝'},
+            {id:'friend3',  title:'Компания',           desc:'Добавь 3 друзей',               reward:70,  type:'friends',  goal:3,    icon:'👫'},
+            {id:'friend5',  title:'Популярный',         desc:'Добавь 5 друзей',               reward:130, type:'friends',  goal:5,    icon:'🌟'},
             // ── Магазин ──
-            {id:'buy1',    title:'Первая покупка',    desc:'Купи что-нибудь в магазине',   reward:15,  type:'buys',     goal:1,    icon:'🛍️'},
-            {id:'buy3',    title:'Шопоголик',         desc:'Купи 3 предмета в магазине',   reward:40,  type:'buys',     goal:3,    icon:'🛒'},
-            {id:'buy5',    title:'Коллекционер',      desc:'Купи 5 предметов в магазине',  reward:80,  type:'buys',     goal:5,    icon:'💎'},
+            {id:'buy1',     title:'Первая покупка',     desc:'Купи что-нибудь в магазине',    reward:20,  type:'buys',     goal:1,    icon:'🛍️'},
+            {id:'buy2',     title:'Шопоголик',          desc:'Купи 2 предмета в магазине',    reward:40,  type:'buys',     goal:2,    icon:'🛒'},
+            {id:'buy4',     title:'Коллекционер',       desc:'Купи 4 предмета в магазине',    reward:90,  type:'buys',     goal:4,    icon:'💎'},
             // ── Студия ──
-            {id:'build10', title:'Строитель',         desc:'Построй 10 блоков',            reward:20,  type:'blocks',   goal:10,   icon:'🧱'},
-            {id:'build50', title:'Архитектор',        desc:'Построй 50 блоков',            reward:60,  type:'blocks',   goal:50,   icon:'🏗️'},
-            {id:'build100',title:'Мастер-строитель',  desc:'Построй 100 блоков',           reward:120, type:'blocks',   goal:100,  icon:'🏛️'},
-            {id:'publish1',title:'Дебют',             desc:'Опубликуй свою первую карту',  reward:50,  type:'publish',  goal:1,    icon:'📤'},
-            {id:'publish3',title:'Разработчик',       desc:'Опубликуй 3 карты',            reward:120, type:'publish',  goal:3,    icon:'🎮'},
+            {id:'build5',   title:'Начинающий',         desc:'Построй 5 блоков в студии',     reward:15,  type:'blocks',   goal:5,    icon:'🧱'},
+            {id:'build20',  title:'Строитель',          desc:'Построй 20 блоков',             reward:35,  type:'blocks',   goal:20,   icon:'🏗️'},
+            {id:'build60',  title:'Архитектор',         desc:'Построй 60 блоков',             reward:80,  type:'blocks',   goal:60,   icon:'🏛️'},
+            {id:'publish1', title:'Дебют',              desc:'Опубликуй свою первую карту',   reward:60,  type:'publish',  goal:1,    icon:'📤'},
+            {id:'publish2', title:'Разработчик',        desc:'Опубликуй 2 карты',             reward:130, type:'publish',  goal:2,    icon:'🎮'},
             // ── Рулетка ──
-            {id:'roul1',   title:'Новичок удачи',     desc:'Покрути рулетку 1 раз',        reward:10,  type:'roulette', goal:1,    icon:'🎰'},
-            {id:'roulwin', title:'Джекпот!',          desc:'Выиграй 100+ 🍊 за раз',       reward:50,  type:'roulbig',  goal:100,  icon:'🤑'},
+            {id:'roul1',    title:'Попытка удачи',      desc:'Покрути рулетку 1 раз',         reward:15,  type:'roulette', goal:1,    icon:'🎰'},
+            {id:'roul3',    title:'Игрок',              desc:'Покрути рулетку 3 раза',        reward:35,  type:'roulette', goal:3,    icon:'🎲'},
+            {id:'roulwin',  title:'Джекпот!',           desc:'Выиграй 100+ 🍊 за один спин',  reward:60,  type:'roulbig',  goal:100,  icon:'🤑'},
             // ── Кредиты ──
-            {id:'lend1',   title:'Банкир',            desc:'Выдай кредит игроку',          reward:30,  type:'lend',     goal:1,    icon:'🏦'},
-            {id:'repay1',  title:'Честный заёмщик',   desc:'Верни долг вовремя',           reward:40,  type:'repay',    goal:1,    icon:'✅'},
+            {id:'lend1',    title:'Банкир',             desc:'Выдай кредит игроку',           reward:35,  type:'lend',     goal:1,    icon:'🏦'},
+            {id:'repay1',   title:'Честный заёмщик',    desc:'Верни долг вовремя',            reward:45,  type:'repay',    goal:1,    icon:'✅'},
+            // ── Шахта ──
+            {id:'mine5',    title:'Шахтёр',             desc:'Сломай 5 блоков в шахте',       reward:20,  type:'mineblock',goal:5,    icon:'⛏️'},
+            {id:'mine20',   title:'Горняк',             desc:'Сломай 20 блоков в шахте',      reward:50,  type:'mineblock',goal:20,   icon:'🪨'},
+            {id:'mine_sell',title:'Торговец',           desc:'Продай ресурсы из шахты',       reward:40,  type:'minesell', goal:1,    icon:'💰'},
+            // ── Аватар ──
+            {id:'wear1',    title:'Стиляга',            desc:'Надень любой аксессуар',        reward:15,  type:'wear',     goal:1,    icon:'👒'},
+            {id:'wear3',    title:'Модник',             desc:'Надень 3 разных аксессуара',    reward:40,  type:'wear',     goal:3,    icon:'🎩'},
+            // ── Цитрусы ──
+            {id:'earn50',   title:'Копилка',            desc:'Заработай 50 🍊',              reward:25,  type:'earn',     goal:50,   icon:'🍊'},
+            {id:'earn200',  title:'Богач',              desc:'Заработай 200 🍊',             reward:60,  type:'earn',     goal:200,  icon:'💰'},
         ];
 
-        const ROTATE_MS = 80 * 60 * 1000; // 1 час 20 минут
+        const ROTATE_MS = 60 * 60 * 1000; // 1 час
         const now = Date.now();
 
-        // Загружаем или создаём слот ротации
         if(!this.questRotation) this.questRotation = {};
         const rot = this.questRotation;
 
-        // Чистим questData от устаревших ключей которых нет в ALL_QUESTS
         const knownIds = new Set(ALL_QUESTS.map(q=>q.id));
         if(this.questData){
             Object.keys(this.questData).forEach(k=>{ if(!knownIds.has(k)) delete this.questData[k]; });
         }
 
-        // Если слот пустой, время вышло, или сохранённые ID устарели — выбираем новые 5 заданий
         const hasStaleIds = rot.ids && rot.ids.some(id=>!knownIds.has(id));
-        if(!rot.nextAt || now >= rot.nextAt || hasStaleIds) {
+        if(!rot.nextAt || now >= rot.nextAt || hasStaleIds || (rot.ids||[]).length < 10) {
             rot.nextAt = now + ROTATE_MS;
-            // Выбираем 5 случайных непересекающихся заданий
-            const shuffled = [...ALL_QUESTS].sort(()=>Math.random()-0.5);
-            rot.ids = shuffled.slice(0,5).map(q=>q.id);
-            // Сбрасываем прогресс только для новых заданий
+            // Выбираем 10 заданий — по 1-2 из каждой категории для баланса
+            const groups = {
+                playtime: ALL_QUESTS.filter(q=>q.type==='playtime'),
+                jumps:    ALL_QUESTS.filter(q=>q.type==='jumps'),
+                maps:     ALL_QUESTS.filter(q=>q.type==='maps'),
+                friends:  ALL_QUESTS.filter(q=>q.type==='friends'),
+                buys:     ALL_QUESTS.filter(q=>q.type==='buys'),
+                blocks:   ALL_QUESTS.filter(q=>q.type==='blocks'||q.type==='publish'),
+                roulette: ALL_QUESTS.filter(q=>q.type==='roulette'||q.type==='roulbig'),
+                misc:     ALL_QUESTS.filter(q=>['lend','repay','mineblock','minesell','wear','earn'].includes(q.type)),
+            };
+            const pick = (arr) => arr[Math.floor(Math.random()*arr.length)];
+            const chosen = new Set();
+            const addRandom = (arr) => {
+                const available = arr.filter(q=>!chosen.has(q.id));
+                if(available.length){ const q=pick(available); chosen.add(q.id); }
+            };
+            // Гарантируем по 1 из основных
+            ['playtime','jumps','maps','friends','buys','blocks','roulette'].forEach(k=>addRandom(groups[k]));
+            // Добираем 3 из разных групп
+            ['misc','playtime','jumps','maps','blocks','roulette','misc'].forEach(k=>{ if(chosen.size<10) addRandom(groups[k]); });
+            // Если ещё не хватает — добираем из всего пула
+            if(chosen.size<10) ALL_QUESTS.filter(q=>!chosen.has(q.id)).sort(()=>Math.random()-0.5).slice(0,10-chosen.size).forEach(q=>chosen.add(q.id));
+
+            rot.ids = [...chosen];
             rot.ids.forEach(id => {
                 if(!this.questData[id] || this.questData[id].rotReset !== rot.nextAt) {
                     this.questData[id] = {progress:0, done:false, claimed:false, rotReset:rot.nextAt};
@@ -8878,32 +9024,26 @@ const app = {
             this.saveData();
         }
 
-        // Активные задания — только те ID что существуют в ALL_QUESTS
         this._questDefs = (rot.ids||[]).map(id => ALL_QUESTS.find(q=>q.id===id)).filter(Boolean);
-        // Инициализируем данные для каждого задания если нет
         this._questDefs.forEach(q=>{
             if(!this.questData[q.id]) this.questData[q.id]={progress:0,done:false,claimed:false};
         });
         this._questRotNextAt = rot.nextAt;
 
-        // Бейдж
         const unclaimed = this._questDefs.filter(q => this.questData[q.id]?.done && !this.questData[q.id]?.claimed).length;
         const badge = document.getElementById('quest-badge');
         if(badge){ badge.textContent='!'; badge.classList.toggle('hidden', unclaimed===0); }
 
-
-        // Запускаем таймер обновления
-        if(!this._questTimer) {
-            const msUntil = rot.nextAt - Date.now();
-            if(msUntil > 0){
-                this._questTimer = setTimeout(()=>{
-                    this._questTimer = null;
-                    this.questRotation = null;
-                    this._initQuests();
-                    this.renderQuests();
-                    this._showToast('🎯 Задания обновились! Забирай новые!');
-                }, msUntil);
-            }
+        if(this._questTimer) { clearTimeout(this._questTimer); this._questTimer=null; }
+        const msUntil = rot.nextAt - Date.now();
+        if(msUntil > 0){
+            this._questTimer = setTimeout(()=>{
+                this._questTimer = null;
+                this.questRotation = null;
+                this._initQuests();
+                this.renderQuests();
+                this._showToast('🎯 Задания обновились! Забирай новые!');
+            }, msUntil);
         }
     },
 
@@ -9024,12 +9164,12 @@ const app = {
         if(!d.done || d.claimed) return;
         d.claimed = true;
         this.balance = (this.balance||0) + q.reward;
+        this._questProgress('earn', q.reward);
         this.saveData();
         this.updateUI();
         this._initQuests();
         this.renderQuests();
         this._showToast('🍊 +'+q.reward+' цитрусов получено!');
-        // Обновляем отображение баланса сразу
         const bv = document.getElementById('balance-val');
         if(bv) bv.textContent = this.balance;
     },
@@ -9651,6 +9791,7 @@ const app = {
             if(!bag[block.id]) bag[block.id] = {...block, count:0, totalVal:0};
             bag[block.id].count++;
             bag[block.id].totalVal += val;
+            this._questProgress('mineblock', 1);
 
             // Частицы
             if(!sess.particles) sess.particles = [];
@@ -9736,6 +9877,8 @@ const app = {
         if(bv) bv.textContent = this.balance;
         this._mine.bag = {};
         this._mine.totalEarned = (this._mine.totalEarned||0)+total;
+        this._questProgress('minesell', 1);
+        this._questProgress('earn', total);
         this.showNotif('💰',`+${total} 🍊 продано!`,`${items.reduce((a,i)=>a+i.count,0)} ресурсов`);
         this._mineRenderBagPreview();
     },
