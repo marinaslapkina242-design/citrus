@@ -2212,21 +2212,65 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
     <div class="hud-overlay">
         <div id="crosshair" class="crosshair"></div>
         <div id="ingame-ui" class="hidden">🍊 <span id="ingame-balance">0</span></div>
-        <div id="studio-ui" class="studio-panel hidden">
-            <div id="palette" style="display:flex;gap:4px;"></div>
-            <div style="width:1px;height:20px;background:#333;"></div>
-            <button class="btn-st" id="stmode-place" onclick="app.setStudioMode('place')" style="background:rgba(255,149,0,0.3)">🧱 Ставить</button>
-            <button class="btn-st" id="stmode-move"  onclick="app.setStudioMode('move')">✋ Двигать</button>
-            <button class="btn-st" id="stmode-scale" onclick="app.setStudioMode('scale')">⤡ Размер</button>
-            <button class="btn-st" id="stmode-delete" onclick="app.setStudioMode('delete')">🗑 Удалить</button>
-            <div style="width:1px;height:20px;background:#333;"></div>
-            <button class="btn-st" onclick="app.clearMap()">🗑 Всё</button>
-            <button class="btn-st" onclick="app.openEngScript()">📝 Скрипт</button>
-            <button class="btn-publish" onclick="app.publishGame()">📤 Опубликовать</button>
-            <button class="btn-publish" onclick="app.studioInviteFriend()" style="background:#1e88e5;margin-left:6px;">👥 Позвать друга</button>
-            
+        <div id="studio-ui" class="studio-panel hidden" style="gap:0;padding:0;border-radius:0;border:none;border-bottom:1px solid rgba(255,149,0,0.15);background:rgba(4,2,7,0.97);width:100%;left:0;transform:none;top:0;justify-content:flex-start;flex-wrap:nowrap;height:52px;overflow:hidden;">
 
-            
+            <!-- СЕКЦИЯ: ИНСТРУМЕНТЫ -->
+            <div style="display:flex;flex-direction:column;align-items:center;padding:0 10px;border-right:1px solid rgba(255,255,255,0.06);height:100%;justify-content:center;gap:2px;">
+                <div style="display:flex;gap:3px;">
+                    <button id="stmode-place" onclick="app.setStudioMode('place')" title="Ставить блок [1]" style="display:flex;flex-direction:column;align-items:center;gap:1px;background:rgba(255,149,0,0.25);border:1px solid rgba(255,149,0,0.4);border-radius:7px;padding:4px 8px;cursor:pointer;min-width:44px;transition:all 0.15s;">
+                        <i class="fas fa-cube" style="font-size:14px;color:#FF9500;"></i>
+                        <span style="font-size:8px;color:rgba(255,255,255,0.6);font-family:var(--font-ui);">Ставить</span>
+                    </button>
+                    <button id="stmode-move" onclick="app.setStudioMode('move')" title="Двигать блок [2]" style="display:flex;flex-direction:column;align-items:center;gap:1px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:7px;padding:4px 8px;cursor:pointer;min-width:44px;transition:all 0.15s;">
+                        <i class="fas fa-arrows-alt" style="font-size:14px;color:rgba(255,255,255,0.7);"></i>
+                        <span style="font-size:8px;color:rgba(255,255,255,0.5);font-family:var(--font-ui);">Двигать</span>
+                    </button>
+                    <button id="stmode-scale" onclick="app.setStudioMode('scale')" title="Изменить размер [3]" style="display:flex;flex-direction:column;align-items:center;gap:1px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:7px;padding:4px 8px;cursor:pointer;min-width:44px;transition:all 0.15s;">
+                        <i class="fas fa-expand-arrows-alt" style="font-size:14px;color:rgba(255,255,255,0.7);"></i>
+                        <span style="font-size:8px;color:rgba(255,255,255,0.5);font-family:var(--font-ui);">Размер</span>
+                    </button>
+                    <button id="stmode-delete" onclick="app.setStudioMode('delete')" title="Удалить блок [4]" style="display:flex;flex-direction:column;align-items:center;gap:1px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:7px;padding:4px 8px;cursor:pointer;min-width:44px;transition:all 0.15s;">
+                        <i class="fas fa-trash" style="font-size:14px;color:rgba(255,100,100,0.8);"></i>
+                        <span style="font-size:8px;color:rgba(255,255,255,0.5);font-family:var(--font-ui);">Удалить</span>
+                    </button>
+                </div>
+                <span style="font-size:7px;color:rgba(255,255,255,0.2);font-family:var(--font-mono);letter-spacing:1px;">ИНСТРУМЕНТЫ</span>
+            </div>
+
+            <!-- СЕКЦИЯ: ЦВЕТА -->
+            <div style="display:flex;flex-direction:column;align-items:center;padding:0 10px;border-right:1px solid rgba(255,255,255,0.06);height:100%;justify-content:center;gap:2px;">
+                <div id="palette" style="display:flex;gap:3px;flex-wrap:nowrap;"></div>
+                <span style="font-size:7px;color:rgba(255,255,255,0.2);font-family:var(--font-mono);letter-spacing:1px;">ЦВЕТ БЛОКА</span>
+            </div>
+
+            <!-- СЕКЦИЯ: ДЕЙСТВИЯ -->
+            <div style="display:flex;flex-direction:column;align-items:center;padding:0 10px;border-right:1px solid rgba(255,255,255,0.06);height:100%;justify-content:center;gap:2px;">
+                <div style="display:flex;gap:3px;">
+                    <button onclick="app.clearMap()" title="Очистить всё" style="display:flex;flex-direction:column;align-items:center;gap:1px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:7px;padding:4px 8px;cursor:pointer;min-width:44px;transition:all 0.15s;">
+                        <i class="fas fa-broom" style="font-size:14px;color:rgba(255,200,100,0.8);"></i>
+                        <span style="font-size:8px;color:rgba(255,255,255,0.5);font-family:var(--font-ui);">Очистить</span>
+                    </button>
+                    <button onclick="app.openEngScript()" title="Редактор скриптов [E]" style="display:flex;flex-direction:column;align-items:center;gap:1px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:7px;padding:4px 8px;cursor:pointer;min-width:44px;transition:all 0.15s;">
+                        <i class="fas fa-code" style="font-size:14px;color:rgba(100,200,255,0.8);"></i>
+                        <span style="font-size:8px;color:rgba(255,255,255,0.5);font-family:var(--font-ui);">Скрипт [E]</span>
+                    </button>
+                    <button onclick="app.studioInviteFriend()" title="Позвать друга" style="display:flex;flex-direction:column;align-items:center;gap:1px;background:rgba(30,136,229,0.15);border:1px solid rgba(30,136,229,0.3);border-radius:7px;padding:4px 8px;cursor:pointer;min-width:44px;transition:all 0.15s;">
+                        <i class="fas fa-user-plus" style="font-size:14px;color:#4FC3F7;"></i>
+                        <span style="font-size:8px;color:rgba(255,255,255,0.5);font-family:var(--font-ui);">Друг</span>
+                    </button>
+                </div>
+                <span style="font-size:7px;color:rgba(255,255,255,0.2);font-family:var(--font-mono);letter-spacing:1px;">ДЕЙСТВИЯ</span>
+            </div>
+
+            <!-- СЕКЦИЯ: ПУБЛИКАЦИЯ -->
+            <div style="display:flex;flex-direction:column;align-items:center;padding:0 10px;height:100%;justify-content:center;gap:2px;">
+                <button onclick="app.publishGame()" style="display:flex;flex-direction:column;align-items:center;gap:1px;background:linear-gradient(135deg,rgba(255,149,0,0.3),rgba(200,80,0,0.2));border:1px solid rgba(255,149,0,0.45);border-radius:7px;padding:4px 14px;cursor:pointer;min-width:64px;transition:all 0.15s;box-shadow:0 0 12px rgba(255,149,0,0.15);">
+                    <i class="fas fa-upload" style="font-size:14px;color:#FF9500;"></i>
+                    <span style="font-size:8px;color:#FF9500;font-family:var(--font-ui);font-weight:700;">Опубликовать</span>
+                </button>
+                <span style="font-size:7px;color:rgba(255,255,255,0.2);font-family:var(--font-mono);letter-spacing:1px;">ПУБЛИКАЦИЯ</span>
+            </div>
+
         </div>
         <div id="mp-panel" class="hidden">
             <h4>В игре</h4>
@@ -2238,8 +2282,59 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
 
         <button class="btn-exit" onclick="app.exitGame()" ontouchstart="app.exitGame()" style="touch-action:manipulation;">← В ХАБ</button>
 
+        <!-- Инструкция студии (только в режиме студии) -->
+        <div id="studio-guide" class="hidden" style="position:absolute;bottom:16px;right:16px;background:rgba(5,3,8,0.92);border:1px solid rgba(255,149,0,0.15);border-radius:14px;padding:14px 16px;pointer-events:none;backdrop-filter:blur(16px);min-width:220px;box-shadow:0 4px 24px rgba(0,0,0,0.6);">
+            <div style="font-size:8px;color:rgba(255,149,0,0.5);font-family:var(--font-mono);letter-spacing:2px;margin-bottom:10px;text-align:center;">📋 ГОРЯЧИЕ КЛАВИШИ</div>
+            <div style="display:flex;flex-direction:column;gap:5px;font-family:var(--font-mono);font-size:10px;">
+                <div style="display:flex;justify-content:space-between;gap:16px;">
+                    <span style="background:rgba(255,149,0,0.15);border:1px solid rgba(255,149,0,0.3);border-radius:4px;padding:1px 6px;color:#FF9500;">1</span>
+                    <span style="color:rgba(255,255,255,0.55);flex:1;">Ставить блок</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;gap:16px;">
+                    <span style="background:rgba(62,207,255,0.12);border:1px solid rgba(62,207,255,0.25);border-radius:4px;padding:1px 6px;color:#3ECFFF;">2</span>
+                    <span style="color:rgba(255,255,255,0.55);flex:1;">Двигать блок</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;gap:16px;">
+                    <span style="background:rgba(57,224,138,0.12);border:1px solid rgba(57,224,138,0.25);border-radius:4px;padding:1px 6px;color:#39E08A;">3</span>
+                    <span style="color:rgba(255,255,255,0.55);flex:1;">Изменить размер</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;gap:16px;">
+                    <span style="background:rgba(255,80,80,0.12);border:1px solid rgba(255,80,80,0.25);border-radius:4px;padding:1px 6px;color:#FF5555;">4</span>
+                    <span style="color:rgba(255,255,255,0.55);flex:1;">Удалить блок</span>
+                </div>
+                <div style="height:1px;background:rgba(255,255,255,0.06);margin:3px 0;"></div>
+                <div style="display:flex;justify-content:space-between;gap:16px;">
+                    <span style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:1px 6px;color:rgba(255,255,255,0.5);">Z/X</span>
+                    <span style="color:rgba(255,255,255,0.55);flex:1;">Цвет блока</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;gap:16px;">
+                    <span style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:1px 6px;color:rgba(255,255,255,0.5);">Q/E</span>
+                    <span style="color:rgba(255,255,255,0.55);flex:1;">Высота блока</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;gap:16px;">
+                    <span style="background:rgba(100,200,255,0.10);border:1px solid rgba(100,200,255,0.22);border-radius:4px;padding:1px 6px;color:#64C8FF;">E</span>
+                    <span style="color:rgba(255,255,255,0.55);flex:1;">Открыть скрипт</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;gap:16px;">
+                    <span style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:1px 6px;color:rgba(255,255,255,0.5);">F</span>
+                    <span style="color:rgba(255,255,255,0.55);flex:1;">Позвать друга</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;gap:16px;">
+                    <span style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:1px 6px;color:rgba(255,255,255,0.5);">Esc</span>
+                    <span style="color:rgba(255,255,255,0.55);flex:1;">Снять выделение</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;gap:16px;">
+                    <span style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:1px 6px;color:rgba(255,255,255,0.5);">WASD</span>
+                    <span style="color:rgba(255,255,255,0.55);flex:1;">Движение</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;gap:16px;">
+                    <span style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:1px 6px;color:rgba(255,255,255,0.5);">ПКМ</span>
+                    <span style="color:rgba(255,255,255,0.55);flex:1;">Удалить / снять</span>
+                </div>
+            </div>
+        </div>
 
-
+        <!-- Обычная подсказка (только в режиме игры) -->
         <div class="controls-hint" id="kb-hint">
             <p><span>WASD</span> — движение</p>
             <p><span>SPACE</span> — прыжок</p>
@@ -2474,11 +2569,10 @@ const app = {
                 if(e.code==='Digit3') this.setStudioMode('scale');
                 if(e.code==='Digit4') this.setStudioMode('delete');
                 if(e.code==='Escape') this._deselectBlock();
-                // Z — предыдущий цвет, X — следующий цвет
                 if(e.code==='KeyZ'){ this._cycleColor(-1); e.preventDefault(); }
                 if(e.code==='KeyX'){ this._cycleColor(1);  e.preventDefault(); }
-                // F — позвать друга
                 if(e.code==='KeyF'){ this.studioInviteFriend(); e.preventDefault(); }
+                if(e.code==='KeyE'){ this.openEngScript(); e.preventDefault(); } // E — скрипт
                 e.preventDefault();
             }
         });
@@ -4490,100 +4584,298 @@ const app = {
         const ctx=this._ac;
         if(ctx.state==='suspended') ctx.resume();
 
-        const BPM=75, beat=60/BPM;
+        // ═══════════════════════════════════════════════
+        // HUB MUSIC — Электронная, Clownparty-стиль
+        // BPM 130, ~81 секунда, потом луп
+        // Структура: Intro → Build → Drop → Break → Drop2 → Outro
+        // ═══════════════════════════════════════════════
+        const BPM = 130, b = 60/BPM, sr = ctx.sampleRate;
 
-        // Мягкая мелодия — пентатоника
-        const melody=[
-            0,523,0,659,784,0,659,523,
-            0,440,0,523,659,0,523,440,
-            0,392,0,523,659,784,659,0,
-            0,523,659,0,784,659,523,0,
-        ];
-        // Тихий бас
-        const bass=[
-            130,0,0,0,130,0,0,0,
-            116,0,0,0,116,0,0,0,
-            98, 0,0,0,98, 0,0,0,
-            130,0,0,0,130,0,0,0,
-        ];
-        // Лёгкие пэды (аккорды)
-        const pads=[
-            [261,329,392], null, null, null, null, null, null, null,
-            [220,277,349], null, null, null, null, null, null, null,
-            [196,247,294], null, null, null, null, null, null, null,
-            [261,329,392], null, null, null, null, null, null, null,
-        ];
+        // Мастер-цепочка: компрессор → ревер → выход
+        const master = ctx.createDynamicsCompressor();
+        master.threshold.value = -14; master.ratio.value = 4;
+        master.attack.value = 0.003; master.release.value = 0.15;
 
-        const totalBeats=melody.length;
-        const loopLen=totalBeats*beat*0.5;
+        const revBuf = ctx.createBuffer(2, sr*2, sr);
+        for(let c=0;c<2;c++){const d=revBuf.getChannelData(c);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,3);}
+        const rev = ctx.createConvolver(); rev.buffer = revBuf;
+        const revG = ctx.createGain(); revG.gain.value = 0.18;
+        master.connect(rev); rev.connect(revG); revG.connect(this._musicGain);
+        master.connect(this._musicGain);
 
-        const playLoop=(startTime)=>{
-            if(!this._musicPlaying) return;
-
-            // Мелодия — мягкий синус
-            melody.forEach((freq,i)=>{
-                if(!freq) return;
-                const t=startTime+i*beat*0.5;
-                const o=ctx.createOscillator(); o.type='sine';
-                o.frequency.value=freq;
-                const gn=ctx.createGain();
-                gn.gain.setValueAtTime(0,t);
-                gn.gain.linearRampToValueAtTime(0.09,t+0.04);
-                gn.gain.exponentialRampToValueAtTime(0.001,t+beat*0.6);
-                o.connect(gn); gn.connect(this._musicGain);
-                o.start(t); o.stop(t+beat*0.65);
-            });
-
-            // Бас — мягкий с фильтром
-            bass.forEach((freq,i)=>{
-                if(!freq) return;
-                const t=startTime+i*beat*0.5;
-                const o=ctx.createOscillator(); o.type='triangle';
-                o.frequency.value=freq;
-                const f=ctx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=400; f.Q.value=0.5;
-                const gn=ctx.createGain();
-                gn.gain.setValueAtTime(0,t);
-                gn.gain.linearRampToValueAtTime(0.18,t+0.05);
-                gn.gain.exponentialRampToValueAtTime(0.001,t+beat*0.9);
-                o.connect(f); f.connect(gn); gn.connect(this._musicGain);
-                o.start(t); o.stop(t+beat);
-            });
-
-            // Пэды — долгие мягкие аккорды
-            pads.forEach((chord,i)=>{
-                if(!chord) return;
-                const t=startTime+i*beat*0.5;
-                chord.forEach(freq=>{
-                    const o=ctx.createOscillator(); o.type='sine';
-                    o.frequency.value=freq;
-                    const gn=ctx.createGain();
-                    gn.gain.setValueAtTime(0,t);
-                    gn.gain.linearRampToValueAtTime(0.04,t+0.3);
-                    gn.gain.linearRampToValueAtTime(0.03,t+loopLen/2-0.3);
-                    gn.gain.linearRampToValueAtTime(0,t+loopLen/2);
-                    o.connect(gn); gn.connect(this._musicGain);
-                    o.start(t); o.stop(t+loopLen/2+0.1);
-                });
-            });
-
-            // Лёгкая перкуссия — только тихий хайхэт
-            for(let i=0;i<totalBeats;i++){
-                if(i%2!==0) continue;
-                const t=startTime+i*beat*0.5;
-                const buf=ctx.createBuffer(1,ctx.sampleRate*0.04,ctx.sampleRate);
-                const d=buf.getChannelData(0);
-                for(let j=0;j<d.length;j++) d[j]=(Math.random()*2-1)*Math.exp(-j/(ctx.sampleRate*0.008));
-                const src=ctx.createBufferSource(); src.buffer=buf;
-                const f=ctx.createBiquadFilter(); f.type='highpass'; f.frequency.value=9000;
-                const gn=ctx.createGain(); gn.gain.setValueAtTime(0.04,t); gn.gain.exponentialRampToValueAtTime(0.001,t+0.04);
-                src.connect(f); f.connect(gn); gn.connect(this._musicGain); src.start(t);
-            }
-
-            const nextId=setTimeout(()=>playLoop(startTime+loopLen),(loopLen-0.2)*1000);
-            this._musicScheduled.push(nextId);
+        // Утилиты
+        const osc = (freq,type,t,dur,vol,dst,detune=0)=>{
+            const o=ctx.createOscillator(); o.type=type; o.frequency.value=freq;
+            if(detune) o.detune.value=detune;
+            const g=ctx.createGain(); g.gain.setValueAtTime(0,t);
+            g.gain.linearRampToValueAtTime(vol,t+0.01);
+            g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+            o.connect(g); g.connect(dst); o.start(t); o.stop(t+dur+0.02);
+        };
+        const noise = (t,dur,vol,lpFreq,dst)=>{
+            const buf=ctx.createBuffer(1,Math.ceil(sr*dur),sr);
+            const d=buf.getChannelData(0);
+            for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.exp(-i/(sr*dur*0.4));
+            const src=ctx.createBufferSource(); src.buffer=buf;
+            const f=ctx.createBiquadFilter(); f.type=lpFreq>5000?'highpass':'bandpass';
+            f.frequency.value=lpFreq;
+            const g=ctx.createGain(); g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+            src.connect(f); f.connect(g); g.connect(dst); src.start(t);
         };
 
-        playLoop(ctx.currentTime+0.1);
+        // ───────────────────────────────────
+        // ГЛАВНАЯ МЕЛОДИЯ — запоминающаяся!
+        // Тема A: весёлая, скачущая
+        const themeA=[
+            [659,b*0.4],[784,b*0.2],[880,b*0.4],[1046,b*0.8],
+            [880,b*0.4],[784,b*0.4],[659,b*0.8],[0,b*0.4],
+            [523,b*0.4],[659,b*0.4],[784,b*0.4],[880,b*0.4],
+            [1046,b*0.4],[880,b*0.4],[784,b*0.4],[659,b*1.2],
+        ];
+        // Тема B: более насыщенная для Drop
+        const themeB=[
+            [1046,b*0.4],[1174,b*0.2],[1318,b*0.4],[1046,b*0.4],
+            [880,b*0.4],[1046,b*0.4],[784,b*0.8],[0,b*0.4],
+            [784,b*0.4],[880,b*0.4],[1046,b*0.4],[1174,b*0.4],
+            [1318,b*0.4],[1174,b*0.4],[1046,b*0.4],[784,b*1.2],
+        ];
+        // Контрмелодия (арпеджио)
+        const arpSeq=[1046,1318,1568,1318,1046,784,880,1046,1318,1046,880,784,659,784,1046,1318];
+
+        const playMelody=(notes,startT,vol,dst,detune=0)=>{
+            let t=startT;
+            notes.forEach(([f,d])=>{
+                if(f>0){
+                    // Основной синт (синус + пила с фильтром)
+                    osc(f,'sine',t,d*0.85,vol*0.7,dst,detune);
+                    const o2=ctx.createOscillator(); o2.type='sawtooth'; o2.frequency.value=f; o2.detune.value=detune+5;
+                    const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=2800; lp.Q.value=1.5;
+                    const g2=ctx.createGain(); g2.gain.setValueAtTime(0,t); g2.gain.linearRampToValueAtTime(vol*0.4,t+0.012);
+                    g2.gain.setValueAtTime(vol*0.3,t+d*0.5); g2.gain.exponentialRampToValueAtTime(0.001,t+d*0.9);
+                    o2.connect(lp); lp.connect(g2); g2.connect(dst); o2.start(t); o2.stop(t+d);
+                }
+                t+=d;
+            });
+            return t;
+        };
+
+        const playArp=(startT,len,vol,dst)=>{
+            for(let i=0;i<len;i++){
+                const t=startT+i*b*0.25;
+                const f=arpSeq[i%arpSeq.length];
+                osc(f,'sine',t,b*0.2,vol,dst);
+            }
+        };
+
+        const playBass=(startT,bars,vol,dst)=>{
+            const bassPat=[130,0,130,0,116,0,116,130,98,0,98,0,110,98,0,0];
+            for(let bar=0;bar<bars;bar++){
+                bassPat.forEach((f,i)=>{
+                    if(!f) return;
+                    const t=startT+bar*b*8+i*b*0.5;
+                    // Бас: квадрат + сабсинус
+                    const o=ctx.createOscillator(); o.type='square'; o.frequency.value=f;
+                    const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=250; lp.Q.value=0.8;
+                    const g=ctx.createGain(); g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(vol,t+0.01);
+                    g.gain.exponentialRampToValueAtTime(0.001,t+b*0.4);
+                    o.connect(lp); lp.connect(g); g.connect(dst); o.start(t); o.stop(t+b*0.42);
+                    // Суббас (синус октавой ниже)
+                    osc(f*0.5,'sine',t,b*0.45,vol*0.6,dst);
+                });
+            }
+        };
+
+        const playDrums=(startT,bars,vol,withSnare=true,dst=master)=>{
+            for(let bar=0;bar<bars;bar++){
+                for(let i=0;i<16;i++){
+                    const t=startT+bar*b*8+i*b*0.5;
+                    const beat16=i%16;
+                    // Кик: 0,8 (сильные) + 4,12 (слабые)
+                    if(beat16===0||beat16===8){
+                        const ok=ctx.createOscillator(); ok.type='sine';
+                        ok.frequency.setValueAtTime(220,t); ok.frequency.exponentialRampToValueAtTime(35,t+0.12);
+                        const gk=ctx.createGain(); gk.gain.setValueAtTime(vol*0.9,t); gk.gain.exponentialRampToValueAtTime(0.001,t+0.16);
+                        ok.connect(gk); gk.connect(dst); ok.start(t); ok.stop(t+0.17);
+                    }
+                    if(beat16===4||beat16===12){
+                        const ok=ctx.createOscillator(); ok.type='sine';
+                        ok.frequency.setValueAtTime(160,t); ok.frequency.exponentialRampToValueAtTime(40,t+0.09);
+                        const gk=ctx.createGain(); gk.gain.setValueAtTime(vol*0.6,t); gk.gain.exponentialRampToValueAtTime(0.001,t+0.12);
+                        ok.connect(gk); gk.connect(dst); ok.start(t); ok.stop(t+0.13);
+                    }
+                    // Снэр: 4,12
+                    if(withSnare&&(beat16===4||beat16===12)){
+                        noise(t,0.14,vol*0.45,2500,dst);
+                        osc(220,'sine',t,0.07,vol*0.12,dst);
+                    }
+                    // Хайхэт — каждые 8th, открытый на 2,6,10,14
+                    const isOpen=beat16%4===2;
+                    noise(t,isOpen?0.08:0.035,isOpen?vol*0.10:vol*0.06,12000,dst);
+                    // Клэп на 4,12
+                    if(withSnare&&(beat16===4||beat16===12)){
+                        noise(t+0.01,0.06,vol*0.18,3500,dst);
+                    }
+                }
+            }
+        };
+
+        const playChords=(startT,bars,vol,dst)=>{
+            const prog=[[261,330,392],[220,277,330],[196,247,330],[220,261,330]];
+            for(let bar=0;bar<bars;bar++){
+                const chord=prog[bar%4];
+                chord.forEach(f=>{
+                    const t=startT+bar*b*8;
+                    const o=ctx.createOscillator(); o.type='sine'; o.frequency.value=f;
+                    const g=ctx.createGain(); g.gain.setValueAtTime(0,t);
+                    g.gain.linearRampToValueAtTime(vol,t+0.3);
+                    g.gain.setValueAtTime(vol*0.8,t+b*6);
+                    g.gain.linearRampToValueAtTime(0,t+b*8);
+                    o.connect(g); g.connect(dst); o.start(t); o.stop(t+b*8+0.05);
+                });
+            }
+        };
+
+        // Эффект нарастания (white noise sweep)
+        const playRiser=(startT,dur,dst)=>{
+            const buf=ctx.createBuffer(1,Math.ceil(sr*dur),sr);
+            const d=buf.getChannelData(0);
+            for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+            const src=ctx.createBufferSource(); src.buffer=buf;
+            const f=ctx.createBiquadFilter(); f.type='bandpass'; f.frequency.value=200;
+            f.frequency.exponentialRampToValueAtTime(8000,ctx.currentTime+dur);
+            const g=ctx.createGain(); g.gain.setValueAtTime(0,startT); g.gain.linearRampToValueAtTime(0.22,startT+dur);
+            src.connect(f); f.connect(g); g.connect(dst); src.start(startT);
+        };
+
+        // ───────────────────────────────────
+        // СТРУКТУРА ТРЕКА (81 секунда)
+        const T0 = ctx.currentTime+0.1;
+        let T = T0;
+
+        // INTRO (0-8s, 2 бара) — только мелодия и пэды, тихо
+        playChords(T,2,0.025,master);
+        playMelody(themeA,T,0.08,master);
+        T += b*16;
+
+        // BUILD-UP (8-16s, 2 бара) — добавляем бас + хайхэт
+        playChords(T,2,0.03,master);
+        playMelody(themeA,T,0.10,master);
+        playBass(T,2,0.12,master);
+        playDrums(T,2,0.55,false); // только кик и хэт
+        T += b*16;
+
+        // PRE-DROP (16-24s, 2 бара) — нарастание + арпеджио
+        playRiser(T,b*16,master);
+        playChords(T,2,0.035,master);
+        playMelody(themeA,T,0.11,master,-7); // чуть расстроена для напряжения
+        playBass(T,2,0.14,master);
+        playDrums(T,2,0.65,false);
+        playArp(T,32,0.05,master);
+        T += b*16;
+
+        // DROP 1 (24-48s, 6 баров) — полный звук, тема B
+        playChords(T,6,0.04,master);
+        playMelody(themeB,T,0.13,master);
+        playMelody(themeB,T+b*16,0.13,master,12); // вторая итерация чуть выше
+        playMelody(themeB,T+b*32,0.13,master);
+        playBass(T,6,0.18,master);
+        playDrums(T,6,0.80,true);
+        playArp(T,96,0.038,master);
+        T += b*48;
+
+        // BREAK (48-56s, 2 бара) — тихо, только пэды и мелодия
+        playChords(T,2,0.028,master);
+        playMelody(themeA,T,0.07,master);
+        T += b*16;
+
+        // BUILD 2 (56-64s, 2 бара) — снова нарастание
+        playRiser(T,b*16,master);
+        playChords(T,2,0.032,master);
+        playMelody(themeA,T,0.09,master);
+        playBass(T,2,0.13,master);
+        playDrums(T,2,0.6,false);
+        playArp(T,32,0.045,master);
+        T += b*16;
+
+        // DROP 2 (64-80s, 4 бара) — ещё мощнее, обе темы
+        playChords(T,4,0.045,master);
+        playMelody(themeB,T,0.15,master);
+        playMelody(themeA,T+b*16,0.12,master,7);
+        playBass(T,4,0.20,master);
+        playDrums(T,4,0.88,true);
+        playArp(T,64,0.042,master);
+        T += b*32;
+
+        // OUTRO (80-81s, ~1 бар) — затухание
+        playChords(T,1,0.02,master);
+        playMelody(themeA,T,0.06,master);
+        T += b*8;
+
+        // ───────────────────────────────────
+        // ЛУП: через 81 секунду начинаем снова
+        const totalLen = T - T0;
+        setTimeout(()=>{
+            if(this._musicPlaying) this.startHubMusic();
+        }, (totalLen - 0.3)*1000);
+
+        // Главная мелодия — яркая, прыгающая, запоминающаяся
+        // До-мажор, игривые скачки
+        const mel = [
+            523,0,659,784,1046,784,659,523,
+            659,0,784,880,1046,880,784,659,
+            784,523,659,784,880,784,659,523,
+            392,523,659,523,440,392,330,0,
+
+            523,659,784,1046,1174,1046,784,659,
+            880,784,659,523,659,784,880,0,
+            523,659,523,392,440,523,659,784,
+            880,784,659,523,392,0,523,0,
+        ];
+
+        // Бас — синкопированный, живой
+        const bas = [
+            130,0,0,130,0,0,130,0,
+            116,0,0,116,0,0,116,0,
+            98, 0,0,98, 0,0,98, 0,
+            110,0,0,110,0,0,110,0,
+            130,0,0,130,0,0,130,0,
+            116,0,0,116,0,0,116,0,
+            98, 0,0,98, 0,0,98, 0,
+            130,0,0,0, 0,0,130,0,
+        ];
+
+        // Аккорды (пэды) — каждые 2 бита
+        const chords = [
+            [261,330,392,523], // C maj
+            null,
+            [220,277,330,440], // A min
+            null,
+            [196,247,294,392], // G maj
+            null,
+            [220,277,330,440], // A min
+            null,
+            [261,330,392,523],
+            null,
+            [220,277,330,440],
+            null,
+            [196,247,294,392],
+            null,
+            [174,220,261,349], // F maj
+            null,
+        ];
+
+        // Весёлые арпеджио сверху (высокий голос)
+        const arp = [
+            1046,1174,1318,1046, 1174,1046,880,784,
+            880,1046,1174,880,  1046,880,784,659,
+            784,880,1046,784,   880,784,659,523,
+            659,784,880,659,    784,659,523,440,
+            1046,1318,1046,784, 1174,1046,880,659,
+            880,1046,880,659,   1046,880,784,523,
+            784,880,784,523,    880,784,659,440,
+            659,784,659,523,    784,0,523,0,
+        ];
+
     },
 
     stopHubMusic(){
@@ -6864,16 +7156,15 @@ const app = {
         document.getElementById('ingame-ui').style.display=(mode==='play'&&(mapId==='gather'||mapId==='race'||mapId==='coins'||mapId==='march8'))?'flex':'none';
         document.getElementById('mp-panel').classList.toggle('hidden',mode!=='play');
 
-        
-        // Чат виден только в игре
-
-        
+        // Показываем инструкцию студии или обычные подсказки
+        const stGuide = document.getElementById('studio-guide');
+        if(stGuide) stGuide.classList.toggle('hidden', mode!=='studio');
         const placeBtnEl=document.getElementById('btn-place');
         if(placeBtnEl)placeBtnEl.classList.toggle('hidden',mode!=='studio');
         const kbHint=document.getElementById('kb-hint');
-        if(kbHint)kbHint.style.display=('ontouchstart' in window)?'none':'block';
+        if(kbHint) kbHint.style.display = (mode==='studio' || 'ontouchstart' in window) ? 'none' : 'block';
         const he=document.getElementById('hint-extra');
-        if(mode==='studio')he.innerHTML='<span>ЛКМ</span> ставить · <span>ПКМ</span> убрать · <span>QE</span> вверх/вниз';
+        if(he && mode!=='studio') he.innerHTML='<span>Мышь</span> — камера';
         this.setupScene();
     },
 
@@ -7628,9 +7919,20 @@ const app = {
 
     setStudioMode(m){
         this._studioMode = m;
+        const colors = {place:'rgba(255,149,0,0.3)',move:'rgba(62,207,255,0.2)',scale:'rgba(57,224,138,0.2)',delete:'rgba(255,80,80,0.2)'};
+        const borders = {place:'rgba(255,149,0,0.5)',move:'rgba(62,207,255,0.35)',scale:'rgba(57,224,138,0.35)',delete:'rgba(255,80,80,0.35)'};
         ['place','move','scale','delete'].forEach(n=>{
-            const b=document.getElementById('stmode-'+n);
-            if(b) b.style.background = n===m ? 'rgba(255,149,0,0.5)' : '';
+            const b = document.getElementById('stmode-'+n);
+            if(!b) return;
+            if(n===m){
+                b.style.background = colors[n];
+                b.style.borderColor = borders[n];
+                b.style.boxShadow = `0 0 10px ${borders[n]}`;
+            } else {
+                b.style.background = 'rgba(255,255,255,0.04)';
+                b.style.borderColor = 'rgba(255,255,255,0.08)';
+                b.style.boxShadow = '';
+            }
         });
         const hints = {
             place: '<span>[1]</span> Ставить · <span>ЛКМ</span> · <span>QE</span> высота · <span>Z/X</span> цвет · <span>F</span> позвать друга',
