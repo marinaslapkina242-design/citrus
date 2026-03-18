@@ -7477,7 +7477,6 @@ const app = {
             const legMat=new THREE.MeshStandardMaterial({color:0x555555,roughness:0.8});
             [-0.28,0.28].forEach(x=>{const leg=new THREE.Mesh(new THREE.BoxGeometry(0.08,0.14,0.08),legMat);leg.position.set(x,-0.39,0);headGroup.add(leg);});
         }
-        }
         // ── ВСЕ НОВЫЕ АКСЕССУАРЫ (используем this.inventory) ──
         const inv=this.inventory||[];
 
