@@ -6811,7 +6811,382 @@ const app = {
         if(inv.includes('rainbow')){const colors=[0xFF0000,0xFF7700,0xFFFF00,0x00FF00,0x0000FF,0x8B00FF];colors.forEach((col,i)=>{const rb=new THREE.Mesh(new THREE.TorusGeometry(0.28+i*0.05,0.025,5,20,Math.PI),new THREE.MeshStandardMaterial({color:col,emissive:col,emissiveIntensity:0.7}));rb.position.set(0,0.38+i*0.02,0.05);rb.rotation.z=Math.PI;headGroup.add(rb);});}
         if(inv.includes('mask')){const mask=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.35,0.08),new THREE.MeshStandardMaterial({color:0xFFD700,metalness:0.9,roughness:0.1}));mask.position.set(0,0.08,0.32);headGroup.add(mask);}
 
-        return g;
+        // ── НОВЫЕ АКСЕССУАРЫ ──
+
+        // Шлем Астронавта
+        if(inv.includes('helmet_space')){
+            const hm=new THREE.MeshStandardMaterial({color:0xffffff,roughness:0.2,metalness:0.4});
+            const dome=new THREE.Mesh(new THREE.SphereGeometry(0.42,16,16),hm);
+            dome.position.set(0,0.05,0); headGroup.add(dome);
+            const visor=new THREE.Mesh(new THREE.SphereGeometry(0.38,16,16,0,Math.PI*2,0,Math.PI*0.5),new THREE.MeshStandardMaterial({color:0x88CCFF,transparent:true,opacity:0.5,metalness:0.8,roughness:0.1}));
+            visor.position.set(0,0.05,0); headGroup.add(visor);
+            const ring=new THREE.Mesh(new THREE.TorusGeometry(0.39,0.04,8,20),new THREE.MeshStandardMaterial({color:0xCCCCCC,metalness:0.8}));
+            ring.position.set(0,-0.08,0); headGroup.add(ring);
+        }
+        // Мотошлем Неон
+        if(inv.includes('helmet_moto')){
+            const hm=new THREE.MeshStandardMaterial({color:0x111111,roughness:0.3,metalness:0.5});
+            const shell=new THREE.Mesh(new THREE.SphereGeometry(0.40,12,12),hm);
+            shell.scale.set(1,0.85,1.1); shell.position.set(0,0.03,0); headGroup.add(shell);
+            const visor=new THREE.Mesh(new THREE.BoxGeometry(0.55,0.22,0.08),new THREE.MeshStandardMaterial({color:0xFF6600,transparent:true,opacity:0.6,emissive:0xFF4400,emissiveIntensity:0.4}));
+            visor.position.set(0,0.06,0.30); headGroup.add(visor);
+            // Неоновая полоска
+            const strip=new THREE.Mesh(new THREE.BoxGeometry(0.58,0.04,0.06),new THREE.MeshStandardMaterial({color:0x00FFFF,emissive:0x00FFFF,emissiveIntensity:2}));
+            strip.position.set(0,0.18,0.28); headGroup.add(strip);
+        }
+        // Алмазная корона
+        if(inv.includes('crown_diamond')){
+            const dm=new THREE.MeshStandardMaterial({color:0x88EEFF,metalness:0.9,roughness:0.0,emissive:0x44AAFF,emissiveIntensity:0.5});
+            const base=new THREE.Mesh(new THREE.CylinderGeometry(0.30,0.28,0.10,8),dm);
+            base.position.set(0,0.40,0); headGroup.add(base);
+            [-0.20,-0.10,0,0.10,0.20].forEach((x,i)=>{
+                const spike=new THREE.Mesh(new THREE.ConeGeometry(0.05,i%2===0?0.28:0.18,5),dm);
+                spike.position.set(x,0.54,0); headGroup.add(spike);
+            });
+        }
+        // Кепка Snapback
+        if(inv.includes('cap_snapback')){
+            const cm=new THREE.MeshStandardMaterial({color:0x222222,roughness:0.8});
+            const top=new THREE.Mesh(new THREE.CylinderGeometry(0.30,0.32,0.18,10),cm);
+            top.position.set(0,0.44,0.02); headGroup.add(top);
+            const brim=new THREE.Mesh(new THREE.BoxGeometry(0.56,0.04,0.30),cm);
+            brim.position.set(0,0.36,0.22); headGroup.add(brim);
+            const logo=new THREE.Mesh(new THREE.BoxGeometry(0.10,0.10,0.02),new THREE.MeshStandardMaterial({color:0xFF9500,emissive:0xFF6600,emissiveIntensity:0.5}));
+            logo.position.set(0,0.48,0.32); headGroup.add(logo);
+        }
+        // Противогаз
+        if(inv.includes('mask_gas')){
+            const gm=new THREE.MeshStandardMaterial({color:0x333322,roughness:0.6,metalness:0.3});
+            const face=new THREE.Mesh(new THREE.BoxGeometry(0.60,0.45,0.14),gm);
+            face.position.set(0,0.02,0.28); headGroup.add(face);
+            [-0.14,0.14].forEach(x=>{const eye=new THREE.Mesh(new THREE.CylinderGeometry(0.09,0.09,0.06,12),new THREE.MeshStandardMaterial({color:0x44FF44,transparent:true,opacity:0.7,emissive:0x22AA22,emissiveIntensity:0.8}));eye.rotation.x=Math.PI/2;eye.position.set(x,0.10,0.36); headGroup.add(eye);});
+            const filter=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.07,0.16,10),new THREE.MeshStandardMaterial({color:0x555544,metalness:0.5}));
+            filter.rotation.x=Math.PI/2; filter.position.set(0,-0.10,0.36); headGroup.add(filter);
+        }
+        // Маска Черепа
+        if(inv.includes('skull_mask')){
+            const sm=new THREE.MeshStandardMaterial({color:0xF5F5DC,roughness:0.5});
+            const face=new THREE.Mesh(new THREE.BoxGeometry(0.58,0.42,0.10),sm);
+            face.position.set(0,0.04,0.30); headGroup.add(face);
+            [-0.15,0.15].forEach(x=>{const eye=new THREE.Mesh(new THREE.SphereGeometry(0.08,8,8),new THREE.MeshStandardMaterial({color:0x000000}));eye.position.set(x,0.12,0.35); headGroup.add(eye);});
+            const nose=new THREE.Mesh(new THREE.BoxGeometry(0.08,0.06,0.06),new THREE.MeshStandardMaterial({color:0x222222}));
+            nose.position.set(0,-0.02,0.35); headGroup.add(nose);
+            const teeth=new THREE.Mesh(new THREE.BoxGeometry(0.30,0.06,0.06),new THREE.MeshStandardMaterial({color:0xFFFFFF}));
+            teeth.position.set(0,-0.14,0.35); headGroup.add(teeth);
+        }
+        // Неоновый визор
+        if(inv.includes('neon_visor')){
+            const visor=new THREE.Mesh(new THREE.BoxGeometry(0.68,0.18,0.06),new THREE.MeshStandardMaterial({color:0xFF0088,transparent:true,opacity:0.65,emissive:0xFF0066,emissiveIntensity:1.5}));
+            visor.position.set(0,0.10,0.32); headGroup.add(visor);
+            const frame=new THREE.Mesh(new THREE.BoxGeometry(0.72,0.22,0.04),new THREE.MeshStandardMaterial({color:0x111111,metalness:0.8}));
+            frame.position.set(0,0.10,0.30); headGroup.add(frame);
+        }
+        // Про-Гарнитура
+        if(inv.includes('headset_pro')){
+            const hm=new THREE.MeshStandardMaterial({color:0x111111,metalness:0.6,roughness:0.4});
+            const band=new THREE.Mesh(new THREE.TorusGeometry(0.34,0.03,6,20,Math.PI),hm);
+            band.position.set(0,0.36,0); band.rotation.z=Math.PI; headGroup.add(band);
+            [-0.35,0.35].forEach(x=>{
+                const cup=new THREE.Mesh(new THREE.CylinderGeometry(0.11,0.11,0.08,12),new THREE.MeshStandardMaterial({color:0x222222,metalness:0.5}));
+                cup.rotation.z=Math.PI/2; cup.position.set(x,0.04,0); headGroup.add(cup);
+                const led=new THREE.Mesh(new THREE.SphereGeometry(0.03,6,6),new THREE.MeshStandardMaterial({color:0x00FF88,emissive:0x00FF88,emissiveIntensity:2}));
+                led.position.set(x*1.12,0.04,0.04); headGroup.add(led);
+            });
+            const mic=new THREE.Mesh(new THREE.CylinderGeometry(0.015,0.015,0.25,6),hm);
+            mic.rotation.z=-0.5; mic.position.set(-0.40,-0.10,0.08); headGroup.add(mic);
+            const micBall=new THREE.Mesh(new THREE.SphereGeometry(0.035,6,6),new THREE.MeshStandardMaterial({color:0x333333}));
+            micBall.position.set(-0.50,-0.20,0.10); headGroup.add(micBall);
+        }
+        // Тёмная Броня
+        if(inv.includes('armor_dark')){
+            const am=new THREE.MeshStandardMaterial({color:0x1a1a2e,roughness:0.3,metalness:0.8});
+            const em=new THREE.MeshStandardMaterial({color:0x4400CC,emissive:0x6600FF,emissiveIntensity:1.2,metalness:0.9});
+            // Нагрудник
+            const chest=new THREE.Mesh(new THREE.BoxGeometry(0.88,0.65,0.22),am);
+            chest.position.set(0,0,0.07); torso.add(chest);
+            // Светящиеся линии на броне
+            const line1=new THREE.Mesh(new THREE.BoxGeometry(0.60,0.04,0.04),em);
+            line1.position.set(0,0.12,0.20); torso.add(line1);
+            const line2=new THREE.Mesh(new THREE.BoxGeometry(0.04,0.40,0.04),em);
+            line2.position.set(0,0,0.20); torso.add(line2);
+            // Наплечники
+            [-0.52,0.52].forEach(x=>{
+                const sp=new THREE.Mesh(new THREE.SphereGeometry(0.20,8,8),am);
+                sp.scale.set(1,0.7,1); sp.position.set(x,0.22,0); torso.add(sp);
+                const spGlow=new THREE.Mesh(new THREE.SphereGeometry(0.08,6,6),em);
+                spGlow.position.set(x,0.22,0.14); torso.add(spGlow);
+            });
+        }
+        // Джинсовая куртка
+        if(inv.includes('jacket_denim')){
+            const jm=new THREE.MeshStandardMaterial({color:0x3a5f8a,roughness:0.9});
+            const jacket=new THREE.Mesh(new THREE.BoxGeometry(0.92,0.72,0.20),jm);
+            jacket.position.set(0,0,0.05); torso.add(jacket);
+            const collar1=new THREE.Mesh(new THREE.BoxGeometry(0.18,0.20,0.06),jm);
+            collar1.position.set(-0.12,0.32,0.12); torso.add(collar1);
+            const collar2=collar1.clone(); collar2.position.set(0.12,0.32,0.12); torso.add(collar2);
+        }
+        // Огненное Худи
+        if(inv.includes('hoodie_fire')){
+            const hm=new THREE.MeshStandardMaterial({color:0xCC2200,roughness:0.8});
+            const hood=new THREE.Mesh(new THREE.BoxGeometry(0.88,0.70,0.18),hm);
+            hood.position.set(0,0,0.04); torso.add(hood);
+            // Огонь по краям
+            [[-0.44,0.1],[0.44,0.1],[0,0.38]].forEach(([x,y])=>{
+                const flame=new THREE.Mesh(new THREE.ConeGeometry(0.08,0.22,6),new THREE.MeshStandardMaterial({color:0xFF6600,emissive:0xFF4400,emissiveIntensity:1.5}));
+                flame.position.set(x,y,0.10); torso.add(flame);
+            });
+        }
+        // Рюкзак
+        if(inv.includes('backpack')){
+            const bm=new THREE.MeshStandardMaterial({color:0x8B4513,roughness:0.8});
+            const pack=new THREE.Mesh(new THREE.BoxGeometry(0.55,0.70,0.28),bm);
+            pack.position.set(0,0,-0.22); torso.add(pack);
+            const top=new THREE.Mesh(new THREE.BoxGeometry(0.55,0.12,0.28),new THREE.MeshStandardMaterial({color:0x6B3410,roughness:0.8}));
+            top.position.set(0,0.40,-0.22); torso.add(top);
+            // Лямки
+            [-0.18,0.18].forEach(x=>{
+                const strap=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.75,0.04),new THREE.MeshStandardMaterial({color:0x5a2a08,roughness:0.9}));
+                strap.position.set(x,0,0.06); torso.add(strap);
+            });
+        }
+        // Джетпак
+        if(inv.includes('jetpack')){
+            const jm=new THREE.MeshStandardMaterial({color:0x888888,metalness:0.8,roughness:0.3});
+            const body=new THREE.Mesh(new THREE.BoxGeometry(0.50,0.65,0.30),jm);
+            body.position.set(0,0,-0.24); torso.add(body);
+            [-0.16,0.16].forEach(x=>{
+                const thruster=new THREE.Mesh(new THREE.CylinderGeometry(0.10,0.14,0.35,10),jm);
+                thruster.position.set(x,-0.38,-0.22); torso.add(thruster);
+                const fire=new THREE.Mesh(new THREE.ConeGeometry(0.10,0.30,10),new THREE.MeshStandardMaterial({color:0xFF6600,emissive:0xFF4400,emissiveIntensity:2,transparent:true,opacity:0.8}));
+                fire.position.set(x,-0.70,-0.22); torso.add(fire);
+            });
+        }
+        // Ангельские крылья
+        if(inv.includes('wings_angel')){
+            const wm=new THREE.MeshStandardMaterial({color:0xFFFFFF,emissive:0xFFEEAA,emissiveIntensity:0.4,transparent:true,opacity:0.9,roughness:0.2});
+            [-1,1].forEach(side=>{
+                const wing=new THREE.Mesh(new THREE.BoxGeometry(1.4,0.9,0.06),wm);
+                wing.position.set(side*0.85,0.15,-0.15); wing.rotation.y=side*0.4; wing.rotation.z=side*0.15; torso.add(wing);
+                const tip=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.5,0.04),wm);
+                tip.position.set(side*1.45,-0.1,-0.15); tip.rotation.z=side*0.5; torso.add(tip);
+            });
+        }
+        // Крылья Демона
+        if(inv.includes('wings_devil')){
+            const wm=new THREE.MeshStandardMaterial({color:0x880000,emissive:0x440000,emissiveIntensity:0.6,transparent:true,opacity:0.85,roughness:0.5});
+            [-1,1].forEach(side=>{
+                const wing=new THREE.Mesh(new THREE.BoxGeometry(1.2,1.0,0.05),wm);
+                wing.position.set(side*0.75,0.10,-0.18); wing.rotation.y=side*0.5; wing.rotation.z=side*-0.2; torso.add(wing);
+                const claw=new THREE.Mesh(new THREE.ConeGeometry(0.06,0.30,5),wm);
+                claw.position.set(side*1.3,0.35,-0.18); claw.rotation.z=side*-1.0; torso.add(claw);
+            });
+        }
+        // Катана
+        if(inv.includes('katana')){
+            const kg=new THREE.Group();
+            const handle=new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,0.45,8),new THREE.MeshStandardMaterial({color:0x1a0a00,roughness:0.8}));
+            kg.add(handle);
+            const guard=new THREE.Mesh(new THREE.BoxGeometry(0.20,0.04,0.06),new THREE.MeshStandardMaterial({color:0xFFD700,metalness:0.9,roughness:0.1}));
+            guard.position.y=0.25; kg.add(guard);
+            const blade=new THREE.Mesh(new THREE.BoxGeometry(0.04,1.10,0.015),new THREE.MeshStandardMaterial({color:0xCCCCCC,metalness:1,roughness:0.0}));
+            blade.position.y=0.82; kg.add(blade);
+            kg.position.set(0.22,-0.55,-0.15); kg.rotation.x=Math.PI*0.08; kg.rotation.z=0.15;
+            torso.add(kg);
+        }
+        // Магический Посох
+        if(inv.includes('staff_magic')){
+            const sg=new THREE.Group();
+            const staff=new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,1.8,8),new THREE.MeshStandardMaterial({color:0x5C2D00,roughness:0.7}));
+            sg.add(staff);
+            const orb=new THREE.Mesh(new THREE.SphereGeometry(0.14,10,10),new THREE.MeshStandardMaterial({color:0xAA44FF,emissive:0x8800FF,emissiveIntensity:1.5,transparent:true,opacity:0.85}));
+            orb.position.y=0.98; sg.add(orb);
+            sg.position.set(-0.55,-0.30,-0.10); sg.rotation.z=0.15;
+            torso.add(sg);
+        }
+        // Боевой топор
+        if(inv.includes('axe_battle')){
+            const ag=new THREE.Group();
+            const hnd=new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,1.2,8),new THREE.MeshStandardMaterial({color:0x3a1a00,roughness:0.8}));
+            ag.add(hnd);
+            const blade=new THREE.Mesh(new THREE.BoxGeometry(0.45,0.55,0.06),new THREE.MeshStandardMaterial({color:0x888888,metalness:0.9,roughness:0.1}));
+            blade.position.set(0.18,0.5,0); ag.add(blade);
+            ag.position.set(0.35,-0.40,-0.15); ag.rotation.z=-0.2;
+            torso.add(ag);
+        }
+        // Лазерный пистолет
+        if(inv.includes('gun_laser')){
+            const gg=new THREE.Group();
+            const body=new THREE.Mesh(new THREE.BoxGeometry(0.28,0.18,0.08),new THREE.MeshStandardMaterial({color:0x222222,metalness:0.7,roughness:0.3}));
+            gg.add(body);
+            const barrel=new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,0.36,8),new THREE.MeshStandardMaterial({color:0x444444,metalness:0.8}));
+            barrel.rotation.z=Math.PI/2; barrel.position.set(0.32,0.04,0); gg.add(barrel);
+            const glow=new THREE.Mesh(new THREE.SphereGeometry(0.04,6,6),new THREE.MeshStandardMaterial({color:0x00FFFF,emissive:0x00FFFF,emissiveIntensity:2}));
+            glow.position.set(0.52,0.04,0); gg.add(glow);
+            gg.position.set(0.32,-0.38,-0.10); gg.rotation.z=0.10;
+            torso.add(gg);
+        }
+        // Скипетр
+        if(inv.includes('scepter')){
+            const sg=new THREE.Group();
+            const rod=new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,1.5,8),new THREE.MeshStandardMaterial({color:0xFFD700,metalness:0.95,roughness:0.05}));
+            sg.add(rod);
+            const top=new THREE.Mesh(new THREE.SphereGeometry(0.16,10,10),new THREE.MeshStandardMaterial({color:0xFF00FF,emissive:0xCC00CC,emissiveIntensity:1.2,metalness:0.8}));
+            top.position.y=0.88; sg.add(top);
+            const ring=new THREE.Mesh(new THREE.TorusGeometry(0.18,0.03,8,16),new THREE.MeshStandardMaterial({color:0xFFD700,metalness:0.95}));
+            ring.position.y=0.88; sg.add(ring);
+            sg.position.set(-0.50,-0.25,-0.10); sg.rotation.z=0.12;
+            torso.add(sg);
+        }
+        // Коса Жнеца
+        if(inv.includes('scythe')){
+            const sg=new THREE.Group();
+            const staff=new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,2.0,8),new THREE.MeshStandardMaterial({color:0x111111,roughness:0.6,metalness:0.3}));
+            sg.add(staff);
+            const blade=new THREE.Mesh(new THREE.BoxGeometry(0.08,0.70,0.04),new THREE.MeshStandardMaterial({color:0xCCCCCC,metalness:1,roughness:0.0}));
+            blade.position.set(0.28,0.80,0); blade.rotation.z=-0.4; sg.add(blade);
+            sg.position.set(-0.50,-0.30,-0.10); sg.rotation.z=0.10;
+            torso.add(sg);
+        }
+        // Питомцы (летят рядом с персонажем)
+        if(inv.includes('pet_dragon')){
+            const pg=new THREE.Group();
+            const body=new THREE.Mesh(new THREE.SphereGeometry(0.20,8,8),new THREE.MeshStandardMaterial({color:0x44AA00,emissive:0x226600,emissiveIntensity:0.3,roughness:0.5}));
+            pg.add(body);
+            const head=new THREE.Mesh(new THREE.SphereGeometry(0.14,8,8),new THREE.MeshStandardMaterial({color:0x55BB00,roughness:0.5}));
+            head.position.set(0.18,0.12,0.10); pg.add(head);
+            const eye=new THREE.Mesh(new THREE.SphereGeometry(0.04,6,6),new THREE.MeshStandardMaterial({color:0xFF4400,emissive:0xFF2200,emissiveIntensity:1}));
+            eye.position.set(0.26,0.16,0.18); pg.add(eye);
+            const wing=new THREE.Mesh(new THREE.BoxGeometry(0.40,0.25,0.03),new THREE.MeshStandardMaterial({color:0x55BB00,transparent:true,opacity:0.8}));
+            wing.position.set(-0.20,0.20,0); wing.rotation.z=0.4; pg.add(wing);
+            pg.position.set(0.85,0.40,-0.10);
+            g.add(pg);
+        }
+        if(inv.includes('pet_cat')){
+            const pg=new THREE.Group();
+            const body=new THREE.Mesh(new THREE.SphereGeometry(0.18,8,8),new THREE.MeshStandardMaterial({color:0xFF9500,roughness:0.9}));
+            pg.add(body);
+            const head=new THREE.Mesh(new THREE.SphereGeometry(0.14,8,8),new THREE.MeshStandardMaterial({color:0xFF9500,roughness:0.9}));
+            head.position.set(0.18,0.14,0); pg.add(head);
+            [-0.06,0.06].forEach(x=>{const ear=new THREE.Mesh(new THREE.ConeGeometry(0.05,0.10,4),new THREE.MeshStandardMaterial({color:0xFFAA33,roughness:0.8}));ear.position.set(0.18+x,0.26,0);pg.add(ear);});
+            const eyes=[-0.05,0.05].map(x=>{const e=new THREE.Mesh(new THREE.SphereGeometry(0.025,6,6),new THREE.MeshStandardMaterial({color:0x00CC44,emissive:0x00AA22,emissiveIntensity:0.8}));e.position.set(0.26,0.16,x);pg.add(e);return e;});
+            pg.position.set(0.80,0.20,-0.10);
+            g.add(pg);
+        }
+        if(inv.includes('pet_robot')){
+            const pg=new THREE.Group();
+            const body=new THREE.Mesh(new THREE.BoxGeometry(0.28,0.30,0.20),new THREE.MeshStandardMaterial({color:0x888888,metalness:0.8,roughness:0.3}));
+            pg.add(body);
+            const head=new THREE.Mesh(new THREE.BoxGeometry(0.22,0.18,0.18),new THREE.MeshStandardMaterial({color:0x999999,metalness:0.7}));
+            head.position.set(0,0.26,0); pg.add(head);
+            const eye=new THREE.Mesh(new THREE.BoxGeometry(0.14,0.06,0.04),new THREE.MeshStandardMaterial({color:0x00FFFF,emissive:0x00DDFF,emissiveIntensity:1.5}));
+            eye.position.set(0,0.28,0.10); pg.add(eye);
+            pg.position.set(0.82,0.10,-0.10);
+            g.add(pg);
+        }
+        if(inv.includes('pet_ghost')){
+            const pg=new THREE.Group();
+            const body=new THREE.Mesh(new THREE.SphereGeometry(0.20,8,8),new THREE.MeshStandardMaterial({color:0xEEEEFF,transparent:true,opacity:0.6,emissive:0xAAAAFF,emissiveIntensity:0.4}));
+            pg.add(body);
+            [-0.08,0.08].forEach(x=>{const eye=new THREE.Mesh(new THREE.SphereGeometry(0.05,6,6),new THREE.MeshStandardMaterial({color:0x000033}));eye.position.set(x,0.06,0.15);pg.add(eye);});
+            pg.position.set(0.80,0.35,-0.10);
+            g.add(pg);
+        }
+        // Ауры (кольца вокруг персонажа)
+        if(inv.includes('aura_fire')){
+            [0,0.15,-0.15].forEach((y,i)=>{
+                const ring=new THREE.Mesh(new THREE.TorusGeometry(0.65+i*0.05,0.04,6,24),new THREE.MeshStandardMaterial({color:0xFF4400,emissive:0xFF2200,emissiveIntensity:1.5,transparent:true,opacity:0.7}));
+                ring.position.y=y-0.5; ring.rotation.x=Math.PI/2+i*0.3; g.add(ring);
+            });
+        }
+        if(inv.includes('aura_ice')){
+            [0,0.15,-0.15].forEach((y,i)=>{
+                const ring=new THREE.Mesh(new THREE.TorusGeometry(0.65+i*0.05,0.04,6,24),new THREE.MeshStandardMaterial({color:0x88DDFF,emissive:0x44AAFF,emissiveIntensity:1.2,transparent:true,opacity:0.65}));
+                ring.position.y=y-0.5; ring.rotation.x=Math.PI/2+i*0.3; g.add(ring);
+            });
+        }
+        if(inv.includes('aura_thunder')){
+            [0,0.15,-0.15].forEach((y,i)=>{
+                const ring=new THREE.Mesh(new THREE.TorusGeometry(0.65+i*0.05,0.04,6,24),new THREE.MeshStandardMaterial({color:0xFFFF00,emissive:0xFFCC00,emissiveIntensity:1.8,transparent:true,opacity:0.7}));
+                ring.position.y=y-0.5; ring.rotation.x=Math.PI/2+i*0.3; g.add(ring);
+            });
+        }
+        // Следы (частицы под ногами)
+        if(inv.includes('trail_stars')){
+            for(let i=0;i<6;i++){
+                const star=new THREE.Mesh(new THREE.SphereGeometry(0.05,4,4),new THREE.MeshStandardMaterial({color:0xFFFF00,emissive:0xFFDD00,emissiveIntensity:2}));
+                star.position.set((Math.random()-0.5)*0.5,-1.0+Math.random()*0.3,(Math.random()-0.5)*0.5);
+                g.add(star);
+            }
+        }
+        if(inv.includes('trail_hearts')){
+            for(let i=0;i<5;i++){
+                const heart=new THREE.Mesh(new THREE.SphereGeometry(0.06,6,6),new THREE.MeshStandardMaterial({color:0xFF4488,emissive:0xFF2266,emissiveIntensity:1.5}));
+                heart.position.set((Math.random()-0.5)*0.4,-1.0+Math.random()*0.3,(Math.random()-0.5)*0.4);
+                g.add(heart);
+            }
+        }
+        // Пузырь Удачи
+        if(inv.includes('bubble')){
+            const bub=new THREE.Mesh(new THREE.SphereGeometry(0.55,14,14),new THREE.MeshStandardMaterial({color:0x88EEFF,transparent:true,opacity:0.18,metalness:0.5,roughness:0.0}));
+            g.add(bub);
+        }
+        // Пончик
+        if(inv.includes('donut')){
+            const dm=new THREE.Mesh(new THREE.TorusGeometry(0.22,0.10,8,16),new THREE.MeshStandardMaterial({color:0xF4A460,roughness:0.7}));
+            dm.position.set(0,0.55,0); dm.rotation.x=Math.PI/2; headGroup.add(dm);
+            const icing=new THREE.Mesh(new THREE.TorusGeometry(0.22,0.06,8,16),new THREE.MeshStandardMaterial({color:0xFF69B4,roughness:0.5}));
+            icing.position.set(0,0.57,0); icing.rotation.x=Math.PI/2; headGroup.add(icing);
+        }
+        // НЛО
+        if(inv.includes('ufo_beam')){
+            const ug=new THREE.Group();
+            const disk=new THREE.Mesh(new THREE.CylinderGeometry(0.45,0.35,0.10,16),new THREE.MeshStandardMaterial({color:0x888888,metalness:0.9,roughness:0.2}));
+            ug.add(disk);
+            const dome=new THREE.Mesh(new THREE.SphereGeometry(0.22,10,8,0,Math.PI*2,0,Math.PI*0.5),new THREE.MeshStandardMaterial({color:0x88FFCC,transparent:true,opacity:0.5,emissive:0x44FFAA,emissiveIntensity:0.5}));
+            dome.position.y=0.06; ug.add(dome);
+            const beam=new THREE.Mesh(new THREE.CylinderGeometry(0.30,0.05,1.2,10),new THREE.MeshStandardMaterial({color:0x88FF88,transparent:true,opacity:0.18,emissive:0x44FF44,emissiveIntensity:0.5}));
+            beam.position.y=-0.70; ug.add(beam);
+            ug.position.set(0,1.20,0);
+            g.add(ug);
+        }
+        // Унитаз
+        if(inv.includes('toilet')){
+            const tm=new THREE.MeshStandardMaterial({color:0xFFFFFF,roughness:0.3,metalness:0.1});
+            const base=new THREE.Mesh(new THREE.CylinderGeometry(0.22,0.28,0.28,12),tm);
+            base.position.set(0,0.44,0.02); headGroup.add(base);
+            const tank=new THREE.Mesh(new THREE.BoxGeometry(0.32,0.28,0.16),tm);
+            tank.position.set(0,0.60,-0.10); headGroup.add(tank);
+            const lid=new THREE.Mesh(new THREE.BoxGeometry(0.36,0.04,0.32),new THREE.MeshStandardMaterial({color:0xEEEEEE,roughness:0.2}));
+            lid.position.set(0,0.36,0.02); headGroup.add(lid);
+        }
+        // Шляпа-Пицца
+        if(inv.includes('pizza_hat')){
+            const pm=new THREE.MeshStandardMaterial({color:0xFFAA00,roughness:0.7});
+            const base=new THREE.Mesh(new THREE.CylinderGeometry(0.38,0.38,0.05,12),pm);
+            base.position.set(0,0.38,0); headGroup.add(base);
+            // Ломтики
+            [0,1,2,3,4,5].forEach(i=>{
+                const angle=i*(Math.PI*2/6);
+                const topping=new THREE.Mesh(new THREE.SphereGeometry(0.05,5,5),new THREE.MeshStandardMaterial({color:i%2===0?0xCC2200:0xFFCC00,roughness:0.8}));
+                topping.position.set(Math.cos(angle)*0.20,0.42,Math.sin(angle)*0.20);
+                headGroup.add(topping);
+            });
+        }
+        // Кактус-шляпа
+        if(inv.includes('cactus')){
+            const cm=new THREE.MeshStandardMaterial({color:0x228B22,roughness:0.7});
+            const trunk=new THREE.Mesh(new THREE.CylinderGeometry(0.10,0.12,0.50,8),cm);
+            trunk.position.set(0,0.64,0); headGroup.add(trunk);
+            [-0.16,0.16].forEach(x=>{
+                const arm=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.08,0.24,8),cm);
+                arm.rotation.z=x>0?-0.8:0.8; arm.position.set(x,0.72,0); headGroup.add(arm);
+                const armTop=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.07,0.18,8),cm);
+                armTop.position.set(x*1.4,0.82,0); headGroup.add(armTop);
+            });
+            // Иголки
+            for(let i=0;i<8;i++){const a=i*Math.PI/4;const sp=new THREE.Mesh(new THREE.CylinderGeometry(0.01,0.01,0.12,4),new THREE.MeshStandardMaterial({color:0xFFFFDD}));sp.rotation.z=a;sp.position.set(Math.cos(a)*0.13,0.64+Math.random()*0.3,Math.sin(a)*0.13);headGroup.add(sp);}
+        }
     },
 
     // ── CHARACTER
