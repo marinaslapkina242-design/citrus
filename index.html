@@ -1575,6 +1575,17 @@
         <div class="header-right">
             <span id="display-name" class="header-username"></span>
             <div class="balance-chip">🍊 <span id="balance-val">0</span></div>
+            <!-- Уровень -->
+            <div id="level-chip" onclick="app.showLevelInfo()" style="background:linear-gradient(135deg,rgba(120,60,220,0.18),rgba(80,20,180,0.10));border:1px solid rgba(140,80,255,0.3);border-radius:10px;padding:6px 12px;font-family:var(--font-mono);font-size:12px;color:#B060FF;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all 0.2s;" title="Твой уровень">
+                ⭐ <span id="level-val">1</span>
+                <div style="width:50px;height:4px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden;">
+                    <div id="xp-bar" style="height:100%;background:linear-gradient(90deg,#B060FF,#FF60CC);border-radius:2px;width:0%;transition:width 0.4s;"></div>
+                </div>
+            </div>
+            <!-- Ежедневная награда -->
+            <button id="daily-btn" onclick="app.openDailyReward()" style="background:linear-gradient(135deg,rgba(255,200,0,0.15),rgba(255,149,0,0.08));border:1px solid rgba(255,200,0,0.3);border-radius:10px;padding:6px 14px;font-family:var(--font-ui);font-size:13px;font-weight:700;color:#FFD700;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:6px;">
+                🎁 <span id="daily-btn-text">Награда</span>
+            </button>
             <button onclick="app.logout()" class="btn-logout">Сменить аккаунт</button>
             <button id="support-btn" onclick="app.openSupport()" title="Срочная помощь и идеи" style="position:relative;background:linear-gradient(135deg,rgba(255,80,80,0.15),rgba(255,40,40,0.08));border:1px solid rgba(255,80,80,0.35);border-radius:10px;padding:6px 14px;color:#ff6b6b;font-size:13px;font-weight:700;font-family:var(--font-body);cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:6px;">
                 🆘 Помощь / Идеи
@@ -1599,6 +1610,7 @@
                 <div class="nav-item"        id="nav-friends"     onclick="app.switchTab('friends')">    <div class="nav-icon"><i class="fas fa-users"></i></div> Друзья <span class="nav-badge hidden" id="fr-badge">0</span></div>
                 <div class="nav-item"        id="nav-studio"      onclick="app.switchTab('studio')">     <div class="nav-icon"><i class="fas fa-cube"></i></div> Студия</div>
                 <div class="nav-item"        id="nav-quests"      onclick="app.switchTab('quests')">     <div class="nav-icon"><i class="fas fa-tasks"></i></div> Задания <span class="nav-badge hidden" id="quest-badge">!</span></div>
+                <div class="nav-item"        id="nav-daily"       onclick="app.switchTab('daily')">      <div class="nav-icon"><i class="fas fa-calendar-check"></i></div> Награда <span class="nav-badge hidden" id="daily-badge">!</span></div>
                 <div class="nav-item"        id="nav-roulette"    onclick="app.switchTab('roulette')">   <div class="nav-icon"><i class="fas fa-dice"></i></div> Рулетка</div>
                 <div class="nav-item"        id="nav-credits"     onclick="app.switchTab('credits')">    <div class="nav-icon"><i class="fas fa-coins"></i></div> Кредиты</div>
                 <div class="nav-item"        id="nav-gifts"       onclick="app.switchTab('gifts')">      <div class="nav-icon"><i class="fas fa-gift"></i></div> Подарки</div>
@@ -1983,7 +1995,12 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
 
             <!-- ══════════════════ TAB: QUESTS ══════════════════ -->
             <div id="tab-quests" class="hidden">
-                <div class="section-title">🎯 Задания</div>
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+                    <div class="section-title" style="margin:0;">🎯 Задания</div>
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <div style="font-size:10px;color:rgba(255,255,255,0.3);font-family:var(--font-mono);">обновление через <span id="quest-timer" style="color:#FF9500;">—</span></div>
+                    </div>
+                </div>
                 <div id="quests-list" style="display:flex;flex-direction:column;gap:12px;padding-bottom:20px;"></div>
             </div>
 
@@ -2187,6 +2204,33 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
                         <input id="stats-search" class="styled-input" placeholder="Поиск по нику..." style="width:200px;padding:6px 12px;font-size:12px;" oninput="app.filterStatsAccounts()">
                     </div>
                     <div id="stats-accounts" style="display:flex;flex-direction:column;gap:6px;max-height:320px;overflow-y:auto;"></div>
+                </div>
+            </div>
+
+            <div id="tab-daily" class="hidden">
+                <div style="max-width:500px;margin:0 auto;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;">
+                        <div class="section-title" style="margin:0;">🎁 Ежедневная награда</div>
+                        <span class="hint-tag" id="daily-next-hint">Заходи каждый день!</span>
+                    </div>
+
+                    <!-- Цепочка 7 дней -->
+                    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:24px;" id="daily-chain"></div>
+
+                    <!-- Текущая награда -->
+                    <div id="daily-tab-reward-box" style="background:linear-gradient(135deg,rgba(255,200,0,0.10),rgba(255,140,0,0.06));border:1px solid rgba(255,200,0,0.25);border-radius:20px;padding:28px;text-align:center;margin-bottom:18px;">
+                        <div style="font-size:48px;margin-bottom:8px;" id="daily-tab-icon">🎁</div>
+                        <div style="font-family:var(--font-head);font-size:40px;color:#FFD700;letter-spacing:2px;" id="daily-tab-amount"></div>
+                        <div style="font-size:12px;color:rgba(255,255,255,0.35);font-family:var(--font-mono);margin-top:6px;" id="daily-tab-label"></div>
+                    </div>
+
+                    <button id="daily-tab-btn" onclick="app._claimDailyFromTab()" style="width:100%;background:linear-gradient(135deg,#FFD700,#FF9500);color:#000;border:none;border-radius:14px;padding:16px;font-family:var(--font-head);font-size:22px;letter-spacing:3px;cursor:pointer;transition:all 0.2s;">ЗАБРАТЬ</button>
+
+                    <!-- Стрик инфо -->
+                    <div style="margin-top:16px;display:flex;align-items:center;justify-content:center;gap:12px;">
+                        <div style="font-size:11px;color:rgba(255,255,255,0.25);font-family:var(--font-mono);">СЕРИЯ ВХОДОВ:</div>
+                        <div style="font-family:var(--font-head);font-size:18px;color:#FF9500;" id="daily-streak-val">0 🔥</div>
+                    </div>
                 </div>
             </div>
 
@@ -2679,6 +2723,9 @@ const app = {
             this.customMaps=d.customMaps||[];
             this.friends=d.friends||[];
         this.questData=d.questData||{}; this.coins=d.coins||0; this.rouletteUsed=d.rouletteUsed||false; this.questRotation=d.questRotation||null; this.visitedMaps=d.visitedMaps||[];
+        this.level=d.level||1; this.xp=d.xp||0;
+        this.dailyStreak=d.dailyStreak||0; this.lastLoginDay=d.lastLoginDay||0;
+        this.dailyItemClaimed=d.dailyItemClaimed||null;
         // Сбрасываем ротацию если в ней есть неизвестные ID — будет пересчитано в _initQuests
         if(this.questRotation && this.questRotation.ids){
             const _validIds = new Set(['play5','play10','play20','play30','play60','jump10','jump30','jump75','jump150','maps1','maps2','maps4','maps7','friend1','friend3','friend5','buy1','buy2','buy4','build5','build20','build60','publish1','publish2','roul1','roul3','roulwin','lend1','repay1','mine5','mine20','mine_sell','wear1','wear3','earn50','earn200']);
@@ -2994,7 +3041,7 @@ const app = {
                 if(bv) bv.textContent = this.balance;
                 if(result) result.textContent = '🎉 +' + prize + ' 🍊!';
                 this.showNotif('🎰','Рулетка!','Ты выиграл ' + prize + ' 🍊!');
-                this._questProgress('roulette', 1);
+                this._questProgress('roulette', 1); this.addXP(20);
                 if(prize >= 100) this._questProgress('roulbig', prize);
                 this._updateRouletteLeaderboard(prize);
                 btn.disabled = false;
@@ -3675,7 +3722,10 @@ const app = {
             inventory:this.inventory, customMaps:this.customMaps, rouletteUsed:this.rouletteUsed||false,
             friends:this.friends, friendRequests:this.friendRequests, sentReqs:this.sentReqs, visitedMaps:this.visitedMaps||[],
             questData:this.questData, coins:this.coins, questRotation:this.questRotation,
-            rouletteTotal:this.rouletteTotal||0
+            rouletteTotal:this.rouletteTotal||0,
+            level:this.level||1, xp:this.xp||0,
+            dailyStreak:this.dailyStreak||0, lastLoginDay:this.lastLoginDay||0,
+            dailyItemClaimed:this.dailyItemClaimed||null,
         };
         localStorage.setItem('citrus_v5_pro', JSON.stringify(_d));
         if(this.userId){
@@ -4184,6 +4234,8 @@ const app = {
         const ga=document.getElementById('nav-group-arrow');
         if(gi){gi.classList.add('open');} if(ga){ga.classList.add('open');}
         this.renderMyGames(); this.renderFriends(); this.renderOnline(); this.initAvatarPreview(); this.renderShop();
+        // Ежедневная награда
+        setTimeout(()=>this._checkDailyReward(), 2000);
         // Показываем панель управления только разрабу и citrus
         const adminNav = document.getElementById('nav-admin');
         const bnAdmin = document.getElementById('bn-admin');
@@ -5570,7 +5622,7 @@ const app = {
 
         switchTab(id){
         this._sfx('nav');
-        ['games','mine','avatar','shop','friends','studio','quests','roulette','credits','gifts','nft','stats','leaderboard','admin','help','cases'].forEach(t=>{
+        ['games','mine','avatar','shop','friends','studio','quests','daily','roulette','credits','gifts','nft','stats','leaderboard','admin','help','cases'].forEach(t=>{
             document.getElementById('tab-'+t)?.classList.add('hidden');
             document.getElementById('nav-'+t)?.classList.remove('active');
         });
@@ -5583,6 +5635,7 @@ const app = {
         if(id==='cases'){}
         if(id==='games')this.renderMyGames();
         if(id==='quests')this.renderQuests();
+        if(id==='daily'){ this._renderDailyTab(); }
         if(id==='roulette')this.initRoulette();
         if(id==='credits')this.initCredits();
         if(id==='gifts'){ this.initGifts(); }
@@ -6609,9 +6662,14 @@ const app = {
     _buildOtherPlayer(name, color, inv=[]) {
         const g = new THREE.Group();
         const c = parseInt((color||'#FF9800').replace('#',''), 16) || 0xFF9800;
-        const matShirt = new THREE.MeshStandardMaterial({color:c, roughness:0.7});
+        const hasClothing = inv.includes('jacket_denim')||inv.includes('hoodie_fire')||inv.includes('armor_dark');
+        const shirtColor = inv.includes('armor_dark') ? 0x1a1a2e :
+                           inv.includes('jacket_denim') ? 0x3a5f8a :
+                           inv.includes('hoodie_fire') ? 0xCC2200 : c;
+        const matShirt = new THREE.MeshStandardMaterial({color:shirtColor, roughness:0.7});
         const matSkin  = new THREE.MeshStandardMaterial({color:0xffcc99, roughness:0.4});
         const matPants = new THREE.MeshStandardMaterial({color:0x111133, roughness:0.8});
+        const matArm   = hasClothing ? matShirt : matSkin;
         // Тело
         const torso = new THREE.Mesh(new THREE.BoxGeometry(0.8,0.85,0.4), matShirt);
         torso.position.y = 1.4; g.add(torso);
@@ -6644,7 +6702,7 @@ const app = {
             const ft=new THREE.Mesh(new THREE.BoxGeometry(0.3,0.12,0.4),new THREE.MeshStandardMaterial({color:0x111111,roughness:0.9})); ft.position.set(0.02,-0.58,0.07); kn.add(ft);
             gg.add(kn); gg._knee=kn; torso.add(gg); return gg;
         };
-        const lA=mkArm2(-0.57,matSkin),rA=mkArm2(0.57,matSkin);
+        const lA=mkArm2(-0.57,matArm),rA=mkArm2(0.57,matArm);
         const lL=mkLeg2(-0.21,matPants),rL=mkLeg2(0.21,matPants);
         g._rig={lA,rA,lL,rL,torso};
         g._invKey = inv.join(',');
@@ -7193,8 +7251,17 @@ const app = {
     buildCharacter(needsRig){
         const group=new THREE.Group();
         const matSkin =new THREE.MeshStandardMaterial({color:0xffcc99,roughness:0.4});
-        const matShirt=new THREE.MeshStandardMaterial({color:0xff5500,roughness:0.7});
+        const inv0=this.inventory||[];
+        // Цвет торса и рукавов зависит от одежды
+        const shirtColor = inv0.includes('armor_dark') ? 0x1a1a2e :
+                           inv0.includes('jacket_denim') ? 0x3a5f8a :
+                           inv0.includes('hoodie_fire') ? 0xCC2200 :
+                           0xff5500;
+        const matShirt=new THREE.MeshStandardMaterial({color:shirtColor,roughness:0.7});
         const matPants=new THREE.MeshStandardMaterial({color:0x111133,roughness:0.8});
+        // Материал рук — цвет одежды если надета, иначе кожа
+        const hasClothing = inv0.includes('jacket_denim')||inv0.includes('hoodie_fire')||inv0.includes('armor_dark');
+        const matArm = hasClothing ? matShirt : matSkin;
         const torso=new THREE.Mesh(new THREE.BoxGeometry(0.8,0.85,0.4),matShirt);
         torso.position.y=1.35;group.add(torso);
         const headGroup=new THREE.Group();headGroup.position.y=0.73;torso.add(headGroup);
@@ -7241,7 +7308,7 @@ const app = {
             g._knee=kneeG;
             torso.add(g); return g;
         };
-        const lA=mkArm(-0.57,matSkin),rA=mkArm(0.57,matSkin);
+        const lA=mkArm(-0.57,matArm),rA=mkArm(0.57,matArm);
         const lL=mkLeg(-0.21,matPants),rL=mkLeg(0.21,matPants);
         
         if(this.inventory.includes('glasses')){
@@ -7372,12 +7439,15 @@ const app = {
             pstar.position.set(0,0.83,0);headGroup.add(pstar);
         }
         if(this.inventory.includes('detective')){
-            // Шляпа детектива
+            // Шляпа детектива — пониже
             const dm=new THREE.MeshStandardMaterial({color:0x222222,roughness:0.8});
-            const dbrim=new THREE.Mesh(new THREE.CylinderGeometry(0.45,0.45,0.05,12),dm);
-            dbrim.position.set(0,0.36,0.04);headGroup.add(dbrim);
-            const dtop=new THREE.Mesh(new THREE.CylinderGeometry(0.24,0.28,0.28,12),dm);
-            dtop.position.set(0,0.53,0.04);headGroup.add(dtop);
+            const dbrim=new THREE.Mesh(new THREE.CylinderGeometry(0.48,0.48,0.05,12),dm);
+            dbrim.position.set(0,0.22,0.04);headGroup.add(dbrim);
+            const dtop=new THREE.Mesh(new THREE.CylinderGeometry(0.25,0.29,0.26,12),dm);
+            dtop.position.set(0,0.37,0.04);headGroup.add(dtop);
+            // Лента
+            const band=new THREE.Mesh(new THREE.CylinderGeometry(0.26,0.26,0.05,12),new THREE.MeshStandardMaterial({color:0x8B0000,roughness:0.7}));
+            band.position.set(0,0.26,0.04);headGroup.add(band);
         }
         if(this.inventory.includes('santa')){
             // Шапка санты
@@ -7538,21 +7608,41 @@ const app = {
         if(inv.includes('armor_dark')){
             const am=new THREE.MeshStandardMaterial({color:0x1a1a2e,roughness:0.3,metalness:0.8});
             const em=new THREE.MeshStandardMaterial({color:0x4400CC,emissive:0x6600FF,emissiveIntensity:1.2,metalness:0.9});
-            const chest=new THREE.Mesh(new THREE.BoxGeometry(0.88,0.65,0.22),am);
-            chest.position.set(0,0,0.07);torso.add(chest);
-            const line1=new THREE.Mesh(new THREE.BoxGeometry(0.60,0.04,0.04),em);line1.position.set(0,0.12,0.20);torso.add(line1);
-            [-0.52,0.52].forEach(x=>{const sp=new THREE.Mesh(new THREE.SphereGeometry(0.20,8,8),am);sp.scale.set(1,0.7,1);sp.position.set(x,0.22,0);torso.add(sp);const spG=new THREE.Mesh(new THREE.SphereGeometry(0.08,6,6),em);spG.position.set(x,0.22,0.14);torso.add(spG);});
+            // Светящиеся линии на груди
+            const line1=new THREE.Mesh(new THREE.BoxGeometry(0.60,0.04,0.04),em);line1.position.set(0,0.12,0.21);torso.add(line1);
+            const line2=new THREE.Mesh(new THREE.BoxGeometry(0.04,0.40,0.04),em);line2.position.set(0,0,0.21);torso.add(line2);
+            // Наплечники
+            [-0.52,0.52].forEach(x=>{
+                const sp=new THREE.Mesh(new THREE.SphereGeometry(0.22,8,8),am);sp.scale.set(1,0.7,1);sp.position.set(x,0.24,0);torso.add(sp);
+                const spG=new THREE.Mesh(new THREE.SphereGeometry(0.08,6,6),em);spG.position.set(x,0.24,0.14);torso.add(spG);
+            });
+            // Светящиеся полосы на руках
+            [lA,rA].forEach(arm=>{
+                const glow=new THREE.Mesh(new THREE.BoxGeometry(0.32,0.04,0.04),em);
+                glow.position.set(0,-0.10,0.16); arm.add(glow);
+            });
+            // Поножи
+            [lL,rL].forEach(leg=>{
+                const kn=new THREE.Mesh(new THREE.BoxGeometry(0.36,0.22,0.36),am);
+                kn.position.y=-0.30; leg.add(kn);
+            });
         }
         if(inv.includes('jacket_denim')){
             const jm=new THREE.MeshStandardMaterial({color:0x3a5f8a,roughness:0.9});
-            const jacket=new THREE.Mesh(new THREE.BoxGeometry(0.92,0.72,0.20),jm);
-            jacket.position.set(0,0,0.05);torso.add(jacket);
+            // Воротник
+            const collar=new THREE.Mesh(new THREE.BoxGeometry(0.38,0.10,0.12),jm);
+            collar.position.set(0,0.38,0.08);torso.add(collar);
         }
         if(inv.includes('hoodie_fire')){
             const hm=new THREE.MeshStandardMaterial({color:0xCC2200,roughness:0.8});
-            const hood=new THREE.Mesh(new THREE.BoxGeometry(0.88,0.70,0.18),hm);
-            hood.position.set(0,0,0.04);torso.add(hood);
-            [[-0.44,0.1],[0.44,0.1],[0,0.38]].forEach(([x,y])=>{const flame=new THREE.Mesh(new THREE.ConeGeometry(0.08,0.22,6),new THREE.MeshStandardMaterial({color:0xFF6600,emissive:0xFF4400,emissiveIntensity:1.5}));flame.position.set(x,y,0.10);torso.add(flame);});
+            // Огонь по краям
+            [[-0.46,0.1],[0.46,0.1],[0,0.40]].forEach(([x,y])=>{
+                const flame=new THREE.Mesh(new THREE.ConeGeometry(0.08,0.22,6),new THREE.MeshStandardMaterial({color:0xFF6600,emissive:0xFF4400,emissiveIntensity:1.5}));
+                flame.position.set(x,y,0.12);torso.add(flame);
+            });
+            // Капюшон
+            const hoodTop=new THREE.Mesh(new THREE.SphereGeometry(0.36,10,8,0,Math.PI*2,0,Math.PI*0.6),hm);
+            hoodTop.position.set(0,0.10,-0.05);headGroup.add(hoodTop);
         }
         if(inv.includes('backpack')){
             const bm=new THREE.MeshStandardMaterial({color:0x8B4513,roughness:0.8});
@@ -7696,7 +7786,271 @@ const app = {
         return group;
     },
 
-    // ── AVATAR PREVIEW
+    // ══════════════════════════════════════
+    // ⭐ УРОВЕНЬ И XP
+    // ══════════════════════════════════════
+    _xpForLevel(lvl){ return Math.floor(100 * Math.pow(1.35, lvl-1)); },
+
+    addXP(amount){
+        if(!this.level) this.level=1;
+        if(!this.xp) this.xp=0;
+        this.xp += amount;
+        const needed = this._xpForLevel(this.level);
+        if(this.xp >= needed){
+            this.xp -= needed;
+            this.level++;
+            this.showNotif('⭐',`Уровень ${this.level}!`,`+${Math.floor(needed*0.5)} 🍊 за повышение!`);
+            this.balance += Math.floor(needed*0.5);
+            this.saveData();
+        }
+        this._updateLevelUI();
+    },
+
+    _updateLevelUI(){
+        const lvl = this.level||1;
+        const xp  = this.xp||0;
+        const needed = this._xpForLevel(lvl);
+        const pct = Math.min(100, Math.round(xp/needed*100));
+        const lv = document.getElementById('level-val');
+        const xb = document.getElementById('xp-bar');
+        if(lv) lv.textContent = lvl;
+        if(xb) xb.style.width = pct+'%';
+    },
+
+    showLevelInfo(){
+        const lvl = this.level||1;
+        const xp  = this.xp||0;
+        const needed = this._xpForLevel(lvl);
+        const pct = Math.min(100, Math.round(xp/needed*100));
+        const m = document.getElementById('level-modal');
+        document.getElementById('lm-level').textContent = lvl;
+        document.getElementById('lm-xp-bar').style.width = pct+'%';
+        document.getElementById('lm-xp-text').textContent = `${xp} / ${needed} XP`;
+        document.getElementById('lm-perks').innerHTML =
+            `🎮 Играй в мирах → +10 XP/мин<br>` +
+            `⛏️ Ломай блоки в шахте → +5 XP<br>` +
+            `🎯 Выполняй задания → +30 XP<br>` +
+            `🎰 Крути рулетку → +20 XP<br>` +
+            `🏗️ Строй блоки → +2 XP/блок`;
+        m.style.display = 'flex';
+    },
+
+    // ══════════════════════════════════════
+    // 🎁 ЕЖЕДНЕВНАЯ НАГРАДА
+    // ══════════════════════════════════════
+    _renderDailyTab(){
+        const today = this._todayDay();
+        const streak = this.dailyStreak||0;
+        const claimed = this.lastLoginDay === today;
+
+        // Цепочка 7 дней
+        const chain = document.getElementById('daily-chain');
+        if(chain){
+            chain.innerHTML = this._DAILY_REWARDS.map((r,i)=>{
+                const dayNum = i+1;
+                const done = streak > dayNum || (streak === dayNum && claimed);
+                const current = streak === dayNum || (streak === 0 && dayNum === 1);
+                const icons = ['🎁','🎁','💎','🎁','🎁','💎','👑'];
+                return `<div style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 4px;border-radius:12px;
+                    background:${done?'rgba(57,224,138,0.10)':current?'rgba(255,200,0,0.12)':'rgba(255,255,255,0.03)'};
+                    border:1px solid ${done?'rgba(57,224,138,0.3)':current?'rgba(255,200,0,0.4)':'rgba(255,255,255,0.06)'};
+                    ${current?'box-shadow:0 0 16px rgba(255,200,0,0.2)':''}">
+                    <div style="font-size:18px;">${done?'✅':current?icons[i]:icons[i]}</div>
+                    <div style="font-family:var(--font-head);font-size:11px;color:${done?'#39E08A':current?'#FFD700':'rgba(255,255,255,0.25)'};">+${r.coins}</div>
+                    <div style="font-size:9px;color:rgba(255,255,255,0.2);font-family:var(--font-mono);">Д${dayNum}</div>
+                </div>`;
+            }).join('');
+        }
+
+        // Текущая награда
+        const idx = Math.max(0,(streak||1)-1) % 7;
+        const reward = this._DAILY_REWARDS[idx];
+        const tabAmount = document.getElementById('daily-tab-amount');
+        const tabLabel  = document.getElementById('daily-tab-label');
+        const tabIcon   = document.getElementById('daily-tab-icon');
+        const streakVal = document.getElementById('daily-streak-val');
+        const hint      = document.getElementById('daily-next-hint');
+        const icons7 = ['🎁','🎁','💎','🎁','🎁','💎','👑'];
+        if(tabAmount) tabAmount.textContent = claimed ? '✓ Забрано' : `+${reward.coins} 🍊`;
+        if(tabLabel)  tabLabel.textContent  = claimed
+            ? `Следующая награда через ${this._msUntilNextDay()} ч.`
+            : `${reward.label}${reward.bonus?' 🔥 БОНУСНЫЙ ДЕНЬ!':''}`;
+        if(tabIcon)   tabIcon.textContent   = icons7[idx];
+        if(streakVal) streakVal.textContent  = `${streak} 🔥`;
+        if(hint)      hint.textContent       = claimed ? `⏰ Завтра +${this._DAILY_REWARDS[(idx+1)%7].coins} 🍊` : 'Заходи каждый день!';
+
+        // Кнопка
+        const btn = document.getElementById('daily-tab-btn');
+        if(btn){
+            btn.disabled   = claimed;
+            btn.textContent = claimed ? '✓ Уже забрано сегодня' : 'ЗАБРАТЬ';
+            btn.style.opacity    = claimed ? '0.4' : '1';
+            btn.style.cursor     = claimed ? 'default' : 'pointer';
+            btn.style.background = claimed ? 'rgba(255,255,255,0.06)' : 'linear-gradient(135deg,#FFD700,#FF9500)';
+            btn.style.color      = claimed ? 'rgba(255,255,255,0.3)' : '#000';
+        }
+
+        // Убираем бейдж
+        const badge = document.getElementById('daily-badge');
+        if(badge && claimed) badge.classList.add('hidden');
+    },
+
+    _msUntilNextDay(){
+        const ms = (Math.floor(Date.now()/86400000)+1)*86400000 - Date.now();
+        return Math.ceil(ms/3600000);
+    },
+
+    _claimDailyFromTab(){
+        const today = this._todayDay();
+        if(parseInt(this.dailyItemClaimed||'0') === today){
+            this._showToast('Уже забрано сегодня! Заходи завтра 🎁');
+            return;
+        }
+        // Стрик: если вчера забирали — продолжаем, иначе сбрасываем
+        const lastClaim = parseInt(this.dailyItemClaimed||'0');
+        const newStreak = lastClaim === today - 1
+            ? Math.min((this.dailyStreak||0) + 1, 7)
+            : 1;
+        this.dailyStreak = newStreak;
+
+        const reward = this._DAILY_REWARDS[(newStreak-1) % 7];
+        this.balance += reward.coins;
+        this.addXP(60);
+        this.dailyItemClaimed = String(today);
+        this.saveData();
+
+        const bv = document.getElementById('balance-val'); if(bv) bv.textContent = this.balance;
+        this._sfx('buy');
+        const nextReward = this._DAILY_REWARDS[newStreak % 7];
+        this.showNotif('🎁', `+${reward.coins} 🍊!`, `День ${newStreak} · Завтра +${nextReward.coins} 🍊!`);
+        const modal = document.getElementById('daily-modal');
+        if(modal) modal.style.display='none';
+        this._renderDailyTab();
+        this._updateDailyBtn();
+        const badge = document.getElementById('daily-badge');
+        if(badge) badge.classList.add('hidden');
+    },
+
+
+    _DAILY_REWARDS: [
+        {day:1, coins:50,  label:'День 1'},
+        {day:2, coins:100, label:'День 2'},
+        {day:3, coins:150, label:'День 3'},
+        {day:4, coins:200, label:'День 4'},
+        {day:5, coins:300, label:'День 5'},
+        {day:6, coins:400, label:'День 6'},
+        {day:7, coins:600, label:'День 7 — БОНУС!', bonus:true},
+    ],
+
+    _todayDay(){ return Math.floor(Date.now() / 86400000); },
+
+    _checkDailyReward(){
+        const today = this._todayDay();
+        const lastClaim = parseInt(this.dailyItemClaimed||'0');
+
+        // Стрик сбрасывается если пропустили день
+        if(lastClaim > 0 && lastClaim < today - 1){
+            this.dailyStreak = 0;
+            this.saveData();
+        }
+
+        // Бейдж и модалка если сегодня ещё не забрали
+        const claimed = lastClaim === today;
+        const badge = document.getElementById('daily-badge');
+        if(badge) badge.classList.toggle('hidden', claimed);
+        if(!claimed) setTimeout(()=> this.openDailyReward(), 800);
+        this._updateDailyBtn();
+    },
+
+    _updateDailyBtn(){
+        const today = this._todayDay();
+        const claimed = parseInt(this.dailyItemClaimed||'0') === today;
+        const btn = document.getElementById('daily-btn-text');
+        if(btn) btn.textContent = claimed ? '✓ Забрано' : 'Награда!';
+        const dbtn = document.getElementById('daily-btn');
+        if(dbtn) dbtn.style.opacity = claimed ? '0.5' : '1';
+    },
+
+    openDailyReward(){
+        const today = this._todayDay();
+        const claimed = parseInt(this.dailyItemClaimed||'0') === today;
+        // Показываем следующую награду (streak+1) если уже забрали, иначе текущую
+        const lastClaim = parseInt(this.dailyItemClaimed||'0');
+        const nextStreak = lastClaim === today - 1
+            ? Math.min((this.dailyStreak||0) + 1, 7)
+            : claimed ? this.dailyStreak : 1;
+        const streak = claimed ? this.dailyStreak : nextStreak;
+        const reward = this._DAILY_REWARDS[(Math.max(1,streak)-1) % 7];
+
+        // Стрик-дни
+        const streakEl = document.getElementById('daily-streak-display');
+        if(streakEl){
+            streakEl.innerHTML = this._DAILY_REWARDS.map((r,i)=>{
+                const done = claimed ? i < streak : i < streak-1;
+                const current = claimed ? false : i === (Math.max(1,streak)-1)%7;
+                return `<div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
+                    <div style="width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;
+                        background:${current?'rgba(255,200,0,0.25)':done?'rgba(57,224,138,0.15)':'rgba(255,255,255,0.04)'};
+                        border:1px solid ${current?'rgba(255,200,0,0.5)':done?'rgba(57,224,138,0.3)':'rgba(255,255,255,0.08)'};">
+                        ${done?'✅':current?'👆':r.bonus?'🌟':'🎁'}
+                    </div>
+                    <div style="font-size:8px;color:rgba(255,255,255,0.3);font-family:var(--font-mono);">Д${i+1}</div>
+                </div>`;
+            }).join('');
+        }
+
+        // Награда
+        document.getElementById('daily-reward-amount').textContent = claimed ? '✓ Забрано' : `+${reward.coins} 🍊`;
+        document.getElementById('daily-reward-label').textContent = claimed
+            ? `Заходи завтра за +${this._DAILY_REWARDS[streak%7].coins} 🍊`
+            : `${reward.label} · День ${streak}${streak>=7?' 🔥 БОНУС!':''}`;
+
+        const claimBtn = document.getElementById('daily-claim-btn');
+        if(claimBtn){
+            claimBtn.disabled = claimed;
+            claimBtn.textContent = claimed ? '✓ Уже забрано сегодня' : 'ЗАБРАТЬ';
+            claimBtn.style.opacity = claimed ? '0.5' : '1';
+            claimBtn.style.background = claimed ? 'rgba(255,255,255,0.06)' : 'linear-gradient(135deg,#FFD700,#FF9500)';
+            claimBtn.style.color = claimed ? 'rgba(255,255,255,0.3)' : '#000';
+        }
+
+        document.getElementById('daily-modal').style.display = 'flex';
+    },
+
+    claimDailyReward(){
+        const today = this._todayDay();
+        if(this.dailyItemClaimed === String(today)){ this._showToast('Уже забрано сегодня!'); return; }
+
+        const streak = this.dailyStreak||1;
+        const reward = this._DAILY_REWARDS[(streak-1)%7];
+
+        this.balance += reward.coins;
+        this.addXP(50);
+        this.dailyItemClaimed = String(today);
+        this.saveData();
+
+        const bv = document.getElementById('balance-val'); if(bv) bv.textContent = this.balance;
+        const claimBtn = document.getElementById('daily-claim-btn');
+        if(claimBtn){ claimBtn.textContent = '✓ Получено!'; claimBtn.disabled = true; claimBtn.style.opacity='0.5'; }
+        this._updateDailyBtn();
+        this.showNotif('🎁', `+${reward.coins} 🍊!`, `День ${streak} · Завтра больше!`);
+        this._sfx('buy');
+    },
+
+    // ══════════════════════════════════════
+    // ⏱️ ТАЙМЕР ЗАДАНИЙ
+    // ══════════════════════════════════════
+    _startQuestTimer(){
+        if(this._qtInterval) clearInterval(this._qtInterval);
+        this._qtInterval = setInterval(()=>{
+            const el = document.getElementById('quest-timer');
+            if(!el || !this._questRotNextAt) return;
+            const left = Math.max(0, this._questRotNextAt - Date.now());
+            const m = Math.floor(left/60000);
+            const s = Math.floor((left%60000)/1000);
+            el.textContent = `${m}:${String(s).padStart(2,'0')}`;
+        }, 1000);
+    },
     initAvatarPreview(){
         const cont=document.getElementById('avatar-container');if(!cont)return;cont.innerHTML='';
         this.pScene=new THREE.Scene();
@@ -8525,6 +8879,8 @@ const app = {
         b.position.set(x,y,z);b.castShadow=true;b.receiveShadow=true;b.userData.removable=true;
         b.userData.blockData={x,y,z,color,sx,sy,sz};
         this.scene.add(b);this.objectsToIntersect.push(b);this.mapBlocks.push({x,y,z,color,sx,sy,sz});
+        this.addXP(2);
+        this._questProgress('blocks',1);
         return b;
     },
     placeBlock(){
@@ -8740,7 +9096,7 @@ const app = {
         requestAnimationFrame(()=>this.engineLoop());
         // Считаем время в игре (каждые 60 сек = +1 минута)
         if(!this._lastMinTick) this._lastMinTick = Date.now();
-        if(Date.now()-this._lastMinTick >= 60000){ this._lastMinTick=Date.now(); this._questProgress('playtime',1); }
+        if(Date.now()-this._lastMinTick >= 60000){ this._lastMinTick=Date.now(); this._questProgress('playtime',1); this.addXP(10); }
         const delta=Math.min(this.clock.getDelta(),0.05);
         const time=this.clock.getElapsedTime();
 
@@ -9690,6 +10046,7 @@ const app = {
         if(!d.done || d.claimed) return;
         d.claimed = true;
         this.balance = (this.balance||0) + q.reward;
+        this.addXP(30);
         this._questProgress('earn', q.reward);
         this.saveData();
         this.updateUI();
@@ -10318,6 +10675,8 @@ const app = {
             bag[block.id].count++;
             bag[block.id].totalVal += val;
             this._questProgress('mineblock', 1);
+            this.addXP(5);
+            this.addXP(5);
 
             // Частицы
             if(!sess.particles) sess.particles = [];
@@ -10427,5 +10786,40 @@ const app = {
 
 window.onload = () => app.init();
 </script>
+<!-- Модалка ежедневной награды -->
+<div id="daily-modal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);align-items:center;justify-content:center;">
+    <div style="background:linear-gradient(160deg,#1a1020,#0e0810);border:1px solid rgba(255,200,0,0.2);border-radius:24px;padding:32px;max-width:420px;width:90%;text-align:center;box-shadow:0 0 60px rgba(255,180,0,0.15);">
+        <div style="font-size:48px;margin-bottom:8px;">🎁</div>
+        <div style="font-family:var(--font-head);font-size:28px;letter-spacing:4px;color:#FFD700;margin-bottom:4px;">ЕЖЕДНЕВНАЯ</div>
+        <div style="font-family:var(--font-head);font-size:28px;letter-spacing:4px;color:#FFD700;margin-bottom:16px;">НАГРАДА</div>
+        <!-- Стрик -->
+        <div id="daily-streak-display" style="display:flex;justify-content:center;gap:6px;margin-bottom:20px;"></div>
+        <!-- Награда сегодня -->
+        <div id="daily-reward-box" style="background:rgba(255,200,0,0.08);border:1px solid rgba(255,200,0,0.2);border-radius:16px;padding:20px;margin-bottom:20px;">
+            <div id="daily-reward-amount" style="font-family:var(--font-head);font-size:36px;color:#FFD700;"></div>
+            <div id="daily-reward-label" style="font-size:12px;color:rgba(255,255,255,0.4);font-family:var(--font-mono);margin-top:4px;"></div>
+        </div>
+        <button id="daily-claim-btn" onclick="app._claimDailyFromTab()" style="background:linear-gradient(135deg,#FFD700,#FF9500);color:#000;border:none;border-radius:14px;padding:14px 40px;font-family:var(--font-head);font-size:20px;letter-spacing:3px;cursor:pointer;width:100%;margin-bottom:10px;">ЗАБРАТЬ</button>
+        <button onclick="document.getElementById('daily-modal').style.display='none'" style="background:none;border:none;color:rgba(255,255,255,0.3);font-family:var(--font-ui);font-size:13px;cursor:pointer;">Закрыть</button>
+    </div>
+</div>
+
+<!-- Модалка уровня -->
+<div id="level-modal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);align-items:center;justify-content:center;">
+    <div style="background:linear-gradient(160deg,#130820,#0e0810);border:1px solid rgba(180,80,255,0.2);border-radius:24px;padding:32px;max-width:380px;width:90%;text-align:center;">
+        <div style="font-size:48px;margin-bottom:8px;">⭐</div>
+        <div style="font-family:var(--font-head);font-size:32px;letter-spacing:4px;color:#B060FF;">УРОВЕНЬ <span id="lm-level"></span></div>
+        <div style="margin:16px 0;background:rgba(180,80,255,0.08);border:1px solid rgba(180,80,255,0.15);border-radius:12px;padding:16px;">
+            <div style="font-family:var(--font-mono);font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:8px;">ПРОГРЕСС</div>
+            <div style="background:rgba(255,255,255,0.06);border-radius:6px;height:10px;overflow:hidden;">
+                <div id="lm-xp-bar" style="height:100%;background:linear-gradient(90deg,#B060FF,#FF60CC);border-radius:6px;transition:width 0.5s;"></div>
+            </div>
+            <div id="lm-xp-text" style="font-family:var(--font-mono);font-size:11px;color:rgba(255,255,255,0.4);margin-top:6px;"></div>
+        </div>
+        <div id="lm-perks" style="font-size:12px;color:rgba(255,255,255,0.35);font-family:var(--font-ui);line-height:1.8;margin-bottom:16px;"></div>
+        <button onclick="document.getElementById('level-modal').style.display='none'" style="background:rgba(180,80,255,0.1);border:1px solid rgba(180,80,255,0.25);color:#B060FF;border-radius:10px;padding:10px 28px;font-family:var(--font-ui);font-size:14px;cursor:pointer;">Закрыть</button>
+    </div>
+</div>
+
 </body>
 </html>
