@@ -2761,6 +2761,12 @@ const app = {
                     }
                 }
                 if(srv.customMaps&&srv.customMaps.length>this.customMaps.length) this.customMaps=srv.customMaps;
+                // Уровень и XP — берём максимальный с любого устройства
+                if((srv.level||1) > (this.level||1)){ this.level=srv.level; this.xp=srv.xp||0; }
+                else if((srv.level||1)===(this.level||1) && (srv.xp||0)>(this.xp||0)){ this.xp=srv.xp; }
+                // Ежедневная серия
+                if((srv.dailyStreak||0) > (this.dailyStreak||0)) this.dailyStreak=srv.dailyStreak;
+                if(srv.dailyItemClaimed && !this.dailyItemClaimed) this.dailyItemClaimed=srv.dailyItemClaimed;
                 // Сохраняем объединённое в localStorage
                 localStorage.setItem('citrus_v5_pro', JSON.stringify({
                     username:this.username,userId:this.userId,balance:this.balance,
@@ -2768,8 +2774,12 @@ const app = {
                     rouletteUsed:this.rouletteUsed,rouletteTotal:this.rouletteTotal,
                     friends:this.friends,friendRequests:this.friendRequests,sentReqs:this.sentReqs,
                     visitedMaps:this.visitedMaps||[],questData:this.questData,
-                    coins:this.coins,questRotation:this.questRotation
+                    coins:this.coins,questRotation:this.questRotation,
+                    level:this.level||1, xp:this.xp||0,
+                    dailyStreak:this.dailyStreak||0,
+                    dailyItemClaimed:this.dailyItemClaimed||null,
                 }));
+                this._updateLevelUI();
                 this.updateUI();
             }).catch(()=>{});
         }
