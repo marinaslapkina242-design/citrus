@@ -4169,291 +4169,351 @@ const app = {
         if(ctx.state==='suspended') ctx.resume();
         if(this._musicGain&&!this._musicMuted){
             this._musicGain.gain.cancelScheduledValues(ctx.currentTime);
-            this._musicGain.gain.setValueAtTime(0.20,ctx.currentTime);
+            this._musicGain.gain.setValueAtTime(0.18,ctx.currentTime);
         }
         const btn=document.getElementById('music-toggle');
         if(btn) btn.textContent='🎵';
 
         const sr=ctx.sampleRate;
-        // ═══ BRAZILIAN PHONK / FUNK AUTOMOTIVO ═══
-        // 155 BPM, tamborzão groove, 808 slides, cowbell, claps
-        const BPM=155, b=60/BPM;
+        // ═══ DARK SYNTHWAVE / VOID PROTOCOL ═══
+        // 95 BPM — slow pulse, analog pads, arp, sub bass, space reverb
+        const BPM=95, b=60/BPM;
 
+        // ── Master chain: comp → reverb → gain ──
         const comp=ctx.createDynamicsCompressor();
-        comp.threshold.value=-16; comp.ratio.value=4;
-        comp.attack.value=0.003; comp.release.value=0.10;
+        comp.threshold.value=-18; comp.ratio.value=3;
+        comp.attack.value=0.005; comp.release.value=0.25;
         comp.connect(this._musicGain);
 
-        // Лёгкий сатуратор (тепло, не агрессия)
-        const sat=(node,amt=3)=>{
-            const ws=ctx.createWaveShaper();
-            const c=new Float32Array(512);
-            for(let i=0;i<512;i++){const x=i*2/512-1; c[i]=Math.tanh(x*amt);}
-            ws.curve=c; node.connect(ws); return ws;
+        // Fake reverb via delay network
+        const rev=(node, mix=0.35, time=1.8)=>{
+            const d1=ctx.createDelay(3); d1.delayTime.value=time*0.41;
+            const d2=ctx.createDelay(3); d2.delayTime.value=time*0.67;
+            const gFB=ctx.createGain(); gFB.gain.value=0.38;
+            const gWet=ctx.createGain(); gWet.gain.value=mix;
+            const gDry=ctx.createGain(); gDry.gain.value=1-mix*0.3;
+            const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=3200;
+            node.connect(gDry); gDry.connect(comp);
+            node.connect(d1); d1.connect(d2); d2.connect(lp); lp.connect(gFB); gFB.connect(d1);
+            lp.connect(gWet); gWet.connect(comp);
         };
 
-        const noiseBuf=(dur,dec)=>{
+        // Chorus effect
+        const chorus=(osc, depth=8, rate=0.25)=>{
+            const lfo=ctx.createOscillator(); lfo.frequency.value=rate; lfo.type='sine';
+            const lfoG=ctx.createGain(); lfoG.gain.value=depth;
+            lfo.connect(lfoG); lfoG.connect(osc.detune);
+            lfo.start(); return lfo;
+        };
+
+        // ── SUB BASS (slow portamento, sine) ──
+        const BASS=(f,t,dur,vol=0.35,fEnd=0)=>{try{
+            const o=ctx.createOscillator(); o.type='sine'; o.frequency.value=f;
+            if(fEnd) o.frequency.setValueAtTime(f,t), o.frequency.exponentialRampToValueAtTime(fEnd,t+dur*0.6);
+            const o2=ctx.createOscillator(); o2.type='triangle'; o2.frequency.value=f;
+            if(fEnd) o2.frequency.setValueAtTime(f,t), o2.frequency.exponentialRampToValueAtTime(fEnd,t+dur*0.6);
+            const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=180;
+            const g=ctx.createGain();
+            g.gain.setValueAtTime(0,t);
+            g.gain.linearRampToValueAtTime(vol,t+0.08);
+            g.gain.setValueAtTime(vol*0.7,t+dur-0.1);
+            g.gain.linearRampToValueAtTime(0,t+dur);
+            const g2=ctx.createGain(); g2.gain.value=vol*0.3;
+            o.connect(g); g.connect(comp);
+            o2.connect(lp); lp.connect(g2); g2.connect(comp);
+            o.start(t); o2.start(t); o.stop(t+dur+0.05); o2.stop(t+dur+0.05);
+        }catch(e){}};
+
+        // ── ANALOG PAD (detuned saws + LP sweep) ──
+        const PAD=(freqs,t,dur,vol=0.07)=>{try{
+            freqs.forEach((f,i)=>{
+                const o=ctx.createOscillator(); o.type='sawtooth';
+                o.frequency.value=f; o.detune.value=[-8,0,8,5,-5][i]||0;
+                const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.Q.value=2;
+                lp.frequency.setValueAtTime(300,t);
+                lp.frequency.exponentialRampToValueAtTime(1800,t+dur*0.4);
+                lp.frequency.setValueAtTime(1800,t+dur*0.55);
+                lp.frequency.exponentialRampToValueAtTime(400,t+dur);
+                const g=ctx.createGain();
+                g.gain.setValueAtTime(0,t);
+                g.gain.linearRampToValueAtTime(vol,t+dur*0.18);
+                g.gain.setValueAtTime(vol*0.85,t+dur*0.7);
+                g.gain.linearRampToValueAtTime(0,t+dur);
+                const cl=chorus(o, 6, 0.2+i*0.07);
+                o.connect(lp); lp.connect(g);
+                rev(g, 0.45, 2.2);
+                o.start(t); o.stop(t+dur+0.05);
+                setTimeout(()=>{try{cl.stop();}catch(e){}}, (t+dur+0.5-ctx.currentTime)*1000);
+            });
+        }catch(e){}};
+
+        // ── LEAD SYNTH (mono saw, filter env) ──
+        const LEAD=(f,t,dur,vol=0.065)=>{try{
+            const o=ctx.createOscillator(); o.type='sawtooth'; o.frequency.value=f;
+            const o2=ctx.createOscillator(); o2.type='square'; o2.frequency.value=f*1.004;
+            const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.Q.value=4;
+            lp.frequency.setValueAtTime(180,t);
+            lp.frequency.exponentialRampToValueAtTime(2800,t+0.04);
+            lp.frequency.exponentialRampToValueAtTime(600,t+dur*0.6);
+            const g=ctx.createGain();
+            g.gain.setValueAtTime(0,t);
+            g.gain.linearRampToValueAtTime(vol,t+0.02);
+            g.gain.setValueAtTime(vol*0.6,t+dur*0.5);
+            g.gain.linearRampToValueAtTime(0,t+dur);
+            const g2=ctx.createGain(); g2.gain.value=vol*0.4;
+            o.connect(lp); o2.connect(lp); lp.connect(g);
+            rev(g, 0.3, 1.4);
+            o.start(t); o2.start(t); o.stop(t+dur+0.05); o2.stop(t+dur+0.05);
+        }catch(e){}};
+
+        // ── ARP SYNTH (square, gated, fast filter) ──
+        const ARP=(f,t,vol=0.04)=>{try{
+            const dur=b*0.22;
+            const o=ctx.createOscillator(); o.type='square'; o.frequency.value=f;
+            const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.Q.value=6;
+            lp.frequency.setValueAtTime(3500,t);
+            lp.frequency.exponentialRampToValueAtTime(800,t+dur);
+            const g=ctx.createGain();
+            g.gain.setValueAtTime(vol,t);
+            g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+            o.connect(lp); lp.connect(g);
+            rev(g, 0.25, 0.9);
+            o.start(t); o.stop(t+dur+0.02);
+        }catch(e){}};
+
+        // ── DARK KICK (thud, no click) ──
+        const KICK=(t,vol=0.55)=>{try{
+            const o=ctx.createOscillator(); o.type='sine';
+            o.frequency.setValueAtTime(90,t);
+            o.frequency.exponentialRampToValueAtTime(32,t+0.35);
+            const g=ctx.createGain();
+            g.gain.setValueAtTime(vol,t);
+            g.gain.exponentialRampToValueAtTime(0.001,t+0.38);
+            o.connect(g); g.connect(comp);
+            o.start(t); o.stop(t+0.42);
+        }catch(e){}};
+
+        // ── SNARE (reverse-ish, roomy) ──
+        const SNARE=(t,vol=0.28)=>{try{
+            const buf=ctx.createBuffer(1,Math.ceil(sr*0.22),sr);
+            const d=buf.getChannelData(0);
+            for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/(sr*0.055));
+            const src=ctx.createBufferSource(); src.buffer=buf;
+            const bp=ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=2200; bp.Q.value=0.8;
+            const hp=ctx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=800;
+            const g=ctx.createGain();
+            g.gain.setValueAtTime(vol,t);
+            g.gain.exponentialRampToValueAtTime(0.001,t+0.18);
+            src.connect(hp); hp.connect(bp); bp.connect(g);
+            rev(g, 0.55, 1.6);
+            src.start(t);
+        }catch(e){}};
+
+        // ── HI-HAT (sparse, metallic) ──
+        const HAT=(t,vol=0.06,open=false)=>{try{
+            const dur=open?0.18:0.028;
             const buf=ctx.createBuffer(1,Math.ceil(sr*dur),sr);
             const d=buf.getChannelData(0);
-            for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/(sr*dec));
-            return buf;
-        };
-
-        // ── 808 КИК (глубокий, питч вниз) ──
-        const KICK=(t,vol=0.75,pEnd=38,dur=0.5)=>{try{
-            const o=ctx.createOscillator(); o.type='sine';
-            o.frequency.setValueAtTime(185,t);
-            o.frequency.exponentialRampToValueAtTime(pEnd,t+dur*0.8);
+            for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/(sr*(open?0.06:0.008)));
+            const src=ctx.createBufferSource(); src.buffer=buf;
+            const hp=ctx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=10000;
             const g=ctx.createGain();
             g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(0.001,t+dur);
-            const sub=ctx.createOscillator(); sub.type='sine'; sub.frequency.value=pEnd*0.8;
-            const sg=ctx.createGain();
-            sg.gain.setValueAtTime(vol*0.45,t); sg.gain.exponentialRampToValueAtTime(0.001,t+dur*0.55);
-            o.connect(g); g.connect(comp); sub.connect(sg); sg.connect(comp);
-            o.start(t); sub.start(t); o.stop(t+dur+0.02); sub.stop(t+dur+0.02);
+            src.connect(hp); hp.connect(g); g.connect(comp); src.start(t);
         }catch(e){}};
 
-        // ── КЛЭП/СНЭР (tamborzão стиль) ──
-        const CLAP=(t,vol=0.55)=>{try{
-            // Белый шум (хлопок)
-            const src=ctx.createBufferSource(); src.buffer=noiseBuf(0.12,0.025);
-            const bp=ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=1800; bp.Q.value=1.5;
-            const g=ctx.createGain(); g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.10);
-            src.connect(bp); bp.connect(g); g.connect(comp); src.start(t);
-            // Второй слой — резкий
-            const src2=ctx.createBufferSource(); src2.buffer=noiseBuf(0.06,0.010);
-            const hp=ctx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=4000;
-            const g2=ctx.createGain(); g2.gain.setValueAtTime(vol*0.5,t+0.005); g2.gain.exponentialRampToValueAtTime(0.001,t+0.06);
-            src2.connect(hp); hp.connect(g2); g2.connect(comp); src2.start(t+0.005);
-        }catch(e){}};
-
-        // ── ХАЙХЭТ (быстрый, металлический) ──
-        const HAT=(t,vol,open=false)=>{try{
-            const dur=open?0.10:0.022;
-            const src=ctx.createBufferSource(); src.buffer=noiseBuf(dur,open?0.04:0.007);
-            const hp=ctx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=9500;
-            const bp=ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=12000; bp.Q.value=0.8;
-            const g=ctx.createGain(); g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(0.001,t+dur);
-            src.connect(hp); hp.connect(bp); bp.connect(g); g.connect(comp); src.start(t);
-        }catch(e){}};
-
-        // ── COWBELL (сигнатура phonk) ──
-        const COWBELL=(f,t,dur,vol)=>{try{
-            [1.0,1.51].forEach((r,ri)=>{
-                const o=ctx.createOscillator(); o.type='square'; o.frequency.value=f*r;
-                const bp=ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=f*r*1.8; bp.Q.value=6;
-                const g=ctx.createGain();
-                g.gain.setValueAtTime(ri===0?vol:vol*0.55,t);
-                g.gain.exponentialRampToValueAtTime(0.001,t+dur);
-                const ws=sat(o,8);
-                ws.connect(bp); bp.connect(g); g.connect(comp);
-                o.start(t); o.stop(t+dur+0.01);
-            });
-        }catch(e){}};
-
-        // ── 808 БАС (с фильтром, слайдами) ──
-        const BASS=(f,t,dur,vol,fEnd=0)=>{try{
-            const o=ctx.createOscillator(); o.type='sawtooth'; o.frequency.value=f;
-            if(fEnd) o.frequency.setValueAtTime(f,t), o.frequency.exponentialRampToValueAtTime(fEnd,t+dur*0.45);
-            const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.Q.value=3;
-            lp.frequency.setValueAtTime(900,t); lp.frequency.exponentialRampToValueAtTime(220,t+0.08);
-            const sub=ctx.createOscillator(); sub.type='sine'; sub.frequency.value=f*(fEnd?0.7:0.5);
+        // ── RISER (atmospheric sweep) ──
+        const RISER=(t,dur,vol=0.04)=>{try{
+            const o=ctx.createOscillator(); o.type='sawtooth';
+            o.frequency.setValueAtTime(40,t);
+            o.frequency.exponentialRampToValueAtTime(320,t+dur);
+            const lp=ctx.createBiquadFilter(); lp.type='lowpass';
+            lp.frequency.setValueAtTime(200,t);
+            lp.frequency.exponentialRampToValueAtTime(4000,t+dur);
             const g=ctx.createGain();
-            g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(vol,t+0.007);
-            g.gain.setValueAtTime(vol*0.65,t+dur*0.5); g.gain.linearRampToValueAtTime(0.001,t+dur);
-            const sg=ctx.createGain();
-            sg.gain.setValueAtTime(0,t); sg.gain.linearRampToValueAtTime(vol*0.7,t+0.01);
-            sg.gain.linearRampToValueAtTime(0.001,t+dur*0.88);
-            const ws=sat(o,5);
-            ws.connect(lp); lp.connect(g); g.connect(comp);
-            sub.connect(sg); sg.connect(comp);
-            o.start(t); sub.start(t); o.stop(t+dur+0.02); sub.stop(t+dur+0.02);
+            g.gain.setValueAtTime(0,t);
+            g.gain.linearRampToValueAtTime(vol,t+dur*0.7);
+            g.gain.linearRampToValueAtTime(0,t+dur);
+            o.connect(lp); lp.connect(g); rev(g,0.6,2.5);
+            o.start(t); o.stop(t+dur+0.1);
         }catch(e){}};
 
-        // ── СИНТ (мелодия, тёмная) ──
-        const SY=(f,t,dur,vol)=>{try{
-            const o=ctx.createOscillator(); o.type='sawtooth'; o.frequency.value=f;
-            const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.Q.value=5;
-            lp.frequency.setValueAtTime(1800,t); lp.frequency.exponentialRampToValueAtTime(350,t+dur*0.35);
-            const g=ctx.createGain();
-            g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(vol,t+0.012);
-            g.gain.setValueAtTime(vol*0.6,t+dur*0.65); g.gain.linearRampToValueAtTime(0.001,t+dur);
-            o.connect(lp); lp.connect(g); g.connect(comp); o.start(t); o.stop(t+dur+0.02);
-        }catch(e){}};
+        // ════════════════════════════════════
+        // CHORD PROGRESSIONS
+        // Am → F → C → G (minor, dark)
+        // Root = A2=110hz
+        // ════════════════════════════════════
+        // Pads: [Am, F, G, Am]
+        const PAD_CHORDS=[
+            [110,138.6,165],   // Am  (A C E)
+            [87.3,110,130.8],  // F   (F A C)
+            [98,123.5,146.8],  // G   (G B D)
+            [110,138.6,165],   // Am
+        ];
 
-        // ── ПАД (атмосфера) ──
-        const PAD=(f,t,dur,vol)=>{try{
-            [-6,0,6,12].forEach(det=>{
-                const o=ctx.createOscillator(); o.type='sine'; o.frequency.value=f; o.detune.value=det;
-                const g=ctx.createGain();
-                g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(vol/4,t+0.5);
-                g.gain.setValueAtTime(vol/4,t+dur-0.5); g.gain.linearRampToValueAtTime(0.001,t+dur);
-                o.connect(g); g.connect(comp); o.start(t); o.stop(t+dur+0.02);
+        // Bass notes per chord (root, slow)
+        const BASS_SEQ=[
+            [110, 0,   b*3.8],
+            [87.3,b*4, b*3.8],
+            [98,  b*8, b*3.8],
+            [110, b*12,b*3.8],
+        ];
+
+        // Lead melody — dark, sparse (Am pentatonic)
+        // [freq, beat, dur]
+        const LEAD_A=[
+            [440,0,b*0.8],[392,1,b*0.5],[330,1.6,b*1.2],
+            [294,3,b*0.6],[330,3.8,b*0.5],[392,4.5,b*1.5],
+            [440,6,b*0.7],[494,6.8,b*0.4],[440,7.3,b*1.5],
+            [392,9,b*0.8],[330,10,b*1.2],[294,11.2,b*0.6],
+            [330,12,b*1],[392,13,b*0.5],[440,13.6,b*2],
+        ];
+        const LEAD_B=[
+            [330,0,b*1.2],[294,1.5,b*0.6],[261,2.2,b*1.5],
+            [294,4,b*0.7],[330,4.8,b*1],[392,6,b*1.8],
+            [440,8,b*0.6],[494,8.8,b*0.5],[523,9.4,b*2],
+            [494,11.5,b*0.5],[440,12,b*1],[392,13,b*0.7],[330,14,b*2],
+        ];
+
+        // Arp patterns — [semitone offsets from root]
+        // Am arp: A C E A (up)
+        const ARP_AM =[0,3,7,12,7,3,0,3,7,12,15,12,7,3,0,3];
+        const ARP_FM =[0,5,9,12,9,5,0,5,9,12,15,12,9,5,0,5];
+        const ARP_GM =[0,2,7,12,7,2,0,2,7,12,14,12,7,2,0,2];
+        const mt=(root,semi)=>root*Math.pow(2,semi/12);
+        const drawArp=(t0,pat,root,vol=0.035)=>{
+            pat.forEach((s,i)=>{
+                const t=t0+i*b*0.25;
+                ARP(mt(root,s),t,vol);
             });
-        }catch(e){}};
+        };
 
         // ════════════════════════════════════
-        // ПАТТЕРНЫ
+        // BAR BUILDERS
         // ════════════════════════════════════
+        const barLen=b*16;
 
-        // TAMBORZÃO DRUMS — синкопированный грув (сердце жанра)
-        // 32 16-х ноты на 2 бара
-        // Кик: 0,3,6,9,12,16,19,22,25,28 — классика tamborzão
-        const KICK_PAT=[0,3,6,9,12,16,19,22,25,28];
-        const CLAP_PAT=[8,24]; // 2 и 4 доля
-        const HAT_PAT_CLOSED=[0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30]; // каждая 8-я
-        const HAT_PAT_OPEN=[4,12,20,28]; // каждая чётная четверть
-
-        // Бас-линия (синкопа, слайды)
-        // [freq, beat(16th), dur(beats), slideFreq]
-        const BAS_A=[
-            [110,0,1.8,98],[98,2,0.8,0],[88,3,1.2,73],
-            [110,5,0.7,0],[110,6,0.5,0],[88,7,1.0,0],
-            [110,8,1.8,98],[98,10,0.8,0],[88,11,1.2,73],
-            [110,13,0.7,0],[73,14,1.5,65],
-        ];
-        const BAS_B=[
-            [110,0,1.4,0],[73,1.5,0.5,0],[88,2,0.8,0],[110,3,1.4,98],
-            [98,5,0.6,88],[88,6,0.8,73],[73,7,1.0,0],
-            [110,8,1.4,0],[73,9.5,0.5,0],[88,10,0.8,0],[110,11,1.4,98],
-            [98,13,0.6,88],[88,14,0.8,0],[73,15,1.0,65],
-        ];
-
-        // Cowbell мелодия (Am, Phrygian dominant)
-        // [freq, beat(16th), dur]
-        const CBL_A=[
-            [330,0,0.5],[294,1,0.4],[277,2,0.8],[233,3,0.4],[220,4,0.4],
-            [233,5,0.4],[277,6,0.4],[294,7,0.4],[330,8,0.6],[277,9,0.4],
-            [233,10,0.8],[220,11.5,0.3],[233,12,0.4],[277,13,0.4],[294,14,0.6],[330,15,0.5],
-        ];
-        const CBL_B=[
-            [349,0,0.5],[330,1,0.4],[294,2,0.8],[277,3,0.4],[233,4,0.6],
-            [277,5,0.4],[330,6,0.4],[349,7,0.6],[330,8,0.5],[294,9,0.4],
-            [277,10,0.8],[233,11.5,0.3],[277,12,0.4],[330,13,0.4],[349,14,0.4],[294,15,0.8],
-        ];
-
-        // Синт мелодия (тёмная, минорная)
-        const MEL_A=[
-            [220,0,1.5],[247,1.5,0.5],[261,2,1],[294,3,0.5],[330,3.5,0.5],
-            [294,4,1],[261,5,0.5],[247,5.5,0.5],[220,6,2],
-            [196,8,1.5],[220,9.5,0.5],[247,10,1],[220,11,0.5],[196,11.5,0.5],
-            [175,12,2],[196,14,0.5],[220,14.5,0.5],[196,15,1],
-        ];
-        const MEL_B=[
-            [261,0,1],[294,1,0.5],[330,1.5,0.5],[349,2,1],[330,3,0.5],[294,3.5,0.5],
-            [277,4,1.5],[247,5.5,0.5],[233,6,2],
-            [247,8,1],[261,9,0.5],[294,9.5,0.5],[330,10,1],[294,11,0.5],[261,11.5,0.5],
-            [247,12,2],[233,14,0.5],[220,14.5,0.5],[196,15,1],
-        ];
-
-        // Пады (Am→F→G→Am)
-        const PADS=[[220,277,330],[175,220,261],[196,247,294],[220,277,330]];
-
-        // ════════════════════════════════════
-        // ФУНКЦИИ ОТРИСОВКИ БАРОВ
-        // ════════════════════════════════════
+        // Kick pattern — half time feel (beats 1,3 only)
         const drawDrums=(t0,vol=1)=>{
-            for(let i=0;i<32;i++){
-                const t=t0+i*b*0.5;
-                if(KICK_PAT.includes(i)) KICK(t,0.68*vol,36,0.48);
-                if(CLAP_PAT.includes(i)) CLAP(t,0.55*vol);
-                if(HAT_PAT_CLOSED.includes(i)) HAT(t,0.11*vol);
-                if(HAT_PAT_OPEN.includes(i)) HAT(t,0.16*vol,true);
-                // Синкопированные клэпы (tamborzão offbeats)
-                if(i===3||i===11||i===19||i===27) CLAP(t,0.30*vol);
-                // Ghost клэпы
-                if(i===6||i===14||i===22||i===30) CLAP(t,0.15*vol);
+            // Kick: beat 1 and beat 3
+            KICK(t0,       0.52*vol);
+            KICK(t0+b*8,   0.48*vol);
+            // Snare: beat 2 and beat 4 (half time)
+            SNARE(t0+b*4,  0.28*vol);
+            SNARE(t0+b*12, 0.25*vol);
+            // Sparse hats — 8th note, occasional open
+            for(let i=0;i<16;i++){
+                const ht=t0+i*b*0.5;
+                if(i%2===0) HAT(ht, 0.05*vol, false);
+                if(i===5||i===11) HAT(ht, 0.07*vol, true);
             }
+            // Ghost kick
+            KICK(t0+b*5.5, 0.18*vol);
+            KICK(t0+b*13.5,0.16*vol);
         };
-        const drawBass=(t0,pat)=>{
-            pat.forEach(([f,beat,dur,sl])=>BASS(f,t0+beat*b*0.5,dur*b*0.5,0.28,sl||0));
+
+        const drawPads=(t0,vol=0.065)=>{
+            PAD_CHORDS.forEach((ch,ci)=>PAD(ch,t0+ci*b*4,b*4.3,vol));
         };
-        const drawCowbell=(t0,pat,vol=0.18)=>{
-            pat.forEach(([f,beat,dur])=>COWBELL(f*2,t0+beat*b*0.5,dur*b*0.48,vol));
+
+        const drawBass=(t0,vol=0.35)=>{
+            BASS_SEQ.forEach(([f,off,dur])=>BASS(f,t0+off,dur,vol));
         };
-        const drawMelody=(t0,pat,vol=0.09)=>{
-            pat.forEach(([f,beat,dur])=>SY(f,t0+beat*b*0.5,dur*b*0.88,vol));
+
+        const drawLeadA=(t0,vol=0.065)=>{
+            LEAD_A.forEach(([f,beat,dur])=>LEAD(f,t0+beat,dur,vol));
         };
-        const drawPads=(t0,vol=0.018)=>{
-            PADS.forEach((ch,ci)=>ch.forEach(f=>PAD(f,t0+ci*b*4,b*4.1,vol)));
+        const drawLeadB=(t0,vol=0.065)=>{
+            LEAD_B.forEach(([f,beat,dur])=>LEAD(f,t0+beat,dur,vol));
+        };
+
+        const drawArpSection=(t0,vol=0.032)=>{
+            drawArp(t0,        ARP_AM, 110, vol);
+            drawArp(t0+b*4,    ARP_FM, 87.3,vol);
+            drawArp(t0+b*8,    ARP_GM, 98,  vol);
+            drawArp(t0+b*12,   ARP_AM, 110, vol);
         };
 
         // ════════════════════════════════════
-        // 6 РАЗНЫХ БАРОВ
+        // 7 SECTIONS
         // ════════════════════════════════════
         const BAR=[];
 
-        // 0: INTRO — только барабаны + пады
+        // 0: INTRO — pads only, riser
         BAR.push(t0=>{
-            drawDrums(t0,0.85);
-            drawPads(t0,0.025);
+            drawPads(t0, 0.04);
+            RISER(t0+b*14, b*2.2, 0.03);
         });
 
-        // 1: VERSE A — барабаны + бас A + пады
+        // 1: BUILD — pads + bass, no drums
         BAR.push(t0=>{
-            drawDrums(t0);
-            drawBass(t0,BAS_A);
-            drawPads(t0,0.022);
+            drawPads(t0, 0.06);
+            drawBass(t0, 0.28);
         });
 
-        // 2: VERSE B — барабаны + бас A + cowbell A
+        // 2: HALF DROP — drums (quiet) + pads + bass
         BAR.push(t0=>{
-            drawDrums(t0);
-            drawBass(t0,BAS_A);
-            drawCowbell(t0,CBL_A);
-            drawPads(t0,0.018);
+            drawDrums(t0, 0.65);
+            drawPads(t0, 0.065);
+            drawBass(t0, 0.33);
         });
 
-        // 3: CHORUS A — всё! Барабаны + бас B + cowbell A + мелодия A
+        // 3: FULL — drums + pads + bass + arp
         BAR.push(t0=>{
-            drawDrums(t0,1.0);
-            drawBass(t0,BAS_B);
-            drawCowbell(t0,CBL_A,0.20);
-            drawMelody(t0,MEL_A,0.10);
-            drawPads(t0,0.020);
+            drawDrums(t0, 0.9);
+            drawPads(t0, 0.065);
+            drawBass(t0, 0.35);
+            drawArpSection(t0, 0.03);
         });
 
-        // 4: CHORUS B — cowbell B + мелодия B (вариация)
+        // 4: LEAD A — drums + pads + bass + lead melody A
         BAR.push(t0=>{
-            drawDrums(t0,1.0);
-            drawBass(t0,BAS_B);
-            drawCowbell(t0,CBL_B,0.20);
-            drawMelody(t0,MEL_B,0.10);
-            drawPads(t0,0.020);
+            drawDrums(t0, 0.9);
+            drawPads(t0, 0.055);
+            drawBass(t0, 0.35);
+            drawLeadA(t0, 0.068);
         });
 
-        // 5: BRIDGE — только мелодия + пады, тихие барабаны
+        // 5: LEAD B — drums + pads + bass + lead melody B + soft arp
         BAR.push(t0=>{
-            drawDrums(t0,0.55);
-            drawMelody(t0,MEL_A,0.12);
-            drawMelody(t0,MEL_B,0.08);
-            drawPads(t0,0.030);
+            drawDrums(t0, 0.9);
+            drawPads(t0, 0.055);
+            drawBass(t0, 0.35);
+            drawLeadB(t0, 0.068);
+            drawArpSection(t0, 0.018);
+        });
+
+        // 6: BREAKDOWN — pads only, very quiet, riser at end
+        BAR.push(t0=>{
+            drawPads(t0, 0.035);
+            drawBass(t0, 0.12);
+            RISER(t0+b*12, b*4.5, 0.04);
         });
 
         // ════════════════════════════════════
-        // ПОСЛЕДОВАТЕЛЬНОСТЬ 32 БАРА (~2 мин)
+        // SEQUENCE (~3 min loop)
         // ════════════════════════════════════
-        // 0=intro,1=verseA,2=verseB,3=chorusA,4=chorusB,5=bridge
         const SEQ=[
-            0,1,             // интро (0-13с)
-            2,2,             // verse с cowbell (13-26с)
-            3,3,             // chorus A (26-39с)
-            4,4,             // chorus B (39-52с)
-            5,5,             // bridge (52-64с)
-            1,2,             // verse снова (64-77с)
-            3,4,             // chorus mix (77-90с)
-            3,3,             // второй дроп (90-103с)
-            4,4,             // (103-116с)
-            5,2,             // спуск (116-129с)
-            3,4,             // финальный хорус (129-142с)
-            3,3,3,4,         // большой финал (142-168с)
-            0,1,             // аутро (168-180с)
+            0,0,          // intro — atmosphere
+            1,1,          // build — bass enters
+            2,2,          // half drop
+            3,3,          // full drop + arp
+            4,4,          // lead melody A
+            5,5,          // lead melody B
+            3,4,          // mix
+            5,3,
+            6,6,          // breakdown
+            0,1,          // re-intro
+            3,3,          // drop again
+            4,5,
+            4,5,
+            3,3,          // outro build
+            2,0,          // fade back
         ];
         let si=0;
 
         const playNext=(t0)=>{
             if(!this._musicPlaying) return;
-            const barLen=b*16;
             BAR[SEQ[si]](t0);
             si=(si+1)%SEQ.length;
             const id=setTimeout(()=>playNext(t0+barLen),(barLen-0.15)*1000);
@@ -4462,7 +4522,6 @@ const app = {
 
         playNext(ctx.currentTime+0.05);
     },
-
     stopHubMusic(){
         this._musicPlaying=false;
         this._musicScheduled.forEach(id=>clearTimeout(id));
