@@ -1541,17 +1541,26 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
 
             <!-- ══════════════════ TAB: LEADERBOARD ══════════════════ -->
             <div id="tab-leaderboard" class="hidden">
-                <div class="section-title">🏆 Топ игроков</div>
-
-                <!-- Топ-3 пьедестал -->
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+                    <div class="section-title" style="margin:0;">🏆 Топ игроков</div>
+                    <div style="display:flex;gap:4px;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:3px;">
+                        <button id="lb-btn-balance" onclick="app.loadLeaderboard('balance')"
+                            style="padding:6px 14px;border-radius:7px;font-size:11px;font-weight:700;font-family:var(--font-mono);letter-spacing:0.5px;
+                            background:linear-gradient(135deg,rgba(0,229,255,0.15),rgba(0,102,255,0.1));color:var(--c-main);
+                            border:1px solid rgba(0,229,255,0.2);box-shadow:0 0 12px rgba(0,229,255,0.08);">
+                            🍊 Монеты
+                        </button>
+                        <button id="lb-btn-time" onclick="app.loadLeaderboard('time')"
+                            style="padding:6px 14px;border-radius:7px;font-size:11px;font-weight:700;font-family:var(--font-mono);letter-spacing:0.5px;
+                            background:transparent;color:rgba(220,240,255,0.3);border:1px solid transparent;">
+                            ⏱ Время
+                        </button>
+                    </div>
+                </div>
                 <div id="lb-podium" style="display:flex;justify-content:center;align-items:flex-end;gap:12px;margin-bottom:24px;padding:20px 0 0;"></div>
-
-                <!-- Остальные места -->
                 <div class="panel-box" style="padding:0;overflow:hidden;">
                     <div id="lb-list" style="display:flex;flex-direction:column;"></div>
                 </div>
-
-                <!-- Моё место -->
                 <div id="lb-myrank" style="margin-top:12px;"></div>
             </div>
 
@@ -3342,7 +3351,18 @@ const app = {
 
     // ══════════ ЛИДЕРБОРД ══════════
 
-    async loadLeaderboard(){
+    _lbMode: 'balance', // 'balance' | 'time'
+
+    async loadLeaderboard(mode){
+        if(mode) this._lbMode = mode;
+        // Обновить стили кнопок
+        const btnB = document.getElementById('lb-btn-balance');
+        const btnT = document.getElementById('lb-btn-time');
+        const activeStyle = 'padding:6px 14px;border-radius:7px;font-size:11px;font-weight:700;font-family:var(--font-mono);letter-spacing:0.5px;background:linear-gradient(135deg,rgba(0,229,255,0.15),rgba(0,102,255,0.1));color:var(--c-main);border:1px solid rgba(0,229,255,0.2);box-shadow:0 0 12px rgba(0,229,255,0.08);';
+        const inactiveStyle = 'padding:6px 14px;border-radius:7px;font-size:11px;font-weight:700;font-family:var(--font-mono);letter-spacing:0.5px;background:transparent;color:rgba(220,240,255,0.3);border:1px solid transparent;';
+        if(btnB) btnB.style.cssText = this._lbMode==='balance' ? activeStyle : inactiveStyle;
+        if(btnT) btnT.style.cssText = this._lbMode==='time'    ? activeStyle : inactiveStyle;
+
         const podium = document.getElementById('lb-podium');
         const list   = document.getElementById('lb-list');
         const myrank = document.getElementById('lb-myrank');
@@ -3353,7 +3373,8 @@ const app = {
 
         let top = [];
         try {
-            const r = await fetch(this._API+'/leaderboard');
+            const endpoint = this._lbMode==='time' ? '/leaderboard-time' : '/leaderboard';
+            const r = await fetch(this._API+endpoint);
             if(r.ok) top = await r.json();
         } catch(e){}
 
@@ -3368,8 +3389,10 @@ const app = {
         const podClr = ['#FFD700','#C0C0C0','#CD7F32'];
 
         // ── Пьедестал (топ-3) ──
-        const order = [1,0,2]; // визуальный порядок: 2-е, 1-е, 3-е
+        const order = [1,0,2];
         podium.innerHTML = '';
+        const isTime = this._lbMode === 'time';
+        const fmtVal = (p) => isTime ? this._fmtHubTime(p.hubTime||0) : (p.balance||0).toLocaleString('ru') + ' 🍊';
         order.forEach(rank => {
             const p = top[rank];
             if(!p) return;
@@ -3382,9 +3405,8 @@ const app = {
                 </div>
                 <div style="font-size:11px;color:rgba(255,255,255,0.35);font-family:var(--font-ui);">${p.tag||''}</div>
                 <div style="font-size:${rank===0?'20px':'16px'};font-weight:700;color:${podClr[rank]};font-family:var(--font-head);">
-                    ${p.balance.toLocaleString('ru')} 🍊
+                    ${fmtVal(p)}
                 </div>
-                <!-- Аватар-кружок -->
                 <div style="width:${rank===0?56:44}px;height:${rank===0?56:44}px;border-radius:50%;
                     background:${col}22;border:3px solid ${podClr[rank]};
                     display:flex;align-items:center;justify-content:center;
@@ -3392,7 +3414,6 @@ const app = {
                     box-shadow:0 0 18px ${podClr[rank]}55;">
                     ${(p.name[0]||'?').toUpperCase()}
                 </div>
-                <!-- Тумба -->
                 <div style="width:80px;height:${podH[rank]}px;
                     background:linear-gradient(180deg,${podClr[rank]}33,${podClr[rank]}11);
                     border:1px solid ${podClr[rank]}44;border-bottom:none;border-radius:6px 6px 0 0;
@@ -3411,10 +3432,10 @@ const app = {
                 list.innerHTML += `
                 <div style="display:flex;align-items:center;gap:12px;padding:11px 16px;
                     border-bottom:1px solid rgba(255,255,255,0.04);
-                    ${isMe?'background:rgba(255,149,0,0.06);':''}
-                    transition:background 0.15s;" 
+                    ${isMe?'background:rgba(0,229,255,0.04);':''}
+                    transition:background 0.15s;"
                     onmouseover="this.style.background='rgba(255,255,255,0.03)'"
-                    onmouseout="this.style.background='${isMe?'rgba(255,149,0,0.06)':'transparent'}'">
+                    onmouseout="this.style.background='${isMe?'rgba(0,229,255,0.04)':'transparent'}'">
                     <div style="width:28px;text-align:center;font-family:var(--font-head);font-size:12px;color:rgba(255,255,255,0.25);flex-shrink:0;">${rank}</div>
                     <div style="width:34px;height:34px;border-radius:50%;background:${col}22;color:${col};
                         display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;">${(p.name[0]||'?').toUpperCase()}</div>
@@ -3424,8 +3445,8 @@ const app = {
                         </div>
                         <div style="font-size:10px;color:rgba(255,255,255,0.2);font-family:var(--font-ui);">${p.tag||''}</div>
                     </div>
-                    <div style="font-family:var(--font-head);font-size:13px;font-weight:700;color:rgba(255,149,0,0.8);flex-shrink:0;">
-                        ${p.balance.toLocaleString('ru')} 🍊
+                    <div style="font-family:var(--font-mono);font-size:13px;font-weight:700;color:rgba(0,229,255,0.8);flex-shrink:0;">
+                        ${fmtVal(p)}
                     </div>
                 </div>`;
             });
@@ -3434,12 +3455,23 @@ const app = {
         // ── Моё место если не в топ-50 ──
         const myPos = top.findIndex(p=>String(p.id)===String(this.userId));
         if(myPos === -1 && myrank){
-            myrank.innerHTML = `<div class="panel-box" style="display:flex;align-items:center;gap:12px;border-color:rgba(255,149,0,0.2);">
-                <div style="font-size:12px;color:rgba(255,255,255,0.3);font-family:var(--font-ui);">Твой баланс:</div>
-                <div style="font-family:var(--font-head);font-size:16px;color:var(--c-main);font-weight:700;">${(this.balance||0).toLocaleString('ru')} 🍊</div>
-                <div style="font-size:11px;color:rgba(255,255,255,0.2);margin-left:auto;">не в топ-50</div>
+            const myVal = isTime ? this._fmtHubTime(this._myHubTime||0) : (this.balance||0).toLocaleString('ru')+' 🍊';
+            const myLabel = isTime ? 'Твоё время:' : 'Твой баланс:';
+            myrank.innerHTML = `<div class="panel-box" style="display:flex;align-items:center;gap:12px;border-color:rgba(0,229,255,0.15);">
+                <div style="font-size:12px;color:rgba(255,255,255,0.3);font-family:var(--font-mono);">${myLabel}</div>
+                <div style="font-family:var(--font-mono);font-size:16px;color:var(--c-main);font-weight:700;">${myVal}</div>
+                <div style="font-size:11px;color:rgba(255,255,255,0.2);margin-left:auto;font-family:var(--font-mono);">не в топ-50</div>
             </div>`;
         } else if(myrank) { myrank.innerHTML=''; }
+    },
+
+    // Форматирование секунд в читаемый вид
+    _fmtHubTime(sec){
+        if(!sec) return '0 мин';
+        const h = Math.floor(sec/3600);
+        const m = Math.floor((sec%3600)/60);
+        if(h>0) return h+'ч '+(m>0?m+'м':'');
+        return m+'м '+(sec%60>0?(sec%60)+'с':'');
     },
 
     // ══════════ СТАТИСТИКА ══════════
@@ -3704,6 +3736,44 @@ const app = {
         // Проверяем непрочитанные сообщения каждые 10 сек
         this._checkDmUnread();
         setInterval(()=>this._checkDmUnread(), 10000);
+        // Трекер времени на сайте — запускаем при входе в хаб
+        this._startHubTimeTracker();
+    },
+
+    _myHubTime: 0,
+    _hubTimeInterval: null,
+    _hubTimeBuffer: 0, // секунды накопленные с последней отправки
+
+    _startHubTimeTracker(){
+        if(this._hubTimeInterval) clearInterval(this._hubTimeInterval);
+        this._hubTimeBuffer = 0;
+        // Каждую секунду — копим в буфер
+        this._hubTimeInterval = setInterval(()=>{
+            if(this.mode === 'play') return; // в игре не считаем
+            this._hubTimeBuffer++;
+            this._myHubTime = (this._myHubTime||0) + 1;
+            // Каждые 60 сек отправляем на сервер
+            if(this._hubTimeBuffer >= 60){
+                this._flushHubTime();
+            }
+        }, 1000);
+        // Отправить при закрытии вкладки
+        window.addEventListener('beforeunload', ()=>this._flushHubTime());
+    },
+
+    _flushHubTime(){
+        const sec = this._hubTimeBuffer;
+        if(!sec || !this.userId) return;
+        this._hubTimeBuffer = 0;
+        // sendBeacon чтобы не терять данные при закрытии
+        const url = this._API + '/hub-time/' + this.userId;
+        const data = JSON.stringify({seconds: sec});
+        if(navigator.sendBeacon){
+            const blob = new Blob([data], {type:'application/json'});
+            navigator.sendBeacon(url, blob);
+        } else {
+            fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body:data, keepalive:true}).catch(()=>{});
+        }
     },
 
     logout(){
