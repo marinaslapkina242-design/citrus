@@ -1010,6 +1010,8 @@
                 <div class="nav-item"        id="nav-leaderboard" onclick="app.switchTab('leaderboard')"><div class="nav-icon"><i class="fas fa-trophy"></i></div> Топ</div>
                 <div class="nav-item hidden" id="nav-admin"       onclick="app.switchTab('admin')">      <div class="nav-icon"><i class="fas fa-shield-alt"></i></div> Баны</div>
                 <div class="nav-item"        id="nav-help"        onclick="app.switchTab('help')">       <div class="nav-icon"><i class="fas fa-question-circle"></i></div> Помощь</div>
+                <div class="nav-item"        id="nav-aihelper"    onclick="app.switchTab('aihelper')">   <div class="nav-icon"><i class="fas fa-robot"></i></div> ИИ Хелпер <span class="nav-badge hidden" id="ai-badge">!</span></div>
+                <div class="nav-item"        id="nav-devmail"     onclick="app.switchTab('devmail')">    <div class="nav-icon"><i class="fas fa-envelope"></i></div> Почта <span class="nav-badge hidden" id="devmail-badge">0</span></div>
 
 
             </div>
@@ -1087,6 +1089,80 @@
                         <div style="color:rgba(0,229,255,0.5);font-size:11px;font-family:var(--font-head);letter-spacing:2px;margin-bottom:6px;">CITRUS ONLINE</div>
                         <div style="color:rgba(255,255,255,0.25);font-size:12px;font-family:var(--font-body);">Зови друзей, собирай цитрусы, становись легендой 🍊</div>
                     </div>
+                </div>
+            </div>
+
+            <!-- ══════════════════ TAB: AI HELPER ══════════════════ -->
+            <div id="tab-aihelper" class="hidden" style="display:flex;flex-direction:column;height:calc(100vh - 64px);overflow:hidden;">
+                <div style="flex-shrink:0;padding:0 0 12px 0;">
+                    <div class="section-title" style="margin-bottom:6px;">🤖 ИИ Хелпер Цитруса</div>
+                    <div id="ai-status-bar" style="display:flex;align-items:center;justify-content:space-between;background:rgba(0,229,255,0.04);border:1px solid rgba(0,229,255,0.1);border-radius:12px;padding:10px 16px;">
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <div style="width:8px;height:8px;border-radius:50%;background:var(--p);box-shadow:0 0 8px var(--p);animation:voidPulse 2s infinite alternate;"></div>
+                            <span style="font-family:var(--font-mono);font-size:12px;color:rgba(0,229,255,0.7);">CITRUS AI v1.0</span>
+                        </div>
+                        <div id="ai-msgs-left" style="font-family:var(--font-mono);font-size:12px;color:rgba(255,255,255,0.35);">Нет доступа</div>
+                    </div>
+                </div>
+                <!-- Paywall banner -->
+                <div id="ai-paywall" style="flex-shrink:0;margin-bottom:12px;background:linear-gradient(135deg,rgba(123,47,255,0.12),rgba(0,229,255,0.06));border:1px solid rgba(123,47,255,0.25);border-radius:16px;padding:20px;text-align:center;">
+                    <div style="font-size:32px;margin-bottom:8px;">🤖</div>
+                    <div style="font-family:var(--font-head);font-size:18px;letter-spacing:3px;color:var(--p);margin-bottom:6px;">ИИ ПОМОЩНИК</div>
+                    <div style="font-size:13px;color:rgba(255,255,255,0.55);font-family:var(--font-body);margin-bottom:16px;line-height:1.7;">Знает всё о Citrus Online и не только.<br>Умеет отвечать на любые вопросы, анализировать фото и файлы.</div>
+                    <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px;">
+                        <div style="font-family:var(--font-head);font-size:28px;color:#FFD600;">1000</div>
+                        <div style="font-size:22px;">🍊</div>
+                        <div style="font-size:13px;color:rgba(255,255,255,0.4);font-family:var(--font-body);">= 5 сообщений</div>
+                    </div>
+                    <button onclick="app.buyAiMessages()" style="background:linear-gradient(135deg,rgba(123,47,255,0.3),rgba(0,229,255,0.2));border:1px solid rgba(0,229,255,0.3);color:var(--p);border-radius:12px;padding:12px 32px;font-family:var(--font-head);font-size:16px;letter-spacing:2px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='linear-gradient(135deg,rgba(123,47,255,0.5),rgba(0,229,255,0.3))'" onmouseout="this.style.background='linear-gradient(135deg,rgba(123,47,255,0.3),rgba(0,229,255,0.2))'">КУПИТЬ ДОСТУП</button>
+                </div>
+                <!-- Chat messages -->
+                <div id="ai-chat" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:4px 2px 4px 0;margin-bottom:12px;scrollbar-width:thin;scrollbar-color:rgba(0,229,255,0.15) transparent;">
+                    <div id="ai-welcome" style="display:flex;gap:10px;align-items:flex-start;">
+                        <div style="flex-shrink:0;width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#7B2FFF,#00E5FF);display:flex;align-items:center;justify-content:center;font-size:16px;">🤖</div>
+                        <div style="background:rgba(123,47,255,0.1);border:1px solid rgba(123,47,255,0.2);border-radius:12px 12px 12px 4px;padding:12px 14px;max-width:80%;">
+                            <div style="font-size:13px;color:rgba(220,240,255,0.85);font-family:var(--font-body);line-height:1.7;">Привет! Я ИИ Хелпер Цитруса 🍊<br>Могу ответить на любой вопрос, помочь с игрой, проанализировать картинку или файл. Купи доступ — и погнали! 🚀</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Input area -->
+                <div id="ai-input-area" style="flex-shrink:0;">
+                    <!-- File preview -->
+                    <div id="ai-file-preview" style="display:none;background:rgba(255,255,255,0.03);border:1px solid rgba(0,229,255,0.1);border-radius:10px;padding:8px 12px;margin-bottom:8px;display:none;align-items:center;gap:8px;">
+                        <span id="ai-file-name" style="font-size:12px;color:rgba(0,229,255,0.7);font-family:var(--font-mono);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+                        <button onclick="app._aiClearFile()" style="background:none;border:none;color:rgba(255,100,100,0.6);cursor:pointer;font-size:14px;padding:0;">✕</button>
+                    </div>
+                    <div style="display:flex;gap:8px;align-items:flex-end;">
+                        <label for="ai-file-input" style="flex-shrink:0;width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,0.35);font-size:15px;transition:all 0.2s;" title="Прикрепить файл или фото" onmouseover="this.style.borderColor='rgba(0,229,255,0.3)';this.style.color='var(--p)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)';this.style.color='rgba(255,255,255,0.35)'">📎<input id="ai-file-input" type="file" accept="image/*,.pdf,.txt,.js,.html,.css,.json" style="display:none" onchange="app._aiFileSelected(this)"></label>
+                        <textarea id="ai-text-input" placeholder="Спроси что угодно..." rows="1" style="flex:1;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;color:rgba(220,240,255,0.9);padding:10px 14px;font-size:14px;font-family:var(--font-body);resize:none;outline:none;line-height:1.5;max-height:120px;overflow-y:auto;scrollbar-width:thin;" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();app.sendAiMessage();}" oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'" onfocus="this.style.borderColor='rgba(0,229,255,0.25)'" onblur="this.style.borderColor='rgba(255,255,255,0.08)'"></textarea>
+                        <button onclick="app.sendAiMessage()" id="ai-send-btn" style="flex-shrink:0;width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,rgba(0,229,255,0.2),rgba(123,47,255,0.2));border:1px solid rgba(0,229,255,0.25);color:var(--p);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;" onmouseover="this.style.background='linear-gradient(135deg,rgba(0,229,255,0.35),rgba(123,47,255,0.35))'" onmouseout="this.style.background='linear-gradient(135deg,rgba(0,229,255,0.2),rgba(123,47,255,0.2))'">➤</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══════════════════ TAB: DEVMAIL ══════════════════ -->
+            <div id="tab-devmail" class="hidden">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+                    <div class="section-title" style="margin:0;">📬 Почта от Разраба</div>
+                    <button onclick="app.loadDevMail()" style="background:rgba(0,229,255,0.05);border:1px solid rgba(0,229,255,0.12);color:rgba(0,229,255,0.5);border-radius:8px;padding:6px 14px;cursor:pointer;font-size:11px;font-family:var(--font-mono);">↻ Обновить</button>
+                </div>
+                <!-- Admin compose panel (only visible to dev) -->
+                <div id="devmail-compose" style="display:none;margin-bottom:20px;">
+                    <div class="panel-box" style="border-color:rgba(255,149,0,0.2);">
+                        <div class="panel-box-title" style="color:#FF9500;">✉️ Новое письмо</div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+                            <input id="dm-emoji" class="styled-input" placeholder="Эмодзи (например 📢)" value="📢">
+                            <input id="dm-by" class="styled-input" placeholder="От кого (напр. Разраб Всем)" value="Разраб Всем">
+                        </div>
+                        <input id="dm-title" class="styled-input" placeholder="Заголовок письма" style="margin-bottom:8px;">
+                        <input id="dm-version" class="styled-input" placeholder="Версия обновления (напр. 0.1) — необязательно" style="margin-bottom:8px;">
+                        <textarea id="dm-body" placeholder="Текст письма..." style="width:100%;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);color:rgba(220,240,255,0.9);padding:12px 14px;border-radius:10px;font-family:var(--font-body);font-size:13px;resize:vertical;outline:none;min-height:90px;margin-bottom:10px;" onfocus="this.style.borderColor='rgba(255,149,0,0.3)'" onblur="this.style.borderColor='rgba(255,255,255,0.07)'"></textarea>
+                        <button onclick="app.sendDevMail()" style="background:linear-gradient(135deg,rgba(255,149,0,0.3),rgba(255,100,0,0.2));border:1px solid rgba(255,149,0,0.3);color:#FF9500;border-radius:10px;padding:10px 24px;font-family:var(--font-head);font-size:15px;letter-spacing:1px;cursor:pointer;">📤 ОТПРАВИТЬ</button>
+                    </div>
+                </div>
+                <!-- Letters list -->
+                <div id="devmail-list" style="display:flex;flex-direction:column;gap:14px;">
+                    <div style="color:rgba(255,255,255,0.2);font-size:13px;text-align:center;padding:40px;">📭 Загрузка...</div>
                 </div>
             </div>
 
@@ -2075,6 +2151,9 @@ const app = {
         this._loadPeerInfo();
         setTimeout(()=>this._readMailbox(), 1000);
         setInterval(()=>this._readMailbox(), 5000);
+        // Check devmail badge
+        setTimeout(()=>this._checkDevMailBadge(), 2000);
+        setInterval(()=>this._checkDevMailBadge(), 2*60*1000);
         // АВТО-ВХОД с проверкой бана
         if (this.username && this.username !== '') {
             // Сначала проверяем бан на сервере
@@ -5208,7 +5287,7 @@ const app = {
 
         switchTab(id){
         this._sfx('nav');
-        ['games','mine','work','avatar','shop','friends','studio','quests','daily','roulette','credits','gifts','nft','stats','leaderboard','admin','help','cases'].forEach(t=>{
+        ['games','mine','work','avatar','shop','friends','studio','quests','daily','roulette','credits','gifts','nft','stats','leaderboard','admin','help','cases','aihelper','devmail'].forEach(t=>{
             document.getElementById('tab-'+t)?.classList.add('hidden');
             document.getElementById('nav-'+t)?.classList.remove('active');
         });
@@ -5228,6 +5307,8 @@ const app = {
         if(id==='gifts'){ this.initGifts(); }
         if(id==='nft'){ this.initNft(); }
         if(id==='admin'){ this.loadBanList(); this.loadBanOnlineList(); }
+        if(id==='aihelper'){ this.initAiHelper(); }
+        if(id==='devmail'){ this.initDevMail(); }
         if(id==='stats'){ this.loadStats(); }
         if(id==='leaderboard'){ this.loadLeaderboard(); }
         else if(this._questCountdownInterval){ clearInterval(this._questCountdownInterval); this._questCountdownInterval=null; }
@@ -10747,10 +10828,264 @@ const app = {
             const bagVal = Object.values(this._mine?.bag||{}).reduce((a,b)=>a+b.totalVal,0);
             h.textContent = bagCount > 0 ? `${bagCount} пред. · ${bagVal} 🍊` : 'пусто';
         }
+    },
+
+    // ══════════ AI HELPER ══════════
+
+    initAiHelper(){
+        const msgsLeft = parseInt(localStorage.getItem('citrus_ai_msgs')||'0');
+        const statusEl = document.getElementById('ai-msgs-left');
+        const paywallEl = document.getElementById('ai-paywall');
+        if(statusEl) statusEl.textContent = msgsLeft > 0 ? `💬 ${msgsLeft} сообщ. осталось` : 'Нет доступа';
+        if(paywallEl) paywallEl.style.display = msgsLeft > 0 ? 'none' : 'block';
+    },
+
+    buyAiMessages(){
+        const cost = 1000;
+        if((this.balance||0) < cost){
+            this._showToast('❌ Нужно 1000 🍊 для доступа к ИИ!'); return;
+        }
+        // Deduct balance
+        this.balance -= cost;
+        this.saveData();
+        // Grant 5 messages
+        const cur = parseInt(localStorage.getItem('citrus_ai_msgs')||'0');
+        localStorage.setItem('citrus_ai_msgs', String(cur + 5));
+        this.initAiHelper();
+        this._showToast('✅ Доступ к ИИ куплен! 5 сообщений');
+        this._sfx('buy');
+    },
+
+    _aiConversation: [],
+    _aiFile: null,
+
+    _aiFileSelected(input){
+        const file = input.files && input.files[0];
+        if(!file) return;
+        this._aiFile = file;
+        const preview = document.getElementById('ai-file-preview');
+        const nameEl = document.getElementById('ai-file-name');
+        if(preview){ preview.style.display = 'flex'; }
+        if(nameEl){ nameEl.textContent = file.name; }
+    },
+
+    _aiClearFile(){
+        this._aiFile = null;
+        const preview = document.getElementById('ai-file-preview');
+        const inp = document.getElementById('ai-file-input');
+        if(preview) preview.style.display = 'none';
+        if(inp) inp.value = '';
+    },
+
+    _aiAddMessage(role, html, isLoading){
+        const chat = document.getElementById('ai-chat');
+        if(!chat) return null;
+        const isUser = role === 'user';
+        const div = document.createElement('div');
+        div.style.cssText = `display:flex;gap:10px;align-items:flex-start;${isUser?'flex-direction:row-reverse;':''}`;
+        div.innerHTML = `
+            <div style="flex-shrink:0;width:34px;height:34px;border-radius:50%;background:${isUser?'linear-gradient(135deg,#00E5FF,#0066FF)':'linear-gradient(135deg,#7B2FFF,#00E5FF)'};display:flex;align-items:center;justify-content:center;font-size:15px;">${isUser?'👤':'🤖'}</div>
+            <div style="background:${isUser?'rgba(0,102,255,0.12)':'rgba(123,47,255,0.1)'};border:1px solid ${isUser?'rgba(0,229,255,0.15)':'rgba(123,47,255,0.2)'};border-radius:${isUser?'12px 12px 4px 12px':'12px 12px 12px 4px'};padding:12px 14px;max-width:80%;">
+                <div class="ai-msg-content" style="font-size:13px;color:rgba(220,240,255,0.88);font-family:var(--font-body);line-height:1.75;white-space:pre-wrap;">${html}</div>
+            </div>`;
+        chat.appendChild(div);
+        chat.scrollTop = chat.scrollHeight;
+        return div;
+    },
+
+    async sendAiMessage(){
+        const msgsLeft = parseInt(localStorage.getItem('citrus_ai_msgs')||'0');
+        if(msgsLeft <= 0){
+            this._showToast('❌ Купи доступ к ИИ — 1000 🍊 за 5 сообщений'); return;
+        }
+        const inp = document.getElementById('ai-text-input');
+        const text = ((inp && inp.value)||'').trim();
+        if(!text && !this._aiFile){ this._showToast('Напиши сообщение'); return; }
+
+        // Deduct message
+        localStorage.setItem('citrus_ai_msgs', String(msgsLeft - 1));
+        this.initAiHelper();
+
+        // Show user message
+        const displayText = text + (this._aiFile ? `\n📎 ${this._aiFile.name}` : '');
+        this._aiAddMessage('user', displayText);
+        if(inp) { inp.value = ''; inp.style.height = 'auto'; }
+
+        // Build message content for API
+        let userContent = [];
+        if(this._aiFile){
+            const file = this._aiFile;
+            const isImage = file.type.startsWith('image/');
+            const isPdf = file.type === 'application/pdf';
+            if(isImage || isPdf){
+                const b64 = await new Promise((res,rej)=>{
+                    const r = new FileReader();
+                    r.onload = ()=> res(r.result.split(',')[1]);
+                    r.onerror = ()=> rej();
+                    r.readAsDataURL(file);
+                });
+                if(isImage) userContent.push({type:'image',source:{type:'base64',media_type:file.type,data:b64}});
+                else userContent.push({type:'document',source:{type:'base64',media_type:'application/pdf',data:b64}});
+            } else {
+                const txt = await file.text();
+                userContent.push({type:'text',text:`[Файл: ${file.name}]\n${txt.slice(0,8000)}`});
+            }
+            this._aiClearFile();
+        }
+        if(text) userContent.push({type:'text',text});
+        if(userContent.length === 1 && userContent[0].type === 'text') userContent = userContent[0].text;
+
+        this._aiConversation.push({role:'user',content:userContent});
+
+        // Loading indicator
+        const loadDiv = this._aiAddMessage('assistant','<span style="opacity:0.4;font-style:italic;">Думаю...</span>', true);
+
+        try {
+            const resp = await fetch(this._API+'/ai-proxy',{
+                method:'POST',
+                headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({
+                    system:'Ты — ИИ Хелпер игры Citrus Online 🍊. Ты знаешь всё об этой игре: цитрусы (внутриигровая валюта), миры, НФТ, магазин, рулетка, кредиты, шахта, задания, аватары. Ты также умеешь помогать с любыми вопросами вне игры. Отвечай на языке пользователя (русском или другом). Будь дружелюбным, кратким и полезным.',
+                    messages: this._aiConversation
+                })
+            });
+            const data = await resp.json();
+            const block = data.content && data.content.find(b=>b.type==='text');
+            const replyText = (block && block.text) || 'Ошибка ответа.';
+            this._aiConversation.push({role:'assistant',content:replyText});
+            if(loadDiv){
+                const el = loadDiv.querySelector('.ai-msg-content');
+                if(el) el.textContent = replyText;
+            }
+        } catch(e){
+            if(loadDiv){
+                const el = loadDiv.querySelector('.ai-msg-content');
+                if(el){ el.textContent = '❌ Ошибка соединения. Попробуй снова.'; el.style.color='rgba(255,100,100,0.8)'; }
+            }
+        }
+        const chat = document.getElementById('ai-chat');
+        if(chat) chat.scrollTop = chat.scrollHeight;
+    },
+
+    // ══════════ DEVMAIL ══════════
+
+    initDevMail(){
+        // Show compose panel for admin
+        const compose = document.getElementById('devmail-compose');
+        if(compose) compose.style.display = this.canBan(this.username) ? 'block' : 'none';
+        this.loadDevMail();
+    },
+
+    async loadDevMail(){
+        const list = document.getElementById('devmail-list');
+        if(!list) return;
+        list.innerHTML = '<div style="color:rgba(255,255,255,0.2);font-size:13px;text-align:center;padding:40px;">📭 Загрузка...</div>';
+        try {
+            const r = await fetch(this._API+'/devmail');
+            const letters = await r.json();
+            if(!Array.isArray(letters)||letters.length===0){
+                list.innerHTML = '<div style="color:rgba(255,255,255,0.2);font-size:13px;text-align:center;padding:40px;">📭 Писем пока нет</div>';
+                // Update badge
+                const badge = document.getElementById('devmail-badge');
+                if(badge){ badge.classList.add('hidden'); }
+                return;
+            }
+            // Update badge
+            const badge = document.getElementById('devmail-badge');
+            const seen = JSON.parse(localStorage.getItem('citrus_devmail_seen')||'[]');
+            const unseen = letters.filter(l=>!seen.includes(l.id)).length;
+            if(badge){
+                if(unseen > 0){ badge.textContent = unseen; badge.classList.remove('hidden'); }
+                else badge.classList.add('hidden');
+            }
+            list.innerHTML = letters.map(l=>{
+                const date = new Date(l.ts).toLocaleDateString('ru',{day:'numeric',month:'long',year:'numeric'});
+                const isNew = !seen.includes(l.id);
+                return `<div style="background:rgba(7,5,24,0.8);border:1px solid rgba(${isNew?'0,229,255,0.15':'255,255,255,0.05'});border-radius:16px;padding:20px 22px;position:relative;${isNew?'box-shadow:0 0 18px rgba(0,229,255,0.05);':''}">
+                    ${isNew?'<div style="position:absolute;top:14px;right:14px;background:var(--p);border-radius:20px;padding:2px 9px;font-size:10px;font-family:var(--font-head);color:#000;letter-spacing:1px;">NEW</div>':''}
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+                        <span style="font-size:26px;">${l.emoji||'📬'}</span>
+                        <div>
+                            <div style="font-family:var(--font-head);font-size:16px;letter-spacing:1px;color:rgba(220,240,255,0.9);">${l.title}</div>
+                            <div style="display:flex;align-items:center;gap:8px;margin-top:2px;">
+                                <span style="font-size:11px;color:rgba(255,255,255,0.3);font-family:var(--font-mono);">От: <b style="color:rgba(0,229,255,0.5);">${l.by||'Разраб'}</b></span>
+                                ${l.version?`<span style="background:rgba(255,149,0,0.1);border:1px solid rgba(255,149,0,0.2);border-radius:20px;padding:1px 8px;font-size:10px;color:#FF9500;font-family:var(--font-head);letter-spacing:1px;">v${l.version}</span>`:''}
+                                <span style="font-size:10px;color:rgba(255,255,255,0.2);font-family:var(--font-mono);">${date}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="font-size:13px;color:rgba(220,240,255,0.7);font-family:var(--font-body);line-height:1.75;white-space:pre-wrap;">${l.body}</div>
+                    ${this.canBan(this.username) ? `<div style="margin-top:12px;text-align:right;"><button onclick="app.deleteDevMail('${l.id}')" style="background:rgba(255,50,50,0.08);border:1px solid rgba(255,50,50,0.15);color:rgba(255,80,80,0.6);border-radius:8px;padding:5px 12px;cursor:pointer;font-size:11px;font-family:var(--font-body);">🗑 Удалить</button></div>` : ''}
+                </div>`;
+            }).join('');
+            // Mark all as seen
+            const allIds = letters.map(l=>l.id);
+            localStorage.setItem('citrus_devmail_seen', JSON.stringify(allIds));
+            if(badge) badge.classList.add('hidden');
+        } catch(e){
+            list.innerHTML = '<div style="color:rgba(255,100,100,0.5);font-size:13px;text-align:center;padding:40px;">❌ Ошибка загрузки</div>';
+        }
+    },
+
+    async sendDevMail(){
+        const emojiEl = document.getElementById('dm-emoji');
+        const byEl    = document.getElementById('dm-by');
+        const titleEl = document.getElementById('dm-title');
+        const bodyEl  = document.getElementById('dm-body');
+        const verEl   = document.getElementById('dm-version');
+        const emoji   = (emojiEl && emojiEl.value.trim()) || '📢';
+        const by      = (byEl    && byEl.value.trim())    || 'Разраб Всем';
+        const title   = titleEl  && titleEl.value.trim();
+        const body    = bodyEl   && bodyEl.value.trim();
+        const version = verEl    && verEl.value.trim();
+        if(!title||!body){ this._showToast('Заполни заголовок и текст'); return; }
+        try {
+            const r = await fetch(this._API+'/devmail',{
+                method:'POST',
+                headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({adminKey:'citrus_admin_2025',emoji,by,title,body,version})
+            });
+            const d = await r.json();
+            if(d.ok){
+                this._showToast('📬 Письмо отправлено!');
+                document.getElementById('dm-title').value='';
+                document.getElementById('dm-body').value='';
+                document.getElementById('dm-version').value='';
+                this.loadDevMail();
+            }
+        } catch(e){ this._showToast('❌ Ошибка'); }
+    },
+
+    async deleteDevMail(id){
+        if(!confirm('Удалить письмо?')) return;
+        try {
+            await fetch(this._API+'/devmail/'+id,{
+                method:'DELETE',
+                headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({adminKey:'citrus_admin_2025'})
+            });
+            this.loadDevMail();
+        } catch(e){}
+    },
+
+    async _checkDevMailBadge(){
+        try {
+            const r = await fetch(this._API+'/devmail');
+            const letters = await r.json();
+            if(!Array.isArray(letters)) return;
+            const seen = JSON.parse(localStorage.getItem('citrus_devmail_seen')||'[]');
+            const unseen = letters.filter(l=>!seen.includes(l.id)).length;
+            const badge = document.getElementById('devmail-badge');
+            if(badge){
+                if(unseen > 0){ badge.textContent = unseen; badge.classList.remove('hidden'); }
+                else badge.classList.add('hidden');
+            }
+        } catch(e){}
     }
 };
 
 window.onload = () => app.init();
+
 </script>
 <!-- Модалка ежедневной награды -->
 <div id="daily-modal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);align-items:center;justify-content:center;">
