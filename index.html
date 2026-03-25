@@ -6575,7 +6575,7 @@ const app = {
             new THREE.MeshBasicMaterial({map:faceTex,transparent:true})
         );
         faceMesh.position.set(0,0,0.301); headGroup.add(faceMesh);
-        if(needsRig){this._drawFace=_drawFace;this._faceBlinkOpen=1.0;this._faceBlinkTimer=0;this._faceBlinkState='open';this._lastFaceState='smile';}
+        if(false){this._drawFace=_drawFace;this._faceBlinkOpen=1.0;this._faceBlinkTimer=0;this._faceBlinkState='open';this._lastFaceState='smile';}
         // Руки с ригом
         const mkArm2=(x,mat)=>{
             const gg=new THREE.Group(); gg.position.set(x,0.45,0);
@@ -7135,6 +7135,7 @@ const app = {
             // Иголки
             for(let i=0;i<8;i++){const a=i*Math.PI/4;const sp=new THREE.Mesh(new THREE.CylinderGeometry(0.01,0.01,0.12,4),new THREE.MeshStandardMaterial({color:0xFFFFDD}));sp.rotation.z=a;sp.position.set(Math.cos(a)*0.13,0.64+Math.random()*0.3,Math.sin(a)*0.13);headGroup.add(sp);}
         }
+        return g;
     },
 
     // ── CHARACTER
