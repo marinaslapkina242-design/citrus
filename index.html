@@ -965,10 +965,10 @@
         <div class="header-divider"></div>
         <div class="header-right">
             <span id="display-name" class="header-username" style="display:flex;align-items:center;gap:6px;"></span>
-            <!-- Онлайн-индикатор скрыт -->
+            <!-- Онлайн-индикатор -->
             <div id="global-online-chip" style="display:none!important;">
-                <div id="my-online-dot"></div>
-                <span id="online-count-chip"></span>
+                <div id="my-online-dot" style="width:7px;height:7px;border-radius:50%;background:#00FF94;box-shadow:0 0 8px #00FF94;animation:pulseDot 2s ease-in-out infinite;"></div>
+                <span id="online-count-chip">онлайн</span>
             </div>
             <div class="balance-chip">🍊 <span id="balance-val">0</span></div>
             <!-- Уровень -->
@@ -2281,6 +2281,19 @@ const app = {
         
         window.addEventListener('mousedown',e=>this.onMouseClick(e));
         window.addEventListener('mousemove',e=>this.onMouseMove(e));
+
+        // ПКМ — вращение камеры без захвата указателя
+        this._rmbDown = false;
+        window.addEventListener('mousedown', e=>{
+            if(e.button === 2 && this.mode === 'play'){ this._rmbDown = true; }
+        });
+        window.addEventListener('mouseup', e=>{
+            if(e.button === 2){ this._rmbDown = false; }
+        });
+        // Блокируем контекстное меню в игре
+        const ev = document.getElementById('engine-view');
+        if(ev) ev.addEventListener('contextmenu', e=>{ if(this.mode==='play') e.preventDefault(); });
+        window.addEventListener('contextmenu', e=>{ if(this.mode==='play') e.preventDefault(); });
         
         this.buildPalette();
         this._initTouch();
@@ -3467,10 +3480,8 @@ const app = {
     },
 
     // Обновляем онлайн-индикатор в хедере
-    _updateOnlineChip(){ /* онлайн-чип скрыт */ },
-
-    // Показываем офлайн-статус (вызывается при потере связи или выходе)
-    _setOfflineStatus(){ /* онлайн-чип скрыт */ },
+    _updateOnlineChip(){ /* скрыт */ },
+    _setOfflineStatus(){ /* скрыт */ },
 
     // ── AUTH
     switchAuthTab(tab){
@@ -4003,36 +4014,33 @@ const app = {
     _startHubTimeTracker(){
         if(this._hubTimeInterval) clearInterval(this._hubTimeInterval);
         this._hubTimeBuffer = 0;
-        // Каждую секунду — копим в буфер (и в хабе, и в игре)
+        // Каждую секунду — копим в буфер
         this._hubTimeInterval = setInterval(()=>{
+            if(this.mode === 'play') return; // в игре не считаем
             this._hubTimeBuffer++;
             this._myHubTime = (this._myHubTime||0) + 1;
-            // Отправляем каждые 30 сек — не ждём 60
-            if(this._hubTimeBuffer >= 30){
+            // Каждые 60 сек отправляем на сервер
+            if(this._hubTimeBuffer >= 60){
                 this._flushHubTime();
             }
         }, 1000);
         // Отправить при закрытии вкладки
         window.addEventListener('beforeunload', ()=>this._flushHubTime());
-        // Запасной вариант — visibilitychange (когда сворачивают вкладку)
-        document.addEventListener('visibilitychange', ()=>{
-            if(document.visibilityState === 'hidden') this._flushHubTime();
-        });
     },
 
     _flushHubTime(){
         const sec = this._hubTimeBuffer;
         if(!sec || !this.userId) return;
         this._hubTimeBuffer = 0;
+        // sendBeacon чтобы не терять данные при закрытии
         const url = this._API + '/hub-time/' + this.userId;
         const data = JSON.stringify({seconds: sec});
-        // Пробуем fetch первым — он надёжнее на Render
-        fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body:data, keepalive:true}).catch(()=>{
-            // Запасной вариант — sendBeacon
-            if(navigator.sendBeacon){
-                navigator.sendBeacon(url, new Blob([data], {type:'application/json'}));
-            }
-        });
+        if(navigator.sendBeacon){
+            const blob = new Blob([data], {type:'application/json'});
+            navigator.sendBeacon(url, blob);
+        } else {
+            fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body:data, keepalive:true}).catch(()=>{});
+        }
     },
 
     logout(){
@@ -6533,15 +6541,39 @@ const app = {
         const headGroup = new THREE.Group();
         headGroup.position.set(0,0.73,0); torso.add(headGroup);
         headGroup.add(new THREE.Mesh(new THREE.BoxGeometry(0.6,0.6,0.6), matSkin));
-        const em = new THREE.MeshBasicMaterial({color:0x000000});
-        [-0.15,0.15].forEach(x=>{const e=new THREE.Mesh(new THREE.PlaneGeometry(0.1,0.1),em);e.position.set(x,0.05,0.31);headGroup.add(e);});
-        // Улыбка через canvas
-        const smileCanvas=document.createElement('canvas');smileCanvas.width=64;smileCanvas.height=32;
-        const sCtx=smileCanvas.getContext('2d');sCtx.strokeStyle='#000';sCtx.lineWidth=5;sCtx.lineCap='round';
-        sCtx.beginPath();sCtx.arc(32,8,16,0,Math.PI);sCtx.stroke();
-        const smileTex=new THREE.CanvasTexture(smileCanvas);
-        const mo=new THREE.Mesh(new THREE.PlaneGeometry(0.22,0.11),new THREE.MeshBasicMaterial({map:smileTex,transparent:true}));
-        mo.position.set(0,-0.14,0.31);headGroup.add(mo);
+        // Лицо — единый canvas 128x128, перерисовывается при анимации
+        const faceCanvas=document.createElement('canvas'); faceCanvas.width=128; faceCanvas.height=128;
+        const faceCtx=faceCanvas.getContext('2d');
+        const faceTex=new THREE.CanvasTexture(faceCanvas);
+        const _drawFace=(eyeOpen=1.0, mouthState='smile')=>{
+            faceCtx.clearRect(0,0,128,128);
+            faceCtx.fillStyle='rgba(0,0,0,0)';
+            // Глаза
+            faceCtx.fillStyle='#111';
+            [-38,38].forEach(ox=>{
+                const ey=52, ex=64+ox;
+                const eh=Math.max(1, 13*eyeOpen);
+                faceCtx.beginPath(); faceCtx.ellipse(ex,ey,10,eh,0,0,Math.PI*2); faceCtx.fill();
+            });
+            // Рот
+            faceCtx.strokeStyle='#111'; faceCtx.lineWidth=5; faceCtx.lineCap='round';
+            if(mouthState==='smile'){
+                faceCtx.beginPath(); faceCtx.arc(64,82,18,0.2,Math.PI-0.2); faceCtx.stroke();
+            } else if(mouthState==='open'){
+                faceCtx.fillStyle='#111';
+                faceCtx.beginPath(); faceCtx.ellipse(64,86,13,9,0,0,Math.PI*2); faceCtx.fill();
+            } else if(mouthState==='serious'){
+                faceCtx.beginPath(); faceCtx.moveTo(46,86); faceCtx.lineTo(82,86); faceCtx.stroke();
+            }
+            faceTex.needsUpdate=true;
+        };
+        _drawFace(1.0,'smile');
+        const faceMesh=new THREE.Mesh(
+            new THREE.PlaneGeometry(0.58,0.58),
+            new THREE.MeshBasicMaterial({map:faceTex,transparent:true})
+        );
+        faceMesh.position.set(0,0,0.301); headGroup.add(faceMesh);
+        if(needsRig){this._drawFace=_drawFace;this._faceBlinkOpen=1.0;this._faceBlinkTimer=0;this._faceBlinkState='open';this._lastFaceState='smile';}
         // Руки с ригом
         const mkArm2=(x,mat)=>{
             const gg=new THREE.Group(); gg.position.set(x,0.45,0);
@@ -9130,6 +9162,12 @@ const app = {
 
     // ── УПРАВЛЕНИЕ МЫШКОЙ (ВРАЩЕНИЕ)
     onMouseMove(e) {
+        // ПКМ зажата — вращаем камеру без pointer lock
+        if(this._rmbDown && this.mode === 'play'){
+            this._camYaw   = (this._camYaw   || Math.PI) - e.movementX * 0.004;
+            this._camPitch = Math.max(-1.2, Math.min(1.2, (this._camPitch || 0.2) - e.movementY * 0.004));
+            return;
+        }
         if (!document.pointerLockElement) return;
         if (this.mode === 'play') {
             this._camYaw   = (this._camYaw   || Math.PI) - e.movementX * 0.003;
@@ -9351,6 +9389,13 @@ const app = {
                 while(diff >  Math.PI) diff -= Math.PI*2;
                 while(diff < -Math.PI) diff += Math.PI*2;
                 this.playerGroup.rotation.y += diff * (this._raceSpeed ? 0.12 : 0.2);
+
+                // Камера плавно следует за направлением движения
+                let camTargetYaw = tgtAngle - Math.PI;
+                let camDiff = camTargetYaw - this._camYaw;
+                while(camDiff >  Math.PI) camDiff -= Math.PI*2;
+                while(camDiff < -Math.PI) camDiff += Math.PI*2;
+                this._camYaw += camDiff * 0.02;
                 
                 if(this._raceSpeed){
                     // В гонках — двигаем без checkCollision, но только по трассе
@@ -9364,11 +9409,6 @@ const app = {
                         this.playerGroup.position.add(move);
                     }
                 }
-            } else {
-                let diff = (camYaw + Math.PI) - this.playerGroup.rotation.y;
-                while(diff >  Math.PI) diff -= Math.PI*2;
-                while(diff < -Math.PI) diff += Math.PI*2;
-                this.playerGroup.rotation.y += diff * 0.1;
             }
 
             // Синхронизируем машину с позицией игрока
@@ -9550,6 +9590,38 @@ const app = {
                     r.torso.rotation.x    = L(r.torso.rotation.x||0, 0, 0.08);
                     r.torso.rotation.y    = L(r.torso.rotation.y, 0, 0.08);
                     r.torso.rotation.z    = L(r.torso.rotation.z||0, 0, 0.08);
+                }
+            }
+
+            // ── АНИМАЦИЯ ЛИЦА
+            if(this._drawFace){
+                // Моргание
+                this._faceBlinkTimer+=delta;
+                const blinkInterval = moving ? 2.2 : 4.0;
+                if(this._faceBlinkState==='open' && this._faceBlinkTimer>blinkInterval){
+                    this._faceBlinkState='closing'; this._faceBlinkTimer=0;
+                }
+                if(this._faceBlinkState==='closing'){
+                    this._faceBlinkOpen-=delta*10;
+                    if(this._faceBlinkOpen<=0){this._faceBlinkOpen=0;this._faceBlinkState='opening';}
+                }
+                if(this._faceBlinkState==='opening'){
+                    this._faceBlinkOpen+=delta*12;
+                    if(this._faceBlinkOpen>=1){this._faceBlinkOpen=1;this._faceBlinkState='open';this._faceBlinkTimer=0;}
+                }
+                // Выражение рта
+                const faceState = !this.canJump ? 'open' : moving ? 'serious' : 'smile';
+                const eyeOpen = this._faceBlinkOpen;
+                // Перерисовываем только если что-то изменилось
+                const eyeKey = Math.round(eyeOpen*10);
+                if(faceState!==this._lastFaceState || eyeKey!==this._lastEyeKey){
+                    this._lastFaceState=faceState; this._lastEyeKey=eyeKey;
+                    this._drawFace(eyeOpen, faceState);
+                }
+                // Голова слегка качается при ходьбе
+                if(this.rig && this.rig.head){
+                    const headBob = moving && this.canJump ? Math.sin(time*11)*0.04 : 0;
+                    this.rig.head.rotation.z = THREE.MathUtils.lerp(this.rig.head.rotation.z||0, headBob, 0.15);
                 }
             }
             if(this.loopFn){try{this.loopFn(delta,time);}catch(e){this.loopFn=null;}}
