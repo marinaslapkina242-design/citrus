@@ -6543,16 +6543,16 @@ const app = {
         const headGroup = new THREE.Group();
         headGroup.position.set(0,0.73,0); torso.add(headGroup);
         headGroup.add(new THREE.Mesh(new THREE.BoxGeometry(0.6,0.6,0.6), matSkin));
-        // Лицо — такое же как у своего персонажа (два глаза + улыбка)
-        const md2=new THREE.MeshBasicMaterial({color:0x000000});
-        const eL2=new THREE.Mesh(new THREE.PlaneGeometry(0.1,0.1),md2); eL2.position.set(-0.15,0.05,0.301); headGroup.add(eL2);
-        const eR2=new THREE.Mesh(new THREE.PlaneGeometry(0.1,0.1),md2); eR2.position.set(0.15,0.05,0.301);  headGroup.add(eR2);
-        const smC2=document.createElement('canvas'); smC2.width=64; smC2.height=40;
-        const smX2=smC2.getContext('2d'); smX2.strokeStyle='#000'; smX2.lineWidth=6; smX2.lineCap='round';
-        smX2.beginPath(); smX2.arc(32,6,20,0,Math.PI); smX2.stroke();
-        const smT2=new THREE.CanvasTexture(smC2);
-        const mo2=new THREE.Mesh(new THREE.PlaneGeometry(0.28,0.14),new THREE.MeshBasicMaterial({map:smT2,transparent:true}));
-        mo2.position.set(0,-0.17,0.301); headGroup.add(mo2);
+        // Лицо — такое же как у своего персонажа
+        const _md2=new THREE.MeshBasicMaterial({color:0x000000});
+        const _eL=new THREE.Mesh(new THREE.PlaneGeometry(0.1,0.1),_md2); _eL.position.set(-0.15,0.05,0.301); headGroup.add(_eL);
+        const _eR=new THREE.Mesh(new THREE.PlaneGeometry(0.1,0.1),_md2); _eR.position.set(0.15,0.05,0.301); headGroup.add(_eR);
+        const _smC=document.createElement('canvas'); _smC.width=64; _smC.height=40;
+        const _smX=_smC.getContext('2d'); _smX.strokeStyle='#000'; _smX.lineWidth=6; _smX.lineCap='round';
+        _smX.beginPath(); _smX.arc(32,6,20,0,Math.PI); _smX.stroke();
+        const _smT=new THREE.CanvasTexture(_smC);
+        const _mo=new THREE.Mesh(new THREE.PlaneGeometry(0.28,0.14),new THREE.MeshBasicMaterial({map:_smT,transparent:true}));
+        _mo.position.set(0,-0.17,0.301); headGroup.add(_mo);
         // Руки с ригом
         const mkArm2=(x,mat)=>{
             const gg=new THREE.Group(); gg.position.set(x,0.45,0);
@@ -7112,6 +7112,16 @@ const app = {
             // Иголки
             for(let i=0;i<8;i++){const a=i*Math.PI/4;const sp=new THREE.Mesh(new THREE.CylinderGeometry(0.01,0.01,0.12,4),new THREE.MeshStandardMaterial({color:0xFFFFDD}));sp.rotation.z=a;sp.position.set(Math.cos(a)*0.13,0.64+Math.random()*0.3,Math.sin(a)*0.13);headGroup.add(sp);}
         }
+        // ── Аксессуары которых не хватало ──
+        if(inv.includes('party')){const pm=new THREE.MeshStandardMaterial({color:0xFF44AA,roughness:0.6});const pcone=new THREE.Mesh(new THREE.ConeGeometry(0.2,0.5,10),pm);pcone.position.set(0,0.55,0);headGroup.add(pcone);const pstar=new THREE.Mesh(new THREE.SphereGeometry(0.05,6,6),new THREE.MeshStandardMaterial({color:0xFFFF00,emissive:0xFFFF00,emissiveIntensity:2}));pstar.position.set(0,0.83,0);headGroup.add(pstar);}
+        if(inv.includes('detective')){const dm=new THREE.MeshStandardMaterial({color:0x222222,roughness:0.8});const dbrim=new THREE.Mesh(new THREE.CylinderGeometry(0.48,0.48,0.05,12),dm);dbrim.position.set(0,0.22,0.04);headGroup.add(dbrim);const dtop=new THREE.Mesh(new THREE.CylinderGeometry(0.25,0.29,0.26,12),dm);dtop.position.set(0,0.37,0.04);headGroup.add(dtop);const band=new THREE.Mesh(new THREE.CylinderGeometry(0.26,0.26,0.05,12),new THREE.MeshStandardMaterial({color:0x8B0000,roughness:0.7}));band.position.set(0,0.26,0.04);headGroup.add(band);}
+        if(inv.includes('robot')){const rm=new THREE.Mesh(new THREE.BoxGeometry(0.64,0.62,0.1),new THREE.MeshStandardMaterial({color:0x888888,metalness:0.9,roughness:0.1}));rm.position.set(0,0,0.32);headGroup.add(rm);[-0.15,0.15].forEach(x=>{const eye=new THREE.Mesh(new THREE.BoxGeometry(0.12,0.08,0.04),new THREE.MeshStandardMaterial({color:0x00FFFF,emissive:0x00FFFF,emissiveIntensity:2}));eye.position.set(x,0.1,0.36);headGroup.add(eye);});}
+        if(inv.includes('alien')){const ah=new THREE.Mesh(new THREE.SphereGeometry(0.4,10,10),new THREE.MeshStandardMaterial({color:0x88FFCC,metalness:0.1,roughness:0,transparent:true,opacity:0.35}));ah.position.set(0,0.05,0);headGroup.add(ah);}
+        if(inv.includes('star')){for(let i=0;i<6;i++){const a=(i/6)*Math.PI*2;const s=new THREE.Mesh(new THREE.SphereGeometry(0.07,5,5),new THREE.MeshStandardMaterial({color:0xFFFF00,emissive:0xFFDD00,emissiveIntensity:2}));s.position.set(Math.cos(a)*0.5,i*0.25,Math.sin(a)*0.5);g.add(s);}}
+        if(inv.includes('medal')){const med=new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.12,0.04,12),new THREE.MeshStandardMaterial({color:0xFFD700,metalness:0.9,roughness:0.1,emissive:0xFFAA00,emissiveIntensity:0.4}));med.position.set(0,-0.2,0.22);med.rotation.x=Math.PI/2;torso.add(med);}
+        if(inv.includes('gem')){const _staff=new THREE.Group();const stick=new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,1.6),new THREE.MeshStandardMaterial({color:0x9966AA,metalness:0.3}));_staff.add(stick);const gem=new THREE.Mesh(new THREE.OctahedronGeometry(0.2),new THREE.MeshStandardMaterial({color:0xAA00FF,emissive:0x7700FF,emissiveIntensity:1.5,transparent:true,opacity:0.9}));gem.position.y=0.95;_staff.add(gem);_staff.position.set(0,-0.85,-0.1);_staff.rotation.x=Math.PI/2;lA.add(_staff);}
+        if(inv.includes('shield')){const sh=new THREE.Mesh(new THREE.BoxGeometry(0.6,0.8,0.08),new THREE.MeshStandardMaterial({color:0xCCCCCC,metalness:0.8,roughness:0.2}));sh.position.set(0,-0.5,0.2);lA.add(sh);const cross1=new THREE.Mesh(new THREE.BoxGeometry(0.08,0.5,0.05),new THREE.MeshStandardMaterial({color:0xFF2222}));cross1.position.set(0,-0.5,0.26);lA.add(cross1);const cross2=new THREE.Mesh(new THREE.BoxGeometry(0.35,0.08,0.05),new THREE.MeshStandardMaterial({color:0xFF2222}));cross2.position.set(0,-0.42,0.26);lA.add(cross2);}
+        if(inv.includes('bow')){const bowM=new THREE.MeshStandardMaterial({color:0x5D4037,roughness:0.7});const arc=new THREE.Mesh(new THREE.TorusGeometry(0.35,0.04,6,20,Math.PI),bowM);arc.position.set(0,-0.5,0.15);arc.rotation.z=Math.PI/2;lA.add(arc);}
         return g;
     },
 
