@@ -963,7 +963,12 @@
         </div>
         <div class="header-divider"></div>
         <div class="header-right">
-            <span id="display-name" class="header-username"></span>
+            <span id="display-name" class="header-username" style="display:flex;align-items:center;gap:6px;"></span>
+            <!-- Онлайн-индикатор -->
+            <div id="global-online-chip" style="display:flex;align-items:center;gap:5px;background:rgba(0,255,148,0.06);border:1px solid rgba(0,255,148,0.18);border-radius:50px;padding:4px 10px;font-family:var(--font-mono);font-size:11px;color:rgba(0,255,148,0.8);" title="Ты онлайн">
+                <div id="my-online-dot" style="width:7px;height:7px;border-radius:50%;background:#00FF94;box-shadow:0 0 8px #00FF94;animation:pulseDot 2s ease-in-out infinite;"></div>
+                <span id="online-count-chip">онлайн</span>
+            </div>
             <div class="balance-chip">🍊 <span id="balance-val">0</span></div>
             <!-- Уровень -->
             <div id="level-chip" onclick="app.showLevelInfo()" style="background:linear-gradient(135deg,rgba(120,60,220,0.18),rgba(80,20,180,0.10));border:1px solid rgba(140,80,255,0.3);border-radius:10px;padding:6px 12px;font-family:var(--font-mono);font-size:12px;color:#B060FF;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all 0.2s;" title="Твой уровень">
@@ -1093,50 +1098,95 @@
             </div>
 
             <!-- ══════════════════ TAB: AI HELPER ══════════════════ -->
-            <div id="tab-aihelper" class="hidden" style="display:flex;flex-direction:column;height:calc(100vh - 64px);overflow:hidden;">
-                <div style="flex-shrink:0;padding:0 0 12px 0;">
-                    <div class="section-title" style="margin-bottom:6px;">🤖 ИИ Хелпер Цитруса</div>
-                    <div id="ai-status-bar" style="display:flex;align-items:center;justify-content:space-between;background:rgba(0,229,255,0.04);border:1px solid rgba(0,229,255,0.1);border-radius:12px;padding:10px 16px;">
-                        <div style="display:flex;align-items:center;gap:10px;">
-                            <div style="width:8px;height:8px;border-radius:50%;background:var(--p);box-shadow:0 0 8px var(--p);animation:voidPulse 2s infinite alternate;"></div>
-                            <span style="font-family:var(--font-mono);font-size:12px;color:rgba(0,229,255,0.7);">CITRUS AI v1.0</span>
+            <!-- ══════════════════ TAB: AI HELPER (NEW DESIGN) ══════════════════ -->
+            <div id="tab-aihelper" class="hidden" style="display:flex;flex-direction:column;height:calc(100vh - 64px);overflow:hidden;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(123,47,255,0.06),transparent);">
+
+                <!-- ── TOP BAR ── -->
+                <div style="flex-shrink:0;padding:0 0 14px;">
+                    <!-- Заголовок -->
+                    <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;">
+                        <div style="position:relative;width:48px;height:48px;flex-shrink:0;">
+                            <div style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#7B2FFF,#00C9FF);display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 0 24px rgba(123,47,255,0.5);">🤖</div>
+                            <div id="ai-online-dot" style="position:absolute;bottom:-2px;right:-2px;width:12px;height:12px;border-radius:50%;background:#00FF94;border:2px solid var(--deep);box-shadow:0 0 8px #00FF94;"></div>
                         </div>
-                        <div id="ai-msgs-left" style="font-family:var(--font-mono);font-size:12px;color:rgba(255,255,255,0.35);">Нет доступа</div>
+                        <div style="flex:1;">
+                            <div style="font-family:var(--font-head);font-size:20px;letter-spacing:3px;background:linear-gradient(90deg,#7B2FFF,#00E5FF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">CITRUS AI</div>
+                            <div style="font-family:var(--font-mono);font-size:10px;color:rgba(0,229,255,0.4);letter-spacing:2px;margin-top:1px;">v2.0 · NEURAL ASSISTANT</div>
+                        </div>
+                        <div id="ai-msgs-left" style="background:rgba(123,47,255,0.12);border:1px solid rgba(123,47,255,0.25);border-radius:50px;padding:5px 14px;font-family:var(--font-mono);font-size:11px;color:#B060FF;">Нет доступа</div>
+                    </div>
+
+                    <!-- Capabilities pills -->
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:2px;">
+                        <div style="display:flex;align-items:center;gap:5px;background:rgba(0,229,255,0.05);border:1px solid rgba(0,229,255,0.12);border-radius:50px;padding:4px 12px;font-size:11px;color:rgba(0,229,255,0.6);font-family:var(--font-mono);">💬 Вопросы</div>
+                        <div style="display:flex;align-items:center;gap:5px;background:rgba(123,47,255,0.05);border:1px solid rgba(123,47,255,0.12);border-radius:50px;padding:4px 12px;font-size:11px;color:rgba(180,100,255,0.7);font-family:var(--font-mono);">🖼 Фото</div>
+                        <div style="display:flex;align-items:center;gap:5px;background:rgba(0,255,148,0.05);border:1px solid rgba(0,255,148,0.12);border-radius:50px;padding:4px 12px;font-size:11px;color:rgba(0,255,148,0.6);font-family:var(--font-mono);">📄 PDF</div>
+                        <div style="display:flex;align-items:center;gap:5px;background:rgba(255,214,0,0.05);border:1px solid rgba(255,214,0,0.12);border-radius:50px;padding:4px 12px;font-size:11px;color:rgba(255,214,0,0.6);font-family:var(--font-mono);">🎮 Игра</div>
                     </div>
                 </div>
-                <!-- Paywall banner -->
-                <div id="ai-paywall" style="flex-shrink:0;margin-bottom:12px;background:linear-gradient(135deg,rgba(123,47,255,0.12),rgba(0,229,255,0.06));border:1px solid rgba(123,47,255,0.25);border-radius:16px;padding:20px;text-align:center;">
-                    <div style="font-size:32px;margin-bottom:8px;">🤖</div>
-                    <div style="font-family:var(--font-head);font-size:18px;letter-spacing:3px;color:var(--p);margin-bottom:6px;">ИИ ПОМОЩНИК</div>
-                    <div style="font-size:13px;color:rgba(255,255,255,0.55);font-family:var(--font-body);margin-bottom:16px;line-height:1.7;">Знает всё о Citrus Online и не только.<br>Умеет отвечать на любые вопросы, анализировать фото и файлы.</div>
-                    <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px;">
-                        <div style="font-family:var(--font-head);font-size:28px;color:#FFD600;">1000</div>
-                        <div style="font-size:22px;">🍊</div>
-                        <div style="font-size:13px;color:rgba(255,255,255,0.4);font-family:var(--font-body);">= 5 сообщений</div>
+
+                <!-- ── PAYWALL (показывается если нет доступа) ── -->
+                <div id="ai-paywall" style="flex-shrink:0;margin-bottom:14px;position:relative;overflow:hidden;border-radius:20px;background:linear-gradient(135deg,rgba(13,9,32,0.95),rgba(7,3,20,0.98));border:1px solid rgba(123,47,255,0.3);">
+                    <!-- Декор фон -->
+                    <div style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 80% 50%,rgba(123,47,255,0.12),transparent),radial-gradient(ellipse 50% 60% at 10% 50%,rgba(0,229,255,0.06),transparent);pointer-events:none;"></div>
+                    <div style="position:relative;display:flex;align-items:center;gap:20px;padding:20px 22px;">
+                        <!-- Иконка -->
+                        <div style="flex-shrink:0;width:60px;height:60px;border-radius:18px;background:linear-gradient(135deg,rgba(123,47,255,0.3),rgba(0,229,255,0.15));border:1px solid rgba(123,47,255,0.4);display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 0 30px rgba(123,47,255,0.3);">🤖</div>
+                        <!-- Текст -->
+                        <div style="flex:1;min-width:0;">
+                            <div style="font-family:var(--font-head);font-size:16px;letter-spacing:2px;color:#fff;margin-bottom:4px;">РАЗБЛОКИРУЙ ИИ</div>
+                            <div style="font-size:12px;color:rgba(255,255,255,0.4);font-family:var(--font-body);line-height:1.5;">Умный помощник знает всё о игре и помогает с любыми вопросами</div>
+                        </div>
+                        <!-- Цена + кнопка -->
+                        <div style="flex-shrink:0;text-align:center;">
+                            <div style="display:flex;align-items:baseline;gap:4px;justify-content:center;margin-bottom:8px;">
+                                <span style="font-family:var(--font-head);font-size:26px;color:#FFD600;">1000</span>
+                                <span style="font-size:16px;">🍊</span>
+                            </div>
+                            <div style="font-size:10px;color:rgba(255,255,255,0.3);font-family:var(--font-mono);margin-bottom:10px;">= 5 сообщений</div>
+                            <button onclick="app.buyAiMessages()" style="background:linear-gradient(135deg,#7B2FFF,#00C9FF);border:none;border-radius:12px;color:#fff;font-family:var(--font-head);font-size:13px;letter-spacing:1px;padding:9px 20px;cursor:pointer;transition:all 0.2s;box-shadow:0 4px 20px rgba(123,47,255,0.4);white-space:nowrap;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 28px rgba(123,47,255,0.6)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 20px rgba(123,47,255,0.4)'">КУПИТЬ</button>
+                        </div>
                     </div>
-                    <button onclick="app.buyAiMessages()" style="background:linear-gradient(135deg,rgba(123,47,255,0.3),rgba(0,229,255,0.2));border:1px solid rgba(0,229,255,0.3);color:var(--p);border-radius:12px;padding:12px 32px;font-family:var(--font-head);font-size:16px;letter-spacing:2px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='linear-gradient(135deg,rgba(123,47,255,0.5),rgba(0,229,255,0.3))'" onmouseout="this.style.background='linear-gradient(135deg,rgba(123,47,255,0.3),rgba(0,229,255,0.2))'">КУПИТЬ ДОСТУП</button>
+                    <!-- Разделитель с features -->
+                    <div style="border-top:1px solid rgba(255,255,255,0.04);padding:10px 22px;display:flex;gap:16px;">
+                        <div style="font-size:11px;color:rgba(255,255,255,0.3);font-family:var(--font-mono);">✓ Без ограничений по темам</div>
+                        <div style="font-size:11px;color:rgba(255,255,255,0.3);font-family:var(--font-mono);">✓ Анализ файлов и фото</div>
+                        <div style="font-size:11px;color:rgba(255,255,255,0.3);font-family:var(--font-mono);">✓ Мгновенные ответы</div>
+                    </div>
                 </div>
-                <!-- Chat messages -->
-                <div id="ai-chat" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:4px 2px 4px 0;margin-bottom:12px;scrollbar-width:thin;scrollbar-color:rgba(0,229,255,0.15) transparent;">
+
+                <!-- ── CHAT AREA ── -->
+                <div id="ai-chat" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:12px;padding:4px 2px 4px 0;margin-bottom:14px;scrollbar-width:thin;scrollbar-color:rgba(123,47,255,0.2) transparent;">
+                    <!-- Приветственное сообщение -->
                     <div id="ai-welcome" style="display:flex;gap:10px;align-items:flex-start;">
-                        <div style="flex-shrink:0;width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#7B2FFF,#00E5FF);display:flex;align-items:center;justify-content:center;font-size:16px;">🤖</div>
-                        <div style="background:rgba(123,47,255,0.1);border:1px solid rgba(123,47,255,0.2);border-radius:12px 12px 12px 4px;padding:12px 14px;max-width:80%;">
-                            <div style="font-size:13px;color:rgba(220,240,255,0.85);font-family:var(--font-body);line-height:1.7;">Привет! Я ИИ Хелпер Цитруса 🍊<br>Могу ответить на любой вопрос, помочь с игрой, проанализировать картинку или файл. Купи доступ — и погнали! 🚀</div>
+                        <div style="flex-shrink:0;width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,#7B2FFF,#00C9FF);display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 0 14px rgba(123,47,255,0.4);">🤖</div>
+                        <div style="max-width:80%;">
+                            <div style="font-size:10px;color:rgba(123,47,255,0.7);font-family:var(--font-mono);margin-bottom:5px;letter-spacing:1px;">CITRUS AI</div>
+                            <div style="background:linear-gradient(135deg,rgba(123,47,255,0.1),rgba(0,229,255,0.05));border:1px solid rgba(123,47,255,0.2);border-radius:4px 16px 16px 16px;padding:13px 16px;">
+                                <div style="font-size:13px;color:rgba(220,240,255,0.88);font-family:var(--font-body);line-height:1.75;">Привет! Я CITRUS AI 🍊<br>Знаю всё об игре и могу помочь с любым вопросом. Умею анализировать картинки и файлы.<br><br>Купи доступ — и начнём! 🚀</div>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <!-- Input area -->
+
+                <!-- ── INPUT AREA ── -->
                 <div id="ai-input-area" style="flex-shrink:0;">
                     <!-- File preview -->
-                    <div id="ai-file-preview" style="display:none;background:rgba(255,255,255,0.03);border:1px solid rgba(0,229,255,0.1);border-radius:10px;padding:8px 12px;margin-bottom:8px;display:none;align-items:center;gap:8px;">
-                        <span id="ai-file-name" style="font-size:12px;color:rgba(0,229,255,0.7);font-family:var(--font-mono);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
-                        <button onclick="app._aiClearFile()" style="background:none;border:none;color:rgba(255,100,100,0.6);cursor:pointer;font-size:14px;padding:0;">✕</button>
+                    <div id="ai-file-preview" style="display:none;background:rgba(123,47,255,0.06);border:1px solid rgba(123,47,255,0.2);border-radius:12px;padding:8px 14px;margin-bottom:8px;align-items:center;gap:8px;">
+                        <div style="width:28px;height:28px;border-radius:8px;background:rgba(123,47,255,0.2);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">📎</div>
+                        <span id="ai-file-name" style="font-size:12px;color:rgba(180,100,255,0.9);font-family:var(--font-mono);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+                        <button onclick="app._aiClearFile()" style="background:rgba(255,100,100,0.1);border:1px solid rgba(255,100,100,0.2);color:rgba(255,100,100,0.7);cursor:pointer;font-size:12px;padding:3px 8px;border-radius:6px;font-family:var(--font-body);">✕</button>
                     </div>
-                    <div style="display:flex;gap:8px;align-items:flex-end;">
-                        <label for="ai-file-input" style="flex-shrink:0;width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,0.35);font-size:15px;transition:all 0.2s;" title="Прикрепить файл или фото" onmouseover="this.style.borderColor='rgba(0,229,255,0.3)';this.style.color='var(--p)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)';this.style.color='rgba(255,255,255,0.35)'">📎<input id="ai-file-input" type="file" accept="image/*,.pdf,.txt,.js,.html,.css,.json" style="display:none" onchange="app._aiFileSelected(this)"></label>
-                        <textarea id="ai-text-input" placeholder="Спроси что угодно..." rows="1" style="flex:1;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;color:rgba(220,240,255,0.9);padding:10px 14px;font-size:14px;font-family:var(--font-body);resize:none;outline:none;line-height:1.5;max-height:120px;overflow-y:auto;scrollbar-width:thin;" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();app.sendAiMessage();}" oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'" onfocus="this.style.borderColor='rgba(0,229,255,0.25)'" onblur="this.style.borderColor='rgba(255,255,255,0.08)'"></textarea>
-                        <button onclick="app.sendAiMessage()" id="ai-send-btn" style="flex-shrink:0;width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,rgba(0,229,255,0.2),rgba(123,47,255,0.2));border:1px solid rgba(0,229,255,0.25);color:var(--p);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;" onmouseover="this.style.background='linear-gradient(135deg,rgba(0,229,255,0.35),rgba(123,47,255,0.35))'" onmouseout="this.style.background='linear-gradient(135deg,rgba(0,229,255,0.2),rgba(123,47,255,0.2))'">➤</button>
+                    <!-- Input row -->
+                    <div style="display:flex;gap:8px;align-items:flex-end;background:rgba(10,6,25,0.9);border:1px solid rgba(123,47,255,0.2);border-radius:16px;padding:8px 8px 8px 14px;transition:border-color 0.2s;" onfocusin="this.style.borderColor='rgba(123,47,255,0.5)'" onfocusout="this.style.borderColor='rgba(123,47,255,0.2)'">
+                        <!-- Attach button -->
+                        <label for="ai-file-input" style="flex-shrink:0;width:34px;height:34px;border-radius:10px;background:rgba(123,47,255,0.1);border:1px solid rgba(123,47,255,0.15);display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(180,100,255,0.6);font-size:15px;transition:all 0.2s;margin-bottom:2px;" title="Прикрепить файл или фото" onmouseover="this.style.background='rgba(123,47,255,0.22)';this.style.color='#B060FF'" onmouseout="this.style.background='rgba(123,47,255,0.1)';this.style.color='rgba(180,100,255,0.6)'">📎<input id="ai-file-input" type="file" accept="image/*,.pdf,.txt,.js,.html,.css,.json" style="display:none" onchange="app._aiFileSelected(this)"></label>
+                        <!-- Textarea -->
+                        <textarea id="ai-text-input" placeholder="Спроси что угодно..." rows="1" style="flex:1;background:transparent;border:none;color:rgba(220,240,255,0.9);padding:6px 0;font-size:14px;font-family:var(--font-body);resize:none;outline:none;line-height:1.55;max-height:120px;overflow-y:auto;scrollbar-width:thin;" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();app.sendAiMessage();}" oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'"></textarea>
+                        <!-- Send button -->
+                        <button onclick="app.sendAiMessage()" id="ai-send-btn" style="flex-shrink:0;width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#7B2FFF,#00C9FF);border:none;color:#fff;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;margin-bottom:2px;box-shadow:0 0 16px rgba(123,47,255,0.4);" onmouseover="this.style.transform='scale(1.08)';this.style.boxShadow='0 0 24px rgba(123,47,255,0.6)'" onmouseout="this.style.transform='';this.style.boxShadow='0 0 16px rgba(123,47,255,0.4)'">➤</button>
                     </div>
+                    <div style="text-align:center;margin-top:7px;font-family:var(--font-mono);font-size:10px;color:rgba(255,255,255,0.12);">Enter — отправить · Shift+Enter — перенос строки</div>
                 </div>
             </div>
 
@@ -2647,28 +2697,46 @@ const app = {
 
         const overlay=document.createElement('div');
         overlay.id='dm-overlay';
-        overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+        overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px);';
         overlay.innerHTML=`
-        <div style="background:var(--c-surface2);border:1px solid rgba(79,195,247,0.2);border-radius:20px;width:100%;max-width:480px;height:70vh;display:flex;flex-direction:column;overflow:hidden;">
+        <div style="background:linear-gradient(160deg,rgba(13,9,32,0.99),rgba(3,0,15,0.99));border:1px solid rgba(79,195,247,0.2);border-radius:24px;width:100%;max-width:520px;height:75vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 40px 80px rgba(0,0,0,0.9);">
             <!-- Шапка -->
-            <div style="display:flex;align-items:center;gap:12px;padding:16px 18px;border-bottom:1px solid rgba(255,255,255,0.06);">
-                <div style="width:38px;height:38px;border-radius:50%;background:rgba(79,195,247,0.15);color:#4fc3f7;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;">${(friendName[0]||'?').toUpperCase()}</div>
-                <div>
-                    <div style="font-family:var(--font-body);font-weight:700;font-size:15px;color:#fff;">${friendName}</div>
-                    <div id="dm-status" style="font-size:11px;color:rgba(255,255,255,0.3);">загрузка...</div>
+            <div style="display:flex;align-items:center;gap:12px;padding:16px 18px;border-bottom:1px solid rgba(255,255,255,0.06);background:rgba(0,0,0,0.2);">
+                <div style="position:relative;">
+                    <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,rgba(79,195,247,0.2),rgba(2,136,209,0.15));color:#4fc3f7;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:17px;border:1px solid rgba(79,195,247,0.15);">${(friendName[0]||'?').toUpperCase()}</div>
+                    <div id="dm-friend-online-dot" style="position:absolute;bottom:-2px;right:-2px;width:10px;height:10px;border-radius:50%;background:#555;border:2px solid rgba(3,0,15,0.99);transition:background 0.3s;"></div>
                 </div>
-                <button onclick="document.getElementById('dm-overlay').remove();clearInterval(app._dmPollTimer);" style="margin-left:auto;background:none;border:none;color:rgba(255,255,255,0.3);font-size:22px;cursor:pointer;line-height:1;">✕</button>
+                <div style="flex:1;">
+                    <div style="font-family:var(--font-body);font-weight:700;font-size:15px;color:#fff;">${friendName}</div>
+                    <div id="dm-status" style="font-size:11px;color:rgba(255,255,255,0.3);font-family:var(--font-mono);">загрузка...</div>
+                </div>
+                <button onclick="document.getElementById('dm-overlay').remove();clearInterval(app._dmPollTimer);clearInterval(app._dmTypingDotInterval);" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.4);font-size:16px;cursor:pointer;line-height:1;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;">✕</button>
             </div>
             <!-- Сообщения -->
-            <div id="dm-messages" style="flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:8px;"></div>
+            <div id="dm-messages" style="flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:6px;scrollbar-width:thin;scrollbar-color:rgba(79,195,247,0.1) transparent;"></div>
+            <!-- Typing indicator -->
+            <div id="dm-typing-row" style="display:none;padding:4px 18px 0;font-family:var(--font-mono);font-size:11px;color:rgba(79,195,247,0.5);min-height:20px;"></div>
+            <!-- Превью медиа -->
+            <div id="dm-media-preview" style="display:none;background:rgba(79,195,247,0.06);border:1px solid rgba(79,195,247,0.15);border-radius:10px;padding:8px 12px;margin:0 12px 4px;align-items:center;gap:8px;">
+                <div id="dm-media-thumb" style="width:36px;height:36px;border-radius:8px;background:rgba(79,195,247,0.1);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;overflow:hidden;"></div>
+                <span id="dm-media-name" style="font-size:12px;color:rgba(79,195,247,0.8);font-family:var(--font-mono);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+                <button onclick="app._dmClearMedia()" style="background:rgba(255,100,100,0.1);border:1px solid rgba(255,100,100,0.2);color:rgba(255,100,100,0.7);cursor:pointer;font-size:11px;padding:3px 8px;border-radius:6px;">✕</button>
+            </div>
             <!-- Ввод -->
-            <div style="padding:12px 16px;border-top:1px solid rgba(255,255,255,0.06);display:flex;gap:10px;align-items:flex-end;">
-                <input id="dm-input" class="styled-input" placeholder="Сообщение..." style="flex:1;margin:0;"
-                    onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();app.sendDm();}">
-                <button onclick="app.sendDm()" style="padding:10px 16px;background:linear-gradient(135deg,#4fc3f7,#0288d1);border:none;border-radius:10px;color:#000;font-weight:700;font-family:var(--font-body);font-size:14px;cursor:pointer;flex-shrink:0;">↑</button>
+            <div style="padding:10px 12px 12px;border-top:1px solid rgba(255,255,255,0.05);">
+                <div style="display:flex;gap:8px;align-items:flex-end;background:rgba(255,255,255,0.03);border:1px solid rgba(79,195,247,0.12);border-radius:14px;padding:6px 6px 6px 14px;" onfocusin="this.style.borderColor='rgba(79,195,247,0.35)'" onfocusout="this.style.borderColor='rgba(79,195,247,0.12)'">
+                    <label for="dm-media-input" style="flex-shrink:0;width:30px;height:30px;border-radius:8px;background:rgba(79,195,247,0.08);border:1px solid rgba(79,195,247,0.12);display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(79,195,247,0.5);font-size:14px;transition:all 0.2s;margin-bottom:2px;" onmouseover="this.style.background='rgba(79,195,247,0.18)';this.style.color='#4fc3f7'" onmouseout="this.style.background='rgba(79,195,247,0.08)';this.style.color='rgba(79,195,247,0.5)'">📎
+                        <input id="dm-media-input" type="file" accept="image/*,image/gif,video/*,.pdf,.txt,.zip" style="display:none" onchange="app._dmMediaSelected(this)">
+                    </label>
+                    <textarea id="dm-input" placeholder="Сообщение..." rows="1" style="flex:1;background:transparent;border:none;color:rgba(220,240,255,0.9);padding:5px 0;font-size:13px;font-family:var(--font-body);resize:none;outline:none;line-height:1.5;max-height:90px;overflow-y:auto;scrollbar-width:thin;"
+                        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();app.sendDm();}"
+                        oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,90)+'px';app._dmSendTyping();"
+                    ></textarea>
+                    <button onclick="app.sendDm()" style="flex-shrink:0;width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,#4fc3f7,#0288d1);border:none;color:#000;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;margin-bottom:2px;font-weight:700;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform=''">↑</button>
+                </div>
             </div>
         </div>`;
-        overlay.onclick=e=>{ if(e.target===overlay){ overlay.remove(); clearInterval(this._dmPollTimer); } };
+        overlay.onclick=e=>{ if(e.target===overlay){ overlay.remove(); clearInterval(this._dmPollTimer); clearInterval(this._dmTypingDotInterval); } };
         document.body.appendChild(overlay);
 
         // Загружаем сообщения и помечаем прочитанными
@@ -2677,14 +2745,84 @@ const app = {
             .then(()=>this.renderFriends())
             .catch(()=>{});
 
-        // Поллинг новых сообщений каждые 2 сек
+        // Поллинг новых сообщений каждые 2 сек + typing
         clearInterval(this._dmPollTimer);
         this._dmPollTimer=setInterval(async()=>{
-            if(!document.getElementById('dm-overlay')){ clearInterval(this._dmPollTimer); return; }
+            if(!document.getElementById('dm-overlay')){ clearInterval(this._dmPollTimer); clearInterval(this._dmTypingDotInterval); return; }
             await this._dmLoadMessages(true);
-            // Помечаем прочитанными пока чат открыт
+            this._dmCheckTyping();
             fetch(this._API+'/dm/'+chatId+'/read',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId:this.userId})}).catch(()=>{});
         }, 2000);
+    },
+
+    // ─── DM TYPING INDICATOR ───
+    _dmTypingTimeout: null,
+    _dmTypingDotInterval: null,
+
+    _dmSendTyping(){
+        if(!this._dmChatIdCurrent||!this._dmFriendId) return;
+        const key='citrus_typing_'+this._dmChatIdCurrent+'_'+this.userId;
+        try{ localStorage.setItem(key,String(Date.now()+3000)); }catch(e){}
+        clearTimeout(this._dmTypingTimeout);
+        this._dmTypingTimeout=setTimeout(()=>{ try{localStorage.removeItem(key);}catch(e){} },3000);
+    },
+
+    _dmCheckTyping(){
+        if(!this._dmChatIdCurrent||!this._dmFriendId) return;
+        const key='citrus_typing_'+this._dmChatIdCurrent+'_'+this._dmFriendId;
+        let until=0;
+        try{ until=parseInt(localStorage.getItem(key)||'0'); }catch(e){}
+        const row=document.getElementById('dm-typing-row');
+        if(!row) return;
+        if(Date.now()<until){
+            row.style.display='block';
+            if(!this._dmTypingDotInterval){
+                let d=0;
+                this._dmTypingDotInterval=setInterval(()=>{
+                    d=(d%3)+1;
+                    const r2=document.getElementById('dm-typing-row');
+                    if(r2) r2.textContent=this._dmFriendName+' печатает'+'.'.repeat(d);
+                    else { clearInterval(this._dmTypingDotInterval); this._dmTypingDotInterval=null; }
+                },500);
+            }
+            if(!row.textContent) row.textContent=this._dmFriendName+' печатает.';
+        } else {
+            row.style.display='none';
+            if(this._dmTypingDotInterval){ clearInterval(this._dmTypingDotInterval); this._dmTypingDotInterval=null; }
+        }
+    },
+
+    // ─── DM MEDIA ───
+    _dmMediaFile: null,
+
+    _dmMediaSelected(input){
+        const file=input.files&&input.files[0];
+        if(!file) return;
+        this._dmMediaFile=file;
+        const preview=document.getElementById('dm-media-preview');
+        const thumb=document.getElementById('dm-media-thumb');
+        const nameEl=document.getElementById('dm-media-name');
+        if(preview) preview.style.display='flex';
+        if(nameEl) nameEl.textContent=file.name;
+        if(thumb){
+            if(file.type.startsWith('image/')){
+                const url=URL.createObjectURL(file);
+                thumb.innerHTML=`<img src="${url}" style="width:100%;height:100%;object-fit:cover;border-radius:6px;">`;
+            } else {
+                const icons={'application/pdf':'📄','text/plain':'📝','application/zip':'🗜️','video/mp4':'🎥'};
+                thumb.textContent=icons[file.type]||'📎';
+            }
+        }
+    },
+
+    _dmClearMedia(){
+        this._dmMediaFile=null;
+        const preview=document.getElementById('dm-media-preview');
+        const inp=document.getElementById('dm-media-input');
+        const thumb=document.getElementById('dm-media-thumb');
+        if(preview) preview.style.display='none';
+        if(thumb) thumb.innerHTML='';
+        if(inp) inp.value='';
     },
 
     async _dmLoadMessages(silent=false){
@@ -2732,15 +2870,45 @@ const app = {
     async sendDm(){
         const input=document.getElementById('dm-input');
         const text=(input?.value||'').trim();
-        if(!text||!this._dmChatIdCurrent) return;
-        input.value='';
+        const hasMedia=!!this._dmMediaFile;
+        if(!text&&!hasMedia) return;
+        if(!this._dmChatIdCurrent) return;
+        if(input) input.value='';
+        input.style.height='auto';
+        // Сбрасываем typing
+        clearTimeout(this._dmTypingTimeout);
+        const key='citrus_typing_'+this._dmChatIdCurrent+'_'+this.userId;
+        try{localStorage.removeItem(key);}catch(e){}
+
         try{
-            await fetch(this._API+'/dm/'+this._dmChatIdCurrent,{
-                method:'POST',headers:{'Content-Type':'application/json'},
-                body:JSON.stringify({from:this.userId, fromName:this.username, text})
-            });
+            // Если есть медиа — конвертируем в base64 и шлём
+            if(hasMedia){
+                const file=this._dmMediaFile;
+                const isImage=file.type.startsWith('image/');
+                const b64=await new Promise((res,rej)=>{
+                    const r=new FileReader();
+                    r.onload=()=>res(r.result);
+                    r.onerror=rej;
+                    r.readAsDataURL(file);
+                });
+                const mediaMsg={
+                    from:this.userId, fromName:this.username,
+                    text:text||'',
+                    media:{ type:file.type, name:file.name, size:file.size, data:b64, isImage }
+                };
+                await fetch(this._API+'/dm/'+this._dmChatIdCurrent,{
+                    method:'POST',headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify(mediaMsg)
+                });
+                this._dmClearMedia();
+            } else {
+                await fetch(this._API+'/dm/'+this._dmChatIdCurrent,{
+                    method:'POST',headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({from:this.userId, fromName:this.username, text})
+                });
+            }
             await this._dmLoadMessages();
-        }catch(e){ input.value=text; this.showNotif('❌','Ошибка','Нет связи'); }
+        }catch(e){ if(input) input.value=text; this.showNotif('❌','Ошибка','Нет связи'); }
     },
 
     async _checkDmUnread(){
@@ -3293,6 +3461,33 @@ const app = {
         });
         const cnt=this.friendRequests.length,b=document.getElementById('fr-badge');
         b.classList.toggle('hidden',cnt===0);if(cnt>0)b.innerText=cnt;
+        // Обновляем онлайн-чип в хедере
+        this._updateOnlineChip();
+    },
+
+    // Обновляем онлайн-индикатор в хедере
+    _updateOnlineChip(){
+        const chip = document.getElementById('global-online-chip');
+        const countEl = document.getElementById('online-count-chip');
+        const dot = document.getElementById('my-online-dot');
+        if(!chip) return;
+        const totalOnline = (this._cachedOnline||[]).length + 1; // +1 это ты
+        if(countEl) countEl.textContent = totalOnline > 1 ? `${totalOnline} онлайн` : 'онлайн';
+        if(dot){
+            dot.style.background = '#00FF94';
+            dot.style.boxShadow = '0 0 8px #00FF94';
+        }
+        chip.title = `Ты онлайн · Всего игроков: ${totalOnline}`;
+    },
+
+    // Показываем офлайн-статус (вызывается при потере связи или выходе)
+    _setOfflineStatus(){
+        const chip = document.getElementById('global-online-chip');
+        const countEl = document.getElementById('online-count-chip');
+        const dot = document.getElementById('my-online-dot');
+        if(dot){ dot.style.background='#FF4545'; dot.style.boxShadow='0 0 8px #FF4545'; }
+        if(countEl) countEl.textContent = 'офлайн';
+        if(chip){ chip.style.borderColor='rgba(255,69,69,0.18)'; chip.style.color='rgba(255,100,100,0.8)'; }
     },
 
     // ── AUTH
@@ -5707,6 +5902,8 @@ const app = {
                 if(now-(this._onlineMap[id].ts||0)>3*60*1000)delete this._onlineMap[id];
         }
         this._cachedOnline=Object.values(this._onlineMap||{});
+        // Обновляем чип онлайн в хедере
+        this._updateOnlineChip();
         return this._cachedOnline.filter(p=>String(p.id)!==String(this.userId));
     },
 
