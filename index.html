@@ -10960,7 +10960,7 @@ const app = {
         } catch(e){
             if(loadDiv){
                 const el = loadDiv.querySelector('.ai-msg-content');
-                if(el){ el.textContent = '❌ Ошибка соединения. Попробуй снова.'; el.style.color='rgba(255,100,100,0.8)'; }
+                if(el){ el.textContent = '❌ Ошибка соединения с сервером. Проверь что GROQ_KEY добавлен на Render.'; el.style.color='rgba(255,100,100,0.8)'; }
             }
         }
         const chat = document.getElementById('ai-chat');
