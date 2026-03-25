@@ -2063,6 +2063,7 @@ const SHOP_ITEMS = [
     {id:'hair_short',  name:'Короткие Волосы',     icon:'💇',  price:120  },
     {id:'hair_long',   name:'Длинные Волосы',      icon:'👩',  price:180  },
     {id:'hair_spiky',  name:'Дыбом Волосы',        icon:'⚡',  price:250  },
+    {id:'hair_emo',    name:'Нефорские Волосы',    icon:'🖤',  price:320  },
     {id:'macaroni',    name:'Макарошки',            icon:'🍝',  price:10000},
     {id:'tvhead',      name:'Голова-Телевизор',     icon:'📺',  price:5000 },
 
@@ -4325,7 +4326,7 @@ const app = {
         if(prize.coins) this.balance+=prize.coins;
         if(prize.item&&!this.inventory.includes(prize.item)) this.inventory.push(prize.item);
         if(prize.multi) prize.multi.forEach(i=>{if(!this.inventory.includes(i))this.inventory.push(i);});
-        if(prize.all){const allItems=['hat','glasses','crown','wings','sword','mask','cape','headphones','medal','flame','ice','star','rainbow','robot','alien','gem','shield','bow','devil','halo','hair_short','hair_long','hair_spiky','detective','santa','wizard','party','macaroni','tvhead'];allItems.forEach(i=>{if(!this.inventory.includes(i))this.inventory.push(i);});}
+        if(prize.all){const allItems=['hat','glasses','crown','wings','sword','mask','cape','headphones','medal','flame','ice','star','rainbow','robot','alien','gem','shield','bow','devil','halo','hair_short','hair_long','hair_spiky','hair_emo','detective','santa','wizard','party','macaroni','tvhead'];allItems.forEach(i=>{if(!this.inventory.includes(i))this.inventory.push(i);});}
         this.saveData();
         this.updateBalance();
 
@@ -6627,21 +6628,116 @@ const app = {
         if(inv.includes('flame')){const fl=new THREE.Mesh(new THREE.TorusGeometry(0.35,0.06,8,20),new THREE.MeshStandardMaterial({color:0xFF4400,emissive:0xFF2200,emissiveIntensity:1.5}));fl.position.set(0,0.55,0);headGroup.add(fl);}
         if(inv.includes('halo')){const hl=new THREE.Mesh(new THREE.TorusGeometry(0.26,0.04,8,24),new THREE.MeshStandardMaterial({color:0xFFDD44,emissive:0xFFBB00,emissiveIntensity:1.5,metalness:0.6}));hl.position.set(0,0.55,0);hl.rotation.x=Math.PI/6;headGroup.add(hl);}
         if(inv.includes('hair_short')){
-            const hm=new THREE.MeshStandardMaterial({color:0x8B4513,roughness:0.8});
-            const hair=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.15,0.62),hm);
-            hair.position.set(0,0.35,0);headGroup.add(hair);
+            // Короткие каштановые волосы — детализированная шапка с чёлкой и боковыми прядями
+            const hm=new THREE.MeshStandardMaterial({color:0x6B3310,roughness:0.85,metalness:0.0});
+            // Основная шапка волос
+            const cap=new THREE.Mesh(new THREE.BoxGeometry(0.65,0.18,0.65),hm);
+            cap.position.set(0,0.36,0);headGroup.add(cap);
+            // Чёлка спереди (тонкая, вровень с лицом)
+            const bang=new THREE.Mesh(new THREE.BoxGeometry(0.58,0.10,0.07),hm);
+            bang.position.set(0,0.26,0.265);headGroup.add(bang);
+            // Боковые виски
+            [-0.31,0.31].forEach(x=>{
+                const temp=new THREE.Mesh(new THREE.BoxGeometry(0.10,0.30,0.30),hm);
+                temp.position.set(x,0.14,0.05);headGroup.add(temp);
+            });
+            // Затылок — округлость
+            const back=new THREE.Mesh(new THREE.BoxGeometry(0.60,0.22,0.18),hm);
+            back.position.set(0,0.28,-0.25);headGroup.add(back);
         }
         if(inv.includes('hair_long')){
-            const hm=new THREE.MeshStandardMaterial({color:0x4a2800,roughness:0.8});
-            const top=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.12,0.62),hm);
-            top.position.set(0,0.35,0);headGroup.add(top);
-            const back=new THREE.Mesh(new THREE.BoxGeometry(0.58,0.9,0.12),hm);
-            back.position.set(0,-0.15,-0.3);headGroup.add(back);
-            [-0.25,0.25].forEach(x=>{const side=new THREE.Mesh(new THREE.BoxGeometry(0.12,0.7,0.2),hm);side.position.set(x,-0.1,0);headGroup.add(side);});
+            // Длинные тёмные волосы — детализированные с прядями
+            const hm=new THREE.MeshStandardMaterial({color:0x2a1400,roughness:0.9,metalness:0.0});
+            const hmSheen=new THREE.MeshStandardMaterial({color:0x3d1e08,roughness:0.7,metalness:0.05});
+            // Верхняя шапка
+            const top=new THREE.Mesh(new THREE.BoxGeometry(0.65,0.14,0.65),hm);
+            top.position.set(0,0.36,0);headGroup.add(top);
+            // Чёлка (тонкая, вровень с лицом)
+            const bang=new THREE.Mesh(new THREE.BoxGeometry(0.60,0.11,0.07),hm);
+            bang.position.set(0,0.25,0.265);headGroup.add(bang);
+            // Длинный водопад сзади
+            const back=new THREE.Mesh(new THREE.BoxGeometry(0.56,1.10,0.14),hm);
+            back.position.set(0,-0.25,-0.30);headGroup.add(back);
+            // Боковые длинные пряди (левая и правая)
+            [-0.27,0.27].forEach(x=>{
+                const strand=new THREE.Mesh(new THREE.BoxGeometry(0.14,0.90,0.22),hm);
+                strand.position.set(x,-0.20,0.02);headGroup.add(strand);
+                // Тонкий блик на пряди
+                const shine=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.70,0.05),hmSheen);
+                shine.position.set(x*0.6,-0.18,0.12);headGroup.add(shine);
+            });
+            // Концы прядей — чуть заужены
+            const tipL=new THREE.Mesh(new THREE.BoxGeometry(0.13,0.18,0.19),hm);
+            tipL.position.set(-0.27,-0.72,0.02);headGroup.add(tipL);
+            const tipR=tipL.clone();tipR.position.set(0.27,-0.72,0.02);headGroup.add(tipR);
         }
         if(inv.includes('hair_spiky')){
-            const hm=new THREE.MeshStandardMaterial({color:0xFFD700,roughness:0.5,emissive:0xCC8800,emissiveIntensity:0.3});
-            [-0.2,0,0.2].forEach((x,i)=>{const spike=new THREE.Mesh(new THREE.ConeGeometry(0.07,0.35,6),hm);spike.position.set(x,0.52,i===1?0.05:0);spike.rotation.z=x*1.5;headGroup.add(spike);});
+            // Взъерошенные золотые волосы — много шипов с градиентом
+            const hmBase=new THREE.MeshStandardMaterial({color:0xB8860B,roughness:0.6,metalness:0.1});
+            const hmTip=new THREE.MeshStandardMaterial({color:0xFFE033,roughness:0.4,emissive:0xDD9900,emissiveIntensity:0.4,metalness:0.1});
+            // Основа волос
+            const base=new THREE.Mesh(new THREE.BoxGeometry(0.63,0.14,0.63),hmBase);
+            base.position.set(0,0.35,0);headGroup.add(base);
+            // Шипы — 7 штук в разных позициях и углах
+            const spikeData=[
+                {x:-0.20,z: 0.00,ry:-0.6,rz:-0.7},{x:-0.10,z: 0.08,ry:0.0,rz:-0.35},
+                {x: 0.00,z: 0.05,ry:0.0,rz: 0.0},{x: 0.10,z: 0.08,ry:0.0,rz: 0.35},
+                {x: 0.20,z: 0.00,ry: 0.6,rz: 0.7},{x:-0.12,z:-0.10,ry:0.3,rz:-0.5},
+                {x: 0.12,z:-0.10,ry:-0.3,rz: 0.5}
+            ];
+            spikeData.forEach(d=>{
+                const spike=new THREE.Mesh(new THREE.ConeGeometry(0.065,0.42,6),hmTip);
+                spike.position.set(d.x,0.60,d.z);
+                spike.rotation.set(0,d.ry,d.rz);
+                headGroup.add(spike);
+            });
+            // Чёлка с небольшим шипом
+            const bangSpike=new THREE.Mesh(new THREE.ConeGeometry(0.055,0.28,6),hmTip);
+            bangSpike.position.set(0,0.45,0.25);bangSpike.rotation.x=-0.55;headGroup.add(bangSpike);
+        }
+        if(inv.includes('hair_emo')){
+            // Голова Box(0.6,0.6,0.6): фронт Z=+0.3, бока X=±0.3, верх Y=+0.3
+            // Глаза: левый (X=-0.15, Y=+0.05), правый (X=+0.15, Y=+0.05)
+            const hm     = new THREE.MeshStandardMaterial({color:0x050505, roughness:0.9, metalness:0.0});
+            const hmBlue = new THREE.MeshStandardMaterial({color:0x080810, roughness:0.85, metalness:0.0});
+
+            // ШАПКА
+            const crown = new THREE.Mesh(new THREE.BoxGeometry(0.74, 0.18, 0.74), hmBlue);
+            crown.position.set(0, 0.36, 0); headGroup.add(crown);
+
+            // БОКА — полные
+            const sideL = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.52, 0.66), hm);
+            sideL.position.set(-0.34, 0.05, 0); headGroup.add(sideL);
+            const sideR = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.52, 0.66), hm);
+            sideR.position.set( 0.34, 0.05, 0); headGroup.add(sideR);
+
+            // ЗАТЫЛОК
+            const backMain = new THREE.Mesh(new THREE.BoxGeometry(0.68, 0.44, 0.16), hmBlue);
+            backMain.position.set(0, 0.11, -0.32); headGroup.add(backMain);
+            const backLow  = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.22, 0.13), hmBlue);
+            backLow.position.set(0, -0.08, -0.31); headGroup.add(backLow);
+
+            // ЧЁЛКА — вертикальная плашка на левой половине лица
+            // Закрывает левый глаз (X=-0.15, Y=+0.05)
+            // Ширина по X: от -0.30 до +0.05 → центр X=-0.12, ширина=0.36
+            // Высота по Y: от +0.28 до -0.10 → центр Y=+0.09, высота=0.38
+            // Выступает перед лицом: Z=0.34 (лицо Z=0.30, чёлка выдаётся на 0.04)
+            const bang = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.38, 0.08), hmBlue);
+            bang.position.set(-0.12, 0.09, 0.34);
+            headGroup.add(bang);
+
+            // ШИПЫ — основание на верхней грани шапки Y=0.45
+            [{x:-0.22,z:-0.06,rz: 0.50,h:0.22},
+             {x:-0.08,z: 0.07,rz: 0.18,h:0.20},
+             {x: 0.05,z: 0.09,rz:-0.08,h:0.24},
+             {x: 0.18,z: 0.02,rz:-0.26,h:0.20},
+             {x: 0.26,z:-0.09,rz:-0.50,h:0.18},
+             {x:-0.28,z:-0.13,rz: 0.65,h:0.16},
+            ].forEach(d=>{
+                const tuft = new THREE.Mesh(new THREE.ConeGeometry(0.050, d.h, 5), hmBlue);
+                tuft.position.set(d.x, 0.45 + d.h/2, d.z);
+                tuft.rotation.z = d.rz; headGroup.add(tuft);
+            });
         }
         if(inv.includes('macaroni')){
             const pm=new THREE.MeshStandardMaterial({color:0xF4C430,roughness:0.7});
@@ -7365,21 +7461,81 @@ const app = {
             const hlight=new THREE.PointLight(0xFFDD44,0.5,1.5);hlight.position.set(0,0.6,0);headGroup.add(hlight);
         }
         if(this.inventory.includes('hair_short')){
-            const hm=new THREE.MeshStandardMaterial({color:0x8B4513,roughness:0.8});
-            const hair=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.15,0.62),hm);
-            hair.position.set(0,0.35,0);headGroup.add(hair);
+            // Короткие каштановые волосы — детализированная шапка с чёлкой и боковыми прядями
+            const hm=new THREE.MeshStandardMaterial({color:0x6B3310,roughness:0.85,metalness:0.0});
+            const cap=new THREE.Mesh(new THREE.BoxGeometry(0.65,0.18,0.65),hm);
+            cap.position.set(0,0.36,0);headGroup.add(cap);
+            const bang=new THREE.Mesh(new THREE.BoxGeometry(0.58,0.10,0.07),hm);
+            bang.position.set(0,0.26,0.265);headGroup.add(bang);
+            [-0.31,0.31].forEach(x=>{
+                const temp=new THREE.Mesh(new THREE.BoxGeometry(0.10,0.30,0.30),hm);
+                temp.position.set(x,0.14,0.05);headGroup.add(temp);
+            });
+            const back=new THREE.Mesh(new THREE.BoxGeometry(0.60,0.22,0.18),hm);
+            back.position.set(0,0.28,-0.25);headGroup.add(back);
         }
         if(this.inventory.includes('hair_long')){
-            const hm=new THREE.MeshStandardMaterial({color:0x4a2800,roughness:0.8});
-            const top=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.12,0.62),hm);
-            top.position.set(0,0.35,0);headGroup.add(top);
-            const back=new THREE.Mesh(new THREE.BoxGeometry(0.58,0.9,0.12),hm);
-            back.position.set(0,-0.15,-0.3);headGroup.add(back);
-            [-0.25,0.25].forEach(x=>{const side=new THREE.Mesh(new THREE.BoxGeometry(0.12,0.7,0.2),hm);side.position.set(x,-0.1,0);headGroup.add(side);});
+            // Длинные тёмные волосы — детализированные с прядями и бликом
+            const hm=new THREE.MeshStandardMaterial({color:0x2a1400,roughness:0.9,metalness:0.0});
+            const hmSheen=new THREE.MeshStandardMaterial({color:0x3d1e08,roughness:0.7,metalness:0.05});
+            const top=new THREE.Mesh(new THREE.BoxGeometry(0.65,0.14,0.65),hm);
+            top.position.set(0,0.36,0);headGroup.add(top);
+            const bang=new THREE.Mesh(new THREE.BoxGeometry(0.60,0.11,0.07),hm);
+            bang.position.set(0,0.25,0.265);headGroup.add(bang);
+            const back=new THREE.Mesh(new THREE.BoxGeometry(0.56,1.10,0.14),hm);
+            back.position.set(0,-0.25,-0.30);headGroup.add(back);
+            [-0.27,0.27].forEach(x=>{
+                const strand=new THREE.Mesh(new THREE.BoxGeometry(0.14,0.90,0.22),hm);
+                strand.position.set(x,-0.20,0.02);headGroup.add(strand);
+                const shine=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.70,0.05),hmSheen);
+                shine.position.set(x*0.6,-0.18,0.12);headGroup.add(shine);
+            });
+            const tipL=new THREE.Mesh(new THREE.BoxGeometry(0.13,0.18,0.19),hm);
+            tipL.position.set(-0.27,-0.72,0.02);headGroup.add(tipL);
+            const tipR=tipL.clone();tipR.position.set(0.27,-0.72,0.02);headGroup.add(tipR);
         }
         if(this.inventory.includes('hair_spiky')){
-            const hm=new THREE.MeshStandardMaterial({color:0xFFD700,roughness:0.5,emissive:0xCC8800,emissiveIntensity:0.3});
-            [-0.2,0,0.2].forEach((x,i)=>{const spike=new THREE.Mesh(new THREE.ConeGeometry(0.07,0.35,6),hm);spike.position.set(x,0.52,i===1?0.05:0);spike.rotation.z=x*1.5;headGroup.add(spike);});
+            // Взъерошенные золотые волосы — много шипов с бликом
+            const hmBase=new THREE.MeshStandardMaterial({color:0xB8860B,roughness:0.6,metalness:0.1});
+            const hmTip=new THREE.MeshStandardMaterial({color:0xFFE033,roughness:0.4,emissive:0xDD9900,emissiveIntensity:0.4,metalness:0.1});
+            const base=new THREE.Mesh(new THREE.BoxGeometry(0.63,0.14,0.63),hmBase);
+            base.position.set(0,0.35,0);headGroup.add(base);
+            const spikeData=[
+                {x:-0.20,z: 0.00,ry:-0.6,rz:-0.7},{x:-0.10,z: 0.08,ry:0.0,rz:-0.35},
+                {x: 0.00,z: 0.05,ry:0.0,rz: 0.0},{x: 0.10,z: 0.08,ry:0.0,rz: 0.35},
+                {x: 0.20,z: 0.00,ry: 0.6,rz: 0.7},{x:-0.12,z:-0.10,ry:0.3,rz:-0.5},
+                {x: 0.12,z:-0.10,ry:-0.3,rz: 0.5}
+            ];
+            spikeData.forEach(d=>{
+                const spike=new THREE.Mesh(new THREE.ConeGeometry(0.065,0.42,6),hmTip);
+                spike.position.set(d.x,0.60,d.z);spike.rotation.set(0,d.ry,d.rz);headGroup.add(spike);
+            });
+            const bangSpike=new THREE.Mesh(new THREE.ConeGeometry(0.055,0.28,6),hmTip);
+            bangSpike.position.set(0,0.45,0.25);bangSpike.rotation.x=-0.55;headGroup.add(bangSpike);
+        }
+        if(this.inventory.includes('hair_emo')){
+            const hm     = new THREE.MeshStandardMaterial({color:0x050505, roughness:0.9, metalness:0.0});
+            const hmBlue = new THREE.MeshStandardMaterial({color:0x080810, roughness:0.85, metalness:0.0});
+            const crown = new THREE.Mesh(new THREE.BoxGeometry(0.74, 0.18, 0.74), hmBlue);
+            crown.position.set(0, 0.36, 0); headGroup.add(crown);
+            const sideL = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.52, 0.66), hm);
+            sideL.position.set(-0.34, 0.05, 0); headGroup.add(sideL);
+            const sideR = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.52, 0.66), hm);
+            sideR.position.set( 0.34, 0.05, 0); headGroup.add(sideR);
+            const backMain = new THREE.Mesh(new THREE.BoxGeometry(0.68, 0.44, 0.16), hmBlue);
+            backMain.position.set(0, 0.11, -0.32); headGroup.add(backMain);
+            const backLow  = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.22, 0.13), hmBlue);
+            backLow.position.set(0, -0.08, -0.31); headGroup.add(backLow);
+            // Чёлка — вертикальная плашка, левая половина лица, без rotation
+            const bang = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.38, 0.08), hmBlue);
+            bang.position.set(-0.12, 0.09, 0.34); headGroup.add(bang);
+            [{x:-0.22,z:-0.06,rz:0.50,h:0.22},{x:-0.08,z:0.07,rz:0.18,h:0.20},
+             {x:0.05,z:0.09,rz:-0.08,h:0.24},{x:0.18,z:0.02,rz:-0.26,h:0.20},
+             {x:0.26,z:-0.09,rz:-0.50,h:0.18},{x:-0.28,z:-0.13,rz:0.65,h:0.16}
+            ].forEach(d=>{
+                const tuft = new THREE.Mesh(new THREE.ConeGeometry(0.050, d.h, 5), hmBlue);
+                tuft.position.set(d.x, 0.45+d.h/2, d.z); tuft.rotation.z = d.rz; headGroup.add(tuft);
+            });
         }
         if(this.inventory.includes('macaroni')){
             const pm=new THREE.MeshStandardMaterial({color:0xF4C430,roughness:0.7});
