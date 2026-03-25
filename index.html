@@ -6531,7 +6531,7 @@ const app = {
         const hasClothing = inv.includes('jacket_denim')||inv.includes('hoodie_fire')||inv.includes('armor_dark');
         const shirtColor = inv.includes('armor_dark') ? 0x1a1a2e :
                            inv.includes('jacket_denim') ? 0x3a5f8a :
-                           inv.includes('hoodie_fire') ? 0xCC2200 : c;
+                           inv.includes('hoodie_fire') ? 0xCC2200 : 0xff5500;
         const matShirt = new THREE.MeshStandardMaterial({color:shirtColor, roughness:0.7});
         const matSkin  = new THREE.MeshStandardMaterial({color:0xffcc99, roughness:0.4});
         const matPants = new THREE.MeshStandardMaterial({color:0x111133, roughness:0.8});
@@ -6543,39 +6543,16 @@ const app = {
         const headGroup = new THREE.Group();
         headGroup.position.set(0,0.73,0); torso.add(headGroup);
         headGroup.add(new THREE.Mesh(new THREE.BoxGeometry(0.6,0.6,0.6), matSkin));
-        // Лицо — единый canvas 128x128, перерисовывается при анимации
-        const faceCanvas=document.createElement('canvas'); faceCanvas.width=128; faceCanvas.height=128;
-        const faceCtx=faceCanvas.getContext('2d');
-        const faceTex=new THREE.CanvasTexture(faceCanvas);
-        const _drawFace=(eyeOpen=1.0, mouthState='smile')=>{
-            faceCtx.clearRect(0,0,128,128);
-            faceCtx.fillStyle='rgba(0,0,0,0)';
-            // Глаза
-            faceCtx.fillStyle='#111';
-            [-38,38].forEach(ox=>{
-                const ey=52, ex=64+ox;
-                const eh=Math.max(1, 13*eyeOpen);
-                faceCtx.beginPath(); faceCtx.ellipse(ex,ey,10,eh,0,0,Math.PI*2); faceCtx.fill();
-            });
-            // Рот
-            faceCtx.strokeStyle='#111'; faceCtx.lineWidth=5; faceCtx.lineCap='round';
-            if(mouthState==='smile'){
-                faceCtx.beginPath(); faceCtx.arc(64,82,18,0.2,Math.PI-0.2); faceCtx.stroke();
-            } else if(mouthState==='open'){
-                faceCtx.fillStyle='#111';
-                faceCtx.beginPath(); faceCtx.ellipse(64,86,13,9,0,0,Math.PI*2); faceCtx.fill();
-            } else if(mouthState==='serious'){
-                faceCtx.beginPath(); faceCtx.moveTo(46,86); faceCtx.lineTo(82,86); faceCtx.stroke();
-            }
-            faceTex.needsUpdate=true;
-        };
-        _drawFace(1.0,'smile');
-        const faceMesh=new THREE.Mesh(
-            new THREE.PlaneGeometry(0.58,0.58),
-            new THREE.MeshBasicMaterial({map:faceTex,transparent:true})
-        );
-        faceMesh.position.set(0,0,0.301); headGroup.add(faceMesh);
-        if(false){this._drawFace=_drawFace;this._faceBlinkOpen=1.0;this._faceBlinkTimer=0;this._faceBlinkState='open';this._lastFaceState='smile';}
+        // Лицо — такое же как у своего персонажа (два глаза + улыбка)
+        const md2=new THREE.MeshBasicMaterial({color:0x000000});
+        const eL2=new THREE.Mesh(new THREE.PlaneGeometry(0.1,0.1),md2); eL2.position.set(-0.15,0.05,0.301); headGroup.add(eL2);
+        const eR2=new THREE.Mesh(new THREE.PlaneGeometry(0.1,0.1),md2); eR2.position.set(0.15,0.05,0.301);  headGroup.add(eR2);
+        const smC2=document.createElement('canvas'); smC2.width=64; smC2.height=40;
+        const smX2=smC2.getContext('2d'); smX2.strokeStyle='#000'; smX2.lineWidth=6; smX2.lineCap='round';
+        smX2.beginPath(); smX2.arc(32,6,20,0,Math.PI); smX2.stroke();
+        const smT2=new THREE.CanvasTexture(smC2);
+        const mo2=new THREE.Mesh(new THREE.PlaneGeometry(0.28,0.14),new THREE.MeshBasicMaterial({map:smT2,transparent:true}));
+        mo2.position.set(0,-0.17,0.301); headGroup.add(mo2);
         // Руки с ригом
         const mkArm2=(x,mat)=>{
             const gg=new THREE.Group(); gg.position.set(x,0.45,0);
