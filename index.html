@@ -114,6 +114,7 @@
         }
 
         .hidden { display: none !important; }
+        #global-online-chip { display: none !important; }
 
         button {
             cursor: pointer; border: none; outline: none;
@@ -964,10 +965,10 @@
         <div class="header-divider"></div>
         <div class="header-right">
             <span id="display-name" class="header-username" style="display:flex;align-items:center;gap:6px;"></span>
-            <!-- Онлайн-индикатор -->
-            <div id="global-online-chip" style="display:flex;align-items:center;gap:5px;background:rgba(0,255,148,0.06);border:1px solid rgba(0,255,148,0.18);border-radius:50px;padding:4px 10px;font-family:var(--font-mono);font-size:11px;color:rgba(0,255,148,0.8);" title="Ты онлайн">
-                <div id="my-online-dot" style="width:7px;height:7px;border-radius:50%;background:#00FF94;box-shadow:0 0 8px #00FF94;animation:pulseDot 2s ease-in-out infinite;"></div>
-                <span id="online-count-chip">онлайн</span>
+            <!-- Онлайн-индикатор скрыт -->
+            <div id="global-online-chip" style="display:none!important;">
+                <div id="my-online-dot"></div>
+                <span id="online-count-chip"></span>
             </div>
             <div class="balance-chip">🍊 <span id="balance-val">0</span></div>
             <!-- Уровень -->
@@ -3466,29 +3467,10 @@ const app = {
     },
 
     // Обновляем онлайн-индикатор в хедере
-    _updateOnlineChip(){
-        const chip = document.getElementById('global-online-chip');
-        const countEl = document.getElementById('online-count-chip');
-        const dot = document.getElementById('my-online-dot');
-        if(!chip) return;
-        const totalOnline = (this._cachedOnline||[]).length + 1; // +1 это ты
-        if(countEl) countEl.textContent = totalOnline > 1 ? `${totalOnline} онлайн` : 'онлайн';
-        if(dot){
-            dot.style.background = '#00FF94';
-            dot.style.boxShadow = '0 0 8px #00FF94';
-        }
-        chip.title = `Ты онлайн · Всего игроков: ${totalOnline}`;
-    },
+    _updateOnlineChip(){ /* онлайн-чип скрыт */ },
 
     // Показываем офлайн-статус (вызывается при потере связи или выходе)
-    _setOfflineStatus(){
-        const chip = document.getElementById('global-online-chip');
-        const countEl = document.getElementById('online-count-chip');
-        const dot = document.getElementById('my-online-dot');
-        if(dot){ dot.style.background='#FF4545'; dot.style.boxShadow='0 0 8px #FF4545'; }
-        if(countEl) countEl.textContent = 'офлайн';
-        if(chip){ chip.style.borderColor='rgba(255,69,69,0.18)'; chip.style.color='rgba(255,100,100,0.8)'; }
-    },
+    _setOfflineStatus(){ /* онлайн-чип скрыт */ },
 
     // ── AUTH
     switchAuthTab(tab){
@@ -4021,32 +4003,36 @@ const app = {
     _startHubTimeTracker(){
         if(this._hubTimeInterval) clearInterval(this._hubTimeInterval);
         this._hubTimeBuffer = 0;
-        // Каждую секунду — копим в буфер (считаем и в хабе, и в игровых мирах)
+        // Каждую секунду — копим в буфер (и в хабе, и в игре)
         this._hubTimeInterval = setInterval(()=>{
             this._hubTimeBuffer++;
             this._myHubTime = (this._myHubTime||0) + 1;
-            // Каждые 60 сек отправляем на сервер
-            if(this._hubTimeBuffer >= 60){
+            // Отправляем каждые 30 сек — не ждём 60
+            if(this._hubTimeBuffer >= 30){
                 this._flushHubTime();
             }
         }, 1000);
         // Отправить при закрытии вкладки
         window.addEventListener('beforeunload', ()=>this._flushHubTime());
+        // Запасной вариант — visibilitychange (когда сворачивают вкладку)
+        document.addEventListener('visibilitychange', ()=>{
+            if(document.visibilityState === 'hidden') this._flushHubTime();
+        });
     },
 
     _flushHubTime(){
         const sec = this._hubTimeBuffer;
         if(!sec || !this.userId) return;
         this._hubTimeBuffer = 0;
-        // sendBeacon чтобы не терять данные при закрытии
         const url = this._API + '/hub-time/' + this.userId;
         const data = JSON.stringify({seconds: sec});
-        if(navigator.sendBeacon){
-            const blob = new Blob([data], {type:'application/json'});
-            navigator.sendBeacon(url, blob);
-        } else {
-            fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body:data, keepalive:true}).catch(()=>{});
-        }
+        // Пробуем fetch первым — он надёжнее на Render
+        fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body:data, keepalive:true}).catch(()=>{
+            // Запасной вариант — sendBeacon
+            if(navigator.sendBeacon){
+                navigator.sendBeacon(url, new Blob([data], {type:'application/json'}));
+            }
+        });
     },
 
     logout(){
