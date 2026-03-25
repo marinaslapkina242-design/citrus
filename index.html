@@ -964,10 +964,10 @@
         <div class="header-divider"></div>
         <div class="header-right">
             <span id="display-name" class="header-username" style="display:flex;align-items:center;gap:6px;"></span>
-            <!-- Онлайн-индикатор скрыт -->
-            <div id="global-online-chip" style="display:none;">
-                <div id="my-online-dot"></div>
-                <span id="online-count-chip"></span>
+            <!-- Онлайн-индикатор -->
+            <div id="global-online-chip" style="display:flex;align-items:center;gap:5px;background:rgba(0,255,148,0.06);border:1px solid rgba(0,255,148,0.18);border-radius:50px;padding:4px 10px;font-family:var(--font-mono);font-size:11px;color:rgba(0,255,148,0.8);" title="Ты онлайн">
+                <div id="my-online-dot" style="width:7px;height:7px;border-radius:50%;background:#00FF94;box-shadow:0 0 8px #00FF94;animation:pulseDot 2s ease-in-out infinite;"></div>
+                <span id="online-count-chip">онлайн</span>
             </div>
             <div class="balance-chip">🍊 <span id="balance-val">0</span></div>
             <!-- Уровень -->
@@ -3466,8 +3466,29 @@ const app = {
     },
 
     // Обновляем онлайн-индикатор в хедере
-    _updateOnlineChip(){ /* чип скрыт */ },
-    _setOfflineStatus(){ /* чип скрыт */ },
+    _updateOnlineChip(){
+        const chip = document.getElementById('global-online-chip');
+        const countEl = document.getElementById('online-count-chip');
+        const dot = document.getElementById('my-online-dot');
+        if(!chip) return;
+        const totalOnline = (this._cachedOnline||[]).length + 1; // +1 это ты
+        if(countEl) countEl.textContent = totalOnline > 1 ? `${totalOnline} онлайн` : 'онлайн';
+        if(dot){
+            dot.style.background = '#00FF94';
+            dot.style.boxShadow = '0 0 8px #00FF94';
+        }
+        chip.title = `Ты онлайн · Всего игроков: ${totalOnline}`;
+    },
+
+    // Показываем офлайн-статус (вызывается при потере связи или выходе)
+    _setOfflineStatus(){
+        const chip = document.getElementById('global-online-chip');
+        const countEl = document.getElementById('online-count-chip');
+        const dot = document.getElementById('my-online-dot');
+        if(dot){ dot.style.background='#FF4545'; dot.style.boxShadow='0 0 8px #FF4545'; }
+        if(countEl) countEl.textContent = 'офлайн';
+        if(chip){ chip.style.borderColor='rgba(255,69,69,0.18)'; chip.style.color='rgba(255,100,100,0.8)'; }
+    },
 
     // ── AUTH
     switchAuthTab(tab){
@@ -4000,9 +4021,8 @@ const app = {
     _startHubTimeTracker(){
         if(this._hubTimeInterval) clearInterval(this._hubTimeInterval);
         this._hubTimeBuffer = 0;
-        // Каждую секунду — копим в буфер
+        // Каждую секунду — копим в буфер (считаем и в хабе, и в игровых мирах)
         this._hubTimeInterval = setInterval(()=>{
-            if(this.mode === 'play') return; // в игре не считаем
             this._hubTimeBuffer++;
             this._myHubTime = (this._myHubTime||0) + 1;
             // Каждые 60 сек отправляем на сервер
@@ -5562,9 +5582,8 @@ const app = {
     removeItem(id){
         this.inventory = this.inventory.filter(i => i !== id);
         this.saveData();
-        if(this.playerGroup && this.scene){ this.scene.remove(this.playerGroup); }
-        this.playerGroup = this.buildCharacter(true);
-        if(this.scene) this.scene.add(this.playerGroup);
+        this.buildCharacter(true);
+        this.scene.add(this.playerGroup);
         const bv2=document.getElementById('balance-val'); if(bv2) bv2.textContent=this.balance;
         const il=document.getElementById('inventory-list');
         if(il){
@@ -11054,43 +11073,17 @@ const app = {
         if(inp) inp.value = '';
     },
 
-    _aiFormatText(text){
-        const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-        let out = text.replace(/```(\w*)\n?([\s\S]*?)```/g, function(_, lang, code){
-            const uid = 'cb_' + Math.random().toString(36).slice(2,9);
-            const label = lang || 'код';
-            return '<div style="margin:8px 0;border-radius:12px;overflow:hidden;border:1px solid rgba(0,229,255,0.18);background:#07050f;">'
-                 + '<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 12px;background:rgba(0,229,255,0.07);border-bottom:1px solid rgba(0,229,255,0.1);">'
-                 + '<span style="font-family:var(--font-mono);font-size:10px;color:rgba(0,229,255,0.5);letter-spacing:1px;">' + esc(label) + '</span>'
-                 + '<button onclick="(function(b){var p=document.getElementById(\'' + uid + '\');navigator.clipboard.writeText(p.innerText).then(function(){b.innerHTML=\'✅ Скопировано\';b.style.color=\'#00FF94\';setTimeout(function(){b.innerHTML=\'📋 Копировать\';b.style.color=\'rgba(0,229,255,0.7)\'},1800)}).catch(function(){})})(this)" style="background:rgba(0,229,255,0.08);border:1px solid rgba(0,229,255,0.2);color:rgba(0,229,255,0.7);border-radius:6px;padding:3px 10px;cursor:pointer;font-size:11px;font-family:var(--font-body);font-weight:600;">📋 Копировать</button>'
-                 + '</div>'
-                 + '<pre id="' + uid + '" style="margin:0;padding:12px 14px;font-family:var(--font-mono);font-size:12px;color:#a8ffb0;line-height:1.65;overflow-x:auto;white-space:pre;">' + esc(code.trimEnd()) + '</pre>'
-                 + '</div>';
-        });
-        out = out.replace(/`([^`\n]+)`/g, '<code style="background:rgba(0,229,255,0.09);border:1px solid rgba(0,229,255,0.18);border-radius:4px;padding:1px 6px;font-family:var(--font-mono);font-size:12px;color:#00E5FF;">$1</code>');
-        out = out.replace(/\*\*(.+?)\*\*/g, '<b style="color:rgba(255,255,255,0.95);">$1</b>');
-        out = out.replace(/\n/g, '<br>');
-        return out;
-    },
-
     _aiAddMessage(role, html, isLoading){
         const chat = document.getElementById('ai-chat');
         if(!chat) return null;
         const isUser = role === 'user';
         const div = document.createElement('div');
-        div.style.cssText = 'display:flex;gap:10px;align-items:flex-start;' + (isUser ? 'flex-direction:row-reverse;' : '');
-        const avatar = document.createElement('div');
-        avatar.style.cssText = 'flex-shrink:0;width:34px;height:34px;border-radius:50%;background:' + (isUser ? 'linear-gradient(135deg,#00E5FF,#0066FF)' : 'linear-gradient(135deg,#7B2FFF,#00E5FF)') + ';display:flex;align-items:center;justify-content:center;font-size:15px;';
-        avatar.textContent = isUser ? '👤' : '🤖';
-        const bubble = document.createElement('div');
-        bubble.style.cssText = 'background:' + (isUser ? 'rgba(0,102,255,0.12)' : 'rgba(123,47,255,0.1)') + ';border:1px solid ' + (isUser ? 'rgba(0,229,255,0.15)' : 'rgba(123,47,255,0.2)') + ';border-radius:' + (isUser ? '12px 12px 4px 12px' : '12px 12px 12px 4px') + ';padding:12px 14px;max-width:82%;min-width:0;';
-        const content = document.createElement('div');
-        content.className = 'ai-msg-content';
-        content.style.cssText = 'font-size:13px;color:rgba(220,240,255,0.88);font-family:var(--font-body);line-height:1.75;';
-        content.innerHTML = isLoading ? html : (isUser ? html.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>') : this._aiFormatText(html));
-        bubble.appendChild(content);
-        div.appendChild(avatar);
-        div.appendChild(bubble);
+        div.style.cssText = `display:flex;gap:10px;align-items:flex-start;${isUser?'flex-direction:row-reverse;':''}`;
+        div.innerHTML = `
+            <div style="flex-shrink:0;width:34px;height:34px;border-radius:50%;background:${isUser?'linear-gradient(135deg,#00E5FF,#0066FF)':'linear-gradient(135deg,#7B2FFF,#00E5FF)'};display:flex;align-items:center;justify-content:center;font-size:15px;">${isUser?'👤':'🤖'}</div>
+            <div style="background:${isUser?'rgba(0,102,255,0.12)':'rgba(123,47,255,0.1)'};border:1px solid ${isUser?'rgba(0,229,255,0.15)':'rgba(123,47,255,0.2)'};border-radius:${isUser?'12px 12px 4px 12px':'12px 12px 12px 4px'};padding:12px 14px;max-width:80%;">
+                <div class="ai-msg-content" style="font-size:13px;color:rgba(220,240,255,0.88);font-family:var(--font-body);line-height:1.75;white-space:pre-wrap;">${html}</div>
+            </div>`;
         chat.appendChild(div);
         chat.scrollTop = chat.scrollHeight;
         return div;
@@ -11158,12 +11151,12 @@ const app = {
             this._aiConversation.push({role:'assistant',content:replyText});
             if(loadDiv){
                 const el = loadDiv.querySelector('.ai-msg-content');
-                if(el) el.innerHTML = this._aiFormatText(replyText);
+                if(el) el.textContent = replyText;
             }
         } catch(e){
             if(loadDiv){
                 const el = loadDiv.querySelector('.ai-msg-content');
-                if(el){ el.innerHTML = '❌ Ошибка соединения с сервером.'; el.style.color='rgba(255,100,100,0.8)'; }
+                if(el){ el.textContent = '❌ Ошибка соединения с сервером. Проверь что GROQ_KEY добавлен на Render.'; el.style.color='rgba(255,100,100,0.8)'; }
             }
         }
         const chat = document.getElementById('ai-chat');
