@@ -5746,7 +5746,7 @@ const app = {
         // Движение других игроков — обрабатываем ДО фильтра self
         if(msg.type==='move') {
             if(String(msg.id)===String(this.userId)) return;
-            if(msg.map !== this.currentMap || this.mode!=='play') {
+            if(String(msg.map) !== String(this.currentMap) || this.mode!=='play') {
                 if(this._others && this._others[msg.id]) {
                     this.scene && this.scene.remove(this._others[msg.id]);
                     delete this._others[msg.id];
@@ -5908,6 +5908,7 @@ const app = {
 
     // После деплоя сервера замени URL ниже на свой
     _API: 'https://citrus-mail.onrender.com',
+    _WSAPI: 'https://citrus-1.onrender.com',
 
     // Отправить письмо на сервер
     async _post(toId, letter) {
@@ -6375,11 +6376,12 @@ const app = {
         if(this._gameWS) { try{this._gameWS.close();}catch(e){} this._gameWS=null; }
         if(this._gameWSReconnTimer){ clearTimeout(this._gameWSReconnTimer); this._gameWSReconnTimer=null; }
 
-        const wsUrl = this._API.replace('https://','wss://').replace('http://','ws://');
+        const wsUrl = (this._WSAPI||this._API).replace('https://','wss://').replace('http://','ws://');
         try {
             this._gameWS = new WebSocket(wsUrl);
             this._gameWS.onopen = () => {
                 this._gameWSAlive = true;
+                if(!this.currentMap || this.mode !== 'play') return;
                 this._gameWS.send(JSON.stringify({
                     type:'join', id:String(this.userId),
                     name:this.username, map:String(this.currentMap),
@@ -8539,7 +8541,7 @@ const app = {
                 for(const id in this._others){
                     const _o = this._others[id];
                     if(!_o) { delete this._others[id]; continue; } // guard
-                    if(now - (_o._lastSeen||0) > 3000){
+                    if(now - (_o._lastSeen||0) > 10000){
                         this.scene&&this.scene.remove(_o);
                         delete this._others[id];
                     }
@@ -9533,7 +9535,6 @@ const app = {
                     // Fallback на HTTP
                     try{ fetch(this._API+'/pos/'+this.userId, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(posData)}); }catch(e){}
                 }
-                this._wsSend(posData);
             }
 
             // ── АНИМАЦИИ ИГРОКА
