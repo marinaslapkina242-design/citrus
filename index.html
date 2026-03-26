@@ -5823,6 +5823,8 @@ const app = {
 
         // Движение других игроков — обрабатываем ДО фильтра self
         if(msg.type==='move') {
+            // Если прямой WS работает — move пакеты идут через него, MQTT игнорируем
+            if(this._gameWSAlive) return;
             if(String(msg.id)===String(this.userId)) return;
             if(String(msg.map) !== String(this.currentMap) || this.mode!=='play') {
                 if(this._others && this._others[msg.id]) {
