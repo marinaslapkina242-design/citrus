@@ -5668,9 +5668,7 @@ const app = {
         inp.value='';
         this._ingameChatAdd(this.currentMap,this.username,this._myColor,text);
         const msg={type:'igchat',map:String(this.currentMap),id:String(this.userId),name:this.username,color:this._myColor,text,ts:Date.now(),_ch:'citrus_v1',_from:String(this.userId)};
-        // Основной канал — прямой WS к серверу
         if(this._gameWS&&this._gameWS.readyState===1){ try{this._gameWS.send(JSON.stringify(msg));}catch(e){} }
-        // Дублируем через MQTT — гарантия доставки если gameWS нестабилен
         try{ this._mqttPublishJson(msg); }catch(e){}
         inp.focus();
     },
@@ -5824,7 +5822,7 @@ const app = {
 
         if(msg._ch!=='citrus_v1')return;
 
-        // Игровой чат — обрабатываем сразу (до фильтра self по _from)
+        // ── Игровой чат через MQTT
         if(msg.type==='igchat') {
             if(String(msg.id)!==String(this.userId))
                 this._ingameChatAdd(msg.map||this.currentMap, msg.name, msg.color, msg.text);
@@ -9757,7 +9755,7 @@ const app = {
             }
             // 🌸 Анимация монет и цветов 8 марта
             if(this.currentMap==='march8' && this._march8Anim) this._march8Anim(time);
-            // Отправляем позицию на сервер (каждые 50мс если двигались, каждые 2с heartbeat чтобы АФК не пропадали)
+            // Отправляем позицию на сервер (каждые 50мс, только если двигались)
             if (!this._lastPosSend || Date.now()-this._lastPosSend > 50) {
                 const px=this.playerGroup.position.x, py=this.playerGroup.position.y, pz=this.playerGroup.position.z;
                 const ry=this.playerGroup.rotation.y;
