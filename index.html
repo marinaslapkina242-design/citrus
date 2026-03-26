@@ -9339,7 +9339,6 @@ const app = {
     async renderMpPanel(){
         const list=document.getElementById('mp-list');if(!list)return;
         const _devBadge=n=>{const b=(n||'').toLowerCase().split('#')[0];if(b==='добрый разраб')return'<svg width="16" height="16" viewBox="0 0 16 16" style="display:inline-block;vertical-align:middle;margin-left:3px;flex-shrink:0;" title="Друг разраба"><circle cx="8" cy="8" r="8" fill="#00C896"/><text x="8" y="11.5" text-anchor="middle" font-size="9" fill="#000">🤝</text></svg>';if(['разраб','citrus'].includes(b))return'<svg width="16" height="16" viewBox="0 0 16 16" style="display:inline-block;vertical-align:middle;margin-left:3px;flex-shrink:0;" title="Владелец"><circle cx="8" cy="8" r="8" fill="#FFD700"/><path d="M4.5 8.2l2.3 2.3 4.2-4.2" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>';if(b==='admin')return'<svg width="16" height="16" viewBox="0 0 16 16" style="display:inline-block;vertical-align:middle;margin-left:3px;flex-shrink:0;" title="Администратор"><circle cx="8" cy="8" r="8" fill="#4fc3f7"/><path d="M4.5 8.2l2.3 2.3 4.2-4.2" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>';if(['добрый разраб','добрый разраб#4874'].includes(b))return'<svg width="16" height="16" viewBox="0 0 16 16" style="display:inline-block;vertical-align:middle;margin-left:3px;flex-shrink:0;" title="Друг разраба"><circle cx="8" cy="8" r="8" fill="#00C896"/><text x="8" y="11.5" text-anchor="middle" font-size="9" fill="#000">🤝</text></svg>';if(['ft77799','dantiyt_official'].includes(b))return'<svg width="16" height="16" viewBox="0 0 16 16" style="display:inline-block;vertical-align:middle;margin-left:3px;flex-shrink:0;" title="Верифицирован"><circle cx="8" cy="8" r="8" fill="#aaaaaa"/><path d="M4.5 8.2l2.3 2.3 4.2-4.2" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>';return'';}
-        list.innerHTML=`<div class="mpp"><div class="mpd" style="background:#00E676"></div>${this.username}${_devBadge(this.username)} (ты)</div>`;
         // Берём актуальный список с сервера
         try {
             const r = await fetch(this._API+'/online');
@@ -9351,11 +9350,16 @@ const app = {
             }
         } catch(e) {}
         const online = this._cachedOnline||[];
-        // Показываем всех друзей — онлайн или нет (без дублей)
-        const shownIds = new Set();
+
+        // Начинаем с себя — добавляем в shownIds чтобы не дублировать
+        const shownIds = new Set([String(this.userId)]);
+        list.innerHTML=`<div class="mpp"><div class="mpd" style="background:#00E676"></div>${this.username}${_devBadge(this.username)} (ты)</div>`;
+
         // Убираем дубли из массива друзей
         const uniqueFriends = [...new Set(this.friends.map(String))];
         uniqueFriends.forEach(id => {
+            if(shownIds.has(String(id))) return;
+            shownIds.add(String(id));
             const p = online.find(x=>x.id===String(id));
             const name = (this._pc||[]).find(x=>x.id===String(id))?.name || id;
             if(p) {
@@ -9364,6 +9368,14 @@ const app = {
             } else {
                 list.innerHTML+=`<div class="mpp"><div class="mpd" style="background:#333;box-shadow:none"></div><span style="color:#444">${name} ○</span></div>`;
             }
+        });
+
+        // Остальные онлайн игроки (не друзья, не ты сам)
+        online.forEach(p => {
+            if(shownIds.has(String(p.id))) return;
+            shownIds.add(String(p.id));
+            const ingame = p.status==='ingame';
+            list.innerHTML+=`<div class="mpp"><div class="mpd" style="background:${ingame?'#00E5FF':'#00E676'}"></div><span style="color:${ingame?'#00E5FF':'inherit'}">${p.name}${_devBadge(p.name)}${ingame?' 🎮':''}</span></div>`;
         });
     },
 
