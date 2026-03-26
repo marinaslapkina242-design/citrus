@@ -1018,7 +1018,6 @@
                 <div class="nav-item"        id="nav-stats"       onclick="app.switchTab('stats')">      <div class="nav-icon"><i class="fas fa-chart-line"></i></div> Статистика</div>
                 <div class="nav-item"        id="nav-leaderboard" onclick="app.switchTab('leaderboard')"><div class="nav-icon"><i class="fas fa-trophy"></i></div> Топ</div>
                 <div class="nav-item hidden" id="nav-admin"       onclick="app.switchTab('admin')">      <div class="nav-icon"><i class="fas fa-shield-alt"></i></div> Баны</div>
-                <div class="nav-item hidden" id="nav-scare"       onclick="app.switchTab('scare')">      <div class="nav-icon"><i class="fas fa-ghost"></i></div> 👻 Пугать</div>
                 <div class="nav-item"        id="nav-help"        onclick="app.switchTab('help')">       <div class="nav-icon"><i class="fas fa-question-circle"></i></div> Помощь</div>
                 <div class="nav-item"        id="nav-aihelper"    onclick="app.switchTab('aihelper')">   <div class="nav-icon"><i class="fas fa-robot"></i></div> ИИ Хелпер <span class="nav-badge hidden" id="ai-badge">!</span></div>
                 <div class="nav-item"        id="nav-devmail"     onclick="app.switchTab('devmail')">    <div class="nav-icon"><i class="fas fa-envelope"></i></div> Почта <span class="nav-badge hidden" id="devmail-badge">0</span></div>
@@ -1670,66 +1669,6 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
                 </div>
             </div>
 
-            </div>
-
-            <!-- ══════════════════ TAB: SCARE (только Разраб) ══════════════════ -->
-            <div id="tab-scare" class="hidden">
-                <div class="section-title">👻 Напугать игрока</div>
-                <div style="display:grid;grid-template-columns:320px 1fr;gap:20px;align-items:start;">
-
-                    <!-- Левая: выбор жертвы -->
-                    <div class="panel-box">
-                        <div class="panel-box-title">🎯 Выбери жертву</div>
-                        <div id="scare-online-list" style="display:flex;flex-direction:column;gap:6px;max-height:400px;overflow-y:auto;margin-bottom:12px;"></div>
-                        <button onclick="app.loadScareOnline()" style="width:100%;padding:8px;background:rgba(0,229,255,0.07);border:1px solid rgba(0,229,255,0.15);border-radius:8px;color:rgba(0,229,255,0.6);font-size:12px;font-family:var(--font-ui);cursor:pointer;">↻ Обновить список</button>
-                        <div id="scare-target-display" style="display:none;margin-top:12px;padding:10px 14px;background:rgba(255,60,60,0.08);border:1px solid rgba(255,60,60,0.2);border-radius:10px;font-size:13px;color:rgba(255,120,120,0.9);font-family:var(--font-ui);">
-                            🎯 Цель: <b id="scare-target-name">—</b>
-                        </div>
-                    </div>
-
-                    <!-- Правая: выбор эффекта -->
-                    <div style="display:flex;flex-direction:column;gap:14px;">
-                        <div class="panel-box" style="cursor:pointer;transition:all 0.2s;" onclick="app.scarePlayer('cracks')"
-                            onmouseover="this.style.borderColor='rgba(255,60,60,0.3)'" onmouseout="this.style.borderColor=''">
-                            <div style="display:flex;align-items:center;gap:14px;">
-                                <div style="font-size:42px;filter:drop-shadow(0 0 12px rgba(255,60,60,0.5));">💀</div>
-                                <div>
-                                    <div style="font-family:var(--font-head);font-size:20px;letter-spacing:2px;color:rgba(255,100,100,0.9);">ТРЕЩИНЫ</div>
-                                    <div style="font-size:12px;color:rgba(255,255,255,0.35);font-family:var(--font-ui);margin-top:4px;">Сначала всё нормально... потом экран медленно покрывается трещинами и сайт "ломается"</div>
-                                </div>
-                                <div style="margin-left:auto;background:rgba(255,60,60,0.1);border:1px solid rgba(255,60,60,0.2);border-radius:8px;padding:8px 16px;font-family:var(--font-head);color:rgba(255,80,80,0.8);font-size:14px;letter-spacing:1px;">ЗАПУСТИТЬ</div>
-                            </div>
-                        </div>
-
-                        <div class="panel-box" style="cursor:pointer;transition:all 0.2s;" onclick="app.scarePlayer('screamer')"
-                            onmouseover="this.style.borderColor='rgba(255,150,0,0.3)'" onmouseout="this.style.borderColor=''">
-                            <div style="display:flex;align-items:center;gap:14px;">
-                                <div style="font-size:42px;filter:drop-shadow(0 0 12px rgba(255,150,0,0.5));">😱</div>
-                                <div>
-                                    <div style="font-family:var(--font-head);font-size:20px;letter-spacing:2px;color:rgba(255,180,0,0.9);">СКРИМЕР</div>
-                                    <div style="font-size:12px;color:rgba(255,255,255,0.35);font-family:var(--font-ui);margin-top:4px;">Резкий скример на весь экран со звуком и вспышкой. Классика.</div>
-                                </div>
-                                <div style="margin-left:auto;background:rgba(255,150,0,0.1);border:1px solid rgba(255,150,0,0.2);border-radius:8px;padding:8px 16px;font-family:var(--font-head);color:rgba(255,180,0,0.8);font-size:14px;letter-spacing:1px;">ЗАПУСТИТЬ</div>
-                            </div>
-                        </div>
-
-                        <div class="panel-box" style="cursor:pointer;transition:all 0.2s;" onclick="app.scarePlayer('dark')"
-                            onmouseover="this.style.borderColor='rgba(150,0,255,0.3)'" onmouseout="this.style.borderColor=''">
-                            <div style="display:flex;align-items:center;gap:14px;">
-                                <div style="font-size:42px;filter:drop-shadow(0 0 12px rgba(150,0,255,0.5));">🌑</div>
-                                <div>
-                                    <div style="font-family:var(--font-head);font-size:20px;letter-spacing:2px;color:rgba(180,80,255,0.9);">ТЁМНЫЙ МИР</div>
-                                    <div style="font-size:12px;color:rgba(255,255,255,0.35);font-family:var(--font-ui);margin-top:4px;">Весь интерфейс становится страшным: кровавые цвета, жуткие шрифты, звуки, дрожание</div>
-                                </div>
-                                <div style="margin-left:auto;background:rgba(150,0,255,0.1);border:1px solid rgba(150,0,255,0.2);border-radius:8px;padding:8px 16px;font-family:var(--font-head);color:rgba(180,80,255,0.8);font-size:14px;letter-spacing:1px;">ЗАПУСТИТЬ</div>
-                            </div>
-                        </div>
-
-                        <div id="scare-status" style="display:none;padding:12px 16px;background:rgba(0,229,255,0.06);border:1px solid rgba(0,229,255,0.15);border-radius:10px;font-size:13px;color:rgba(0,229,255,0.7);font-family:var(--font-mono);text-align:center;"></div>
-                    </div>
-                </div>
-            </div>
-
             <!-- ══════════════════ TAB: LEADERBOARD ══════════════════ -->
             <div id="tab-leaderboard" class="hidden">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
@@ -2302,8 +2241,6 @@ const app = {
                     this.renderMyGames(); this.renderFriends(); this.renderOnline(); this.initAvatarPreview(); this.renderShop();
                     const adminNav = document.getElementById('nav-admin');
                     if(adminNav) adminNav.classList.toggle('hidden', !this.canBan(this.username));
-                    const scareNav = document.getElementById('nav-scare');
-                    if(scareNav) scareNav.classList.toggle('hidden', !this.isDev(this.username));
                     this.updateUI();
                     this._wsConnect();
                     setInterval(()=>this.renderOnline(), 30000);
@@ -2326,8 +2263,6 @@ const app = {
                     this.renderMyGames(); this.renderFriends(); this.renderOnline(); this.initAvatarPreview(); this.renderShop();
                     const adminNav = document.getElementById('nav-admin');
                     if(adminNav) adminNav.classList.toggle('hidden', !this.canBan(this.username));
-                    const scareNav = document.getElementById('nav-scare');
-                    if(scareNav) scareNav.classList.toggle('hidden', !this.isDev(this.username));
                     this.updateUI();
                     this._wsConnect();
                     setInterval(()=>this.renderOnline(), 30000);
@@ -4095,8 +4030,6 @@ const app = {
         const bnAdmin = document.getElementById('bn-admin');
         if(adminNav) adminNav.classList.toggle('hidden', !this.canBan(this.username));
         if(bnAdmin) bnAdmin.classList.toggle('hidden', !this.canBan(this.username));
-        const scareNav3 = document.getElementById('nav-scare');
-        if(scareNav3) scareNav3.classList.toggle('hidden', !this.isDev(this.username));
         this.updateUI();
         // Проверяем офлайн заработок с продаж НФТ
         setTimeout(()=>this.checkOfflineEarnings(), 1500);
@@ -5575,7 +5508,7 @@ const app = {
 
         switchTab(id){
         this._sfx('nav');
-        ['games','mine','work','avatar','shop','friends','studio','quests','daily','roulette','credits','gifts','nft','stats','leaderboard','admin','scare','help','cases','aihelper','devmail'].forEach(t=>{
+        ['games','mine','work','avatar','shop','friends','studio','quests','daily','roulette','credits','gifts','nft','stats','leaderboard','admin','help','cases','aihelper','devmail'].forEach(t=>{
             document.getElementById('tab-'+t)?.classList.add('hidden');
             document.getElementById('nav-'+t)?.classList.remove('active');
         });
