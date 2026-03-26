@@ -5667,16 +5667,13 @@ const app = {
         if(!text||!this.currentMap) return;
         inp.value='';
         this._ingameChatAdd(this.currentMap,this.username,this._myColor,text);
-        const msg={type:'igchat',map:String(this.currentMap),id:String(this.userId),name:this.username,color:this._myColor,text,ts:Date.now()};
+        const msg={type:'igchat',map:String(this.currentMap),id:String(this.userId),name:this.username,color:this._myColor,text,ts:Date.now(),_ch:'citrus_v1',_from:String(this.userId)};
+        // Отправляем через gameWS (основной канал)
         if(this._gameWS&&this._gameWS.readyState===1){
-            try{this._gameWS.send(JSON.stringify(msg));}catch(e){
-                // WS упал — шлём через HTTP
-                try{fetch(this._API+'/igchat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(msg)});}catch(e2){}
-            }
-        } else {
-            // WS не готов — шлём через HTTP как fallback
-            try{fetch(this._API+'/igchat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(msg)});}catch(e){}
+            try{this._gameWS.send(JSON.stringify(msg));}catch(e){}
         }
+        // Всегда дублируем через MQTT — чтобы гарантировать доставку
+        try{ this._mqttPublishJson(msg); }catch(e){}
         inp.focus();
     },
 
@@ -5890,6 +5887,13 @@ const app = {
         // Обработка чата
         if(false && msg.type==='chat') {
             this.appendChatMessage(msg.name, msg.text, msg.color);
+            return;
+        }
+
+        // Игровой чат через MQTT (когда gameWS недоступен)
+        if(msg.type==='igchat') {
+            if(String(msg.id)!==String(this.userId))
+                this._ingameChatAdd(msg.map||this.currentMap, msg.name, msg.color, msg.text);
             return;
         }
 
@@ -6533,16 +6537,13 @@ const app = {
                         o._lastSeen = Date.now();
                         o._moving = msg.moving;
                         o._jumping = msg.jumping;
-                    } else if(msg.type==='leave') {
-                        // Игрок вышел — убираем его модель
-                        if(this._others && this._others[msg.id]) {
-                            this.scene&&this.scene.remove(this._others[msg.id]);
-                            delete this._others[msg.id];
-                        }
-                    } else if(msg.type==='igchat') {
-                        // Сообщение игрового чата
+                        return; // обработали move — выходим
+                    }
+                    if(msg.type==='igchat') {
+                        // Сообщение игрового чата — независимый блок, не в else-if!
                         if(String(msg.id)!==String(this.userId))
-                            this._ingameChatAdd(msg.map, msg.name, msg.color, msg.text);
+                            this._ingameChatAdd(msg.map||this.currentMap, msg.name, msg.color, msg.text);
+                        return;
                     }
                 }catch(e){}
             };
@@ -9752,7 +9753,7 @@ const app = {
             }
             // 🌸 Анимация монет и цветов 8 марта
             if(this.currentMap==='march8' && this._march8Anim) this._march8Anim(time);
-            // Отправляем позицию на сервер (каждые 50мс если двигались, или каждые 2с heartbeat чтобы не пропадать)
+            // Отправляем позицию на сервер (каждые 50мс, только если двигались)
             if (!this._lastPosSend || Date.now()-this._lastPosSend > 50) {
                 const px=this.playerGroup.position.x, py=this.playerGroup.position.y, pz=this.playerGroup.position.z;
                 const ry=this.playerGroup.rotation.y;
@@ -9762,9 +9763,7 @@ const app = {
                     Math.abs(px-this._lastSentPos.x)>0.01 || Math.abs(py-this._lastSentPos.y)>0.01 ||
                     Math.abs(pz-this._lastSentPos.z)>0.01 || Math.abs(ry-this._lastSentPos.ry)>0.01 ||
                     moving !== this._lastSentPos.moving || jumping !== this._lastSentPos.jumping;
-                // Heartbeat: даже если не двигались — шлём раз в 2 сек чтобы не пропасть
-                const needHeartbeat = !this._lastPosSend || Date.now()-this._lastPosSend > 2000;
-                if(posChanged || needHeartbeat) {
+                if(posChanged) {
                     this._lastPosSend = Date.now();
                     this._lastSentPos = {x:px,y:py,z:pz,ry,moving,jumping};
                     const posData = {
@@ -9904,7 +9903,7 @@ const app = {
             for(const id in this._others) {
                 const o = this._others[id];
                 if(!o) continue; // guard: entry may have been deleted by stale timer
-                if(now - (o._lastSeen||0) > 8000) {
+                if(now - (o._lastSeen||0) > 5000) {
                     this.scene && this.scene.remove(o);
                     delete this._others[id];
                 } else if(o._targetPos) {
@@ -9913,8 +9912,9 @@ const app = {
                         // Слишком далеко — телепорт
                         o.position.copy(o._targetPos);
                     } else {
-                        // Плавная интерполяция: base=0.92 — быстрее догоняем, меньше визуальный лаг
-                        const base = 0.92;
+                        // Плавная интерполяция: догоняем за ~100мс (2 пакета по 50мс)
+                        // base=0.85 при 60fps даёт ~95% за 100мс — плавно и без скачков
+                        const base = 0.85;
                         const lerpSpeed = 1 - Math.pow(1 - base, delta / 0.01667);
                         o.position.lerp(o._targetPos, Math.min(lerpSpeed, 1));
                     }
