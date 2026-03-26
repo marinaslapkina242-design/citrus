@@ -8774,7 +8774,7 @@ const app = {
                 for(const id in this._others){
                     const _o = this._others[id];
                     if(!_o) { delete this._others[id]; continue; } // guard
-                    if(now - (_o._lastSeen||0) > 60000){
+                    if(now - (_o._lastSeen||0) > 10000){
                         this.scene&&this.scene.remove(_o);
                         delete this._others[id];
                     }
@@ -9339,6 +9339,7 @@ const app = {
     async renderMpPanel(){
         const list=document.getElementById('mp-list');if(!list)return;
         const _devBadge=n=>{const b=(n||'').toLowerCase().split('#')[0];if(b==='добрый разраб')return'<svg width="16" height="16" viewBox="0 0 16 16" style="display:inline-block;vertical-align:middle;margin-left:3px;flex-shrink:0;" title="Друг разраба"><circle cx="8" cy="8" r="8" fill="#00C896"/><text x="8" y="11.5" text-anchor="middle" font-size="9" fill="#000">🤝</text></svg>';if(['разраб','citrus'].includes(b))return'<svg width="16" height="16" viewBox="0 0 16 16" style="display:inline-block;vertical-align:middle;margin-left:3px;flex-shrink:0;" title="Владелец"><circle cx="8" cy="8" r="8" fill="#FFD700"/><path d="M4.5 8.2l2.3 2.3 4.2-4.2" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>';if(b==='admin')return'<svg width="16" height="16" viewBox="0 0 16 16" style="display:inline-block;vertical-align:middle;margin-left:3px;flex-shrink:0;" title="Администратор"><circle cx="8" cy="8" r="8" fill="#4fc3f7"/><path d="M4.5 8.2l2.3 2.3 4.2-4.2" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>';if(['добрый разраб','добрый разраб#4874'].includes(b))return'<svg width="16" height="16" viewBox="0 0 16 16" style="display:inline-block;vertical-align:middle;margin-left:3px;flex-shrink:0;" title="Друг разраба"><circle cx="8" cy="8" r="8" fill="#00C896"/><text x="8" y="11.5" text-anchor="middle" font-size="9" fill="#000">🤝</text></svg>';if(['ft77799','dantiyt_official'].includes(b))return'<svg width="16" height="16" viewBox="0 0 16 16" style="display:inline-block;vertical-align:middle;margin-left:3px;flex-shrink:0;" title="Верифицирован"><circle cx="8" cy="8" r="8" fill="#aaaaaa"/><path d="M4.5 8.2l2.3 2.3 4.2-4.2" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>';return'';}
+        list.innerHTML=`<div class="mpp"><div class="mpd" style="background:#00E676"></div>${this.username}${_devBadge(this.username)} (ты)</div>`;
         // Берём актуальный список с сервера
         try {
             const r = await fetch(this._API+'/online');
@@ -9350,16 +9351,11 @@ const app = {
             }
         } catch(e) {}
         const online = this._cachedOnline||[];
-
-        // Начинаем с себя — добавляем в shownIds чтобы не дублировать
-        const shownIds = new Set([String(this.userId)]);
-        list.innerHTML=`<div class="mpp"><div class="mpd" style="background:#00E676"></div>${this.username}${_devBadge(this.username)} (ты)</div>`;
-
+        // Показываем всех друзей — онлайн или нет (без дублей)
+        const shownIds = new Set();
         // Убираем дубли из массива друзей
         const uniqueFriends = [...new Set(this.friends.map(String))];
         uniqueFriends.forEach(id => {
-            if(shownIds.has(String(id))) return;
-            shownIds.add(String(id));
             const p = online.find(x=>x.id===String(id));
             const name = (this._pc||[]).find(x=>x.id===String(id))?.name || id;
             if(p) {
@@ -9368,14 +9364,6 @@ const app = {
             } else {
                 list.innerHTML+=`<div class="mpp"><div class="mpd" style="background:#333;box-shadow:none"></div><span style="color:#444">${name} ○</span></div>`;
             }
-        });
-
-        // Остальные онлайн игроки (не друзья, не ты сам)
-        online.forEach(p => {
-            if(shownIds.has(String(p.id))) return;
-            shownIds.add(String(p.id));
-            const ingame = p.status==='ingame';
-            list.innerHTML+=`<div class="mpp"><div class="mpd" style="background:${ingame?'#00E5FF':'#00E676'}"></div><span style="color:${ingame?'#00E5FF':'inherit'}">${p.name}${_devBadge(p.name)}${ingame?' 🎮':''}</span></div>`;
         });
     },
 
@@ -9906,7 +9894,7 @@ const app = {
             for(const id in this._others) {
                 const o = this._others[id];
                 if(!o) continue; // guard: entry may have been deleted by stale timer
-                if(now - (o._lastSeen||0) > 60000) {
+                if(now - (o._lastSeen||0) > 5000) {
                     this.scene && this.scene.remove(o);
                     delete this._others[id];
                 } else if(o._targetPos) {
@@ -11636,62 +11624,5 @@ window.onload = () => app.init();
     </div>
 </div>
 
-<script>
-// ═══ ПАТЧ v2: FIX IGCHAT + AFK ═══
-(function waitForApp() {
-    if (typeof app === 'undefined' || !app._ingameChatSend) {
-        setTimeout(waitForApp, 100);
-        return;
-    }
-
-    // ── 1. Чат: шлём igchat только через WS (MQTT убран — он ломал чат)
-    app._ingameChatSend = function() {
-        const inp = document.getElementById('ingame-chat-input');
-        if (!inp) return;
-        const text = inp.value.trim();
-        if (!text || !this.currentMap) return;
-        inp.value = '';
-        // Показываем себе сразу
-        this._ingameChatAdd(this.currentMap, this.username, this._myColor, text);
-        const msg = {
-            type: 'igchat',
-            map: String(this.currentMap),
-            id: String(this.userId),
-            name: this.username,
-            color: this._myColor,
-            text: text,
-            ts: Date.now()
-        };
-        if (this._gameWS && this._gameWS.readyState === 1) {
-            try { this._gameWS.send(JSON.stringify(msg)); } catch(e) {}
-        }
-        inp.focus();
-    };
-
-    // ── 2. АФК heartbeat: шлём свою позицию каждые 3 секунды
-    //    (таймауты удаления в engineLoop и staleTimer уже увеличены до 60с в коде)
-    setInterval(function() {
-        if (app.mode !== 'play' || !app.playerGroup || !app._gameWS || app._gameWS.readyState !== 1) return;
-        try {
-            app._gameWS.send(JSON.stringify({
-                type: 'move',
-                id: String(app.userId),
-                name: app.username,
-                color: app._myColor,
-                x: app.playerGroup.position.x,
-                y: app.playerGroup.position.y,
-                z: app.playerGroup.position.z,
-                ry: app.playerGroup.rotation.y,
-                map: String(app.currentMap),
-                inv: app.inventory || [],
-                moving: false,
-                jumping: false
-            }));
-        } catch(e) {}
-    }, 3000);
-
-    console.log('[PATCH v2] igchat + AFK fix applied');
-})();
-</script>
 </body>
 </html>
