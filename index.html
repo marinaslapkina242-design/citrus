@@ -1921,43 +1921,14 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
         </div>
 
         <!-- ── ИГРОВОЙ ЧАТ (верхний левый угол) ── -->
-        <div id="ingame-chat" class="hidden" style="
-            position:absolute; top:16px; left:16px;
-            width:280px; pointer-events:none; z-index:10;
-            display:flex; flex-direction:column; gap:6px;
-        ">
-            <!-- Лента сообщений -->
-            <div id="ingame-chat-msgs" style="
-                display:flex; flex-direction:column; gap:3px;
-                max-height:180px; overflow:hidden;
-                mask-image:linear-gradient(to bottom, transparent 0%, black 30%);
-                -webkit-mask-image:linear-gradient(to bottom, transparent 0%, black 30%);
-            "></div>
-            <!-- Поле ввода -->
-            <div id="ingame-chat-input-wrap" style="
-                display:flex; gap:6px; pointer-events:all;
-                background:rgba(3,0,15,0.75); border:1px solid rgba(0,229,255,0.15);
-                border-radius:10px; padding:5px 8px; backdrop-filter:blur(12px);
-                transition:opacity 0.2s;
-            ">
-                <input id="ingame-chat-input" type="text" maxlength="80"
-                    placeholder="Написать... (Enter)"
-                    autocomplete="off" spellcheck="false"
-                    style="
-                        flex:1; background:none; border:none; outline:none;
-                        color:rgba(220,240,255,0.9); font-size:12px;
-                        font-family:var(--font-ui); caret-color:var(--p);
-                    "
-                    onkeydown="if(event.key==='Enter'){app._ingameChatSend();event.preventDefault();event.stopPropagation();}
-                               if(event.key==='Escape'){this.blur();}"
-                    onfocus="app._ingameChatFocus(true)"
-                    onblur="app._ingameChatFocus(false)"
-                />
-                <button onclick="app._ingameChatSend()" style="
-                    background:rgba(0,229,255,0.12); border:1px solid rgba(0,229,255,0.2);
-                    border-radius:6px; color:var(--p); font-size:11px; padding:2px 8px;
-                    cursor:pointer; font-family:var(--font-ui); pointer-events:all;
-                ">↑</button>
+        <div id="ingame-chat" style="display:none;position:absolute;top:16px;left:16px;width:280px;z-index:20;flex-direction:column;gap:6px;">
+            <div id="ingame-chat-msgs" style="display:flex;flex-direction:column;gap:3px;max-height:180px;overflow:hidden;pointer-events:none;mask-image:linear-gradient(to bottom,transparent 0%,black 35%);-webkit-mask-image:linear-gradient(to bottom,transparent 0%,black 35%);"></div>
+            <div style="display:flex;gap:6px;pointer-events:all;background:rgba(3,0,15,0.82);border:1px solid rgba(0,229,255,0.18);border-radius:10px;padding:5px 8px;backdrop-filter:blur(12px);">
+                <input id="ingame-chat-input" type="text" maxlength="80" placeholder="T — чат, Enter — отправить" autocomplete="off" spellcheck="false"
+                    style="flex:1;background:none;border:none;outline:none;color:rgba(220,240,255,0.9);font-size:12px;font-family:var(--font-ui);caret-color:var(--p);"
+                    onkeydown="if(event.key==='Enter'){app._ingameChatSend();event.preventDefault();event.stopPropagation();}if(event.key==='Escape'){this.blur();}"
+                    onfocus="app._ingameChatFocus(true)" onblur="app._ingameChatFocus(false)"/>
+                <button onclick="app._ingameChatSend()" style="background:rgba(0,229,255,0.12);border:1px solid rgba(0,229,255,0.2);border-radius:6px;color:var(--p);font-size:13px;padding:2px 10px;cursor:pointer;pointer-events:all;">↑</button>
             </div>
         </div>
         
@@ -5657,12 +5628,12 @@ const app = {
     _ingameChatFocused: false,
     _ingameChatShow(mapId){
         const el=document.getElementById('ingame-chat');
-        if(el) el.classList.remove('hidden');
+        if(el){ el.style.display='flex'; }
         this._ingameChatRender(mapId);
     },
     _ingameChatHide(){
         const el=document.getElementById('ingame-chat');
-        if(el) el.classList.add('hidden');
+        if(el){ el.style.display='none'; }
     },
     _ingameChatFocus(on){
         this._ingameChatFocused=on;
@@ -9926,18 +9897,21 @@ const app = {
                     delete this._others[id];
                 } else if(o._targetPos) {
                     const dist = o.position.distanceTo(o._targetPos);
-                    if(dist > 12) { o.position.copy(o._targetPos); }
-                    else if(dist > 0.01) {
-                        // Быстрый lerp — догоняем цель за ~3 кадра (~50мс)
-                        const base = 0.97;
+                    if(dist > 15) {
+                        // Слишком далеко — телепорт
+                        o.position.copy(o._targetPos);
+                    } else {
+                        // Плавная интерполяция: догоняем за ~100мс (2 пакета по 50мс)
+                        // base=0.85 при 60fps даёт ~95% за 100мс — плавно и без скачков
+                        const base = 0.85;
                         const lerpSpeed = 1 - Math.pow(1 - base, delta / 0.01667);
                         o.position.lerp(o._targetPos, Math.min(lerpSpeed, 1));
                     }
-                    // Быстрый поворот
+                    // Плавный поворот
                     let diff = (o._targetRy||0) - o.rotation.y;
                     while(diff > Math.PI) diff -= Math.PI*2;
                     while(diff < -Math.PI) diff += Math.PI*2;
-                    o.rotation.y += diff * 0.5;
+                    o.rotation.y += diff * 0.3;
                     // Анимация конечностей
                     if(o._rig) {
                         const L = THREE.MathUtils.lerp;
