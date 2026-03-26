@@ -728,6 +728,9 @@
         .touch-place-btn:active { background: rgba(0,229,255,0.25); }
         #mp-panel { position: absolute; top: 16px; right: 65px; background: rgba(3,0,15,0.88); border: 1px solid rgba(0,229,255,0.1); border-radius: 10px; padding: 10px 14px; pointer-events: none; min-width: 150px; backdrop-filter: blur(12px); }
         #mp-panel h4 { font-size: 9px; color: rgba(0,229,255,0.4); text-transform: uppercase; letter-spacing: 3px; margin: 0 0 8px; font-family: var(--font-mono); }
+        .igchat-msg { font-size:12px; font-family:var(--font-ui); line-height:1.4; padding:3px 7px; border-radius:7px; background:rgba(3,0,15,0.65); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.05); animation:igchatIn 0.2s ease both; pointer-events:none; word-break:break-word; }
+        @keyframes igchatIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+        .igchat-msg.fade { opacity:0; transition:opacity 1s; }
         .mpp { display: flex; align-items: center; gap: 7px; font-size: 12px; color: rgba(220,240,255,0.4); margin-bottom: 4px; font-family: var(--font-mono); }
         .mpd { width: 6px; height: 6px; background: var(--g); border-radius: 50%; box-shadow: 0 0 6px var(--g); }
 
@@ -1916,6 +1919,47 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
             <h4>В игре</h4>
             <div id="mp-list"></div>
         </div>
+
+        <!-- ── ИГРОВОЙ ЧАТ (верхний левый угол) ── -->
+        <div id="ingame-chat" class="hidden" style="
+            position:absolute; top:16px; left:16px;
+            width:280px; pointer-events:none; z-index:10;
+            display:flex; flex-direction:column; gap:6px;
+        ">
+            <!-- Лента сообщений -->
+            <div id="ingame-chat-msgs" style="
+                display:flex; flex-direction:column; gap:3px;
+                max-height:180px; overflow:hidden;
+                mask-image:linear-gradient(to bottom, transparent 0%, black 30%);
+                -webkit-mask-image:linear-gradient(to bottom, transparent 0%, black 30%);
+            "></div>
+            <!-- Поле ввода -->
+            <div id="ingame-chat-input-wrap" style="
+                display:flex; gap:6px; pointer-events:all;
+                background:rgba(3,0,15,0.75); border:1px solid rgba(0,229,255,0.15);
+                border-radius:10px; padding:5px 8px; backdrop-filter:blur(12px);
+                transition:opacity 0.2s;
+            ">
+                <input id="ingame-chat-input" type="text" maxlength="80"
+                    placeholder="Написать... (Enter)"
+                    autocomplete="off" spellcheck="false"
+                    style="
+                        flex:1; background:none; border:none; outline:none;
+                        color:rgba(220,240,255,0.9); font-size:12px;
+                        font-family:var(--font-ui); caret-color:var(--p);
+                    "
+                    onkeydown="if(event.key==='Enter'){app._ingameChatSend();event.preventDefault();event.stopPropagation();}
+                               if(event.key==='Escape'){this.blur();}"
+                    onfocus="app._ingameChatFocus(true)"
+                    onblur="app._ingameChatFocus(false)"
+                />
+                <button onclick="app._ingameChatSend()" style="
+                    background:rgba(0,229,255,0.12); border:1px solid rgba(0,229,255,0.2);
+                    border-radius:6px; color:var(--p); font-size:11px; padding:2px 8px;
+                    cursor:pointer; font-family:var(--font-ui); pointer-events:all;
+                ">↑</button>
+            </div>
+        </div>
         
 
         </div>
@@ -2260,6 +2304,13 @@ const app = {
         // ОБНОВЛЕННЫЕ СОБЫТИЯ КЛАВИАТУРЫ (Защита при вводе в чат)
         window.addEventListener('keydown', e => {
             if(document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
+            // T — открыть чат в игре
+            if(e.code==='KeyT' && this.mode==='play'){
+                e.preventDefault();
+                const inp=document.getElementById('ingame-chat-input');
+                if(inp) inp.focus();
+                return;
+            }
             this.keys[e.code] = true;
             // Горячие клавиши студии
             if(this.mode === 'studio'){
@@ -2347,7 +2398,10 @@ const app = {
                 if(!srv||srv.error) return;
                 // Берём самый большой баланс (защита от перезаписи)
                 if((srv.balance||0) > this.balance){ this.balance=srv.balance; }
-                if(srv.inventory&&srv.inventory.length>this.inventory.length) this.inventory=srv.inventory;
+                // Берём с сервера ТОЛЬКО если локальный инвентарь пустой (первый вход / новое устройство)
+                if(srv.inventory&&Array.isArray(srv.inventory)&&this.inventory.length===0){
+                    this.inventory = srv.inventory;
+                }
                 if(srv.friends&&srv.friends.length>this.friends.length) this.friends=srv.friends;
                 if(srv.rouletteUsed) this.rouletteUsed=true;
                 if((srv.rouletteTotal||0)>this.rouletteTotal) this.rouletteTotal=srv.rouletteTotal;
@@ -3464,16 +3518,23 @@ const app = {
         }
         this.updateUI();
     },
+    _renderInventoryList(){
+        const il=document.getElementById('inventory-list');
+        if(!il)return;
+        il.innerHTML=this.inventory.length?'':`<li style="color:rgba(255,255,255,0.2);font-size:13px;padding:10px;text-align:center;font-family:var(--font-ui);">Ничего нет</li>`;
+        this.inventory.forEach(iid=>{
+            const it=SHOP_ITEMS.find(i=>i.id===iid);
+            if(it)il.innerHTML+=`<li style="display:flex;align-items:center;gap:10px;color:rgba(255,255,255,0.7);font-size:13px;padding:9px 12px;background:rgba(255,255,255,0.04);border-radius:10px;border:1px solid rgba(255,255,255,0.07);font-family:var(--font-body);font-weight:600;">
+                <span style="font-size:20px;">${it.icon}</span>
+                <span>${it.name}</span>
+                <button onclick="app.removeItem('${iid}')" style="margin-left:auto;background:rgba(255,60,60,0.1);border:1px solid rgba(255,60,60,0.15);color:rgba(255,100,100,0.6);cursor:pointer;font-size:12px;line-height:1;padding:4px 8px;border-radius:6px;transition:all 0.2s;" title="Снять" onmouseover="this.style.background='rgba(255,60,60,0.2)';this.style.color='#ff6b6b'" onmouseout="this.style.background='rgba(255,60,60,0.1)';this.style.color='rgba(255,100,100,0.6)'">✕</button></li>`;
+        });
+    },
     updateUI(){
         document.getElementById('display-name').innerHTML=(this.fullTag || this.username)+this.devBadge(this.username);
         document.getElementById('balance-val').innerText=this.balance;
         document.getElementById('ingame-balance').innerText=this.balance;
-        const il=document.getElementById('inventory-list');
-        il.innerHTML=this.inventory.length?'':'<li style="color:#444;font-size:13px">Ничего нет</li>';
-        this.inventory.forEach(id=>{
-            const it=SHOP_ITEMS.find(i=>i.id===id);
-            if(it)il.innerHTML+=`<li style="display:flex;align-items:center;gap:9px;color:#aaa;font-size:13px;padding:7px;background:#111;border-radius:8px;"><span>${it.icon} ${it.name}</span><button onclick="app.removeItem('${id}')" style="margin-left:auto;background:none;border:none;color:#444;cursor:pointer;font-size:16px;line-height:1;padding:0 2px;" title="Снять">✕</button></li>`;
-        });
+        this._renderInventoryList();
         const cnt=this.friendRequests.length,b=document.getElementById('fr-badge');
         b.classList.toggle('hidden',cnt===0);if(cnt>0)b.innerText=cnt;
         // Обновляем онлайн-чип в хедере
@@ -5577,23 +5638,68 @@ const app = {
     removeItem(id){
         this.inventory = this.inventory.filter(i => i !== id);
         this.saveData();
-        this.buildCharacter(true);
-        this.scene.add(this.playerGroup);
-        const bv2=document.getElementById('balance-val'); if(bv2) bv2.textContent=this.balance;
-        const il=document.getElementById('inventory-list');
-        if(il){
-            il.innerHTML=this.inventory.length?'':`<li style="color:rgba(255,255,255,0.2);font-size:13px;padding:10px;text-align:center;font-family:var(--font-ui);">Ничего нет</li>`;
-            this.inventory.forEach(iid=>{
-                const it=SHOP_ITEMS.find(i=>i.id===iid);
-                if(it)il.innerHTML+=`<li style="display:flex;align-items:center;gap:10px;color:rgba(255,255,255,0.7);font-size:13px;padding:9px 12px;background:rgba(255,255,255,0.04);border-radius:10px;border:1px solid rgba(255,255,255,0.07);font-family:var(--font-body);font-weight:600;">
-                    <span style="font-size:20px;">${it.icon}</span>
-                    <span>${it.name}</span>
-                    <button onclick="app.removeItem('${iid}')" style="margin-left:auto;background:rgba(255,60,60,0.1);border:1px solid rgba(255,60,60,0.15);color:rgba(255,100,100,0.6);cursor:pointer;font-size:12px;line-height:1;padding:4px 8px;border-radius:6px;transition:all 0.2s;" title="Снять" onmouseover="this.style.background='rgba(255,60,60,0.2)';this.style.color='#ff6b6b'" onmouseout="this.style.background='rgba(255,60,60,0.1)';this.style.color='rgba(255,100,100,0.6)'">✕</button></li>`;
-            });
+        if(this.mode==='play' && this.playerGroup && this.scene){
+            this.scene.remove(this.playerGroup);
+            this.playerGroup = this.buildCharacter(true);
+            this.scene.add(this.playerGroup);
+        } else {
+            this.buildCharacter(true);
+            if(this.scene) this.scene.add(this.playerGroup);
         }
+        const bv2=document.getElementById('balance-val'); if(bv2) bv2.textContent=this.balance;
+        this._renderInventoryList();
         this.updateAvatarPreview();
     },
     resetAvatar(){this.inventory=[];this.saveData();this.renderShop();this.updateAvatarPreview();},
+
+    // ── ИГРОВОЙ ЧАТ
+    _ingameChatMsgs: {},
+    _ingameChatFocused: false,
+    _ingameChatShow(mapId){
+        const el=document.getElementById('ingame-chat');
+        if(el) el.classList.remove('hidden');
+        this._ingameChatRender(mapId);
+    },
+    _ingameChatHide(){
+        const el=document.getElementById('ingame-chat');
+        if(el) el.classList.add('hidden');
+    },
+    _ingameChatFocus(on){
+        this._ingameChatFocused=on;
+        if(on){ this._chatWasKeys={...(this.keys||{})}; this.keys={}; }
+        else { if(this._chatWasKeys) this.keys=this._chatWasKeys; this._chatWasKeys=null; }
+    },
+    _ingameChatRender(mapId){
+        const map=mapId||this.currentMap;
+        const msgs=(this._ingameChatMsgs[map]||[]).slice(-30);
+        const el=document.getElementById('ingame-chat-msgs');
+        if(!el) return;
+        el.innerHTML=msgs.map(m=>{
+            const safe=m.text.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            return `<div class="igchat-msg"><span style="color:${m.color||'#00E5FF'};font-weight:700;">${m.name}</span> <span style="color:rgba(220,240,255,0.8);">${safe}</span></div>`;
+        }).join('');
+        el.scrollTop=el.scrollHeight;
+        // Притемняем старые сообщения
+        const divs=el.querySelectorAll('.igchat-msg');
+        divs.forEach((d,i)=>{ const age=Date.now()-(msgs[i]&&msgs[i].ts||0); if(age>7000) d.style.opacity='0.35'; });
+    },
+    _ingameChatAdd(mapId,name,color,text){
+        if(!this._ingameChatMsgs[mapId]) this._ingameChatMsgs[mapId]=[];
+        this._ingameChatMsgs[mapId].push({name,color,text,ts:Date.now()});
+        if(this._ingameChatMsgs[mapId].length>100) this._ingameChatMsgs[mapId].shift();
+        if(String(this.currentMap)===String(mapId)) this._ingameChatRender(mapId);
+    },
+    _ingameChatSend(){
+        const inp=document.getElementById('ingame-chat-input');
+        if(!inp) return;
+        const text=inp.value.trim();
+        if(!text||!this.currentMap) return;
+        inp.value='';
+        this._ingameChatAdd(this.currentMap,this.username,this._myColor,text);
+        const msg={type:'igchat',map:String(this.currentMap),id:String(this.userId),name:this.username,color:this._myColor,text,ts:Date.now()};
+        if(this._gameWS&&this._gameWS.readyState===1){ try{this._gameWS.send(JSON.stringify(msg));}catch(e){} }
+        inp.focus();
+    },
 
     // ── MULTIPLAYER / WEBSOCKET / CHAT
     _wsConnect(){
@@ -6452,6 +6558,10 @@ const app = {
                             this.scene&&this.scene.remove(this._others[msg.id]);
                             delete this._others[msg.id];
                         }
+                    } else if(msg.type==='igchat') {
+                        // Сообщение игрового чата
+                        if(String(msg.id)!==String(this.userId))
+                            this._ingameChatAdd(msg.map, msg.name, msg.color, msg.text);
                     }
                 }catch(e){}
             };
@@ -8558,6 +8668,9 @@ const app = {
         if(stTouch) stTouch.classList.toggle('hidden', mode!=='studio');
         document.getElementById('ingame-ui').style.display=(mode==='play'&&(mapId==='gather'||mapId==='race'||mapId==='coins'||mapId==='march8'))?'flex':'none';
         document.getElementById('mp-panel').classList.toggle('hidden',mode!=='play');
+        // Чат — показываем в режиме игры и студии
+        if(mode==='play'){ this._ingameChatShow(mapId); }
+        else { this._ingameChatHide(); }
 
         // Показываем инструкцию студии или обычные подсказки
         const stGuide = document.getElementById('studio-guide');
@@ -9658,29 +9771,34 @@ const app = {
             }
             // 🌸 Анимация монет и цветов 8 марта
             if(this.currentMap==='march8' && this._march8Anim) this._march8Anim(time);
-            // Отправляем позицию на сервер (каждые 150мс)
+            // Отправляем позицию на сервер (каждые 50мс, только если двигались)
             if (!this._lastPosSend || Date.now()-this._lastPosSend > 50) {
-                this._lastPosSend = Date.now();
-                const posData = {
-                    type:'move', _from: String(this.userId),
-                    id: String(this.userId), name: this.username,
-                    color: this._myColor,
-                    x: this.playerGroup.position.x,
-                    y: this.playerGroup.position.y,
-                    z: this.playerGroup.position.z,
-                    ry: this.playerGroup.rotation.y,
-                    map: String(this.currentMap),
-                    inv: this.inventory||[],
-                    moving: !!(this.keys&&(this.keys['KeyW']||this.keys['KeyA']||this.keys['KeyS']||this.keys['KeyD'])),
-                    jumping: !this.canJump,
-                    vy: this.velocity ? this.velocity.y : 0
-                };
-                // Через наш WS сервер (быстро и надёжно)
-                if(this._gameWS && this._gameWS.readyState===1) {
-                    try{ this._gameWS.send(JSON.stringify(posData)); }catch(e){}
-                } else {
-                    // Fallback на HTTP
-                    try{ fetch(this._API+'/pos/'+this.userId, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(posData)}); }catch(e){}
+                const px=this.playerGroup.position.x, py=this.playerGroup.position.y, pz=this.playerGroup.position.z;
+                const ry=this.playerGroup.rotation.y;
+                const moving=!!(this.keys&&(this.keys['KeyW']||this.keys['KeyA']||this.keys['KeyS']||this.keys['KeyD']));
+                const jumping=!this.canJump;
+                const posChanged = !this._lastSentPos ||
+                    Math.abs(px-this._lastSentPos.x)>0.01 || Math.abs(py-this._lastSentPos.y)>0.01 ||
+                    Math.abs(pz-this._lastSentPos.z)>0.01 || Math.abs(ry-this._lastSentPos.ry)>0.01 ||
+                    moving !== this._lastSentPos.moving || jumping !== this._lastSentPos.jumping;
+                if(posChanged) {
+                    this._lastPosSend = Date.now();
+                    this._lastSentPos = {x:px,y:py,z:pz,ry,moving,jumping};
+                    const posData = {
+                        type:'move', _from: String(this.userId),
+                        id: String(this.userId), name: this.username,
+                        color: this._myColor,
+                        x:px, y:py, z:pz, ry,
+                        map: String(this.currentMap),
+                        inv: this.inventory||[],
+                        moving, jumping,
+                        vy: this.velocity ? this.velocity.y : 0
+                    };
+                    if(this._gameWS && this._gameWS.readyState===1) {
+                        try{ this._gameWS.send(JSON.stringify(posData)); }catch(e){}
+                    } else {
+                        try{ fetch(this._API+'/pos/'+this.userId, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(posData)}); }catch(e){}
+                    }
                 }
             }
 
@@ -9807,21 +9925,19 @@ const app = {
                     this.scene && this.scene.remove(o);
                     delete this._others[id];
                 } else if(o._targetPos) {
-                    // Delta-time корректный lerp — плавное движение без лагов
                     const dist = o.position.distanceTo(o._targetPos);
-                    // Телепортируем если слишком далеко (чтобы не плыть через всю карту)
                     if(dist > 12) { o.position.copy(o._targetPos); }
-                    else {
-                        // Коэффициент: 1-(1-base)^(delta/16.67ms) чтобы не зависеть от FPS
-                        const base = dist > 4 ? 0.85 : 0.75;
+                    else if(dist > 0.01) {
+                        // Быстрый lerp — догоняем цель за ~3 кадра (~50мс)
+                        const base = 0.97;
                         const lerpSpeed = 1 - Math.pow(1 - base, delta / 0.01667);
                         o.position.lerp(o._targetPos, Math.min(lerpSpeed, 1));
                     }
-                    // Плавный поворот
+                    // Быстрый поворот
                     let diff = (o._targetRy||0) - o.rotation.y;
                     while(diff > Math.PI) diff -= Math.PI*2;
                     while(diff < -Math.PI) diff += Math.PI*2;
-                    o.rotation.y += diff * 0.2;
+                    o.rotation.y += diff * 0.5;
                     // Анимация конечностей
                     if(o._rig) {
                         const L = THREE.MathUtils.lerp;
@@ -10544,6 +10660,8 @@ const app = {
         this._snowParticles=null;
         // Чистим HUD всех игр
         ['race-hud','dropper-hud','maze-hud','coins-hud'].forEach(id=>{const el=document.getElementById(id);if(el)el.remove();});
+        this._ingameChatHide();
+        this._ingameChatFocus(false);
         this._raceCar=null; this._raceSpeed=false;
         document.exitPointerLock();
         document.getElementById('engine-view').style.display='none';
