@@ -8774,7 +8774,7 @@ const app = {
                 for(const id in this._others){
                     const _o = this._others[id];
                     if(!_o) { delete this._others[id]; continue; } // guard
-                    if(now - (_o._lastSeen||0) > 10000){
+                    if(now - (_o._lastSeen||0) > 60000){
                         this.scene&&this.scene.remove(_o);
                         delete this._others[id];
                     }
@@ -9894,7 +9894,7 @@ const app = {
             for(const id in this._others) {
                 const o = this._others[id];
                 if(!o) continue; // guard: entry may have been deleted by stale timer
-                if(now - (o._lastSeen||0) > 5000) {
+                if(now - (o._lastSeen||0) > 60000) {
                     this.scene && this.scene.remove(o);
                     delete this._others[id];
                 } else if(o._targetPos) {
@@ -11625,101 +11625,61 @@ window.onload = () => app.init();
 </div>
 
 <script>
-// ═══ ПАТЧ: FIX IGCHAT + AFK ═══
-document.addEventListener('DOMContentLoaded', function() {
-    // Ждём пока app инициализируется
-    const waitApp = setInterval(function() {
-        if (typeof app === 'undefined') return;
-        clearInterval(waitApp);
+// ═══ ПАТЧ v2: FIX IGCHAT + AFK ═══
+(function waitForApp() {
+    if (typeof app === 'undefined' || !app._ingameChatSend) {
+        setTimeout(waitForApp, 100);
+        return;
+    }
 
-        // ── 1. Патч _ingameChatSend: отправляем через оба канала
-        app._ingameChatSend = function() {
-            const inp = document.getElementById('ingame-chat-input');
-            if (!inp) return;
-            const text = inp.value.trim();
-            if (!text || !this.currentMap) return;
-            inp.value = '';
-            this._ingameChatAdd(this.currentMap, this.username, this._myColor, text);
-            const msg = {
-                type: 'igchat',
-                map: String(this.currentMap),
-                id: String(this.userId),
-                name: this.username,
-                color: this._myColor,
-                text: text,
-                ts: Date.now(),
-                _ch: 'citrus_v1',
-                _from: String(this.userId)
-            };
-            // Основной канал — прямой WS
-            if (this._gameWS && this._gameWS.readyState === 1) {
-                try { this._gameWS.send(JSON.stringify(msg)); } catch(e) {}
-            }
-            // Дублируем через MQTT для надёжности
-            try { this._mqttPublishJson(msg); } catch(e) {}
-            inp.focus();
+    // ── 1. Чат: шлём igchat только через WS (MQTT убран — он ломал чат)
+    app._ingameChatSend = function() {
+        const inp = document.getElementById('ingame-chat-input');
+        if (!inp) return;
+        const text = inp.value.trim();
+        if (!text || !this.currentMap) return;
+        inp.value = '';
+        // Показываем себе сразу
+        this._ingameChatAdd(this.currentMap, this.username, this._myColor, text);
+        const msg = {
+            type: 'igchat',
+            map: String(this.currentMap),
+            id: String(this.userId),
+            name: this.username,
+            color: this._myColor,
+            text: text,
+            ts: Date.now()
         };
+        if (this._gameWS && this._gameWS.readyState === 1) {
+            try { this._gameWS.send(JSON.stringify(msg)); } catch(e) {}
+        }
+        inp.focus();
+    };
 
-        // ── 2. Патч _connectGameWS: починить onmessage чтобы igchat работал
-        const _origConnectGameWS = app._connectGameWS.bind(app);
-        app._connectGameWS = function() {
-            _origConnectGameWS();
-            // Ждём пока WS создастся, потом подменяем onmessage
-            setTimeout(() => {
-                if (!this._gameWS) return;
-                const _origOnMessage = this._gameWS.onmessage;
-                this._gameWS.onmessage = (e) => {
-                    try {
-                        const msg = JSON.parse(e.data);
-                        // Обрабатываем igchat ДО всего остального — независимо
-                        if (msg.type === 'igchat') {
-                            if (String(msg.id) !== String(this.userId)) {
-                                this._ingameChatAdd(msg.map || this.currentMap, msg.name, msg.color, msg.text);
-                            }
-                            return;
-                        }
-                    } catch(err) {}
-                    // Всё остальное — оригинальный обработчик
-                    if (_origOnMessage) _origOnMessage(e);
-                };
-            }, 300);
-        };
-
-        // ── 3. Патч _wsHandle: igchat через MQTT
-        const _origWsHandle = app._wsHandle.bind(app);
-        app._wsHandle = function(msg, topic) {
-            if (msg && msg.type === 'igchat' && msg._ch === 'citrus_v1') {
-                if (String(msg.id) !== String(this.userId)) {
-                    this._ingameChatAdd(msg.map || this.currentMap, msg.name, msg.color, msg.text);
-                }
-                return;
-            }
-            _origWsHandle(msg, topic);
-        };
-
-        // ── 4. Патч АФК: heartbeat каждые 2с
-        const _origEngineLoop = app.engineLoop ? app.engineLoop.bind(app) : null;
-        // Вместо переписывания engineLoop — просто шлём heartbeat отдельным интервалом
-        setInterval(() => {
-            if (app.mode !== 'play' || !app.playerGroup || !app._gameWS || app._gameWS.readyState !== 1) return;
-            const px = app.playerGroup.position.x, py = app.playerGroup.position.y, pz = app.playerGroup.position.z;
-            const ry = app.playerGroup.rotation.y;
+    // ── 2. АФК heartbeat: шлём свою позицию каждые 3 секунды
+    //    (таймауты удаления в engineLoop и staleTimer уже увеличены до 60с в коде)
+    setInterval(function() {
+        if (app.mode !== 'play' || !app.playerGroup || !app._gameWS || app._gameWS.readyState !== 1) return;
+        try {
             app._gameWS.send(JSON.stringify({
                 type: 'move',
                 id: String(app.userId),
                 name: app.username,
                 color: app._myColor,
-                x: px, y: py, z: pz, ry,
+                x: app.playerGroup.position.x,
+                y: app.playerGroup.position.y,
+                z: app.playerGroup.position.z,
+                ry: app.playerGroup.rotation.y,
                 map: String(app.currentMap),
                 inv: app.inventory || [],
                 moving: false,
                 jumping: false
             }));
-        }, 2000);
+        } catch(e) {}
+    }, 3000);
 
-        console.log('[PATCH] igchat + AFK fix applied');
-    }, 100);
-});
+    console.log('[PATCH v2] igchat + AFK fix applied');
+})();
 </script>
 </body>
 </html>
