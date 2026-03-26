@@ -5667,9 +5667,8 @@ const app = {
         if(!text||!this.currentMap) return;
         inp.value='';
         this._ingameChatAdd(this.currentMap,this.username,this._myColor,text);
-        const msg={type:'igchat',map:String(this.currentMap),id:String(this.userId),name:this.username,color:this._myColor,text,ts:Date.now(),_ch:'citrus_v1',_from:String(this.userId)};
+        const msg={type:'igchat',map:String(this.currentMap),id:String(this.userId),name:this.username,color:this._myColor,text,ts:Date.now()};
         if(this._gameWS&&this._gameWS.readyState===1){ try{this._gameWS.send(JSON.stringify(msg));}catch(e){} }
-        try{ this._mqttPublishJson(msg); }catch(e){}
         inp.focus();
     },
 
@@ -5821,13 +5820,6 @@ const app = {
         }
 
         if(msg._ch!=='citrus_v1')return;
-
-        // ── Игровой чат через MQTT
-        if(msg.type==='igchat') {
-            if(String(msg.id)!==String(this.userId))
-                this._ingameChatAdd(msg.map||this.currentMap, msg.name, msg.color, msg.text);
-            return;
-        }
 
         // Движение других игроков — обрабатываем ДО фильтра self
         if(msg.type==='move') {
@@ -6535,16 +6527,16 @@ const app = {
                         o._jumping = msg.jumping;
                         return;
                     }
+                    if(msg.type==='igchat') {
+                        if(String(msg.id)!==String(this.userId))
+                            this._ingameChatAdd(msg.map||this.currentMap, msg.name, msg.color, msg.text);
+                        return;
+                    }
                     if(msg.type==='leave') {
                         if(this._others && this._others[msg.id]) {
                             this.scene&&this.scene.remove(this._others[msg.id]);
                             delete this._others[msg.id];
                         }
-                        return;
-                    }
-                    if(msg.type==='igchat') {
-                        if(String(msg.id)!==String(this.userId))
-                            this._ingameChatAdd(msg.map||this.currentMap, msg.name, msg.color, msg.text);
                         return;
                     }
                 }catch(e){}
