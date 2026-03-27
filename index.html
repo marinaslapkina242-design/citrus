@@ -2221,6 +2221,7 @@ const app = {
         // Check devmail badge
         setTimeout(()=>this._checkDevMailBadge(), 2000);
         setInterval(()=>this._checkDevMailBadge(), 2*60*1000);
+        // Туториал запускается после авто-входа (см. _tutCheckAndStart / _tutAutoStart)
         // АВТО-ВХОД с проверкой бана
         if (this.username && this.username !== '') {
             // Сначала проверяем бан на сервере
@@ -2244,7 +2245,7 @@ const app = {
                     this.updateUI();
                     this._wsConnect();
                     setInterval(()=>this.renderOnline(), 30000);
-                    this._tutCheckAndStart();
+                    this._tutAutoStart();
                     this._initAudio();
                     const _tm1=()=>{ if(this._ac&&this._ac.state==='suspended') this._ac.resume().then(()=>this.startHubMusic()); else this.startHubMusic(); document.removeEventListener('click',_tm1); document.removeEventListener('touchstart',_tm1); };
                     setTimeout(()=>{ if(this._ac&&this._ac.state!=='suspended') this.startHubMusic(); else { document.addEventListener('click',_tm1); document.addEventListener('touchstart',_tm1); } },300);
@@ -2267,7 +2268,7 @@ const app = {
                     this.updateUI();
                     this._wsConnect();
                     setInterval(()=>this.renderOnline(), 30000);
-                    this._tutCheckAndStart();
+                    this._tutAutoStart();
                     this._initAudio();
                     const _tm2=()=>{ if(this._ac&&this._ac.state==='suspended') this._ac.resume().then(()=>this.startHubMusic()); else this.startHubMusic(); document.removeEventListener('click',_tm2); document.removeEventListener('touchstart',_tm2); };
                     setTimeout(()=>{ if(this._ac&&this._ac.state!=='suspended') this.startHubMusic(); else { document.addEventListener('click',_tm2); document.addEventListener('touchstart',_tm2); } },300);
@@ -3546,9 +3547,6 @@ const app = {
         this.switchAuthTab('login');
         document.getElementById('login-username').value = name;
         document.getElementById('login-password').focus();
-        // Перезагружаем страницу через 5 сек
-        this.showNotif('🔄','Перезагрузка...','Страница обновится через 5 секунд');
-        setTimeout(()=>location.reload(), 1000);
     },
 
     // ══════════════════════════════════════════
@@ -3635,10 +3633,23 @@ const app = {
     _tutCheckAndStart(){
         const key = 'citrus_need_tutorial_'+(this.username||'').toLowerCase();
         if(localStorage.getItem(key) === '1'){
-            localStorage.removeItem(key);
-            // Небольшая задержка чтобы хаб успел загрузиться
-            setTimeout(()=>this._tutStart(), 800);
+            // Первый вход — перезагружаем страницу через 1 сек
+            // После перезагрузки флаг остаётся и туториал запустится в _tutAutoStart
+            localStorage.setItem('citrus_tutorial_reload', this.username.toLowerCase());
+            setTimeout(()=>location.reload(), 1000);
         }
+    },
+
+    _tutAutoStart(){
+        // Вызывается после перезагрузки — проверяем флаг
+        const reloadKey = localStorage.getItem('citrus_tutorial_reload');
+        if(!reloadKey) return;
+        localStorage.removeItem('citrus_tutorial_reload');
+        const tutKey = 'citrus_need_tutorial_'+reloadKey;
+        if(localStorage.getItem(tutKey) !== '1') return;
+        localStorage.removeItem(tutKey);
+        // Небольшая задержка чтобы хаб успел загрузиться
+        setTimeout(()=>this._tutStart(), 1200);
     },
 
     _tutStart(){
