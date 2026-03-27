@@ -3546,6 +3546,9 @@ const app = {
         this.switchAuthTab('login');
         document.getElementById('login-username').value = name;
         document.getElementById('login-password').focus();
+        // Перезагружаем страницу через 5 сек
+        this.showNotif('🔄','Перезагрузка...','Страница обновится через 5 секунд');
+        setTimeout(()=>location.reload(), 1000);
     },
 
     // ══════════════════════════════════════════
