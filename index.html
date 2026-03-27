@@ -2318,8 +2318,14 @@ const app = {
                 // Берём самый большой баланс (защита от перезаписи)
                 if((srv.balance||0) > this.balance){ this.balance=srv.balance; }
                 // Берём с сервера ТОЛЬКО если локальный инвентарь пустой (первый вход / новое устройство)
+                // НЕ перезаписываем локальный инвентарь с сервера — сервер мёрджит и возвращает снятые вещи
                 if(srv.inventory&&Array.isArray(srv.inventory)&&this.inventory.length===0){
                     this.inventory = srv.inventory;
+                }
+                // Если инвентарь уже есть локально — доверяем только локальному.
+                // Сразу отправляем актуальный инвентарь на сервер чтобы перезаписать старый мёрдж
+                if(this.inventory.length > 0){
+                    try{ fetch(this._API+'/players/'+this.userId,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:String(this.userId),inventory:this.inventory})}); }catch(e){}
                 }
                 if(srv.friends&&srv.friends.length>this.friends.length) this.friends=srv.friends;
                 if(srv.rouletteUsed) this.rouletteUsed=true;
@@ -3636,19 +3642,25 @@ const app = {
         spot.style.width  = (r.width+pad*2)+'px';
         spot.style.height = (r.height+pad*2)+'px';
 
-        // Позиция карточки — правее навбара, с отступом от стрелки
-        const cardW = 380, cardH = 260;
+        // Позиция карточки — правее стрелки, не выходит за экран
         const arrowW = 52;
-        // Карточка начинается после стрелки: r.right + arrowW + 20
         const cx = r.right + arrowW + 20;
-        let cy = r.top + r.height/2 - cardH/2;
-        cy = Math.max(12, Math.min(cy, window.innerHeight - cardH - 12));
-
-        card.style.transform = 'none';
+        // Ограничиваем высоту карточки реальной высотой экрана
+        const maxCardH = window.innerHeight - 24;
+        card.style.maxHeight = maxCardH + 'px';
+        // Сначала рендерим, потом считаем позицию по реальной высоте
         card.style.left = cx + 'px';
-        card.style.top  = cy + 'px';
+        card.style.top = '12px';
         card.style.right = 'auto';
         card.style.bottom = 'auto';
+        card.style.transform = 'none';
+        // После рендера — центрируем по вертикали относительно целевого элемента
+        requestAnimationFrame(() => {
+            const realH = card.offsetHeight;
+            let cy = r.top + r.height/2 - realH/2;
+            cy = Math.max(12, Math.min(cy, window.innerHeight - realH - 12));
+            card.style.top = cy + 'px';
+        });
 
         // Стрелка — между навбаром и карточкой, указывает влево
         arrow.style.setProperty('--arrow-rot','-90deg');
@@ -11892,9 +11904,14 @@ window.onload = () => app.init();
     border-radius:20px;
     padding:24px 28px 20px;
     min-width:320px;max-width:380px;
+    max-height:calc(100vh - 40px);
+    overflow-y:auto;
+    overscroll-behavior:contain;
     box-shadow:0 16px 56px rgba(0,0,0,0.85),0 0 0 1px rgba(255,59,48,0.12) inset, 0 0 40px rgba(255,59,48,0.08);
-    transition:all 0.4s cubic-bezier(0.4,0,0.2,1);
+    transition:left 0.4s cubic-bezier(0.4,0,0.2,1), top 0.4s cubic-bezier(0.4,0,0.2,1);
     pointer-events:all;
+    scrollbar-width:thin;
+    scrollbar-color:rgba(255,59,48,0.3) transparent;
 }
 .tut-step-badge {
     display:inline-block;
