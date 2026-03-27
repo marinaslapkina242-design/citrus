@@ -3633,23 +3633,18 @@ const app = {
     _tutCheckAndStart(){
         const key = 'citrus_need_tutorial_'+(this.username||'').toLowerCase();
         if(localStorage.getItem(key) === '1'){
-            // Первый вход — перезагружаем страницу через 1 сек
-            // После перезагрузки флаг остаётся и туториал запустится в _tutAutoStart
-            localStorage.setItem('citrus_tutorial_reload', this.username.toLowerCase());
+            localStorage.removeItem(key);
+            // Перезагружаем страницу — после reload авто-вход откроет хаб и запустит туториал
+            localStorage.setItem('citrus_run_tutorial', '1');
             setTimeout(()=>location.reload(), 1000);
         }
     },
 
     _tutAutoStart(){
-        // Вызывается после перезагрузки — проверяем флаг
-        const reloadKey = localStorage.getItem('citrus_tutorial_reload');
-        if(!reloadKey) return;
-        localStorage.removeItem('citrus_tutorial_reload');
-        const tutKey = 'citrus_need_tutorial_'+reloadKey;
-        if(localStorage.getItem(tutKey) !== '1') return;
-        localStorage.removeItem(tutKey);
-        // Небольшая задержка чтобы хаб успел загрузиться
-        setTimeout(()=>this._tutStart(), 1200);
+        if(localStorage.getItem('citrus_run_tutorial') === '1'){
+            localStorage.removeItem('citrus_run_tutorial');
+            setTimeout(()=>this._tutStart(), 1000);
+        }
     },
 
     _tutStart(){
@@ -4266,6 +4261,7 @@ const app = {
         const ga=document.getElementById('nav-group-arrow');
         if(gi){gi.classList.add('open');} if(ga){ga.classList.add('open');}
         this.renderMyGames(); this.renderFriends(); this.renderOnline(); this.initAvatarPreview(); this.renderShop();
+        this._tutAutoStart();
         // Ежедневная награда
         setTimeout(()=>this._checkDailyReward(), 2000);
         // Показываем панель управления только разрабу и citrus
