@@ -3630,20 +3630,12 @@ const app = {
         },
     ],
 
-    _tutCheckAndStart(){
-        const key = 'citrus_need_tutorial_'+(this.username||'').toLowerCase();
-        if(localStorage.getItem(key) === '1'){
-            localStorage.removeItem(key);
-            // Перезагружаем страницу — после reload авто-вход откроет хаб и запустит туториал
-            localStorage.setItem('citrus_run_tutorial', '1');
-            setTimeout(()=>location.reload(), 1000);
-        }
-    },
+    _tutCheckAndStart(){}, // не используется
 
     _tutAutoStart(){
         if(localStorage.getItem('citrus_run_tutorial') === '1'){
             localStorage.removeItem('citrus_run_tutorial');
-            setTimeout(()=>this._tutStart(), 1000);
+            setTimeout(()=>this._tutStart(), 800);
         }
     },
 
@@ -3800,6 +3792,14 @@ const app = {
         this.fullTag    = `${this.username}#${this.userId}`;
 
         this.saveData();
+
+        // Новый игрок — перезагружаем страницу, после reload запустится туториал
+        const tutKey = 'citrus_need_tutorial_'+user.name.toLowerCase();
+        if(localStorage.getItem(tutKey) === '1'){
+            localStorage.setItem('citrus_run_tutorial', '1');
+            setTimeout(()=>location.reload(), 1000);
+            return;
+        }
 
         // Проверяем не забанен ли игрок — сначала синхронизируем с сервером
         try {
