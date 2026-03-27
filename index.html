@@ -2260,20 +2260,6 @@ const app = {
             }).catch(()=>{});
         }
     },
-                body: JSON.stringify({creditId, lenderId: this.userId})
-            });
-            const d = await res.json();
-            if(d.ok){
-                // Просто прибавляем сумму локально — не берём баланс с сервера
-                this.balance += d.amount;
-                this.saveData();
-                document.getElementById('balance-val').textContent = this.balance;
-                this.showNotif('✅','Кредит отозван',`+${d.amount} 🍊 возвращено`);
-                this._loadCredits();
-            } else this.showNotif('❌','Ошибка', d.error||'');
-        } catch(e){}
-    },
-
     initRoulette(){
         const prizes = [5,5,10,10,10,15,15,20,20,25,30,35,40,50,60,75,100,200];
         const colors = ['#FF4081','#FF9800','#FFD740','#69F0AE','#40C4FF','#E040FB',
