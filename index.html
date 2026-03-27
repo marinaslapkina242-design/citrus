@@ -2061,7 +2061,6 @@ const SHOP_ITEMS = [
     {id:'jacket_denim',name:'Джинсовая Куртка',    icon:'🧥',  price:320,  category:'body'},
     {id:'backpack',    name:'Рюкзак Авантюриста',  icon:'🎒',  price:420,  category:'body'},
     {id:'jetpack',     name:'Джетпак',             icon:'🚀',  price:6000, category:'body'},
-    {id:'wings_angel', name:'Ангельские Крылья',   icon:'✨',  price:3500, category:'body'},
     {id:'pet_robot',   name:'Робот Компаньон',     icon:'🤖',  price:3000, category:'pet'},
     {id:'pet_ghost',   name:'Призрак',             icon:'👻',  price:1500, category:'pet'},
     {id:'aura_thunder',name:'Аура Грома',          icon:'⚡',  price:7000, category:'effect'},
@@ -3503,76 +3502,64 @@ const app = {
 
     _tutSteps: [
         {
-            target: null, // центр экрана — приветствие
-            title: 'ПРИВЕТ! Я ЦИТРУС 🍊',
-            desc: 'Добро пожаловать в <b>CITRUS ONLINE</b>!<br>Давай расскажу как тут всё устроено. Это займёт меньше минуты!',
-            cardPos: 'center',
+            target: null,
+            title: '🍊 ДОБРО ПОЖАЛОВАТЬ!',
+            desc: 'Ты в <b style="color:#FF9500">CITRUS ONLINE</b> — многопользовательской игре прямо в браузере!<br><br>Я покажу тебе все разделы. Читай внимательно — это важно для старта. Пропустить нельзя 😏',
         },
         {
             target: 'nav-games',
-            title: 'МИРЫ 🎮',
-            desc: 'Здесь все игровые миры — <b>Цитрусовый Лес</b>, Паркур, Космос, Арена ПВП и ещё много всего. Заходи и играй с другими!',
-            cardPos: 'right',
+            title: '🎮 МИРЫ',
+            desc: 'Выбирай любой мир и заходи играть с другими онлайн-игроками.<br><br><b style="color:#fff">Управление:</b><br> <b style="color:#FF9500">WASD</b> — ходить<br> <b style="color:#FF9500">Пробел</b> — прыгать<br> <b style="color:#FF9500">Мышь</b> — смотреть по сторонам<br> <b style="color:#FF9500">T</b> — написать в чат<br><br>На телефоне — джойстик и кнопки на экране.',
         },
         {
             target: 'nav-mine',
-            title: 'ШАХТА ⛏️',
-            desc: 'Копай руду от первого лица и продавай её за <b>🍊 цитрусы</b> — местная валюта. Чем редче руда — тем больше монет!',
-            cardPos: 'right',
+            title: '⛏️ ШАХТА',
+            desc: 'Здесь зарабатываются первые — <b style="color:#FF9500">🍊 Цитрусы</b>.<br><br>Кликай по рудам которые появляются на экране, наполняй мешок и нажимай <b style="color:#FF9500">«Продать всё»</b>.<br><br>Есть обычная руда, серебро, золото и редкие кристаллы — чем редче, тем дороже!',
         },
         {
             target: 'nav-work',
-            title: 'РАБОТА ⚡',
-            desc: 'Выполняй задания за <b>🍊 монеты</b>. Простой способ заработать не выходя из хаба.',
-            cardPos: 'right',
+            title: '⚡ РАБОТА',
+            desc: 'Выполняй простые задания прямо в хабе и получай <b style="color:#FF9500">🍊 Цитрусы</b>.<br><br>Задания обновляются — можно делать их снова. Отличный способ заработать пока ждёшь друзей!',
         },
         {
             target: 'nav-shop',
-            title: 'МАГАЗИН 🛒',
-            desc: 'Трать заработанные монеты на <b>шляпы, крылья, оружие, эффекты</b> и многое другое. Наряди своего персонажа!',
-            cardPos: 'right',
+            title: '🛒 МАГАЗИН',
+            desc: 'На заработанные цитрусы покупай крутые вещи для персонажа:<br><br>🖤 Нефорские волосы &nbsp; 🦾 Тёмная броня<br>🚀 Джетпак &nbsp; 👻 Призрак-компаньон<br>⚡ Аура Грома &nbsp; 🗡️ Световой меч<br><br>Купленное сразу попадает в инвентарь аватара.',
         },
         {
             target: 'nav-avatar',
-            title: 'АВАТАР 👤',
-            desc: 'Смотри как выглядит твой персонаж со всеми надетыми предметами. Снимай и надевай что хочешь!',
-            cardPos: 'right',
+            title: '👤 АВАТАР',
+            desc: 'Здесь ты настраиваешь внешность своего персонажа.<br><br>Выбирай <b style="color:#FF9500">цвет тела</b>, надевай купленные вещи из инвентаря и смотри как выглядишь в 3D-превью.<br><br>Другие игроки видят твой аватар в мирах — выгляди круто! 😎',
         },
         {
             target: 'nav-friends',
-            title: 'ДРУЗЬЯ 👥',
-            desc: 'Добавляй других игроков в друзья, пиши им личные сообщения и зови в игру вместе!',
-            cardPos: 'right',
+            title: '👥 ДРУЗЬЯ',
+            desc: 'Добавляй игроков по тегу — он выглядит примерно так: <b style="color:#38BDF8">Ник#1234</b><br><br>Что можно с друзьями:<br> 💬 Писать личные сообщения<br> 🌍 Видеть в каком мире они сидят<br> ➡️ Телепортироваться к ним в мир<br> 🎁 Дарить подарки',
         },
         {
             target: 'nav-studio',
-            title: 'СТУДИЯ 🎨',
-            desc: 'Создавай <b>свои собственные карты</b> из блоков и публикуй их — другие игроки смогут играть на них!',
-            cardPos: 'right',
+            title: '🎨 СТУДИЯ',
+            desc: 'Создавай свои собственные миры из блоков!<br><br>Размещай блоки, выбирай цвета и форму, строй что угодно — платформы, лабиринты, арены.<br><br>После нажми <b style="color:#FF9500">«Опубликовать»</b> — твой мир появится в общем списке и другие смогут зайти!',
         },
         {
             target: 'nav-quests',
-            title: 'ЗАДАНИЯ 📋',
-            desc: 'Каждый день новые задания с наградами. Выполняй их чтобы <b>прокачивать уровень</b> и получать бонусы!',
-            cardPos: 'right',
+            title: '📋 ЗАДАНИЯ',
+            desc: 'Каждый день появляются новые задания с наградами в <b style="color:#FF9500">🍊 цитрусах и XP</b>.<br><br>Примеры заданий:<br> Прыгнуть 50 раз в мире<br> Собрать руды в шахте<br> Посетить 3 разных мира<br>Выполняй — прокачивай уровень и получай бонусы!',
         },
         {
             target: 'nav-daily',
-            title: 'ЕЖЕДНЕВНАЯ НАГРАДА 🎁',
-            desc: 'Заходи каждый день и получай <b>бесплатные монеты</b>. Чем дольше серия — тем больше награда!',
-            cardPos: 'right',
+            title: '🎁 ЕЖЕДНЕВНАЯ НАГРАДА',
+            desc: 'Заходи в игру каждый день и получай <b style="color:#FFD700">бесплатные цитрусы</b>!<br><br>Серия дней увеличивает награду:<br> День 1 → немного цитрусов<br> День 3 → больше<br> День 7 → максимум + бонус!<br><br>Пропустишь день — серия сбросится. Не забывай заходить! 🍊',
         },
         {
             target: 'nav-roulette',
-            title: 'РУЛЕТКА 🎲',
-            desc: 'Крути рулетку раз в день и выигрывай <b>редкие предметы</b> или кучу монет. Удача на твоей стороне?',
-            cardPos: 'right',
+            title: '🎲 РУЛЕТКА',
+            desc: 'Рискуй цитрусами и выигрывай больше!<br><br>Поставь любую сумму<br> Крути рулетку<br> Выиграй x2, x5 или даже x10 от ставки<br><br>Но можно и проиграть — используй с умом. Раз в день есть <b style="color:#4ADE80">бесплатное вращение</b>!',
         },
         {
             target: 'nav-leaderboard',
-            title: 'ТОП ИГРОКОВ 🏆',
-            desc: 'Смотри кто самый богатый и сколько времени провёл в игре. Попади в топ!',
-            cardPos: 'right',
+            title: '🏆 ТОП ИГРОКОВ',
+            desc: 'Таблица лучших игроков по количеству цитрусов.<br><br>Топ-3 получают золотые, серебряные и бронзовые короны рядом с ником.<br><br>Копи цитрусы, выполняй задания, заходи каждый день — и твоё имя окажется на первом месте! 👑',
         },
     ],
 
@@ -3649,9 +3636,11 @@ const app = {
         spot.style.width  = (r.width+pad*2)+'px';
         spot.style.height = (r.height+pad*2)+'px';
 
-        // Позиция карточки — справа от навбара
-        const cardW = 320, cardH = 200;
-        const cx = r.right + 24;
+        // Позиция карточки — правее навбара, с отступом от стрелки
+        const cardW = 380, cardH = 260;
+        const arrowW = 52;
+        // Карточка начинается после стрелки: r.right + arrowW + 20
+        const cx = r.right + arrowW + 20;
         let cy = r.top + r.height/2 - cardH/2;
         cy = Math.max(12, Math.min(cy, window.innerHeight - cardH - 12));
 
@@ -3661,12 +3650,11 @@ const app = {
         card.style.right = 'auto';
         card.style.bottom = 'auto';
 
-        // Стрелка — указывает влево на элемент
-        // Поворачиваем на -90deg (влево)
+        // Стрелка — между навбаром и карточкой, указывает влево
         arrow.style.setProperty('--arrow-rot','-90deg');
         arrow.style.setProperty('--arrow-dx','6px');
         arrow.style.setProperty('--arrow-dy','0px');
-        const ax = r.right + 4;
+        const ax = r.right + 6;
         const ay = r.top + r.height/2 - 26;
         arrow.style.left = ax+'px';
         arrow.style.top  = ay+'px';
@@ -11900,11 +11888,11 @@ window.onload = () => app.init();
 #tut-card {
     position:fixed;z-index:50002;
     background:linear-gradient(160deg,#0e0820,#080514);
-    border:1px solid rgba(255,59,48,0.35);
+    border:1px solid rgba(255,59,48,0.4);
     border-radius:20px;
-    padding:22px 26px 18px;
-    min-width:280px;max-width:340px;
-    box-shadow:0 12px 48px rgba(0,0,0,0.8),0 0 0 1px rgba(255,59,48,0.1) inset;
+    padding:24px 28px 20px;
+    min-width:320px;max-width:380px;
+    box-shadow:0 16px 56px rgba(0,0,0,0.85),0 0 0 1px rgba(255,59,48,0.12) inset, 0 0 40px rgba(255,59,48,0.08);
     transition:all 0.4s cubic-bezier(0.4,0,0.2,1);
     pointer-events:all;
 }
@@ -11924,9 +11912,9 @@ window.onload = () => app.init();
     margin-bottom:8px;line-height:1.2;
 }
 .tut-desc {
-    font-size:13px;color:rgba(200,220,255,0.65);
-    font-family:var(--font-ui);line-height:1.7;
-    margin-bottom:18px;
+    font-size:14px;color:rgba(210,228,255,0.80);
+    font-family:var(--font-ui);line-height:1.8;
+    margin-bottom:20px;
 }
 .tut-btns { display:flex;gap:8px;align-items:center; }
 #tut-btn-next {
@@ -12013,7 +12001,6 @@ window.onload = () => app.init();
     <div class="tut-desc" id="tut-desc"></div>
     <div class="tut-btns">
         <button id="tut-btn-next" onclick="app._tutNext()">ДАЛЕЕ →</button>
-        <button id="tut-btn-skip" onclick="app._tutSkip()">Пропустить</button>
     </div>
 </div>
 
@@ -12021,11 +12008,12 @@ window.onload = () => app.init();
 <div id="tut-final">
     <div class="tut-final-box">
         <div style="font-size:64px;margin-bottom:16px;filter:drop-shadow(0 0 20px rgba(255,200,0,0.6));">🎉</div>
-        <div style="font-family:var(--font-head);font-size:32px;letter-spacing:4px;color:#FFD700;margin-bottom:8px;">МОЛОДЕЦ!</div>
+        <div style="font-family:var(--font-head);font-size:32px;letter-spacing:4px;color:#FFD700;margin-bottom:8px;">ГОТОВО!</div>
         <div style="font-size:15px;color:rgba(200,220,255,0.7);font-family:var(--font-ui);line-height:1.8;margin-bottom:28px;">
-            Ты прошёл обучение!<br>
-            Ты знаешь как играть в <b style="color:var(--p);">CITRUS ONLINE</b>.<br>
-            Удачной игры и хорошего настроения! 🍊
+            Ты прошёл обучение! Теперь ты знаешь всё что нужно.<br>
+            Начни с <b style="color:#FF9500">Шахты</b> чтобы заработать первые монеты,<br>
+            купи что-нибудь в <b style="color:#FF9500">Магазине</b> и зайди в <b style="color:#FF9500">Мир</b>.<br><br>
+            Удачной игры! <b style="color:var(--p);">CITRUS ONLINE</b> 🍊
         </div>
         <button onclick="app._tutFinish()" style="
             padding:14px 40px;
