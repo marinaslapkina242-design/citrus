@@ -491,6 +491,16 @@
                         radial-gradient(ellipse 50% 60% at 0% 100%, rgba(123,47,255,0.03), transparent),
                         var(--deep);
             position: relative;
+            display: flex; flex-direction: column;
+        }
+        /* Все вкладки растягиваются на всю доступную высоту */
+        .content-area > [id^="tab-"] {
+            flex: 1;
+            min-height: 100%;
+        }
+        /* Вкладки со своей высотой — не переопределяем */
+        #tab-aihelper, #tab-mine {
+            flex: none;
         }
         #tab-roulette { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 10px; width: 100%; gap: 4px; }
         .content-area::-webkit-scrollbar { width: 3px; }
@@ -1018,7 +1028,7 @@
                 <div class="nav-item"        id="nav-stats"       onclick="app.switchTab('stats')">      <div class="nav-icon"><i class="fas fa-chart-line"></i></div> Статистика</div>
                 <div class="nav-item"        id="nav-leaderboard" onclick="app.switchTab('leaderboard')"><div class="nav-icon"><i class="fas fa-trophy"></i></div> Топ</div>
                 <div class="nav-item hidden" id="nav-admin"       onclick="app.switchTab('admin')">      <div class="nav-icon"><i class="fas fa-shield-alt"></i></div> Баны</div>
-                <div class="nav-item hidden" id="nav-scare"       onclick="app.switchTab('scare')">      <div class="nav-icon"><i class="fas fa-ghost"></i></div> 👻 Пугать</div>
+                <div class="nav-item hidden" id="nav-scare"       onclick="app.switchTab('scare')">      <div class="nav-icon"><i class="fas fa-ghost"></i></div> Пугать</div>
                 <div class="nav-item"        id="nav-help"        onclick="app.switchTab('help')">       <div class="nav-icon"><i class="fas fa-question-circle"></i></div> Помощь</div>
                 <div class="nav-item"        id="nav-aihelper"    onclick="app.switchTab('aihelper')">   <div class="nav-icon"><i class="fas fa-robot"></i></div> ИИ Хелпер <span class="nav-badge hidden" id="ai-badge">!</span></div>
                 <div class="nav-item"        id="nav-devmail"     onclick="app.switchTab('devmail')">    <div class="nav-icon"><i class="fas fa-envelope"></i></div> Почта <span class="nav-badge hidden" id="devmail-badge">0</span></div>
@@ -4396,6 +4406,34 @@ const app = {
         setInterval(()=>this._checkDmUnread(), 10000);
         // Трекер времени на сайте — запускаем при входе в хаб
         this._startHubTimeTracker();
+        // Подключаем WS чтобы получать scare и другие события даже в хабе
+        this._connectHubWS();
+    },
+
+    _connectHubWS(){
+        if(this._gameWS && this._gameWS.readyState === 1){
+            try{ this._gameWS.send(JSON.stringify({type:'lobby', id:String(this.userId), name:this.username})); }catch(e){}
+            return;
+        }
+        if(this._gameWS){ try{this._gameWS.close();}catch(e){} this._gameWS=null; }
+        const wsUrl = (this._WSAPI||this._API).replace('https://','wss://').replace('http://','ws://');
+        try {
+            this._gameWS = new WebSocket(wsUrl);
+            this._gameWS.onopen = () => {
+                this._gameWSAlive = true;
+                try{ this._gameWS.send(JSON.stringify({type:'lobby', id:String(this.userId), name:this.username})); }catch(e){}
+            };
+            this._gameWS.onmessage = (e) => {
+                try {
+                    const msg = JSON.parse(e.data);
+                    if(msg.type==='scare' && String(msg.to)===String(this.userId)){
+                        this._applyScareEffect(msg.effect);
+                    }
+                } catch(err){}
+            };
+            this._gameWS.onclose = () => { this._gameWSAlive = false; this._gameWS = null; };
+            this._gameWS.onerror = () => {};
+        } catch(e){}
     },
 
     _myHubTime: 0,
