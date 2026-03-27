@@ -491,16 +491,6 @@
                         radial-gradient(ellipse 50% 60% at 0% 100%, rgba(123,47,255,0.03), transparent),
                         var(--deep);
             position: relative;
-            display: flex; flex-direction: column;
-        }
-        /* Все вкладки растягиваются на всю доступную высоту */
-        .content-area > [id^="tab-"] {
-            flex: 1;
-            min-height: 100%;
-        }
-        /* Вкладки со своей высотой — не переопределяем */
-        #tab-aihelper, #tab-mine {
-            flex: none;
         }
         #tab-roulette { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 10px; width: 100%; gap: 4px; }
         .content-area::-webkit-scrollbar { width: 3px; }
@@ -1028,7 +1018,6 @@
                 <div class="nav-item"        id="nav-stats"       onclick="app.switchTab('stats')">      <div class="nav-icon"><i class="fas fa-chart-line"></i></div> Статистика</div>
                 <div class="nav-item"        id="nav-leaderboard" onclick="app.switchTab('leaderboard')"><div class="nav-icon"><i class="fas fa-trophy"></i></div> Топ</div>
                 <div class="nav-item hidden" id="nav-admin"       onclick="app.switchTab('admin')">      <div class="nav-icon"><i class="fas fa-shield-alt"></i></div> Баны</div>
-                <div class="nav-item hidden" id="nav-scare"       onclick="app.switchTab('scare')">      <div class="nav-icon"><i class="fas fa-ghost"></i></div> Пугать</div>
                 <div class="nav-item"        id="nav-help"        onclick="app.switchTab('help')">       <div class="nav-icon"><i class="fas fa-question-circle"></i></div> Помощь</div>
                 <div class="nav-item"        id="nav-aihelper"    onclick="app.switchTab('aihelper')">   <div class="nav-icon"><i class="fas fa-robot"></i></div> ИИ Хелпер <span class="nav-badge hidden" id="ai-badge">!</span></div>
                 <div class="nav-item"        id="nav-devmail"     onclick="app.switchTab('devmail')">    <div class="nav-icon"><i class="fas fa-envelope"></i></div> Почта <span class="nav-badge hidden" id="devmail-badge">0</span></div>
@@ -1680,66 +1669,6 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
                 </div>
             </div>
 
-            </div>
-
-            <!-- ══════════════════ TAB: SCARE (только Разраб) ══════════════════ -->
-            <div id="tab-scare" class="hidden">
-                <div class="section-title">👻 Напугать игрока</div>
-                <div style="display:grid;grid-template-columns:320px 1fr;gap:20px;align-items:start;">
-
-                    <!-- Левая: выбор жертвы -->
-                    <div class="panel-box">
-                        <div class="panel-box-title">🎯 Выбери жертву</div>
-                        <div id="scare-online-list" style="display:flex;flex-direction:column;gap:6px;max-height:400px;overflow-y:auto;margin-bottom:12px;"></div>
-                        <button onclick="app.loadScareOnline()" style="width:100%;padding:8px;background:rgba(0,229,255,0.07);border:1px solid rgba(0,229,255,0.15);border-radius:8px;color:rgba(0,229,255,0.6);font-size:12px;font-family:var(--font-ui);cursor:pointer;">↻ Обновить список</button>
-                        <div id="scare-target-display" style="display:none;margin-top:12px;padding:10px 14px;background:rgba(255,60,60,0.08);border:1px solid rgba(255,60,60,0.2);border-radius:10px;font-size:13px;color:rgba(255,120,120,0.9);font-family:var(--font-ui);">
-                            🎯 Цель: <b id="scare-target-name">—</b>
-                        </div>
-                    </div>
-
-                    <!-- Правая: выбор эффекта -->
-                    <div style="display:flex;flex-direction:column;gap:14px;">
-                        <div class="panel-box" style="cursor:pointer;transition:all 0.2s;" onclick="app.scarePlayer('cracks')"
-                            onmouseover="this.style.borderColor='rgba(255,60,60,0.3)'" onmouseout="this.style.borderColor=''">
-                            <div style="display:flex;align-items:center;gap:14px;">
-                                <div style="font-size:42px;filter:drop-shadow(0 0 12px rgba(255,60,60,0.5));">💀</div>
-                                <div>
-                                    <div style="font-family:var(--font-head);font-size:20px;letter-spacing:2px;color:rgba(255,100,100,0.9);">ТРЕЩИНЫ</div>
-                                    <div style="font-size:12px;color:rgba(255,255,255,0.35);font-family:var(--font-ui);margin-top:4px;">Сначала всё нормально... потом экран медленно покрывается трещинами и сайт "ломается"</div>
-                                </div>
-                                <div style="margin-left:auto;background:rgba(255,60,60,0.1);border:1px solid rgba(255,60,60,0.2);border-radius:8px;padding:8px 16px;font-family:var(--font-head);color:rgba(255,80,80,0.8);font-size:14px;letter-spacing:1px;">ЗАПУСТИТЬ</div>
-                            </div>
-                        </div>
-
-                        <div class="panel-box" style="cursor:pointer;transition:all 0.2s;" onclick="app.scarePlayer('screamer')"
-                            onmouseover="this.style.borderColor='rgba(255,150,0,0.3)'" onmouseout="this.style.borderColor=''">
-                            <div style="display:flex;align-items:center;gap:14px;">
-                                <div style="font-size:42px;filter:drop-shadow(0 0 12px rgba(255,150,0,0.5));">😱</div>
-                                <div>
-                                    <div style="font-family:var(--font-head);font-size:20px;letter-spacing:2px;color:rgba(255,180,0,0.9);">СКРИМЕР</div>
-                                    <div style="font-size:12px;color:rgba(255,255,255,0.35);font-family:var(--font-ui);margin-top:4px;">Резкий скример на весь экран со звуком и вспышкой. Классика.</div>
-                                </div>
-                                <div style="margin-left:auto;background:rgba(255,150,0,0.1);border:1px solid rgba(255,150,0,0.2);border-radius:8px;padding:8px 16px;font-family:var(--font-head);color:rgba(255,180,0,0.8);font-size:14px;letter-spacing:1px;">ЗАПУСТИТЬ</div>
-                            </div>
-                        </div>
-
-                        <div class="panel-box" style="cursor:pointer;transition:all 0.2s;" onclick="app.scarePlayer('dark')"
-                            onmouseover="this.style.borderColor='rgba(150,0,255,0.3)'" onmouseout="this.style.borderColor=''">
-                            <div style="display:flex;align-items:center;gap:14px;">
-                                <div style="font-size:42px;filter:drop-shadow(0 0 12px rgba(150,0,255,0.5));">🌑</div>
-                                <div>
-                                    <div style="font-family:var(--font-head);font-size:20px;letter-spacing:2px;color:rgba(180,80,255,0.9);">ТЁМНЫЙ МИР</div>
-                                    <div style="font-size:12px;color:rgba(255,255,255,0.35);font-family:var(--font-ui);margin-top:4px;">Весь интерфейс становится страшным: кровавые цвета, жуткие шрифты, звуки, дрожание</div>
-                                </div>
-                                <div style="margin-left:auto;background:rgba(150,0,255,0.1);border:1px solid rgba(150,0,255,0.2);border-radius:8px;padding:8px 16px;font-family:var(--font-head);color:rgba(180,80,255,0.8);font-size:14px;letter-spacing:1px;">ЗАПУСТИТЬ</div>
-                            </div>
-                        </div>
-
-                        <div id="scare-status" style="display:none;padding:12px 16px;background:rgba(0,229,255,0.06);border:1px solid rgba(0,229,255,0.15);border-radius:10px;font-size:13px;color:rgba(0,229,255,0.7);font-family:var(--font-mono);text-align:center;"></div>
-                    </div>
-                </div>
-            </div>
-
             <!-- ══════════════════ TAB: LEADERBOARD ══════════════════ -->
             <div id="tab-leaderboard" class="hidden">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
@@ -2312,8 +2241,6 @@ const app = {
                     this.renderMyGames(); this.renderFriends(); this.renderOnline(); this.initAvatarPreview(); this.renderShop();
                     const adminNav = document.getElementById('nav-admin');
                     if(adminNav) adminNav.classList.toggle('hidden', !this.canBan(this.username));
-                    const scareNav = document.getElementById('nav-scare');
-                    if(scareNav) scareNav.classList.toggle('hidden', !this.isDev(this.username));
                     this.updateUI();
                     this._wsConnect();
                     setInterval(()=>this.renderOnline(), 30000);
@@ -2336,8 +2263,6 @@ const app = {
                     this.renderMyGames(); this.renderFriends(); this.renderOnline(); this.initAvatarPreview(); this.renderShop();
                     const adminNav = document.getElementById('nav-admin');
                     if(adminNav) adminNav.classList.toggle('hidden', !this.canBan(this.username));
-                    const scareNav = document.getElementById('nav-scare');
-                    if(scareNav) scareNav.classList.toggle('hidden', !this.isDev(this.username));
                     this.updateUI();
                     this._wsConnect();
                     setInterval(()=>this.renderOnline(), 30000);
@@ -3999,297 +3924,6 @@ const app = {
         this.loadBanList(); this.loadBanOnlineList();
     },
 
-    // ══════════════════════════════════════════════════════
-    // 👻 СИСТЕМА ИСПУГА
-    // ══════════════════════════════════════════════════════
-    _scareTargetId: null,
-    _scareTargetName: null,
-
-    loadScareOnline(){
-        if(!this.isDev(this.username)) return;
-        const el = document.getElementById('scare-online-list');
-        if(!el) return;
-        const online = (this._cachedOnline||[]).filter(p=>String(p.id)!==String(this.userId));
-        if(!online.length){
-            el.innerHTML = '<div style="color:rgba(255,255,255,0.2);font-size:12px;text-align:center;padding:16px;">Никого нет онлайн</div>';
-            return;
-        }
-        el.innerHTML = online.map(p=>`
-            <div onclick="app._scareSelectTarget('${p.id}','${(p.name||p.tag||'').replace(/'/g,'')}')"
-                style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:${this._scareTargetId===String(p.id)?'rgba(255,60,60,0.12)':'rgba(255,255,255,0.03)'};
-                border:1px solid ${this._scareTargetId===String(p.id)?'rgba(255,60,60,0.3)':'rgba(255,255,255,0.07)'};
-                border-radius:10px;cursor:pointer;transition:all 0.15s;"
-                onmouseover="this.style.background='rgba(255,60,60,0.08)'"
-                onmouseout="this.style.background='${this._scareTargetId===String(p.id)?'rgba(255,60,60,0.12)':'rgba(255,255,255,0.03)'}'">
-                <div style="width:8px;height:8px;border-radius:50%;background:#39E08A;flex-shrink:0;box-shadow:0 0 6px #39E08A;"></div>
-                <div style="font-size:13px;font-family:var(--font-ui);color:rgba(220,240,255,0.85);">${p.name||p.tag||('#'+p.id)}</div>
-                ${this._scareTargetId===String(p.id)?'<div style="margin-left:auto;font-size:10px;color:rgba(255,80,80,0.8);font-family:var(--font-mono);">🎯 ЦЕЛЬ</div>':''}
-            </div>`).join('');
-    },
-
-    _scareSelectTarget(id, name){
-        this._scareTargetId = String(id);
-        this._scareTargetName = name;
-        const disp = document.getElementById('scare-target-display');
-        const nm = document.getElementById('scare-target-name');
-        if(disp) disp.style.display = 'block';
-        if(nm) nm.textContent = name;
-        this.loadScareOnline();
-        this._showToast(`🎯 Цель: ${name}`);
-    },
-
-    scarePlayer(effect){
-        if(!this.isDev(this.username)){ this._showToast('❌ Нет прав'); return; }
-        if(!this._scareTargetId){ this._showToast('⚠️ Сначала выбери жертву!'); return; }
-        const names = {cracks:'💀 Трещины', screamer:'😱 Скример', dark:'🌑 Тёмный мир'};
-        const status = document.getElementById('scare-status');
-        if(status){ status.style.display='block'; status.textContent=`Отправляю ${names[effect]} → ${this._scareTargetName}...`; }
-
-        const msg = {
-            type: 'scare',
-            to: String(this._scareTargetId),
-            effect,
-            from: this.username,
-        };
-        // Отправляем через gameWS если доступен, иначе через MQTT
-        if(this._gameWS && this._gameWS.readyState===1){
-            try{ this._gameWS.send(JSON.stringify(msg)); }catch(e){}
-        }
-        // Дублируем через MQTT для надёжности
-        this._wsSend({...msg, _ch:'citrus_v1'});
-
-        setTimeout(()=>{
-            if(status){ status.textContent=`✅ Отправлено! ${this._scareTargetName} сейчас испугается 😈`; }
-            setTimeout(()=>{ if(status) status.style.display='none'; }, 4000);
-        }, 500);
-    },
-
-    // ── Применяем эффект испуга на СТОРОНЕ ЖЕРТВЫ
-    _applyScareEffect(effect){
-        if(effect==='cracks') this._scareCracks();
-        else if(effect==='screamer') this._scareScreamer();
-        else if(effect==='dark') this._scareDark();
-    },
-
-    _scareCracks(){
-        // Фаза 1: ничего 3 сек
-        // Фаза 2: трещины нарастают 8 сек
-        // Фаза 3: "краш" — экран трясётся и выкидывает на страницу ошибки
-        const overlay = document.createElement('div');
-        overlay.id = 'scare-cracks-overlay';
-        overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;pointer-events:none;';
-        document.body.appendChild(overlay);
-
-        // SVG трещин — рисуем рандомные линии
-        const makeCracks = (count, opacity) => {
-            let svg = `<svg style="position:absolute;inset:0;width:100%;height:100%;opacity:${opacity}" xmlns="http://www.w3.org/2000/svg">`;
-            const W = window.innerWidth, H = window.innerHeight;
-            // Центр трещины — случайный
-            const cx = W*0.3 + Math.random()*W*0.4;
-            const cy = H*0.3 + Math.random()*H*0.4;
-            for(let i=0;i<count;i++){
-                const angle = (Math.PI*2/count)*i + Math.random()*0.4;
-                const len = 80 + Math.random()*Math.min(W,H)*0.4;
-                let x=cx, y=cy, path=`M${cx},${cy}`;
-                for(let s=0;s<6;s++){
-                    const jitter = (Math.random()-0.5)*40;
-                    x += Math.cos(angle)*len/6 + jitter;
-                    y += Math.sin(angle)*len/6 + jitter;
-                    path += ` L${x},${y}`;
-                }
-                const w = 0.5+Math.random()*2;
-                svg += `<path d="${path}" stroke="rgba(0,0,0,${0.6+Math.random()*0.4})" stroke-width="${w*2+1}" fill="none"/>`;
-                svg += `<path d="${path}" stroke="rgba(255,255,255,${0.1+Math.random()*0.2})" stroke-width="${w}" fill="none"/>`;
-            }
-            svg += '</svg>';
-            return svg;
-        };
-
-        let phase = 0;
-        const steps = [
-            [3000, ()=>{ overlay.innerHTML = makeCracks(4, 0.3); }],
-            [1500, ()=>{ overlay.innerHTML = makeCracks(8, 0.55); }],
-            [1000, ()=>{ overlay.innerHTML = makeCracks(14, 0.75); overlay.style.background='rgba(0,0,0,0.1)'; }],
-            [800,  ()=>{ overlay.innerHTML = makeCracks(22, 0.9); overlay.style.background='rgba(0,0,0,0.25)'; }],
-            [600,  ()=>{ overlay.innerHTML = makeCracks(32, 1); overlay.style.background='rgba(0,0,0,0.45)'; }],
-            [400,  ()=>{
-                // Трясём экран
-                document.body.style.animation='scareShake 0.1s infinite';
-                overlay.style.background='rgba(0,0,0,0.7)';
-                overlay.innerHTML = makeCracks(50, 1);
-            }],
-            [600,  ()=>{
-                // КРАШ — экран чернеет
-                overlay.style.background='#000';
-                overlay.style.pointerEvents='all';
-                overlay.innerHTML=`<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;">
-                    <div style="font-size:64px;">💀</div>
-                    <div style="font-family:monospace;font-size:18px;color:#cc0000;letter-spacing:2px;">ОШИБКА: КРИТИЧЕСКИЙ СБОЙ</div>
-                    <div style="font-family:monospace;font-size:12px;color:#666;max-width:400px;text-align:center;line-height:1.8;">
-                        KERNEL_SECURITY_CHECK_FAILURE<br>
-                        0x00000139 (0x0000000000000003)<br>
-                        Сбор данных: ████████████ 100%
-                    </div>
-                    <button onclick="document.getElementById('scare-cracks-overlay').remove();document.body.style.animation=''"
-                        style="margin-top:20px;padding:10px 28px;background:#1a1a1a;border:1px solid #333;color:#666;font-family:monospace;font-size:13px;cursor:pointer;border-radius:4px;">
-                        Перезапустить
-                    </button>
-                </div>`;
-                document.body.style.animation='';
-            }],
-        ];
-
-        // Добавляем keyframes для тряски
-        if(!document.getElementById('scare-style')){
-            const s=document.createElement('style');
-            s.id='scare-style';
-            s.textContent=`
-                @keyframes scareShake{0%{transform:translate(0)}20%{transform:translate(-4px,3px)}40%{transform:translate(4px,-3px)}60%{transform:translate(-3px,-4px)}80%{transform:translate(3px,4px)}100%{transform:translate(0)}}
-                @keyframes scareFlash{0%,100%{opacity:1}50%{opacity:0}}
-                @keyframes scarePulse{0%,100%{filter:hue-rotate(0deg) saturate(1)}50%{filter:hue-rotate(180deg) saturate(3)}}
-                @keyframes scareBlood{0%{background-position:0% 0%}100%{background-position:100% 100%}}
-                @keyframes scareDrip{0%{transform:translateY(-100%)}100%{transform:translateY(110vh)}}
-            `;
-            document.head.appendChild(s);
-        }
-
-        let delay = 0;
-        steps.forEach(([wait, fn])=>{
-            delay += wait;
-            setTimeout(fn, delay);
-        });
-    },
-
-    _scareScreamer(){
-        if(!document.getElementById('scare-style')){
-            const s=document.createElement('style');s.id='scare-style';
-            s.textContent=`@keyframes scareShake{0%{transform:translate(0)}20%{transform:translate(-4px,3px)}40%{transform:translate(4px,-3px)}60%{transform:translate(-3px,-4px)}80%{transform:translate(3px,4px)}100%{transform:translate(0)}}@keyframes scareFlash{0%,100%{opacity:1}50%{opacity:0}}@keyframes scarePulse{0%,100%{filter:hue-rotate(0deg) saturate(1)}50%{filter:hue-rotate(180deg) saturate(3)}}`;
-            document.head.appendChild(s);
-        }
-        // Пауза 1.5 сек — потом скример
-        setTimeout(()=>{
-            const el = document.createElement('div');
-            el.style.cssText='position:fixed;inset:0;z-index:99999;background:#000;display:flex;align-items:center;justify-content:center;cursor:pointer;animation:scareShake 0.08s infinite;';
-            // Страшное лицо из эмодзи + красный фон
-            el.innerHTML=`
-                <div style="text-align:center;animation:scareFlash 0.15s infinite;">
-                    <div style="font-size:min(60vw,60vh);line-height:1;filter:drop-shadow(0 0 40px red);">😱</div>
-                    <div style="position:absolute;inset:0;background:radial-gradient(circle,rgba(255,0,0,0.4),transparent 70%);pointer-events:none;"></div>
-                </div>`;
-            document.body.appendChild(el);
-
-            // Звук — синтезированный пронзительный крик
-            try{
-                const ac = new (window.AudioContext||window.webkitAudioContext)();
-                const osc = ac.createOscillator();
-                const gain = ac.createGain();
-                osc.connect(gain); gain.connect(ac.destination);
-                osc.type='sawtooth';
-                osc.frequency.setValueAtTime(800,ac.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(200,ac.currentTime+1.5);
-                gain.gain.setValueAtTime(0.8,ac.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+1.5);
-                osc.start(); osc.stop(ac.currentTime+1.5);
-            }catch(e){}
-
-            // Убираем через 3 сек или по клику
-            const remove = ()=>{ el.remove(); document.body.style.animation=''; };
-            el.addEventListener('click', remove);
-            setTimeout(remove, 3000);
-        }, 1500);
-    },
-
-    _scareDark(){
-        if(!document.getElementById('scare-style')){
-            const s=document.createElement('style');s.id='scare-style';
-            s.textContent=`@keyframes scareShake{0%{transform:translate(0)}20%{transform:translate(-4px,3px)}40%{transform:translate(4px,-3px)}60%{transform:translate(-3px,-4px)}80%{transform:translate(3px,4px)}100%{transform:translate(0)}}@keyframes scareBlood{0%{background-position:0% 0%}100%{background-position:200% 200%}}@keyframes scareDrip{0%{transform:translateY(-10px);opacity:0}10%{opacity:1}100%{transform:translateY(100px);opacity:0.6}}`;
-            document.head.appendChild(s);
-        }
-
-        // Постепенно меняем весь интерфейс
-        const root = document.documentElement;
-        const orig = {
-            p: getComputedStyle(root).getPropertyValue('--p'),
-            void_: getComputedStyle(root).getPropertyValue('--void'),
-            r: getComputedStyle(root).getPropertyValue('--r'),
-        };
-
-        // Фаза 1: цвета начинают "кровоточить"
-        setTimeout(()=>{
-            root.style.setProperty('--p','#8B0000');
-            root.style.setProperty('--c-main','#8B0000');
-            root.style.setProperty('--c-glow','#cc0000');
-            root.style.setProperty('--r','#8B0000');
-            document.body.style.filter='saturate(0.3) brightness(0.7)';
-        }, 1000);
-
-        // Фаза 2: кровавые подтёки
-        setTimeout(()=>{
-            document.body.style.filter='saturate(0) brightness(0.4) sepia(1)';
-            const drips = document.createElement('div');
-            drips.id='scare-dark-drips';
-            drips.style.cssText='position:fixed;inset:0;z-index:9999;pointer-events:none;overflow:hidden;';
-            for(let i=0;i<18;i++){
-                const d=document.createElement('div');
-                const x=Math.random()*100;
-                const delay=Math.random()*3;
-                const dur=2+Math.random()*3;
-                const h=30+Math.random()*80;
-                d.style.cssText=`position:absolute;left:${x}%;top:0;width:${2+Math.random()*6}px;height:${h}px;
-                    background:linear-gradient(to bottom,#8B0000,#cc0000,transparent);
-                    border-radius:0 0 50% 50%;animation:scareDrip ${dur}s ${delay}s infinite;`;
-                drips.appendChild(d);
-            }
-            document.body.appendChild(drips);
-            document.body.style.animation='scareShake 0.5s infinite';
-        }, 3000);
-
-        // Фаза 3: страшные надписи
-        setTimeout(()=>{
-            const msg = document.createElement('div');
-            msg.id='scare-dark-msg';
-            msg.style.cssText='position:fixed;inset:0;z-index:99998;display:flex;align-items:center;justify-content:center;pointer-events:none;';
-            const phrases=['ТЫ НЕ ОДИН','Я ВИЖУ ТЕБЯ','ВЫХОДА НЕТ','ОН СМОТРИТ'];
-            msg.innerHTML=`<div style="font-family:'Bebas Neue',sans-serif;font-size:clamp(40px,8vw,100px);
-                color:rgba(139,0,0,0.15);letter-spacing:8px;text-align:center;line-height:1.3;
-                text-shadow:0 0 40px rgba(255,0,0,0.3);animation:scareFlash 2s infinite;">
-                ${phrases[Math.floor(Math.random()*phrases.length)]}
-            </div>`;
-            document.body.appendChild(msg);
-        }, 5000);
-
-        // Фаза 4: кнопка "выйти из кошмара" через 10 сек
-        setTimeout(()=>{
-            document.body.style.animation='';
-            const btn = document.createElement('div');
-            btn.style.cssText='position:fixed;bottom:30px;right:30px;z-index:99999;';
-            btn.innerHTML=`<button onclick="app._scareRemoveDark()" style="
-                background:rgba(139,0,0,0.3);border:1px solid rgba(139,0,0,0.5);
-                color:rgba(255,100,100,0.7);padding:10px 20px;border-radius:10px;
-                font-family:var(--font-ui);font-size:12px;cursor:pointer;">
-                💀 Выйти из кошмара
-            </button>`;
-            btn.id='scare-dark-exitbtn';
-            document.body.appendChild(btn);
-        }, 10000);
-    },
-
-    _scareRemoveDark(){
-        const root = document.documentElement;
-        root.style.removeProperty('--p');
-        root.style.removeProperty('--c-main');
-        root.style.removeProperty('--c-glow');
-        root.style.removeProperty('--r');
-        document.body.style.filter='';
-        document.body.style.animation='';
-        ['scare-dark-drips','scare-dark-msg','scare-dark-exitbtn'].forEach(id=>{
-            const el=document.getElementById(id); if(el) el.remove();
-        });
-        this._showToast('😅 Кошмар закончился');
-    },
-
-
-
     _checkIfBanned(){
         const bans = this._getBans();
         const nick = (this.username||'').toLowerCase();
@@ -4396,8 +4030,6 @@ const app = {
         const bnAdmin = document.getElementById('bn-admin');
         if(adminNav) adminNav.classList.toggle('hidden', !this.canBan(this.username));
         if(bnAdmin) bnAdmin.classList.toggle('hidden', !this.canBan(this.username));
-        const scareNav3 = document.getElementById('nav-scare');
-        if(scareNav3) scareNav3.classList.toggle('hidden', !this.isDev(this.username));
         this.updateUI();
         // Проверяем офлайн заработок с продаж НФТ
         setTimeout(()=>this.checkOfflineEarnings(), 1500);
@@ -4406,34 +4038,6 @@ const app = {
         setInterval(()=>this._checkDmUnread(), 10000);
         // Трекер времени на сайте — запускаем при входе в хаб
         this._startHubTimeTracker();
-        // Подключаем WS чтобы получать scare и другие события даже в хабе
-        this._connectHubWS();
-    },
-
-    _connectHubWS(){
-        if(this._gameWS && this._gameWS.readyState === 1){
-            try{ this._gameWS.send(JSON.stringify({type:'lobby', id:String(this.userId), name:this.username})); }catch(e){}
-            return;
-        }
-        if(this._gameWS){ try{this._gameWS.close();}catch(e){} this._gameWS=null; }
-        const wsUrl = (this._WSAPI||this._API).replace('https://','wss://').replace('http://','ws://');
-        try {
-            this._gameWS = new WebSocket(wsUrl);
-            this._gameWS.onopen = () => {
-                this._gameWSAlive = true;
-                try{ this._gameWS.send(JSON.stringify({type:'lobby', id:String(this.userId), name:this.username})); }catch(e){}
-            };
-            this._gameWS.onmessage = (e) => {
-                try {
-                    const msg = JSON.parse(e.data);
-                    if(msg.type==='scare' && String(msg.to)===String(this.userId)){
-                        this._applyScareEffect(msg.effect);
-                    }
-                } catch(err){}
-            };
-            this._gameWS.onclose = () => { this._gameWSAlive = false; this._gameWS = null; };
-            this._gameWS.onerror = () => {};
-        } catch(e){}
     },
 
     _myHubTime: 0,
@@ -5904,7 +5508,7 @@ const app = {
 
         switchTab(id){
         this._sfx('nav');
-        ['games','mine','work','avatar','shop','friends','studio','quests','daily','roulette','credits','gifts','nft','stats','leaderboard','admin','scare','help','cases','aihelper','devmail'].forEach(t=>{
+        ['games','mine','work','avatar','shop','friends','studio','quests','daily','roulette','credits','gifts','nft','stats','leaderboard','admin','help','cases','aihelper','devmail'].forEach(t=>{
             document.getElementById('tab-'+t)?.classList.add('hidden');
             document.getElementById('nav-'+t)?.classList.remove('active');
         });
@@ -5924,7 +5528,6 @@ const app = {
         if(id==='gifts'){ this.initGifts(); }
         if(id==='nft'){ this.initNft(); }
         if(id==='admin'){ this.loadBanList(); this.loadBanOnlineList(); }
-        if(id==='scare'){ this.loadScareOnline(); }
         if(id==='aihelper'){ this.initAiHelper(); }
         if(id==='devmail'){ this.initDevMail(); }
         if(id==='stats'){ this.loadStats(); }
@@ -6213,11 +5816,6 @@ const app = {
                 document.getElementById('auth-error').textContent = `🚫 Ты забанен. Причина: ${banReason}`;
                 document.getElementById('auth-error').style.display='block';
             }, 300);
-            return;
-        }
-
-        if(msg.type==='scare' && String(msg.to)===String(this.userId)){
-            this._applyScareEffect(msg.effect);
             return;
         }
 
@@ -6937,9 +6535,6 @@ const app = {
                         // Сообщение игрового чата
                         if(String(msg.id)!==String(this.userId))
                             this._ingameChatAdd(msg.map, msg.name, msg.color, msg.text);
-                    } else if(msg.type==='scare') {
-                        if(String(msg.to)===String(this.userId))
-                            this._applyScareEffect(msg.effect);
                     }
                 }catch(e){}
             };
