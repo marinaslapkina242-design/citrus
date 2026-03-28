@@ -847,7 +847,7 @@
         @keyframes tabFadeIn { from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none} }
 
         [id^="tab-"] { animation: tabFadeIn 0.2s ease; }
-        #tab-games,#tab-avatar,#tab-shop,#tab-friends,#tab-studio,#tab-quests,#tab-roulette,#tab-gifts { animation: fadeInUp 0.3s ease both; }
+        #tab-games,#tab-avatar,#tab-shop,#tab-friends,#tab-studio,#tab-quests,#tab-roulette,#tab-credits,#tab-gifts { animation: fadeInUp 0.3s ease both; }
 
         .grid .card { animation: fadeInUp 0.4s ease both; }
         .grid .card:nth-child(1){animation-delay:.02s}.grid .card:nth-child(2){animation-delay:.04s}.grid .card:nth-child(3){animation-delay:.06s}.grid .card:nth-child(4){animation-delay:.08s}.grid .card:nth-child(5){animation-delay:.10s}.grid .card:nth-child(6){animation-delay:.12s}.grid .card:nth-child(7){animation-delay:.14s}.grid .card:nth-child(8){animation-delay:.16s}.grid .card:nth-child(9){animation-delay:.18s}
@@ -1012,11 +1012,13 @@
                 <div class="nav-item"        id="nav-quests"      onclick="app.switchTab('quests')">     <div class="nav-icon"><i class="fas fa-tasks"></i></div> Задания <span class="nav-badge hidden" id="quest-badge">!</span></div>
                 <div class="nav-item"        id="nav-daily"       onclick="app.switchTab('daily')">      <div class="nav-icon"><i class="fas fa-calendar-check"></i></div> Награда <span class="nav-badge hidden" id="daily-badge">!</span></div>
                 <div class="nav-item"        id="nav-roulette"    onclick="app.switchTab('roulette')">   <div class="nav-icon"><i class="fas fa-dice"></i></div> Рулетка</div>
+                <div class="nav-item"        id="nav-credits"     onclick="app.switchTab('credits')">    <div class="nav-icon"><i class="fas fa-coins"></i></div> Кредиты</div>
                 <div class="nav-item"        id="nav-gifts"       onclick="app.switchTab('gifts')">      <div class="nav-icon"><i class="fas fa-gift"></i></div> Подарки</div>
                 <div class="nav-item"        id="nav-nft"         onclick="app.switchTab('nft')">        <div class="nav-icon"><i class="fas fa-gem"></i></div> НФТ Подарки</div>
                 <div class="nav-item"        id="nav-stats"       onclick="app.switchTab('stats')">      <div class="nav-icon"><i class="fas fa-chart-line"></i></div> Статистика</div>
                 <div class="nav-item"        id="nav-leaderboard" onclick="app.switchTab('leaderboard')"><div class="nav-icon"><i class="fas fa-trophy"></i></div> Топ</div>
                 <div class="nav-item hidden" id="nav-admin"       onclick="app.switchTab('admin')">      <div class="nav-icon"><i class="fas fa-shield-alt"></i></div> Баны</div>
+                <div class="nav-item"        id="nav-help"        onclick="app.switchTab('help')">       <div class="nav-icon"><i class="fas fa-question-circle"></i></div> Помощь</div>
                 <div class="nav-item"        id="nav-aihelper"    onclick="app.switchTab('aihelper')">   <div class="nav-icon"><i class="fas fa-robot"></i></div> ИИ Хелпер <span class="nav-badge hidden" id="ai-badge">!</span></div>
                 <div class="nav-item"        id="nav-devmail"     onclick="app.switchTab('devmail')">    <div class="nav-icon"><i class="fas fa-envelope"></i></div> Почта <span class="nav-badge hidden" id="devmail-badge">0</span></div>
 
@@ -1035,6 +1037,69 @@
 
 
             <!-- ══════════════════ TAB: HELP ══════════════════ -->
+            <div id="tab-help" class="hidden">
+                <div class="section-title">❓ Помощь — все вкладки</div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;max-width:900px;">
+
+                    <div style="background:rgba(255,149,0,0.05);border:1px solid rgba(255,149,0,0.12);border-radius:16px;padding:20px 22px;">
+                        <div style="font-family:var(--font-head);font-size:12px;color:#FF9500;margin-bottom:10px;letter-spacing:1px;">🎮 МИРЫ</div>
+                        <div style="color:rgba(255,255,255,0.72);font-size:13.5px;line-height:1.85;font-family:var(--font-body);">Выбери мир и нажми чтобы войти. Управление: <b style="color:#FF9500">WASD</b> — движение, <b style="color:#FF9500">Пробел</b> — прыжок, <b style="color:#FF9500">мышь</b> — камера. На мобиле — джойстик и кнопка прыжка. В каждом мире свои цитрусы и секреты.</div>
+                    </div>
+                    <div style="background:rgba(255,149,0,0.05);border:1px solid rgba(255,149,0,0.12);border-radius:16px;padding:20px 22px;">
+                        <div style="font-family:var(--font-head);font-size:12px;color:#FF4444;margin-bottom:10px;letter-spacing:1px;">🔫 АРЕНА ПВП</div>
+                        <div style="color:rgba(255,255,255,0.72);font-size:13.5px;line-height:1.85;font-family:var(--font-body);">Заходи в Арену ПВП и стреляй по мишеням! <b style="color:#ff6666">ЛКМ</b> — выстрел, прицел в центре экрана. У тебя 30 патронов, через 5 сек перезарядка. Попадание в центр даёт 50 очков. На мобиле — кнопка 🔫 на экране.</div>
+                    </div>
+                    <div style="background:rgba(255,149,0,0.05);border:1px solid rgba(255,149,0,0.12);border-radius:16px;padding:20px 22px;">
+                        <div style="font-family:var(--font-head);font-size:12px;color:#FF9500;margin-bottom:10px;letter-spacing:1px;">👤 АВАТАР</div>
+                        <div style="color:rgba(255,255,255,0.72);font-size:13.5px;line-height:1.85;font-family:var(--font-body);">Настрой внешность персонажа: цвет тела, одежда, аксессуары. Вещи покупаются в <b style="color:#FF9500">Магазине</b> за цитрусы 🍊. Аватар виден другим игрокам в мирах.</div>
+                    </div>
+                    <div style="background:rgba(255,149,0,0.05);border:1px solid rgba(255,149,0,0.12);border-radius:16px;padding:20px 22px;">
+                        <div style="font-family:var(--font-head);font-size:12px;color:#FF9500;margin-bottom:10px;letter-spacing:1px;">🛒 МАГАЗИН</div>
+                        <div style="color:rgba(255,255,255,0.72);font-size:13.5px;line-height:1.85;font-family:var(--font-body);">Покупай шляпы, очки, крылья, мечи, плащи и многое другое. Каждая вещь стоит цитрусы 🍊. Купленное автоматически попадает в инвентарь аватара.</div>
+                    </div>
+                    <div style="background:rgba(255,149,0,0.05);border:1px solid rgba(255,149,0,0.12);border-radius:16px;padding:20px 22px;">
+                        <div style="font-family:var(--font-head);font-size:12px;color:#38BDF8;margin-bottom:10px;letter-spacing:1px;">👥 ДРУЗЬЯ</div>
+                        <div style="color:rgba(255,255,255,0.72);font-size:13.5px;line-height:1.85;font-family:var(--font-body);">Добавляй друзей по тегу — он выглядит как <b style="color:#38BDF8">Ник#1234</b>. Нажми 💬 рядом с другом чтобы написать ему лично. Можно видеть онлайн-статус и в каком мире сидит друг — нажми Войти чтобы попасть к нему.</div>
+                    </div>
+                    <div style="background:rgba(255,149,0,0.05);border:1px solid rgba(255,149,0,0.12);border-radius:16px;padding:20px 22px;">
+                        <div style="font-family:var(--font-head);font-size:12px;color:#38BDF8;margin-bottom:10px;letter-spacing:1px;">💬 ГЛОБАЛЬНЫЙ ЧАТ</div>
+                        <div style="color:rgba(255,255,255,0.72);font-size:13.5px;line-height:1.85;font-family:var(--font-body);">Общий чат для всех игроков онлайн. Пиши сообщения, знакомься с другими. Обновляется каждые 4 секунды автоматически. Сообщения видят все кто онлайн прямо сейчас.</div>
+                    </div>
+
+                    <div style="background:rgba(255,149,0,0.05);border:1px solid rgba(255,149,0,0.12);border-radius:16px;padding:20px 22px;">
+                        <div style="font-family:var(--font-head);font-size:12px;color:#4ADE80;margin-bottom:10px;letter-spacing:1px;">🎰 РУЛЕТКА</div>
+                        <div style="color:rgba(255,255,255,0.72);font-size:13.5px;line-height:1.85;font-family:var(--font-body);">Поставь цитрусы и крути рулетку — можно умножить цитрусы в несколько раз! Чем больше ставишь — тем выше риск и награда. Используй с умом.</div>
+                    </div>
+                    <div style="background:rgba(255,149,0,0.05);border:1px solid rgba(255,149,0,0.12);border-radius:16px;padding:20px 22px;">
+                        <div style="font-family:var(--font-head);font-size:12px;color:#FF9500;margin-bottom:10px;letter-spacing:1px;">💰 КРЕДИТЫ</div>
+                        <div style="color:rgba(255,255,255,0.72);font-size:13.5px;line-height:1.85;font-family:var(--font-body);">Одолжи цитрусы у другого игрока или дай в долг сам. Удобно если цитрусы кончились а хочется купить в магазине. Договаривайся с друзьями!</div>
+                    </div>
+                    <div style="background:rgba(255,149,0,0.05);border:1px solid rgba(255,149,0,0.12);border-radius:16px;padding:20px 22px;">
+                        <div style="font-family:var(--font-head);font-size:12px;color:#F472B6;margin-bottom:10px;letter-spacing:1px;">🎁 ПОДАРКИ и НФТ</div>
+                        <div style="color:rgba(255,255,255,0.72);font-size:13.5px;line-height:1.85;font-family:var(--font-body);">Дари предметы и НФТ-подарки друзьям просто так или за заслуги. НФТ можно продавать и покупать между игроками. Редкие НФТ стоят дорого — следи за рынком!</div>
+                    </div>
+                    <div style="background:rgba(255,149,0,0.05);border:1px solid rgba(255,149,0,0.12);border-radius:16px;padding:20px 22px;">
+                        <div style="font-family:var(--font-head);font-size:12px;color:#4ADE80;margin-bottom:10px;letter-spacing:1px;">🎯 ЗАДАНИЯ</div>
+                        <div style="color:rgba(255,255,255,0.72);font-size:13.5px;line-height:1.85;font-family:var(--font-body);">Каждый день появляются новые задания — выполняй и получай бонусные цитрусы 🍊. Задания разные: прыгать, посещать миры, играть с друзьями. Всё выполнено — жди следующего дня!</div>
+                    </div>
+                    <div style="background:rgba(255,149,0,0.05);border:1px solid rgba(255,149,0,0.12);border-radius:16px;padding:20px 22px;">
+                        <div style="font-family:var(--font-head);font-size:12px;color:#FFD700;margin-bottom:10px;letter-spacing:1px;">🏆 ТОП ИГРОКОВ</div>
+                        <div style="color:rgba(255,255,255,0.72);font-size:13.5px;line-height:1.85;font-family:var(--font-body);">Таблица лучших по балансу монет. Топ-3 — на пьедестале. Копи цитрусы и попади в лидеры!</div>
+                    </div>
+                    <div style="background:rgba(255,149,0,0.05);border:1px solid rgba(255,149,0,0.12);border-radius:16px;padding:20px 22px;">
+                        <div style="font-family:var(--font-head);font-size:12px;color:#FF9500;margin-bottom:10px;letter-spacing:1px;">🎨 СТУДИЯ</div>
+                        <div style="color:rgba(255,255,255,0.72);font-size:13.5px;line-height:1.85;font-family:var(--font-body);">Создавай собственные миры из блоков. Строй что хочешь — платформы, лабиринты, арены. Готовый мир появится в списке миров игроков и другие смогут зайти.</div>
+                    </div>
+                    <div style="background:rgba(255,149,0,0.05);border:1px solid rgba(255,149,0,0.12);border-radius:16px;padding:20px 22px;">
+                        <div style="font-family:var(--font-head);font-size:12px;color:#38BDF8;margin-bottom:10px;letter-spacing:1px;">📊 СТАТИСТИКА</div>
+                        <div style="color:rgba(255,255,255,0.72);font-size:13.5px;line-height:1.85;font-family:var(--font-body);">Общая статистика игры: сколько зарегистрировалось, сессий, кто онлайн. Графики активности и популярности миров. Интересно посмотреть как растёт игра!</div>
+                    </div>
+                    <div style="background:rgba(0,229,255,0.04);border:1px solid rgba(0,229,255,0.1);border-radius:16px;padding:18px 22px;text-align:center;grid-column:1/-1;">
+                        <div style="color:rgba(0,229,255,0.5);font-size:11px;font-family:var(--font-head);letter-spacing:2px;margin-bottom:6px;">CITRUS ONLINE</div>
+                        <div style="color:rgba(255,255,255,0.25);font-size:12px;font-family:var(--font-body);">Зови друзей, собирай цитрусы, становись легендой 🍊</div>
+                    </div>
+                </div>
+            </div>
 
             <!-- ══════════════════ TAB: AI HELPER ══════════════════ -->
             <!-- ══════════════════ TAB: AI HELPER (NEW DESIGN) ══════════════════ -->
@@ -1461,6 +1526,38 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
             </div>
 
             <!-- ══════════════════ TAB: CREDITS ══════════════════ -->
+            <div id="tab-credits" class="hidden">
+                <div class="section-title">💳 Кредиты</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+
+                    <div id="my-credit-section" class="panel-box">
+                        <div class="panel-box-title" style="color:var(--c-main);">📤 Выставить кредит</div>
+                        <div style="display:flex;flex-direction:column;gap:10px;">
+                            <input id="credit-amount" type="number" min="1000" max="100000" placeholder="Сумма (1000–100000 🍊)" class="styled-input">
+                            <select id="credit-days" class="styled-select">
+                                <option value="10">10 минут</option>
+                                <option value="20">20 минут</option>
+                                <option value="30">30 минут</option>
+                                <option value="45">45 минут</option>
+                                <option value="60">1 час</option>
+                            </select>
+                            <button onclick="app.postCredit()" class="btn-orange-full">Выставить кредит</button>
+                        </div>
+                        <div id="my-active-credit" style="margin-top:12px;"></div>
+                    </div>
+
+                    <div id="my-debt-section" class="panel-box" style="display:none;border-color:rgba(255,68,68,0.2);">
+                        <div class="panel-box-title" style="color:#FF4444;">⚠️ Мой долг</div>
+                        <div id="my-debt-info" style="color:rgba(255,255,255,0.5);font-size:13px;line-height:1.6;"></div>
+                        <button onclick="app.repayCredit()" style="margin-top:14px;padding:11px 24px;background:linear-gradient(135deg,#4CAF50,#2E7D32);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font-body);">💸 Вернуть долг</button>
+                    </div>
+                </div>
+
+                <div class="section-title">📋 Доступные кредиты</div>
+                <div id="credits-list" style="display:flex;flex-direction:column;gap:8px;">
+                    <div style="color:rgba(255,255,255,0.2);font-size:13px;text-align:center;padding:20px;">Загрузка...</div>
+                </div>
+            </div>
 
             <!-- ══════════════════ TAB: GIFTS ══════════════════ -->
             <div id="tab-gifts" class="hidden">
@@ -2260,6 +2357,155 @@ const app = {
             }).catch(()=>{});
         }
     },
+
+
+    async initCredits(){
+        await this._loadCredits();
+    },
+
+    async _loadCredits(){
+        const list = document.getElementById('credits-list');
+        const myDebt = document.getElementById('my-debt-section');
+        const myDebtInfo = document.getElementById('my-debt-info');
+        const myActive = document.getElementById('my-active-credit');
+        try {
+            const res = await fetch(this._API + '/credits');
+            const data = await res.json();
+            const now = Date.now();
+            // Не синкаем баланс здесь — это перезаписывает только что снятые деньги
+
+            // Check my debt
+            const myBorrow = data.borrows ? data.borrows.find(b => b.borrowerId == this.userId) : null;
+            if(myBorrow){
+                myDebt.style.display = 'block';
+                const daysLeft = Math.max(0, Math.ceil((myBorrow.dueAt - now) / 60000));
+                const overdue = now > myBorrow.dueAt;
+                myDebtInfo.innerHTML = `Ты взял <b style="color:#FFD700">${myBorrow.amount} 🍊</b> у <b>${myBorrow.lenderName}</b> · 
+                    ${overdue ? '<span style="color:#FF4444">⚠️ Просрочено!</span>' : `Осталось <b style="color:#4CAF50">${daysLeft} мин.</b>`}`;
+            } else {
+                myDebt.style.display = 'none';
+            }
+
+            // Check my posted credit
+            const myCredit = data.credits ? data.credits.find(c => c.lenderId == this.userId) : null;
+            if(myCredit){
+                const taken = myCredit.borrowerId ? `<span style="color:#FF9800">Взял: <b>${myCredit.borrowerName}</b></span>` : '<span style="color:#4CAF50">Свободен</span>';
+                myActive.innerHTML = `<div style="background:#111;border-radius:8px;padding:10px;font-size:13px;color:#aaa;">
+                    Твой кредит: <b style="color:#FFD700">${myCredit.amount} 🍊</b> · ${myCredit.days} дн. · ${taken}
+                    <button onclick="app.cancelCredit('${myCredit.id}')" style="margin-left:10px;background:none;border:1px solid #333;color:#555;border-radius:6px;padding:3px 10px;cursor:pointer;font-size:12px;">Отозвать</button>
+                </div>`;
+            } else {
+                myActive.innerHTML = '';
+            }
+
+            // Available credits list
+            const available = (data.credits || []).filter(c => c.lenderId != this.userId && !c.borrowerId);
+            if(!available.length){
+                list.innerHTML = '<div style="color:#444;font-size:13px;padding:12px;">Нет доступных кредитов</div>';
+            } else {
+                list.innerHTML = available.map(c => `
+                    <div style="display:flex;align-items:center;gap:12px;background:#0e0e0e;border:1px solid #1e1e1e;border-radius:10px;padding:12px 16px;">
+                        <div style="flex:1;">
+                            <span style="font-size:15px;font-weight:bold;color:#FFD700;">${c.amount} 🍊</span>
+                            <span style="color:#555;font-size:12px;margin-left:8px;">· ${c.days} мин. · от <b style="color:#aaa">${c.lenderName}</b></span>
+                        </div>
+                        <button onclick="app.borrowCredit('${c.id}')" style="padding:8px 18px;background:linear-gradient(135deg,#FF9800,#FF5722);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:bold;cursor:pointer;">Взять</button>
+                    </div>`).join('');
+            }
+        } catch(e){ if(list) list.innerHTML='<div style="color:#444;font-size:13px;">Ошибка загрузки</div>'; }
+    },
+
+    async postCredit(){
+        const amount = parseInt(document.getElementById('credit-amount').value);
+        const days = parseInt(document.getElementById('credit-days').value);
+        if(!amount || amount < 1000 || amount > 100000){ this.showNotif('❌','Ошибка','Сумма от 1000 до 100000 🍊'); return; }
+        if(!days || days < 10 || days > 60){ this.showNotif('❌','Ошибка','Выбери срок'); return; }
+        if(this.balance < amount){ this.showNotif('❌','Мало цитрусов',`Нужно ${amount} 🍊`); return; }
+        try {
+            const res = await fetch(this._API + '/credits', {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({lenderId: this.userId, lenderName: this.username+'#'+this.userId, amount, days, newBalance: this.balance - amount})
+            });
+            const d = await res.json();
+            if(d.ok){
+                this.balance -= amount;
+                this.saveData();
+                document.getElementById('balance-val').textContent = this.balance;
+                this._questProgress('lend',1); this.showNotif('✅','Кредит выставлен!',`-${amount} 🍊 на ${days} мин.`);
+                this._loadCredits();
+            } else this.showNotif('❌','Ошибка', d.error||'Попробуй снова');
+        } catch(e){ this.showNotif('❌','Ошибка','Нет связи'); }
+    },
+
+    async borrowCredit(creditId){
+        // Check no existing debt
+        try {
+            const res = await fetch(this._API + '/credits/borrow', {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({creditId, borrowerId: this.userId, borrowerName: this.username+'#'+this.userId})
+            });
+            const d = await res.json();
+            if(d.ok){
+                this.balance += d.amount;
+                this.saveData();
+                document.getElementById('balance-val').textContent = this.balance;
+                this.showNotif('💰','Кредит получен!',`+${d.amount} 🍊 · Верни за ${d.days} мин.`);
+                this._loadCredits();
+            } else this.showNotif('❌','Ошибка', d.error||'Нельзя взять');
+        } catch(e){ this.showNotif('❌','Ошибка','Нет связи'); }
+    },
+
+    async repayCredit(){
+        try {
+            // First check we have enough
+            const checkRes = await fetch(this._API + '/credits');
+            const checkData = await checkRes.json();
+            const myBorrow = (checkData.borrows||[]).find(b=>String(b.borrowerId)===String(this.userId));
+            if(!myBorrow){ this.showNotif('❌','Ошибка','Нет долга'); return; }
+            if(this.balance < myBorrow.amount){
+                this.showNotif('❌','Мало цитрусов',`Нужно ${myBorrow.amount} 🍊 для погашения`); return;
+            }
+            // Deduct from borrower first
+            this.balance -= myBorrow.amount;
+            this.saveData();
+            document.getElementById('balance-val').textContent = this.balance;
+            // Tell server - repay and give to lender
+            const res = await fetch(this._API + '/credits/repay', {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({borrowerId: this.userId, balance: this.balance})
+            });
+            const d = await res.json();
+            if(d.ok){
+                this._questProgress('repay',1); this.showNotif('✅','Долг погашен!',`-${myBorrow.amount} 🍊 · Кредитор получил деньги`);
+                this._loadCredits();
+            } else {
+                // Rollback
+                this.balance += myBorrow.amount;
+                this.saveData();
+                document.getElementById('balance-val').textContent = this.balance;
+                this.showNotif('❌','Ошибка', d.error||'Нет долга');
+            }
+        } catch(e){ this.showNotif('❌','Ошибка','Нет связи'); }
+    },
+
+    async cancelCredit(creditId){
+        try {
+            const res = await fetch(this._API + '/credits/cancel', {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({creditId, lenderId: this.userId})
+            });
+            const d = await res.json();
+            if(d.ok){
+                // Просто прибавляем сумму локально — не берём баланс с сервера
+                this.balance += d.amount;
+                this.saveData();
+                document.getElementById('balance-val').textContent = this.balance;
+                this.showNotif('✅','Кредит отозван',`+${d.amount} 🍊 возвращено`);
+                this._loadCredits();
+            } else this.showNotif('❌','Ошибка', d.error||'');
+        } catch(e){}
+    },
+
     initRoulette(){
         const prizes = [5,5,10,10,10,15,15,20,20,25,30,35,40,50,60,75,100,200];
         const colors = ['#FF4081','#FF9800','#FFD740','#69F0AE','#40C4FF','#E040FB',
@@ -5435,7 +5681,7 @@ const app = {
 
         switchTab(id){
         this._sfx('nav');
-        ['games','mine','work','avatar','shop','friends','studio','quests','daily','roulette','gifts','nft','stats','leaderboard','admin','help','cases','aihelper','devmail'].forEach(t=>{
+        ['games','mine','work','avatar','shop','friends','studio','quests','daily','roulette','credits','gifts','nft','stats','leaderboard','admin','help','cases','aihelper','devmail'].forEach(t=>{
             document.getElementById('tab-'+t)?.classList.add('hidden');
             document.getElementById('nav-'+t)?.classList.remove('active');
         });
@@ -5451,6 +5697,7 @@ const app = {
         if(id==='daily'){ this._renderDailyTab(); }
         if(id==='work'){ this._initWork(); }
         if(id==='roulette')this.initRoulette();
+        if(id==='credits')this.initCredits();
         if(id==='gifts'){ this.initGifts(); }
         if(id==='nft'){ this.initNft(); }
         if(id==='admin'){ this.loadBanList(); this.loadBanOnlineList(); }
@@ -8692,8 +8939,20 @@ const app = {
         if(this.mode==='play') {
             this._others = {}; // чистим перед входом в новый мир
             this._connectGameWS();
-            // staleTimer отключён — игроки не пропадают пока не выйдут
+            // Резервный cleanup — убираем игроков которых не видели >3 сек
             if(this._staleTimer) clearInterval(this._staleTimer);
+            this._staleTimer = setInterval(()=>{
+                if(!this._others || this.mode!=='play') return;
+                const now = Date.now();
+                for(const id in this._others){
+                    const _o = this._others[id];
+                    if(!_o) { delete this._others[id]; continue; } // guard
+                    if(now - (_o._lastSeen||0) > 600000){
+                        this.scene&&this.scene.remove(_o);
+                        delete this._others[id];
+                    }
+                }
+            }, 1000);
         }
         // Опрашиваем позиции других игроков с сервера каждые 150мс (fallback если WS не поднялся)
         if(this._posInterval) clearInterval(this._posInterval);
@@ -9670,8 +9929,12 @@ const app = {
             }
             // 🌸 Анимация монет и цветов 8 марта
             if(this.currentMap==='march8' && this._march8Anim) this._march8Anim(time);
-            // Отправляем позицию на сервер (каждые 50мс, только если двигались)
-            if (!this._lastPosSend || Date.now()-this._lastPosSend > 50) {
+            // Отправляем позицию на сервер:
+            // — каждые 50мс если двигаемся
+            // — каждые 2000мс если стоим (heartbeat чтобы другие не пропадали)
+            const _now = Date.now();
+            const _timeSinceLastSend = _now - (this._lastPosSend||0);
+            if (_timeSinceLastSend > 50) {
                 const px=this.playerGroup.position.x, py=this.playerGroup.position.y, pz=this.playerGroup.position.z;
                 const ry=this.playerGroup.rotation.y;
                 const moving=!!(this.keys&&(this.keys['KeyW']||this.keys['KeyA']||this.keys['KeyS']||this.keys['KeyD']));
@@ -9680,8 +9943,9 @@ const app = {
                     Math.abs(px-this._lastSentPos.x)>0.01 || Math.abs(py-this._lastSentPos.y)>0.01 ||
                     Math.abs(pz-this._lastSentPos.z)>0.01 || Math.abs(ry-this._lastSentPos.ry)>0.01 ||
                     moving !== this._lastSentPos.moving || jumping !== this._lastSentPos.jumping;
-                if(posChanged) {
-                    this._lastPosSend = Date.now();
+                // Отправляем если: позиция изменилась ИЛИ прошло >2 сек (heartbeat)
+                if(posChanged || _timeSinceLastSend > 2000) {
+                    this._lastPosSend = _now;
                     this._lastSentPos = {x:px,y:py,z:pz,ry,moving,jumping};
                     const posData = {
                         type:'move', _from: String(this.userId),
@@ -9819,8 +10083,11 @@ const app = {
             const now = Date.now();
             for(const id in this._others) {
                 const o = this._others[id];
-                if(!o) continue; // guard
-                if(o._targetPos) {
+                if(!o) continue; // guard: entry may have been deleted by stale timer
+                if(now - (o._lastSeen||0) > 600000) {
+                    this.scene && this.scene.remove(o);
+                    delete this._others[id];
+                } else if(o._targetPos) {
                     const dist = o.position.distanceTo(o._targetPos);
                     if(dist > 15) {
                         // Слишком далеко — телепорт
