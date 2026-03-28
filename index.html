@@ -2189,6 +2189,7 @@ const app = {
                     if(adminNav) adminNav.classList.toggle('hidden', !this.canBan(this.username));
                     this.updateUI();
                     this._wsConnect();
+                    this._startHubTimeTracker();
                     setInterval(()=>this.renderOnline(), 30000);
                     this._tutAutoStart();
                     this._initAudio();
@@ -2212,6 +2213,7 @@ const app = {
                     if(adminNav) adminNav.classList.toggle('hidden', !this.canBan(this.username));
                     this.updateUI();
                     this._wsConnect();
+                    this._startHubTimeTracker();
                     setInterval(()=>this.renderOnline(), 30000);
                     this._tutAutoStart();
                     this._initAudio();
