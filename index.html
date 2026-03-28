@@ -4240,15 +4240,9 @@ const app = {
         const sec = this._hubTimeBuffer;
         if(!sec || !this.userId) return;
         this._hubTimeBuffer = 0;
-        // sendBeacon чтобы не терять данные при закрытии
         const url = this._API + '/hub-time/' + this.userId;
         const data = JSON.stringify({seconds: sec});
-        if(navigator.sendBeacon){
-            const blob = new Blob([data], {type:'application/json'});
-            navigator.sendBeacon(url, blob);
-        } else {
-            fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body:data, keepalive:true}).catch(()=>{});
-        }
+        fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body:data}).catch(()=>{});
     },
 
     logout(){
