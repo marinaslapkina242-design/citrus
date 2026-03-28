@@ -3773,7 +3773,7 @@ const app = {
     isCitrus(name){ const n=(name||'').toLowerCase().trim(); return n==='citrus'; },
     isDev(name){ const n=(name||'').toLowerCase().trim(); return n==='разраб' || n==='razrab'; },
     isOwner(name){ return this.isCitrus(name) || this.isDev(name); },
-    isVerified(name){ const n=(name||'').toLowerCase().trim(); return ['ft77799','dantiyt_official','mekuper'].includes(n); },
+    isVerified(name){ const n=(name||'').toLowerCase().trim(); return ['ft77799','dantiyt_official'].includes(n); },
     isSpecial(name){ const n=(name||'').toLowerCase().trim().split('#')[0]; return n==='добрый разраб'; },
     isStaff(name){ return this.isAdmin(name) || this.isOwner(name); },
 
@@ -8947,7 +8947,7 @@ const app = {
                 for(const id in this._others){
                     const _o = this._others[id];
                     if(!_o) { delete this._others[id]; continue; } // guard
-                    if(now - (_o._lastSeen||0) > 600000){
+                    if(now - (_o._lastSeen||0) > 60000){
                         this.scene&&this.scene.remove(_o);
                         delete this._others[id];
                     }
@@ -9629,6 +9629,21 @@ const app = {
     },
 
     onMouseClick(e) {
+        // Глобальная защита от автокликера — max 20 кликов в секунду
+        const _cn = Date.now();
+        if(!this._globalClickTimes) this._globalClickTimes = [];
+        this._globalClickTimes = this._globalClickTimes.filter(t => _cn - t < 1000);
+        this._globalClickTimes.push(_cn);
+        if(this._globalClickTimes.length > 20){
+            if(!this._autoclickerWarnedAt || _cn - this._autoclickerWarnedAt > 10000){
+                this._autoclickerWarnedAt = _cn;
+                this._showToast('⚠️ Автокликер обнаружен! Клики заблокированы на 30 сек');
+            }
+            this._globalClickBlocked = _cn + 30000;
+            this._globalClickTimes = [];
+        }
+        if(this._globalClickBlocked && _cn < this._globalClickBlocked) return;
+
         if(e.button===0&&this.currentMap==='pvp'&&this.mode==='play'){this._pvpShoot();return;}
         if (this.mode !== 'studio') return;
         const mode = this._studioMode || 'place';
@@ -9728,6 +9743,10 @@ const app = {
 
     _pvpShoot(){
         if(this.currentMap!=='pvp'||this.mode!=='play') return;
+        // Защита от автокликера — минимум 80мс между выстрелами
+        const now = Date.now();
+        if(this._pvpLastShot && now - this._pvpLastShot < 80) return;
+        this._pvpLastShot = now;
         if(this._pvpAmmo<=0){this.showNotif('🔫','Патроны кончились!','Следующая обойма через 5 сек');
             setTimeout(()=>{this._pvpAmmo=30;if(this._pvpShowHud)this._pvpShowHud();},5000);return;}
         this._pvpAmmo--;
@@ -9929,12 +9948,8 @@ const app = {
             }
             // 🌸 Анимация монет и цветов 8 марта
             if(this.currentMap==='march8' && this._march8Anim) this._march8Anim(time);
-            // Отправляем позицию на сервер:
-            // — каждые 50мс если двигаемся
-            // — каждые 2000мс если стоим (heartbeat чтобы другие не пропадали)
-            const _now = Date.now();
-            const _timeSinceLastSend = _now - (this._lastPosSend||0);
-            if (_timeSinceLastSend > 50) {
+            // Отправляем позицию на сервер (каждые 50мс, только если двигались)
+            if (!this._lastPosSend || Date.now()-this._lastPosSend > 50) {
                 const px=this.playerGroup.position.x, py=this.playerGroup.position.y, pz=this.playerGroup.position.z;
                 const ry=this.playerGroup.rotation.y;
                 const moving=!!(this.keys&&(this.keys['KeyW']||this.keys['KeyA']||this.keys['KeyS']||this.keys['KeyD']));
@@ -9943,9 +9958,8 @@ const app = {
                     Math.abs(px-this._lastSentPos.x)>0.01 || Math.abs(py-this._lastSentPos.y)>0.01 ||
                     Math.abs(pz-this._lastSentPos.z)>0.01 || Math.abs(ry-this._lastSentPos.ry)>0.01 ||
                     moving !== this._lastSentPos.moving || jumping !== this._lastSentPos.jumping;
-                // Отправляем если: позиция изменилась ИЛИ прошло >2 сек (heartbeat)
-                if(posChanged || _timeSinceLastSend > 2000) {
-                    this._lastPosSend = _now;
+                if(posChanged) {
+                    this._lastPosSend = Date.now();
                     this._lastSentPos = {x:px,y:py,z:pz,ry,moving,jumping};
                     const posData = {
                         type:'move', _from: String(this.userId),
@@ -10084,7 +10098,7 @@ const app = {
             for(const id in this._others) {
                 const o = this._others[id];
                 if(!o) continue; // guard: entry may have been deleted by stale timer
-                if(now - (o._lastSeen||0) > 600000) {
+                if(now - (o._lastSeen||0) > 60000) {
                     this.scene && this.scene.remove(o);
                     delete this._others[id];
                 } else if(o._targetPos) {
@@ -11379,16 +11393,16 @@ const app = {
     mineHit(){
         const now = Date.now();
 
-        // Защита от автокликера — максимум 5 ударов в секунду
+        // Защита от автокликера — максимум 6 ударов в секунду
         if(!this._mineClickTimes) this._mineClickTimes = [];
         this._mineClickTimes = this._mineClickTimes.filter(t => now - t < 1000);
         this._mineClickTimes.push(now);
 
-        if(this._mineClickTimes.length > 10){
-            // Отстранение на 3 минуты — сохраняем в localStorage
+        if(this._mineClickTimes.length > 6){
+            // Отстранение на 10 минут
             if(this._mineRAF){ cancelAnimationFrame(this._mineRAF); this._mineRAF = null; }
             this._mineBanned = true;
-            this._mineBanUntil = Date.now() + 3 * 60 * 1000;
+            this._mineBanUntil = Date.now() + 10 * 60 * 1000;
             localStorage.setItem('citrus_mine_ban', String(this._mineBanUntil));
             this._mineClickTimes = [];
             this._mineShowBanScreen();
