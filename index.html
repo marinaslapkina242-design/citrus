@@ -3637,7 +3637,8 @@ const app = {
         spot.style.height = (r.height+pad*2)+'px';
 
         // Позиция карточки — правее навбара, с отступом от стрелки
-        const cardW = 380, cardH = 260;
+        const cardW = 380;
+        const cardH = Math.min(card.offsetHeight || 300, window.innerHeight * 0.85);
         const arrowW = 52;
         // Карточка начинается после стрелки: r.right + arrowW + 20
         const cx = r.right + arrowW + 20;
@@ -3649,6 +3650,7 @@ const app = {
         card.style.top  = cy + 'px';
         card.style.right = 'auto';
         card.style.bottom = 'auto';
+        card.style.maxHeight = (window.innerHeight * 0.85) + 'px';
 
         // Стрелка — между навбаром и карточкой, указывает влево
         arrow.style.setProperty('--arrow-rot','-90deg');
@@ -4225,8 +4227,8 @@ const app = {
             if(this.mode === 'play') return; // в игре не считаем
             this._hubTimeBuffer++;
             this._myHubTime = (this._myHubTime||0) + 1;
-            // Каждые 60 сек отправляем на сервер
-            if(this._hubTimeBuffer >= 60){
+            // Каждые 10 сек отправляем на сервер
+            if(this._hubTimeBuffer >= 10){
                 this._flushHubTime();
             }
         }, 1000);
@@ -11920,6 +11922,8 @@ window.onload = () => app.init();
     border-radius:20px;
     padding:24px 28px 20px;
     min-width:320px;max-width:380px;
+    max-height:90vh;
+    overflow-y:auto;
     box-shadow:0 16px 56px rgba(0,0,0,0.85),0 0 0 1px rgba(255,59,48,0.12) inset, 0 0 40px rgba(255,59,48,0.08);
     transition:all 0.4s cubic-bezier(0.4,0,0.2,1);
     pointer-events:all;
