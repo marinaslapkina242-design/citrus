@@ -617,7 +617,7 @@ if(req.method==='DELETE'&&parts[0]==='devmail'&&parts[1]){
     // Leaderboard (по времени на сайте)
     if(req.method==='GET'&&parts[0]==='leaderboard-time'){
         const top = Object.values(DB.players)
-            .filter(p=>p.name&&(p.hubTime||0)>0)
+            .filter(p=>p.name)
             .sort((a,b)=>(b.hubTime||0)-(a.hubTime||0))
             .slice(0,50)
             .map(p=>({id:p.id,name:p.name,tag:p.tag||'',color:p.color||'#FF9800',hubTime:p.hubTime||0,inventory:p.inventory||[]}));
