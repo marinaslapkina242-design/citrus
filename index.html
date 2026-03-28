@@ -3773,7 +3773,7 @@ const app = {
     isCitrus(name){ const n=(name||'').toLowerCase().trim(); return n==='citrus'; },
     isDev(name){ const n=(name||'').toLowerCase().trim(); return n==='разраб' || n==='razrab'; },
     isOwner(name){ return this.isCitrus(name) || this.isDev(name); },
-    isVerified(name){ const n=(name||'').toLowerCase().trim(); return ['ft77799','dantiyt_official'].includes(n); },
+    isVerified(name){ const n=(name||'').toLowerCase().trim(); return ['ft77799','dantiyt_official','mekuper'].includes(n); },
     isSpecial(name){ const n=(name||'').toLowerCase().trim().split('#')[0]; return n==='добрый разраб'; },
     isStaff(name){ return this.isAdmin(name) || this.isOwner(name); },
 
