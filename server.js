@@ -33,6 +33,7 @@ function fixDB(){
     if(!DB.stats) DB.stats={totalRegistered:0,totalSessions:0,worldPlays:{},dailyActive:{},firstSeenDates:[]};
     if(!DB.devmail) DB.devmail={};
     if(!DB.aiHelper) DB.aiHelper={};
+    if(!DB.promoCodes) DB.promoCodes={};
 }
 
 function loadLocalDB(){
@@ -842,6 +843,64 @@ if(req.method==='DELETE'&&parts[0]==='devmail'&&parts[1]){
             broadcastToMap(d.map,{type:'igchat',...d},d.id||'');
         }
         return reply(res,200,{ok:true});
+    }
+
+    // ══════════ ПРОМОКОДЫ ══════════
+    if(req.method==='GET'&&parts[0]==='promo'&&!parts[1]){
+        // Разраб видит все промокоды
+        const key=url.searchParams.get('adminKey');
+        if(key!=='citrus_admin_2025') return reply(res,403,{error:'forbidden'});
+        if(!DB.promoCodes) DB.promoCodes={};
+        return reply(res,200,DB.promoCodes);
+    }
+    if(req.method==='POST'&&parts[0]==='promo'&&parts[1]==='create'){
+        // Создать промокод (только разраб)
+        const d=await body(req);
+        if(d.adminKey!=='citrus_admin_2025') return reply(res,403,{error:'forbidden'});
+        if(!d.code||!d.coins) return reply(res,400,{error:'нужен code и coins'});
+        if(!DB.promoCodes) DB.promoCodes={};
+        DB.promoCodes[d.code.toUpperCase()]={
+            code:d.code.toUpperCase(),
+            coins:parseInt(d.coins)||0,
+            desc:d.desc||'',
+            maxUses:parseInt(d.maxUses)||0, // 0 = безлимит
+            uses:0,
+            usedBy:[],
+            createdAt:Date.now()
+        };
+        saveDB();
+        return reply(res,200,{ok:true});
+    }
+    if(req.method==='DELETE'&&parts[0]==='promo'&&parts[1]){
+        // Удалить промокод (только разраб)
+        const d=await body(req);
+        if(d.adminKey!=='citrus_admin_2025') return reply(res,403,{error:'forbidden'});
+        if(!DB.promoCodes||!DB.promoCodes[parts[1].toUpperCase()]) return reply(res,404,{error:'не найден'});
+        delete DB.promoCodes[parts[1].toUpperCase()];
+        saveDB();
+        return reply(res,200,{ok:true});
+    }
+    if(req.method==='POST'&&parts[0]==='promo'&&parts[1]==='redeem'){
+        const d=await body(req);
+        const code=(d.code||'').toUpperCase().trim();
+        const userId=String(d.userId||'');
+        if(!code||!userId) return reply(res,400,{error:'Нет кода или userId'});
+        if(!DB.promoCodes) DB.promoCodes={};
+        const promo=DB.promoCodes[code];
+        if(!promo) return reply(res,200,{ok:false,error:'Промокод не найден или уже недействителен'});
+        // Проверяем не использовал ли уже
+        if(promo.usedBy.includes(userId)) return reply(res,200,{ok:false,error:'Ты уже использовал этот промокод'});
+        // Проверяем лимит использований
+        if(promo.maxUses>0&&promo.uses>=promo.maxUses) return reply(res,200,{ok:false,error:'Промокод закончился'});
+        // Применяем
+        promo.uses++;
+        promo.usedBy.push(userId);
+        // Начисляем монеты игроку
+        if(promo.coins>0&&DB.players[userId]){
+            DB.players[userId].balance=(DB.players[userId].balance||0)+promo.coins;
+        }
+        saveDB();
+        return reply(res,200,{ok:true,coins:promo.coins,desc:promo.desc});
     }
 
     reply(res,404,{error:'not found'});
