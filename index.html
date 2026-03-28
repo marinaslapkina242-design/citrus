@@ -3829,7 +3829,44 @@ const app = {
 
     _lbMode: 'balance', // 'balance' | 'time'
 
-    async loadLeaderboard(mode){
+    _lbFetching: false,
+
+    async _silentUpdateLeaderboard(){
+        if(this._lbFetching) return;
+        this._lbFetching = true;
+        try {
+            const list = document.getElementById('lb-list');
+            if(!list){ this._lbFetching = false; return; }
+            const endpoint = this._lbMode==='time' ? '/leaderboard-time' : '/leaderboard';
+            const r = await fetch(this._API+endpoint);
+            if(!r.ok){ this._lbFetching = false; return; }
+            const top = await r.json();
+            const isTime = this._lbMode === 'time';
+            const fmtVal = (p) => isTime ? this._fmtHubTime(p.hubTime||0) : (p.balance||0).toLocaleString('ru') + ' 🍊';
+            const medals = ['🥇','🥈','🥉'];
+            const totalSlots = Math.max(top.length, 10);
+            const rows = list.querySelectorAll('[data-lb-rank]');
+            if(rows.length !== totalSlots){ this._lbFetching = false; this.loadLeaderboard(); return; }
+            for(let i = 0; i < totalSlots; i++){
+                const p = top[i] || null;
+                const rank = i + 1;
+                const medal = rank <= 3 ? medals[rank-1] : null;
+                const row = list.querySelector('[data-lb-rank="'+rank+'"]');
+                if(!row) continue;
+                if(p){
+                    const valEl  = row.querySelector('[data-lb-val]');
+                    const nameEl = row.querySelector('[data-lb-name]');
+                    const rankEl = row.querySelector('[data-lb-ranknum]');
+                    if(valEl)  valEl.textContent  = fmtVal(p);
+                    if(rankEl) rankEl.textContent = medal || String(rank);
+                    if(nameEl) nameEl.textContent = p.name + (String(p.id)===String(this.userId) ? ' ← ты' : '');
+                }
+            }
+        } catch(e){}
+        this._lbFetching = false;
+    },
+
+        async loadLeaderboard(mode){
         if(mode) this._lbMode = mode;
         // Обновить стили кнопок
         const btnB = document.getElementById('lb-btn-balance');
@@ -3854,48 +3891,39 @@ const app = {
             if(r.ok) top = await r.json();
         } catch(e){}
 
-        if(!top.length){
-            podium.innerHTML='<div style="color:rgba(255,255,255,0.2);font-size:13px;padding:20px;text-align:center;">Пока никого нет 🍊</div>';
-            return;
-        }
-
-        // ── Простой список 1-50 ──
+        // ── Список 1-10 с data-атрибутами для тихого обновления ──
         const isTime = this._lbMode === 'time';
         const fmtVal = (p) => isTime ? this._fmtHubTime(p.hubTime||0) : (p.balance||0).toLocaleString('ru') + ' 🍊';
         const medals = ['🥇','🥈','🥉'];
         podium.innerHTML = '';
         list.innerHTML = '';
-        top.forEach((p, i) => {
+        const totalSlots = Math.max(top.length, 10);
+        for(let i = 0; i < totalSlots; i++){
+            const p = top[i] || null;
             const rank = i + 1;
-            const isMe = String(p.id)===String(this.userId);
-            const col = p.color||'#888';
+            const isMe = p && String(p.id)===String(this.userId);
+            const col = p ? (p.color||'#888') : '#333';
             const medal = rank <= 3 ? medals[rank-1] : null;
             const rankClr = rank===1?'#FFD700':rank===2?'#C0C0C0':rank===3?'#CD7F32':'rgba(255,255,255,0.25)';
-            list.innerHTML += `
-            <div style="display:flex;align-items:center;gap:12px;padding:11px 16px;
-                border-bottom:1px solid rgba(255,255,255,0.04);
-                border-radius:${rank===1?'12px 12px':'0'} 0 0;
-                ${isMe?'background:rgba(0,229,255,0.04);':''}
-                transition:background 0.15s;"
-                onmouseover="this.style.background='rgba(255,255,255,0.03)'"
-                onmouseout="this.style.background='${isMe?'rgba(0,229,255,0.04)':'transparent'}'">
-                <div style="width:28px;text-align:center;font-family:var(--font-head);font-size:${rank<=3?'18px':'13px'};color:${rankClr};flex-shrink:0;">
-                    ${medal || rank}
-                </div>
-                <div style="width:34px;height:34px;border-radius:50%;background:${col}22;color:${col};
-                    border:${rank<=3?'2px solid '+rankClr:'none'};
-                    display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;">${(p.name[0]||'?').toUpperCase()}</div>
-                <div style="flex:1;min-width:0;">
-                    <div style="font-family:var(--font-body);font-weight:700;font-size:13px;color:rgba(255,255,255,${isMe?'1':'0.8'});">
-                        ${p.name}${isMe?' <span style="font-size:10px;color:var(--c-main);">← ты</span>':''}
+            if(p){
+                list.innerHTML += `<div data-lb-rank="${rank}" style="display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid rgba(255,255,255,0.04);${isMe?'background:rgba(0,229,255,0.04);':''}transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.03)'" onmouseout="this.style.background='${isMe?'rgba(0,229,255,0.04)':'transparent'}'">
+                    <div data-lb-ranknum style="width:28px;text-align:center;font-family:var(--font-head);font-size:${rank<=3?'18px':'13px'};color:${rankClr};flex-shrink:0;">${medal || rank}</div>
+                    <div data-lb-avatar style="width:34px;height:34px;border-radius:50%;background:${col}22;color:${col};border:${rank<=3?'2px solid '+rankClr:'none'};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;">${(p.name[0]||'?').toUpperCase()}</div>
+                    <div style="flex:1;min-width:0;">
+                        <div data-lb-name style="font-family:var(--font-body);font-weight:700;font-size:13px;color:rgba(255,255,255,${isMe?'1':'0.8'});">${p.name}${isMe?' <span style="font-size:10px;color:var(--c-main);">← ты</span>':''}</div>
+                        <div style="font-size:10px;color:rgba(255,255,255,0.2);font-family:var(--font-ui);">${p.tag||''}</div>
                     </div>
-                    <div style="font-size:10px;color:rgba(255,255,255,0.2);font-family:var(--font-ui);">${p.tag||''}</div>
-                </div>
-                <div style="font-family:var(--font-mono);font-size:13px;font-weight:700;color:${rank<=3?rankClr:'rgba(0,229,255,0.8)'};flex-shrink:0;">
-                    ${fmtVal(p)}
-                </div>
-            </div>`;
-        });
+                    <div data-lb-val style="font-family:var(--font-mono);font-size:13px;font-weight:700;color:${rank<=3?rankClr:'rgba(0,229,255,0.8)'};flex-shrink:0;">${fmtVal(p)}</div>
+                </div>`;
+            } else {
+                list.innerHTML += `<div data-lb-rank="${rank}" style="display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid rgba(255,255,255,0.04);opacity:0.3;">
+                    <div data-lb-ranknum style="width:28px;text-align:center;font-family:var(--font-head);font-size:${rank<=3?'18px':'13px'};color:${rankClr};flex-shrink:0;">${medal || rank}</div>
+                    <div style="width:34px;height:34px;border-radius:50%;border:${rank<=3?'2px solid '+rankClr:'1px dashed rgba(255,255,255,0.1)'};display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span style="color:rgba(255,255,255,0.2);font-size:14px;">?</span></div>
+                    <div style="flex:1;font-size:13px;color:rgba(255,255,255,0.15);font-family:var(--font-body);">— свободно —</div>
+                    <div data-lb-val style="font-family:var(--font-mono);font-size:13px;color:rgba(255,255,255,0.1);flex-shrink:0;">—</div>
+                </div>`;
+            }
+        }
 
         // ── Моё место если не в топ-50 ──
         const myPos = top.findIndex(p=>String(p.id)===String(this.userId));
@@ -4198,10 +4226,7 @@ const app = {
             if(this.mode === 'play') return; // в игре не считаем
             this._hubTimeBuffer++;
             this._myHubTime = (this._myHubTime||0) + 1;
-            // Каждые 10 сек отправляем на сервер
-            if(this._hubTimeBuffer >= 10){
-                this._flushHubTime();
-            }
+            this._flushHubTime();
         }, 1000);
         // Отправить при закрытии вкладки
         window.addEventListener('beforeunload', ()=>this._flushHubTime());
@@ -5671,8 +5696,15 @@ const app = {
         if(id==='aihelper'){ this.initAiHelper(); }
         if(id==='devmail'){ this.initDevMail(); }
         if(id==='stats'){ this.loadStats(); }
-        if(id==='leaderboard'){ this.loadLeaderboard(); }
-        else if(this._questCountdownInterval){ clearInterval(this._questCountdownInterval); this._questCountdownInterval=null; }
+        if(id==='leaderboard'){
+            this.loadLeaderboard();
+            if(this._lbRefreshInterval) clearInterval(this._lbRefreshInterval);
+            this._lbFetching = false;
+            this._lbRefreshInterval = setInterval(()=>this._silentUpdateLeaderboard(), 1000);
+        } else {
+            if(this._lbRefreshInterval){ clearInterval(this._lbRefreshInterval); this._lbRefreshInterval=null; }
+        }
+        if(id!=='quests' && this._questCountdownInterval){ clearInterval(this._questCountdownInterval); this._questCountdownInterval=null; }
         if(id==='friends'){
             // Регистрируем на сервере (на случай если зашли раньше деплоя)
             try{ fetch(this._API+'/players/'+this.userId,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:String(this.userId),name:this.username,tag:this.fullTag,color:this._myColor})}); }catch(e){}
@@ -8676,9 +8708,10 @@ const app = {
             const el = document.getElementById('quest-timer');
             if(!el || !this._questRotNextAt) return;
             const left = Math.max(0, this._questRotNextAt - Date.now());
-            const m = Math.floor(left/60000);
+            const h = Math.floor(left/3600000);
+            const m = Math.floor((left%3600000)/60000);
             const s = Math.floor((left%60000)/1000);
-            el.textContent = `${m}:${String(s).padStart(2,'0')}`;
+            el.textContent = h > 0 ? h+'ч '+String(m).padStart(2,'0')+'м' : m+'м '+String(s).padStart(2,'0')+'с';
         }, 1000);
     },
     initAvatarPreview(){
@@ -10675,22 +10708,16 @@ const app = {
         const list = document.getElementById('quests-list');
         if(!list){ console.error('quests-list not found!'); return; }
 
-        // Таймер — отдельный элемент над списком
-        let timerEl = document.getElementById('quest-timer');
-        if(!timerEl){
-            timerEl = document.createElement('div');
-            timerEl.id = 'quest-timer';
-            timerEl.style.cssText = 'color:#555;font-size:12px;text-align:right;margin-bottom:12px;padding:0 4px;';
-            list.parentNode.insertBefore(timerEl, list);
-        }
+        // Таймер — обновляем существующий span в шапке
+        const timerEl = document.getElementById('quest-timer');
         if(this._questCountdownInterval) clearInterval(this._questCountdownInterval);
         const tick = () => {
             const ms = Math.max(0, (this._questRotNextAt||0) - Date.now());
             const h = Math.floor(ms/3600000);
             const m = Math.floor((ms%3600000)/60000);
             const s = Math.floor((ms%60000)/1000);
-            const timeStr = h > 0 ? h+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0') : m+':'+String(s).padStart(2,'0');
-            timerEl.textContent = timeStr;
+            const timeStr = h > 0 ? h+'ч '+String(m).padStart(2,'0')+'м' : m+'м '+String(s).padStart(2,'0')+'с';
+            if(timerEl) timerEl.textContent = timeStr;
             if(ms<=0){ clearInterval(this._questCountdownInterval); this._questCountdownInterval=null; }
         };
         tick();
