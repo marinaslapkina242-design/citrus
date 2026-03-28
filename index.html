@@ -10893,6 +10893,10 @@ const app = {
         { id:'void',     emoji:'💀', name:'Чёрный кристалл',   rarity:'mythic',    rc:'#FF3030', minV:500, maxV:1000,hp:500 },
         { id:'celestite',emoji:'⭐', name:'Небесит',           rarity:'mythic',    rc:'#FFFFFF', minV:600, maxV:1200,hp:500 },
         { id:'soulstone',emoji:'🔮', name:'Камень душ',        rarity:'mythic',    rc:'#CC00FF', minV:700, maxV:1500,hp:500 },
+        // ── DIVINE (божественные) ── крайне редкие
+        { id:'godstone',  emoji:'✨', name:'Камень Богов',      rarity:'divine',    rc:'#FFD700', minV:2000, maxV:5000, hp:1000 },
+        { id:'stardust',  emoji:'🌌', name:'Звёздная пыль',     rarity:'divine',    rc:'#4488FF', minV:2500, maxV:6000, hp:1000 },
+        { id:'eternity',  emoji:'♾️', name:'Осколок Вечности', rarity:'divine',    rc:'#FF00FF', minV:3000, maxV:8000, hp:1000 },
     ],
     _MINE_W: [
         // common
@@ -10906,7 +10910,9 @@ const app = {
         // legendary
         0.4,0.3,0.25,0.2,
         // mythic
-        0.1,0.07,0.05
+        0.1,0.07,0.05,
+        // divine — крайне редкие
+        0.015,0.010,0.007
     ],
 
     _mine: null,
@@ -11045,8 +11051,8 @@ const app = {
     _minePickRes(depth){
         const w = this._MINE_W.map((v,i)=>{
             const r = this._MINE_RES[i].rarity;
-            const b = depth*(r==='common'?-1.2 : r==='uncommon'?0.4 : r==='rare'?0.8 : r==='epic'?1.2 : r==='legendary'?1.6 : 2.0);
-            return Math.max(0.01, v+b);
+            const b = depth*(r==='common'?-1.2 : r==='uncommon'?0.4 : r==='rare'?0.8 : r==='epic'?1.2 : r==='legendary'?1.6 : r==='mythic'?2.0 : 2.5);
+            return Math.max(0.001, v+b);
         });
         const total = w.reduce((a,b)=>a+b,0);
         let r = Math.random()*total;
@@ -11447,9 +11453,12 @@ const app = {
             // Попап
             const popup = document.getElementById('mine-pickup-popup');
             if(popup){
-                popup.innerHTML = `<div style="background:rgba(0,0,0,0.8);border:1px solid ${block.rc}55;border-radius:14px;padding:10px 20px;font-family:var(--font-mono);font-size:15px;color:${block.rc};">${block.emoji} +${block.name}<span style="color:#FFB340;margin-left:8px;">+${val} 🍊</span></div>`;
-                popup.style.opacity='1'; popup.style.top='32%';
-                setTimeout(()=>{ if(popup){popup.style.opacity='0'; popup.style.top='28%';} }, 1400);
+                const isDivine = block.rarity === 'divine';
+                popup.innerHTML = `<div style="background:rgba(0,0,0,0.9);border:1px solid ${block.rc}${isDivine?'ff':'55'};border-radius:14px;padding:${isDivine?'14px 28px':'10px 20px'};font-family:var(--font-mono);font-size:${isDivine?'18px':'15px'};color:${block.rc};${isDivine?`box-shadow:0 0 30px ${block.rc}88;animation:scareFlash 0.5s ease 2;`:''}">${isDivine?'✨ ':''}${block.emoji} +${block.name}${isDivine?' ✨':''}<span style="color:#FFB340;margin-left:8px;">+${val} 🍊</span>${isDivine?`<div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:4px;letter-spacing:2px;">БОЖЕСТВЕННАЯ НАХОДКА!</div>`:''}
+                </div>`;
+                popup.style.opacity='1'; popup.style.top= isDivine ? '30%' : '32%';
+                if(isDivine) this._showToast(`✨ БОЖЕСТВЕННАЯ РУДА! ${block.emoji} ${block.name} +${val} 🍊`);
+                setTimeout(()=>{ if(popup){popup.style.opacity='0'; popup.style.top='28%';} }, isDivine ? 3000 : 1400);
             }
 
             sess.bi++;
