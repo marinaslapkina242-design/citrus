@@ -1010,6 +1010,7 @@
                 <div class="nav-item"        id="nav-friends"     onclick="app.switchTab('friends')">    <div class="nav-icon"><i class="fas fa-users"></i></div> Друзья <span class="nav-badge hidden" id="fr-badge">0</span></div>
                 <div class="nav-item"        id="nav-studio"      onclick="app.switchTab('studio')">     <div class="nav-icon"><i class="fas fa-cube"></i></div> Студия</div>
                 <div class="nav-item"        id="nav-quests"      onclick="app.switchTab('quests')">     <div class="nav-icon"><i class="fas fa-tasks"></i></div> Задания <span class="nav-badge hidden" id="quest-badge">!</span></div>
+                <div class="nav-item"        id="nav-promo"       onclick="app.switchTab('promo')">      <div class="nav-icon"><i class="fas fa-ticket-alt"></i></div> Промокоды</div>
                 <div class="nav-item"        id="nav-daily"       onclick="app.switchTab('daily')">      <div class="nav-icon"><i class="fas fa-calendar-check"></i></div> Награда <span class="nav-badge hidden" id="daily-badge">!</span></div>
                 <div class="nav-item"        id="nav-roulette"    onclick="app.switchTab('roulette')">   <div class="nav-icon"><i class="fas fa-dice"></i></div> Рулетка</div>
                 <div class="nav-item"        id="nav-credits"     onclick="app.switchTab('credits')">    <div class="nav-icon"><i class="fas fa-coins"></i></div> Кредиты</div>
@@ -1667,6 +1668,29 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
                     </div>
 
                 </div>
+
+                <!-- Управление промокодами -->
+                <div class="section-title" style="margin-top:28px;">🎟️ Промокоды</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                    <div class="panel-box">
+                        <div class="panel-box-title">➕ Создать промокод</div>
+                        <input id="pc-code" class="styled-input" placeholder="Код (например: CITRUS2025)" style="margin-bottom:8px;text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()">
+                        <input id="pc-coins" class="styled-input" placeholder="Монеты (например: 500)" type="number" style="margin-bottom:8px;">
+                        <input id="pc-desc" class="styled-input" placeholder="Описание (необязательно)" style="margin-bottom:8px;">
+                        <input id="pc-maxuses" class="styled-input" placeholder="Макс использований (0 = безлимит)" type="number" style="margin-bottom:12px;">
+                        <button onclick="app._adminCreatePromo()" style="width:100%;padding:10px;background:linear-gradient(135deg,#00C8FF,#0066FF);border:none;border-radius:10px;color:#fff;font-weight:700;font-family:var(--font-body);font-size:14px;cursor:pointer;">🎟️ Создать</button>
+                        <div id="pc-status" style="margin-top:8px;font-size:12px;font-family:var(--font-mono);min-height:16px;"></div>
+                    </div>
+                    <div class="panel-box">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+                            <div class="panel-box-title" style="margin:0;">📋 Активные промокоды</div>
+                            <button onclick="app._adminLoadPromos()" style="background:rgba(0,200,255,0.1);border:1px solid rgba(0,200,255,0.2);color:rgba(0,200,255,0.7);border-radius:8px;padding:5px 10px;cursor:pointer;font-size:11px;font-family:var(--font-body);">↻ Обновить</button>
+                        </div>
+                        <div id="pc-list" style="display:flex;flex-direction:column;gap:6px;max-height:280px;overflow-y:auto;">
+                            <div style="color:rgba(255,255,255,0.2);font-size:12px;text-align:center;padding:16px;">Нажми "Обновить"</div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- ══════════════════ TAB: LEADERBOARD ══════════════════ -->
@@ -1789,6 +1813,41 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
                     <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);border-radius:14px;padding:16px;">
                         <div style="font-size:10px;color:rgba(255,255,255,0.2);font-family:var(--font-mono);margin-bottom:10px;">ИСТОРИЯ</div>
                         <div id="work-history" style="font-size:12px;color:rgba(255,255,255,0.3);font-family:var(--font-mono);line-height:2;"><div style="color:rgba(255,255,255,0.1);">— пусто —</div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══════════════════ TAB: PROMO ══════════════════ -->
+            <div id="tab-promo" class="hidden">
+                <div style="max-width:480px;margin:0 auto;">
+                    <div class="section-title">🎟️ Промокоды</div>
+                    <div style="background:linear-gradient(135deg,rgba(0,229,255,0.06),rgba(123,47,255,0.06));border:1px solid rgba(0,229,255,0.15);border-radius:20px;padding:24px;margin-bottom:20px;">
+                        <div style="font-size:13px;color:rgba(200,220,255,0.6);font-family:var(--font-ui);line-height:1.8;margin-bottom:20px;">
+                            🍊 Вводи промокоды и получай бесплатные монеты и предметы!<br>
+                            Промокоды публикует разраб в новостях и соцсетях.
+                        </div>
+                        <div style="display:flex;gap:8px;">
+                            <input id="promo-input" type="text" maxlength="32"
+                                placeholder="Введи промокод..."
+                                autocomplete="off" spellcheck="false"
+                                style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(0,229,255,0.2);color:#fff;padding:12px 16px;border-radius:12px;font-size:14px;outline:none;font-family:var(--font-ui);text-transform:uppercase;letter-spacing:2px;transition:border-color 0.2s;"
+                                onfocus="this.style.borderColor='rgba(0,229,255,0.5)'" onblur="this.style.borderColor='rgba(0,229,255,0.2)'"
+                                onkeydown="if(event.key==='Enter')app.redeemPromo()"
+                                oninput="this.value=this.value.toUpperCase()">
+                            <button onclick="app.redeemPromo()" style="padding:12px 24px;background:linear-gradient(135deg,var(--p),var(--c-deep));border:none;border-radius:12px;color:#fff;font-family:var(--font-head);font-size:16px;letter-spacing:2px;cursor:pointer;white-space:nowrap;box-shadow:0 0 20px rgba(0,229,255,0.3);transition:all 0.2s;"
+                                onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform=''">
+                                ✓ ПРИМЕНИТЬ
+                            </button>
+                        </div>
+                        <div id="promo-status" style="margin-top:12px;font-size:13px;font-family:var(--font-mono);min-height:20px;"></div>
+                    </div>
+
+                    <!-- История использованных промокодов -->
+                    <div class="panel-box">
+                        <div class="panel-box-title">📋 Использованные промокоды</div>
+                        <div id="promo-history" style="display:flex;flex-direction:column;gap:6px;max-height:300px;overflow-y:auto;">
+                            <div style="color:rgba(255,255,255,0.2);font-size:12px;text-align:center;padding:16px;font-family:var(--font-mono);">— пока пусто —</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -3559,6 +3618,11 @@ const app = {
             desc: 'Рискуй цитрусами и выигрывай больше!<br><br>Поставь любую сумму<br> Крути рулетку<br> Выиграй x2, x5 или даже x10 от ставки<br><br>Но можно и проиграть — используй с умом. Раз в день есть <b style="color:#4ADE80">бесплатное вращение</b>!',
         },
         {
+            target: 'nav-promo',
+            title: '🎟️ ПРОМОКОДЫ',
+            desc: 'Разраб иногда выдаёт <b style="color:#00E5FF">секретные промокоды</b> — вводи их здесь и получай бесплатные монеты и предметы!<br><br>Следи за новостями игры чтобы не пропустить промокод. Каждый промокод можно использовать только <b>один раз</b>.',
+        },
+        {
             target: 'nav-leaderboard',
             title: '🏆 ТОП ИГРОКОВ',
             desc: 'Таблица лучших игроков по количеству цитрусов.<br><br>Топ-3 получают золотые, серебряные и бронзовые короны рядом с ником.<br><br>Копи цитрусы, выполняй задания, заходи каждый день — и твоё имя окажется на первом месте! 👑',
@@ -4095,6 +4159,137 @@ const app = {
         try { fetch(this._API+'/bans/all', {method:'DELETE', headers:{'Content-Type':'application/json'}, body:JSON.stringify({adminKey:'citrus_admin_2025'})}); } catch(e){}
         this.showNotif('🗑','Бан-лист очищен','Все баны удалены');
         this.loadBanList(); this.loadBanOnlineList();
+    },
+
+    clearAllBans(){
+        if(!this.canBan(this.username)) return;
+        if(!confirm('Очистить весь бан-лист? Все игроки будут разбанены.')) return;
+        this._saveBans([]);
+        try { fetch(this._API+'/bans/all', {method:'DELETE', headers:{'Content-Type':'application/json'}, body:JSON.stringify({adminKey:'citrus_admin_2025'})}); } catch(e){}
+        this.showNotif('🗑','Бан-лист очищен','Все баны удалены');
+        this.loadBanList(); this.loadBanOnlineList();
+    },
+
+    // ══════════════════════════════════════
+    // 🎟️ ПРОМОКОДЫ
+    // ══════════════════════════════════════
+    _PROMO_CODES: {
+        // Формат: 'КОД': { coins: число, desc: 'описание', maxUses: число (0 = безлимит) }
+        // Промокоды добавляются разрабом
+    },
+
+    redeemPromo(){
+        const inp = document.getElementById('promo-input');
+        const status = document.getElementById('promo-status');
+        if(!inp || !status) return;
+
+        const code = inp.value.trim().toUpperCase();
+        if(!code){ status.innerHTML = '<span style="color:rgba(255,100,100,0.8);">⚠️ Введи промокод</span>'; return; }
+
+        // Проверяем уже использованные
+        const usedKey = 'citrus_promo_used_' + (this.userId||'');
+        const used = JSON.parse(localStorage.getItem(usedKey)||'[]');
+        if(used.includes(code)){
+            status.innerHTML = '<span style="color:rgba(255,100,100,0.8);">❌ Ты уже использовал этот промокод</span>';
+            return;
+        }
+
+        // Проверяем на сервере
+        fetch(this._API + '/promo/redeem', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({code, userId: String(this.userId), username: this.username})
+        }).then(r=>r.json()).then(d=>{
+            if(d.ok){
+                // Сохраняем локально
+                used.push(code);
+                localStorage.setItem(usedKey, JSON.stringify(used));
+                // Начисляем награду
+                if(d.coins){ this.balance += d.coins; this.saveData(); }
+                inp.value = '';
+                status.innerHTML = `<span style="color:rgba(0,229,255,0.9);">✅ Промокод активирован! ${d.coins?'+'+d.coins+' 🍊':''} ${d.desc||''}</span>`;
+                this.showNotif('🎟️','Промокод активирован!', d.coins ? '+'+d.coins+' 🍊' : (d.desc||'Награда получена'));
+                this._renderPromoHistory();
+            } else {
+                status.innerHTML = `<span style="color:rgba(255,100,100,0.8);">❌ ${d.error||'Неверный промокод'}</span>`;
+            }
+        }).catch(()=>{
+            status.innerHTML = '<span style="color:rgba(255,100,100,0.8);">❌ Нет соединения с сервером</span>';
+        });
+    },
+
+    _renderPromoHistory(){
+        const el = document.getElementById('promo-history');
+        if(!el) return;
+        const usedKey = 'citrus_promo_used_' + (this.userId||'');
+        const used = JSON.parse(localStorage.getItem(usedKey)||'[]');
+        if(!used.length){
+            el.innerHTML = '<div style="color:rgba(255,255,255,0.2);font-size:12px;text-align:center;padding:16px;font-family:var(--font-mono);">— пока пусто —</div>';
+            return;
+        }
+        el.innerHTML = used.map(code=>`
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(0,229,255,0.04);border:1px solid rgba(0,229,255,0.08);border-radius:10px;">
+                <span style="font-size:16px;">🎟️</span>
+                <span style="font-family:var(--font-mono);font-size:13px;color:rgba(0,229,255,0.7);letter-spacing:2px;">${code}</span>
+                <span style="margin-left:auto;font-size:10px;color:rgba(255,255,255,0.2);font-family:var(--font-mono);">✓ использован</span>
+            </div>`).join('');
+    },
+
+    async _adminCreatePromo(){
+        if(!this.isDev(this.username)) return;
+        const code = (document.getElementById('pc-code')?.value||'').toUpperCase().trim();
+        const coins = parseInt(document.getElementById('pc-coins')?.value||'0');
+        const desc = document.getElementById('pc-desc')?.value?.trim()||'';
+        const maxUses = parseInt(document.getElementById('pc-maxuses')?.value||'0');
+        const status = document.getElementById('pc-status');
+        if(!code){ if(status) status.innerHTML='<span style="color:rgba(255,100,100,0.8);">⚠️ Введи код</span>'; return; }
+        if(!coins){ if(status) status.innerHTML='<span style="color:rgba(255,100,100,0.8);">⚠️ Введи цитрусы</span>'; return; }
+        try{
+            const r = await fetch(this._API+'/promo/create',{
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({adminKey:'citrus_admin_2025',code,coins,desc,maxUses})
+            });
+            const d = await r.json();
+            if(d.ok){
+                if(status) status.innerHTML=`<span style="color:rgba(0,229,255,0.9);">✅ Промокод "${code}" создан!</span>`;
+                document.getElementById('pc-code').value='';
+                document.getElementById('pc-coins').value='';
+                document.getElementById('pc-desc').value='';
+                document.getElementById('pc-maxuses').value='';
+                this._adminLoadPromos();
+            } else {
+                if(status) status.innerHTML=`<span style="color:rgba(255,100,100,0.8);">❌ ${d.error}</span>`;
+            }
+        }catch(e){ if(status) status.innerHTML='<span style="color:rgba(255,100,100,0.8);">❌ Ошибка сети</span>'; }
+    },
+
+    async _adminLoadPromos(){
+        if(!this.isDev(this.username)) return;
+        const el = document.getElementById('pc-list');
+        if(!el) return;
+        el.innerHTML='<div style="color:rgba(255,255,255,0.3);font-size:12px;text-align:center;padding:12px;">Загрузка...</div>';
+        try{
+            const r = await fetch(this._API+'/promo?adminKey=citrus_admin_2025');
+            const promos = await r.json();
+            const list = Object.values(promos);
+            if(!list.length){ el.innerHTML='<div style="color:rgba(255,255,255,0.2);font-size:12px;text-align:center;padding:12px;">Нет промокодов</div>'; return; }
+            el.innerHTML = list.map(p=>`
+                <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(0,200,255,0.04);border:1px solid rgba(0,200,255,0.1);border-radius:10px;font-family:var(--font-mono);font-size:11px;">
+                    <div style="flex:1;">
+                        <div style="color:rgba(0,229,255,0.9);letter-spacing:1px;font-size:13px;">${p.code}</div>
+                        <div style="color:rgba(255,255,255,0.3);margin-top:2px;">+${p.coins} 🍊 · исп: ${p.uses}${p.maxUses?'/'+p.maxUses:''} ${p.desc?'· '+p.desc:''}</div>
+                    </div>
+                    <button onclick="app._adminDeletePromo('${p.code}')" style="background:rgba(255,50,50,0.1);border:1px solid rgba(255,50,50,0.2);color:rgba(255,80,80,0.7);border-radius:7px;padding:4px 8px;cursor:pointer;font-size:11px;">🗑</button>
+                </div>`).join('');
+        }catch(e){ el.innerHTML='<div style="color:rgba(255,100,100,0.5);text-align:center;padding:12px;">❌ Ошибка</div>'; }
+    },
+
+    async _adminDeletePromo(code){
+        if(!this.isDev(this.username)||!confirm(`Удалить промокод "${code}"?`)) return;
+        try{
+            await fetch(this._API+'/promo/'+code,{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({adminKey:'citrus_admin_2025'})});
+            this._adminLoadPromos();
+        }catch(e){}
     },
 
     _checkIfBanned(){
@@ -5673,7 +5868,7 @@ const app = {
 
         switchTab(id){
         this._sfx('nav');
-        ['games','mine','work','avatar','shop','friends','studio','quests','daily','roulette','credits','gifts','nft','stats','leaderboard','admin','help','cases','aihelper','devmail'].forEach(t=>{
+        ['games','mine','work','avatar','shop','friends','studio','quests','promo','daily','roulette','credits','gifts','nft','stats','leaderboard','admin','help','cases','aihelper','devmail'].forEach(t=>{
             document.getElementById('tab-'+t)?.classList.add('hidden');
             document.getElementById('nav-'+t)?.classList.remove('active');
         });
@@ -5693,6 +5888,7 @@ const app = {
         if(id==='gifts'){ this.initGifts(); }
         if(id==='nft'){ this.initNft(); }
         if(id==='admin'){ this.loadBanList(); this.loadBanOnlineList(); }
+        if(id==='promo'){ this._renderPromoHistory(); }
         if(id==='aihelper'){ this.initAiHelper(); }
         if(id==='devmail'){ this.initDevMail(); }
         if(id==='stats'){ this.loadStats(); }
@@ -10580,20 +10776,15 @@ const app = {
             // ── Друзья ──
             {id:'friend1',  title:'Найди друга',        desc:'Добавь 1 друга',                reward:30,  type:'friends',  goal:1,    icon:'🤝'},
             {id:'friend3',  title:'Компания',           desc:'Добавь 3 друзей',               reward:70,  type:'friends',  goal:3,    icon:'👫'},
-            {id:'friend5',  title:'Популярный',         desc:'Добавь 5 друзей',               reward:130, type:'friends',  goal:5,    icon:'🌟'},
+            {id:'friend5',  title:'Добавь 5 друзей',   desc:'Добавь 5 друзей',               reward:130, type:'friends',  goal:5,    icon:'🌟'},
             // ── Магазин ──
             {id:'buy1',     title:'Первая покупка',     desc:'Купи что-нибудь в магазине',    reward:20,  type:'buys',     goal:1,    icon:'🛍️'},
             {id:'buy2',     title:'Шопоголик',          desc:'Купи 2 предмета в магазине',    reward:40,  type:'buys',     goal:2,    icon:'🛒'},
             {id:'buy4',     title:'Коллекционер',       desc:'Купи 4 предмета в магазине',    reward:90,  type:'buys',     goal:4,    icon:'💎'},
-            // ── Студия ──
-            {id:'build5',   title:'Начинающий',         desc:'Построй 5 блоков в студии',     reward:15,  type:'blocks',   goal:5,    icon:'🧱'},
-            {id:'build20',  title:'Строитель',          desc:'Построй 20 блоков',             reward:35,  type:'blocks',   goal:20,   icon:'🏗️'},
-            {id:'build60',  title:'Архитектор',         desc:'Построй 60 блоков',             reward:80,  type:'blocks',   goal:60,   icon:'🏛️'},
             // ── Рулетка ──
             {id:'roul1',    title:'Попытка удачи',      desc:'Покрути рулетку 1 раз',         reward:15,  type:'roulette', goal:1,    icon:'🎰'},
             {id:'roul3',    title:'Игрок',              desc:'Покрути рулетку 3 раза',        reward:35,  type:'roulette', goal:3,    icon:'🎲'},
             {id:'roulwin',  title:'Джекпот!',           desc:'Выиграй 100+ 🍊 за один спин',  reward:60,  type:'roulbig',  goal:100,  icon:'🤑'},
-            // ── Кредиты ──
             // ── Шахта ──
             {id:'mine5',    title:'Шахтёр',             desc:'Сломай 5 блоков в шахте',       reward:20,  type:'mineblock',goal:5,    icon:'⛏️'},
             {id:'mine20',   title:'Горняк',             desc:'Сломай 20 блоков в шахте',      reward:50,  type:'mineblock',goal:20,   icon:'🪨'},
@@ -10620,16 +10811,14 @@ const app = {
         const hasStaleIds = rot.ids && rot.ids.some(id=>!knownIds.has(id));
         if(!rot.nextAt || now >= rot.nextAt || hasStaleIds || (rot.ids||[]).length < 10) {
             rot.nextAt = now + ROTATE_MS;
-            // Выбираем 10 заданий — по 1-2 из каждой категории для баланса
             const groups = {
                 playtime: ALL_QUESTS.filter(q=>q.type==='playtime'),
                 jumps:    ALL_QUESTS.filter(q=>q.type==='jumps'),
                 maps:     ALL_QUESTS.filter(q=>q.type==='maps'),
                 friends:  ALL_QUESTS.filter(q=>q.type==='friends'),
                 buys:     ALL_QUESTS.filter(q=>q.type==='buys'),
-                blocks:   ALL_QUESTS.filter(q=>q.type==='blocks'||q.type==='publish'),
                 roulette: ALL_QUESTS.filter(q=>q.type==='roulette'||q.type==='roulbig'),
-                misc:     ALL_QUESTS.filter(q=>['lend','repay','mineblock','minesell','wear','earn'].includes(q.type)),
+                misc:     ALL_QUESTS.filter(q=>['mineblock','minesell','wear','earn'].includes(q.type)),
             };
             const pick = (arr) => arr[Math.floor(Math.random()*arr.length)];
             const chosen = new Set();
@@ -10637,11 +10826,8 @@ const app = {
                 const available = arr.filter(q=>!chosen.has(q.id));
                 if(available.length){ const q=pick(available); chosen.add(q.id); }
             };
-            // Гарантируем по 1 из основных
-            ['playtime','jumps','maps','friends','buys','blocks','roulette'].forEach(k=>addRandom(groups[k]));
-            // Добираем 3 из разных групп
-            ['misc','playtime','jumps','maps','blocks','roulette','misc'].forEach(k=>{ if(chosen.size<10) addRandom(groups[k]); });
-            // Если ещё не хватает — добираем из всего пула
+            ['playtime','jumps','maps','friends','buys','roulette'].forEach(k=>addRandom(groups[k]));
+            ['misc','playtime','jumps','maps','roulette','misc'].forEach(k=>{ if(chosen.size<10) addRandom(groups[k]); });
             if(chosen.size<10) ALL_QUESTS.filter(q=>!chosen.has(q.id)).sort(()=>Math.random()-0.5).slice(0,10-chosen.size).forEach(q=>chosen.add(q.id));
 
             rot.ids = [...chosen];
