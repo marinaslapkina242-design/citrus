@@ -3046,35 +3046,28 @@ const app = {
     },
 
     async _claimGift(amount,fromId,btn){
-        // Защита от двойного нажатия
         if(btn.disabled) return;
-        btn.disabled = true;
-        btn.textContent = '...';
+        btn.disabled = true; btn.textContent = '...';
         try{
             const r=await fetch(this._API+'/mail/'+this.userId);
             const msgs=await r.json();
-            // Находим ОДИН подарок для удаления
-            const giftIdx = msgs.findIndex(m=>m.type==='gift'&&String(m.from_id)===String(fromId)&&m.amount===amount);
-            if(giftIdx === -1){
-                // Подарок уже забран
-                btn.textContent = '✓';
+            const giftIdx=msgs.findIndex(m=>m.type==='gift'&&String(m.from_id)===String(fromId)&&m.amount===amount);
+            if(giftIdx===-1){
+                btn.textContent='✓';
                 this.showNotif('❌','Уже забрано','Этот подарок уже получен');
-                setTimeout(()=>btn.closest('div[style]')?.remove(), 1000);
+                setTimeout(()=>btn.closest('div[style]')?.remove(),1000);
                 return;
             }
-            // Удаляем только этот один подарок
-            const remaining = msgs.filter((_,i)=>i!==giftIdx);
+            const remaining=msgs.filter((_,i)=>i!==giftIdx);
             await fetch(this._API+'/mail/'+this.userId,{method:'DELETE'});
             for(const m of remaining) await fetch(this._API+'/mail/'+this.userId,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(m)});
-            // Начисляем баланс только после успешного удаления
             this.balance+=amount; this.saveData();
             document.getElementById('balance-val').textContent=this.balance;
             this.showNotif('🎁',`+${amount} 🍊 получено!`,`Подарок от игрока`);
             btn.closest('div[style]')?.remove();
             this._loadGiftsInbox();
         }catch(e){
-            btn.disabled = false;
-            btn.textContent = 'Забрать';
+            btn.disabled=false; btn.textContent='Забрать';
             this.showNotif('❌','Ошибка','Попробуй ещё раз');
         }
     },
@@ -3084,9 +3077,14 @@ const app = {
         if(!amount||amount<1||amount>100000){ this.showNotif('❌','Ошибка','Сумма от 1 до 100 000 🍊'); return; }
         if(!this._giftSelectedId){ this.showNotif('❌','Выбери друга','Нажми на имя друга выше'); return; }
         if(this.balance<amount){ this.showNotif('❌','Мало цитрусов',`Нужно ${amount} 🍊, у тебя ${this.balance}`); return; }
-        this.balance-=amount; this.saveData();
-        document.getElementById('balance-val').textContent=this.balance;
+        const btn=document.querySelector('.btn-orange-full');
+        if(btn){btn.disabled=true;btn.textContent='...';}
         try{
+            this.balance-=amount;
+            await fetch(this._API+'/players/'+this.userId,{method:'POST',headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({id:String(this.userId),name:this.username,balance:this.balance,forceBalance:true})});
+            this.saveData();
+            document.getElementById('balance-val').textContent=this.balance;
             await fetch(this._API+'/mail/'+this._giftSelectedId,{method:'POST',headers:{'Content-Type':'application/json'},
                 body:JSON.stringify({type:'gift',from_id:String(this.userId),from_name:this.username+'#'+this.userId,amount})});
             this.showNotif('🎁','Подарок отправлен!',`${amount} 🍊 → ${this._giftSelectedName}`);
@@ -3098,6 +3096,8 @@ const app = {
             this.balance+=amount; this.saveData();
             document.getElementById('balance-val').textContent=this.balance;
             this.showNotif('❌','Ошибка','Подарок не отправлен, монеты возвращены');
+        }finally{
+            if(btn){btn.disabled=false;btn.textContent='🎁 Отправить подарок';}
         }
     },
 
@@ -3931,6 +3931,43 @@ const app = {
     _lbMode: 'balance', // 'balance' | 'time'
 
     _lbFetching: false,
+
+    async _silentUpdateLeaderboard(){
+        if(this._lbFetching) return;
+        this._lbFetching = true;
+        try {
+            const list = document.getElementById('lb-list');
+            if(!list){ this._lbFetching = false; return; }
+            const endpoint = this._lbMode==='time' ? '/leaderboard-time' : '/leaderboard';
+            const r = await fetch(this._API+endpoint);
+            if(!r.ok){ this._lbFetching = false; return; }
+            const top = await r.json();
+            const isTime = this._lbMode === 'time';
+            const fmtVal = (p) => isTime ? this._fmtHubTime(p.hubTime||0) : (p.balance||0).toLocaleString('ru') + ' 🍊';
+            const medals = ['🥇','🥈','🥉'];
+            const totalSlots = Math.max(top.length, 10);
+            const rows = list.querySelectorAll('[data-lb-rank]');
+            if(rows.length !== totalSlots){ this._lbFetching = false; this.loadLeaderboard(); return; }
+            for(let i = 0; i < totalSlots; i++){
+                const p = top[i] || null;
+                const rank = i + 1;
+                const medal = rank <= 3 ? medals[rank-1] : null;
+                const row = list.querySelector('[data-lb-rank="'+rank+'"]');
+                if(!row) continue;
+                if(p){
+                    const valEl  = row.querySelector('[data-lb-val]');
+                    const nameEl = row.querySelector('[data-lb-name]');
+                    const rankEl = row.querySelector('[data-lb-ranknum]');
+                    if(valEl)  valEl.textContent  = fmtVal(p);
+                    if(rankEl) rankEl.textContent = medal || String(rank);
+                    if(nameEl) nameEl.textContent = p.name + (String(p.id)===String(this.userId) ? ' ← ты' : '');
+                }
+            }
+        } catch(e){}
+        this._lbFetching = false;
+    },
+
+        _lbFetching: false,
 
     async _silentUpdateLeaderboard(){
         if(this._lbFetching) return;
