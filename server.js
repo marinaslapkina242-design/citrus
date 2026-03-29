@@ -139,8 +139,8 @@ const server=http.createServer(async(req,res)=>{
         const isNew = !DB.players[parts[1]];
         const existing = DB.players[parts[1]] || {};
 
-        // Баланс — берём максимальный (никогда не уменьшаем)
-        const safeBalance = Math.max(p.balance||0, existing.balance||0);
+        // Баланс — берём максимальный, но если клиент явно указал forceBalance — доверяем ему (списание подарков и т.д.)
+        const safeBalance = p.forceBalance ? (p.balance||0) : Math.max(p.balance||0, existing.balance||0);
 
         // Инвентарь — объединяем все уникальные предметы
         const mergedInv = Array.from(new Set([...(existing.inventory||[]),...(p.inventory||[])]));
@@ -537,16 +537,6 @@ if(req.method==='DELETE'&&parts[0]==='devmail'&&parts[1]){
     if(req.method==='GET'&&parts[0]==='earnings'&&parts[1]){
         if(!DB.pendingEarnings) DB.pendingEarnings={};
         return reply(res,200, DB.pendingEarnings[parts[1]]||{total:0,sales:[]});
-    }
-    // Сброс баланса (только admin)
-    if(req.method==='POST'&&parts[0]==='admin'&&parts[1]==='setbalance'){
-        const d=await body(req);
-        if(d.adminKey!=='citrus_admin_2025') return reply(res,403,{error:'forbidden'});
-        if(!d.playerId) return reply(res,400,{error:'no playerId'});
-        if(!DB.players[d.playerId]) return reply(res,404,{error:'player not found'});
-        DB.players[d.playerId].balance = d.balance !== undefined ? d.balance : 0;
-        saveDB();
-        return reply(res,200,{ok:true, newBalance: DB.players[d.playerId].balance});
     }
     if(req.method==='POST'&&parts[0]==='earnings'&&parts[1]==='claim'||
        req.method==='POST'&&parts[0]==='earnings'&&parts[2]==='claim'){
