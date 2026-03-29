@@ -1278,15 +1278,7 @@
                         </div>
                     </div>
 
-                    <div class="card world-card" onclick="app.launch('play','dropper')">
-                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(0,200,255,0.2),#050510);">
-                            <span class="world-emoji">🌊</span>
-                            <div class="world-glow" style="background:rgba(0,200,255,0.2);"></div>
-                        </div>
-                        <div class="card-info">
-                            <div><b>Дроппер</b><br><small class="world-tag" style="color:#00E5FF">💧 Упади в воду!</small></div>
-                        </div>
-                    </div>
+
 
                     <div class="card world-card" onclick="app.launch('play','obby')">
                         <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(255,100,0,0.2),#050510);">
@@ -1328,7 +1320,15 @@
                         </div>
                     </div>
 
-
+                    <div class="card world-card" onclick="app.launch('play','sky')">
+                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(255,220,0,0.2),#050510);">
+                            <span class="world-emoji">☁️</span>
+                            <div class="world-glow" style="background:rgba(255,220,0,0.12);"></div>
+                        </div>
+                        <div class="card-info">
+                            <div><b>Небесный город</b><br><small class="world-tag" style="color:#FDE68A">🏙️ Над облаками!</small></div>
+                        </div>
+                    </div>
 
                 </div>
                 <div class="section-title">Миры игроков</div>
@@ -4041,12 +4041,13 @@ const app = {
             volcano: '🌋 Остров Вулкана',
             space:   '🚀 Космическая База',
             race:    '🏎️ Гонки на цитрусах',
-            dropper: '🌊 Дроппер',
             obby:    '🔥 Огненный Обби',
             maze:    '🌀 Лабиринт',
             pvp:     '🔫 Арена ПВП',
             hideseek:'👀 Прятки',
             dungeon: '⚔️ Тёмное Подземелье',
+            underwater: '🌊 Подводный мир',
+            crystal: '💎 Кристальная пещера',
         };
         const KNOWN_WORLDS = new Set(Object.keys(wNames));
 
@@ -9768,14 +9769,11 @@ const app = {
             const chest=new THREE.Mesh(new THREE.BoxGeometry(2,1.5,1.5),new THREE.MeshStandardMaterial({color:0x8B4513,roughness:0.8}));
             chest.position.set(8,0.75,-5); this.scene.add(chest); this.objectsToIntersect.push(chest);
             // Цитрусы на дне
-            const citrusCount = 20 + Math.floor(Math.random()*11);
-            for(let i=0;i<citrusCount;i++){
-                const g=new THREE.SphereGeometry(0.4+Math.random()*0.2,10,10);
-                const m=new THREE.MeshStandardMaterial({color:0xFF9500,roughness:0.4,metalness:0.1});
-                const citrus=new THREE.Mesh(g,m);
+            const uwCitrusCount = 20 + Math.floor(Math.random()*11);
+            for(let i=0;i<uwCitrusCount;i++){
+                const citrus=new THREE.Mesh(new THREE.SphereGeometry(0.4+Math.random()*0.2,10,10),new THREE.MeshStandardMaterial({color:0xFF9500,roughness:0.4,metalness:0.1}));
                 citrus.position.set((Math.random()-0.5)*70,0.5,(Math.random()-0.5)*70);
-                this.scene.add(citrus);
-                this.collectibles.push(citrus);
+                this.scene.add(citrus); this.collectibles.push(citrus);
             }
         }
 
@@ -9798,14 +9796,11 @@ const app = {
             const cols=[0xaa00ff,0x00ffcc,0xff00aa,0x0066ff,0xffcc00];
             for(let i=0;i<40;i++) crystal((Math.random()-0.5)*60,(Math.random()-0.5)*60,cols[Math.floor(Math.random()*cols.length)],2+Math.random()*5,0.2+Math.random()*0.6);
             // Цитрусы на полу пещеры
-            const crystalCitrusCount = 20 + Math.floor(Math.random()*11);
-            for(let i=0;i<crystalCitrusCount;i++){
-                const g=new THREE.SphereGeometry(0.4+Math.random()*0.2,10,10);
-                const m=new THREE.MeshStandardMaterial({color:0xFF9500,roughness:0.4,metalness:0.1,emissive:0xFF6600,emissiveIntensity:0.2});
-                const citrus=new THREE.Mesh(g,m);
+            const crCitrusCount = 20 + Math.floor(Math.random()*11);
+            for(let i=0;i<crCitrusCount;i++){
+                const citrus=new THREE.Mesh(new THREE.SphereGeometry(0.4+Math.random()*0.2,10,10),new THREE.MeshStandardMaterial({color:0xFF9500,roughness:0.4,metalness:0.1,emissive:0xFF6600,emissiveIntensity:0.2}));
                 citrus.position.set((Math.random()-0.5)*60,0.45,(Math.random()-0.5)*60);
-                this.scene.add(citrus);
-                this.collectibles.push(citrus);
+                this.scene.add(citrus); this.collectibles.push(citrus);
             }
         }
 
@@ -11722,22 +11717,6 @@ const app = {
 
     mineHit(){
         const now = Date.now();
-
-        // Защита от автокликера — максимум 20 ударов в секунду
-        if(!this._mineClickTimes) this._mineClickTimes = [];
-        this._mineClickTimes = this._mineClickTimes.filter(t => now - t < 1000);
-        this._mineClickTimes.push(now);
-
-        if(this._mineClickTimes.length > 20){
-            // Отстранение на 10 минут
-            if(this._mineRAF){ cancelAnimationFrame(this._mineRAF); this._mineRAF = null; }
-            this._mineBanned = true;
-            this._mineBanUntil = Date.now() + 10 * 60 * 1000;
-            localStorage.setItem('citrus_mine_ban', String(this._mineBanUntil));
-            this._mineClickTimes = [];
-            this._mineShowBanScreen();
-            return;
-        }
 
         if(this._mineBanned) return;
 
