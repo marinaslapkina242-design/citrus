@@ -3046,18 +3046,37 @@ const app = {
     },
 
     async _claimGift(amount,fromId,btn){
-        this.balance+=amount; this.saveData();
-        document.getElementById('balance-val').textContent=this.balance;
+        // Защита от двойного нажатия
+        if(btn.disabled) return;
+        btn.disabled = true;
+        btn.textContent = '...';
         try{
             const r=await fetch(this._API+'/mail/'+this.userId);
             const msgs=await r.json();
-            const remaining=msgs.filter(m=>!(m.type==='gift'&&String(m.from_id)===String(fromId)&&m.amount===amount));
+            // Находим ОДИН подарок для удаления
+            const giftIdx = msgs.findIndex(m=>m.type==='gift'&&String(m.from_id)===String(fromId)&&m.amount===amount);
+            if(giftIdx === -1){
+                // Подарок уже забран
+                btn.textContent = '✓';
+                this.showNotif('❌','Уже забрано','Этот подарок уже получен');
+                setTimeout(()=>btn.closest('div[style]')?.remove(), 1000);
+                return;
+            }
+            // Удаляем только этот один подарок
+            const remaining = msgs.filter((_,i)=>i!==giftIdx);
             await fetch(this._API+'/mail/'+this.userId,{method:'DELETE'});
             for(const m of remaining) await fetch(this._API+'/mail/'+this.userId,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(m)});
-        }catch(e){}
-        this.showNotif('🎁',`+${amount} 🍊 получено!`,`Подарок от игрока`);
-        btn.closest('div[style]').remove();
-        this._loadGiftsInbox();
+            // Начисляем баланс только после успешного удаления
+            this.balance+=amount; this.saveData();
+            document.getElementById('balance-val').textContent=this.balance;
+            this.showNotif('🎁',`+${amount} 🍊 получено!`,`Подарок от игрока`);
+            btn.closest('div[style]')?.remove();
+            this._loadGiftsInbox();
+        }catch(e){
+            btn.disabled = false;
+            btn.textContent = 'Забрать';
+            this.showNotif('❌','Ошибка','Попробуй ещё раз');
+        }
     },
 
     async sendGift(){
