@@ -538,6 +538,16 @@ if(req.method==='DELETE'&&parts[0]==='devmail'&&parts[1]){
         if(!DB.pendingEarnings) DB.pendingEarnings={};
         return reply(res,200, DB.pendingEarnings[parts[1]]||{total:0,sales:[]});
     }
+    // Сброс баланса (только admin)
+    if(req.method==='POST'&&parts[0]==='admin'&&parts[1]==='setbalance'){
+        const d=await body(req);
+        if(d.adminKey!=='citrus_admin_2025') return reply(res,403,{error:'forbidden'});
+        if(!d.playerId) return reply(res,400,{error:'no playerId'});
+        if(!DB.players[d.playerId]) return reply(res,404,{error:'player not found'});
+        DB.players[d.playerId].balance = d.balance !== undefined ? d.balance : 0;
+        saveDB();
+        return reply(res,200,{ok:true, newBalance: DB.players[d.playerId].balance});
+    }
     if(req.method==='POST'&&parts[0]==='earnings'&&parts[1]==='claim'||
        req.method==='POST'&&parts[0]==='earnings'&&parts[2]==='claim'){
         const pid=parts[1]==='claim'?parts[0]:parts[1];
