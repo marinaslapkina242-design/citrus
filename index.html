@@ -974,6 +974,7 @@
                 <span id="online-count-chip">онлайн</span>
             </div>
             <div class="balance-chip">🍊 <span id="balance-val">0</span></div>
+            <div class="balance-chip" style="background:linear-gradient(135deg,rgba(123,47,255,0.15),rgba(0,229,255,0.08));border-color:rgba(123,47,255,0.3);color:#B060FF;">🪙 <span id="tokens-val">0</span></div>
             <!-- Уровень -->
             <div id="level-chip" onclick="app.showLevelInfo()" style="background:linear-gradient(135deg,rgba(120,60,220,0.18),rgba(80,20,180,0.10));border:1px solid rgba(140,80,255,0.3);border-radius:10px;padding:6px 12px;font-family:var(--font-mono);font-size:12px;color:#B060FF;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all 0.2s;" title="Твой уровень">
                 ⭐ <span id="level-val">1</span>
@@ -1014,6 +1015,7 @@
                 <div class="nav-item"        id="nav-daily"       onclick="app.switchTab('daily')">      <div class="nav-icon"><i class="fas fa-calendar-check"></i></div> Награда <span class="nav-badge hidden" id="daily-badge">!</span></div>
                 <div class="nav-item"        id="nav-roulette"    onclick="app.switchTab('roulette')">   <div class="nav-icon"><i class="fas fa-dice"></i></div> Рулетка</div>
                 <div class="nav-item"        id="nav-credits"     onclick="app.switchTab('credits')">    <div class="nav-icon"><i class="fas fa-coins"></i></div> Кредиты</div>
+                <div class="nav-item"        id="nav-exchange"    onclick="app.switchTab('exchange')">   <div class="nav-icon"><i class="fas fa-exchange-alt"></i></div> Обмен</div>
                 <div class="nav-item"        id="nav-gifts"       onclick="app.switchTab('gifts')">      <div class="nav-icon"><i class="fas fa-gift"></i></div> Подарки</div>
                 <div class="nav-item"        id="nav-nft"         onclick="app.switchTab('nft')">        <div class="nav-icon"><i class="fas fa-gem"></i></div> НФТ Подарки</div>
                 <div class="nav-item"        id="nav-stats"       onclick="app.switchTab('stats')">      <div class="nav-icon"><i class="fas fa-chart-line"></i></div> Статистика</div>
@@ -1130,33 +1132,18 @@
                     </div>
                 </div>
 
-                <!-- ── PAYWALL (показывается если нет доступа) ── -->
-                <div id="ai-paywall" style="flex-shrink:0;margin-bottom:14px;position:relative;overflow:hidden;border-radius:20px;background:linear-gradient(135deg,rgba(13,9,32,0.95),rgba(7,3,20,0.98));border:1px solid rgba(123,47,255,0.3);">
-                    <!-- Декор фон -->
-                    <div style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 80% 50%,rgba(123,47,255,0.12),transparent),radial-gradient(ellipse 50% 60% at 10% 50%,rgba(0,229,255,0.06),transparent);pointer-events:none;"></div>
-                    <div style="position:relative;display:flex;align-items:center;gap:20px;padding:20px 22px;">
-                        <!-- Иконка -->
-                        <div style="flex-shrink:0;width:60px;height:60px;border-radius:18px;background:linear-gradient(135deg,rgba(123,47,255,0.3),rgba(0,229,255,0.15));border:1px solid rgba(123,47,255,0.4);display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 0 30px rgba(123,47,255,0.3);">🤖</div>
-                        <!-- Текст -->
-                        <div style="flex:1;min-width:0;">
-                            <div style="font-family:var(--font-head);font-size:16px;letter-spacing:2px;color:#fff;margin-bottom:4px;">РАЗБЛОКИРУЙ ИИ</div>
-                            <div style="font-size:12px;color:rgba(255,255,255,0.4);font-family:var(--font-body);line-height:1.5;">Умный помощник знает всё о игре и помогает с любыми вопросами</div>
-                        </div>
-                        <!-- Цена + кнопка -->
-                        <div style="flex-shrink:0;text-align:center;">
-                            <div style="display:flex;align-items:baseline;gap:4px;justify-content:center;margin-bottom:8px;">
-                                <span style="font-family:var(--font-head);font-size:26px;color:#FFD600;">1000</span>
-                                <span style="font-size:16px;">🍊</span>
-                            </div>
-                            <div style="font-size:10px;color:rgba(255,255,255,0.3);font-family:var(--font-mono);margin-bottom:10px;">= 5 сообщений</div>
-                            <button onclick="app.buyAiMessages()" style="background:linear-gradient(135deg,#7B2FFF,#00C9FF);border:none;border-radius:12px;color:#fff;font-family:var(--font-head);font-size:13px;letter-spacing:1px;padding:9px 20px;cursor:pointer;transition:all 0.2s;box-shadow:0 4px 20px rgba(123,47,255,0.4);white-space:nowrap;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 28px rgba(123,47,255,0.6)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 20px rgba(123,47,255,0.4)'">КУПИТЬ</button>
-                        </div>
-                    </div>
-                    <!-- Разделитель с features -->
-                    <div style="border-top:1px solid rgba(255,255,255,0.04);padding:10px 22px;display:flex;gap:16px;">
-                        <div style="font-size:11px;color:rgba(255,255,255,0.3);font-family:var(--font-mono);">✓ Без ограничений по темам</div>
-                        <div style="font-size:11px;color:rgba(255,255,255,0.3);font-family:var(--font-mono);">✓ Анализ файлов и фото</div>
-                        <div style="font-size:11px;color:rgba(255,255,255,0.3);font-family:var(--font-mono);">✓ Мгновенные ответы</div>
+                <!-- ── МАГАЗИН ПАКОВ ── -->
+                <div id="ai-paywall" style="flex-shrink:0;margin-bottom:14px;border-radius:20px;background:linear-gradient(135deg,rgba(13,9,32,0.95),rgba(7,3,20,0.98));border:1px solid rgba(123,47,255,0.3);padding:16px;">
+                    <div style="font-family:var(--font-head);font-size:14px;letter-spacing:2px;color:#fff;margin-bottom:4px;">🛒 МАГАЗИН ПАКОВ</div>
+                    <div style="font-size:11px;color:rgba(255,255,255,0.3);font-family:var(--font-mono);margin-bottom:12px;">Покупай паки за 🍊 цитрусы или 🪙 токены</div>
+                    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;">
+                        ${[5,10,15,20,25,30,35,40,45,50].map(n=>`
+                        <div onclick="app.buyAiPack(${n})" style="background:rgba(123,47,255,0.08);border:1px solid rgba(123,47,255,0.2);border-radius:12px;padding:10px 6px;text-align:center;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='rgba(123,47,255,0.2)';this.style.borderColor='rgba(123,47,255,0.5)'" onmouseout="this.style.background='rgba(123,47,255,0.08)';this.style.borderColor='rgba(123,47,255,0.2)'">
+                            <div style="font-family:var(--font-head);font-size:16px;color:#B060FF;">${n}</div>
+                            <div style="font-size:9px;color:rgba(255,255,255,0.4);font-family:var(--font-mono);">сообщ.</div>
+                            <div style="font-size:10px;color:#FF9500;font-family:var(--font-mono);margin-top:4px;">${n*200}🍊</div>
+                            <div style="font-size:9px;color:#B060FF;font-family:var(--font-mono);">или ${n}🪙</div>
+                        </div>`).join('')}
                     </div>
                 </div>
 
@@ -1579,6 +1566,46 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
             </div>
 
             <!-- ══════════════════ TAB: GIFTS ══════════════════ -->
+            <!-- ══════════════════ TAB: ОБМЕН ══════════════════ -->
+            <div id="tab-exchange" class="hidden">
+                <div class="section-title">🔄 Обмен валют</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                    <!-- Обмен цитрусов на токены -->
+                    <div class="panel-box">
+                        <div class="panel-box-title">🍊 → 🪙 Цитрусы в токены</div>
+                        <div style="color:rgba(255,255,255,0.4);font-size:12px;margin-bottom:16px;font-family:var(--font-ui);">100 🍊 = 1 🪙 токен</div>
+                        <div style="background:rgba(123,47,255,0.06);border:1px solid rgba(123,47,255,0.15);border-radius:12px;padding:14px;margin-bottom:14px;text-align:center;">
+                            <div style="font-family:var(--font-mono);font-size:11px;color:rgba(255,255,255,0.3);margin-bottom:6px;">Твой баланс</div>
+                            <div style="font-family:var(--font-head);font-size:24px;color:#FF9500;">🍊 <span id="exchange-balance">0</span></div>
+                            <div style="font-size:11px;color:rgba(180,100,255,0.7);font-family:var(--font-mono);margin-top:4px;">🪙 <span id="exchange-tokens">0</span> токенов</div>
+                        </div>
+                        <div style="display:flex;gap:8px;margin-bottom:10px;">
+                            <input type="number" id="exchange-amount" min="100" step="100" placeholder="Сумма (мин. 100 🍊)" class="styled-input" style="flex:1;" oninput="document.getElementById('exchange-preview').textContent=Math.floor((+this.value||0)/100)+' 🪙'">
+                        </div>
+                        <div style="font-size:12px;color:rgba(180,100,255,0.6);font-family:var(--font-mono);margin-bottom:12px;">Получишь: <span id="exchange-preview">0 🪙</span></div>
+                        <button onclick="app.exchangeToTokens()" class="btn-orange-full" style="background:linear-gradient(135deg,#7B2FFF,#00C9FF);">🪙 Обменять</button>
+                    </div>
+                    <!-- Информация о токенах -->
+                    <div class="panel-box">
+                        <div class="panel-box-title">🪙 Что такое токены?</div>
+                        <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px;">
+                            <div style="background:rgba(0,229,255,0.04);border:1px solid rgba(0,229,255,0.1);border-radius:10px;padding:12px;">
+                                <div style="font-size:13px;font-weight:700;color:rgba(220,240,255,0.9);margin-bottom:4px;">💬 ИИ Хелпер</div>
+                                <div style="font-size:11px;color:rgba(255,255,255,0.4);font-family:var(--font-ui);">Покупай паки сообщений за токены</div>
+                            </div>
+                            <div style="background:rgba(255,149,0,0.04);border:1px solid rgba(255,149,0,0.1);border-radius:10px;padding:12px;">
+                                <div style="font-size:13px;font-weight:700;color:rgba(220,240,255,0.9);margin-bottom:4px;">🎁 Подарки</div>
+                                <div style="font-size:11px;color:rgba(255,255,255,0.4);font-family:var(--font-ui);">Отправляй токены друзьям</div>
+                            </div>
+                            <div style="background:rgba(123,47,255,0.04);border:1px solid rgba(123,47,255,0.1);border-radius:10px;padding:12px;">
+                                <div style="font-size:13px;font-weight:700;color:rgba(220,240,255,0.9);margin-bottom:4px;">🛍️ Магазин</div>
+                                <div style="font-size:11px;color:rgba(255,255,255,0.4);font-family:var(--font-ui);">При покупке аксессуаров начисляются токены</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div id="tab-gifts" class="hidden">
                 <div class="section-title">🎁 Подарки</div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
@@ -1588,8 +1615,13 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
                         <div id="gift-friend-list" style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px;min-height:36px;">
                             <div style="color:rgba(255,255,255,0.2);font-size:12px;">Загрузка...</div>
                         </div>
+                        <!-- Переключатель тип подарка -->
+                        <div style="display:flex;gap:6px;margin-bottom:10px;">
+                            <button id="gift-type-citrus" onclick="app._giftType='citrus';this.style.background='rgba(255,149,0,0.2)';this.style.borderColor='rgba(255,149,0,0.4)';document.getElementById('gift-type-token').style.background='transparent';document.getElementById('gift-type-token').style.borderColor='rgba(255,255,255,0.08)';" style="flex:1;padding:7px;border-radius:8px;border:1px solid rgba(255,149,0,0.4);background:rgba(255,149,0,0.2);color:#FF9500;font-family:var(--font-body);font-size:12px;font-weight:700;cursor:pointer;">🍊 Цитрусы</button>
+                            <button id="gift-type-token" onclick="app._giftType='token';this.style.background='rgba(123,47,255,0.2)';this.style.borderColor='rgba(123,47,255,0.4)';document.getElementById('gift-type-citrus').style.background='transparent';document.getElementById('gift-type-citrus').style.borderColor='rgba(255,255,255,0.08)';" style="flex:1;padding:7px;border-radius:8px;border:1px solid rgba(255,255,255,0.08);background:transparent;color:rgba(180,100,255,0.7);font-family:var(--font-body);font-size:12px;font-weight:700;cursor:pointer;">🪙 Токены</button>
+                        </div>
                         <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
-                            <input type="number" id="gift-amount" min="1" max="100000" placeholder="Сумма (1–100 000 🍊)" class="styled-input" style="flex:1;">
+                            <input type="number" id="gift-amount" min="1" max="100000" placeholder="Сумма" class="styled-input" style="flex:1;">
                         </div>
                         <div id="gift-selected-friend" style="color:rgba(255,149,0,0.4);font-size:12px;margin-bottom:12px;font-family:var(--font-body);">Выбери друга выше 👆</div>
                         <button onclick="app.sendGift()" class="btn-orange-full" style="touch-action:manipulation;">🎁 Отправить подарок</button>
@@ -1898,14 +1930,26 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
             </div>
 
             <div id="tab-roulette" class="hidden">
-                <div style="display:flex;align-items:flex-start;justify-content:center;gap:40px;padding-top:10px;width:100%;">
+                <div style="display:flex;align-items:flex-start;justify-content:center;gap:24px;padding-top:10px;width:100%;flex-wrap:wrap;">
+                    <!-- Таблица шансов СЛЕВА -->
+                    <div style="width:200px;padding-top:60px;flex-shrink:0;">
+                        <div class="section-title" style="font-size:13px;margin-bottom:10px;">📊 Таблица шансов</div>
+                        <div style="display:flex;flex-direction:column;gap:4px;">
+                            ${[{v:5,c:'#FF4081',p:'11.8%'},{v:10,c:'#FF9800',p:'11.8%'},{v:15,c:'#FFD740',p:'11.8%'},{v:20,c:'#69F0AE',p:'5.9%'},{v:25,c:'#40C4FF',p:'5.9%'},{v:30,c:'#E040FB',p:'5.9%'},{v:40,c:'#FF6E40',p:'5.9%'},{v:50,c:'#00E5FF',p:'5.9%'},{v:75,c:'#CCFF90',p:'5.9%'},{v:100,c:'#FF80AB',p:'5.9%'},{v:200,c:'#82B1FF',p:'5.9%'},{v:300,c:'#FFD740',p:'5.9%'},{v:400,c:'#69F0AE',p:'5.9%'},{v:500,c:'#FF4081',p:'5.9%'}].map(r=>`
+                            <div style="display:flex;align-items:center;gap:8px;padding:5px 8px;background:rgba(255,255,255,0.02);border-radius:8px;border:1px solid rgba(255,255,255,0.04);">
+                                <div style="width:10px;height:10px;border-radius:50%;background:${r.c};flex-shrink:0;"></div>
+                                <span style="flex:1;font-family:var(--font-mono);font-size:11px;color:rgba(255,255,255,0.7);">${r.v} 🍊</span>
+                                <span style="font-family:var(--font-mono);font-size:11px;color:${r.c};">${r.p}</span>
+                            </div>`).join('')}
+                        </div>
+                    </div>
+                    <!-- Рулетка по центру -->
                     <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
                         <div style="text-align:center;">
                             <div class="roulette-title">🎰 РУЛЕТКА</div>
                             <div style="color:rgba(255,255,255,0.3);font-size:12px;margin-top:4px;font-family:var(--font-ui);">Первый раз бесплатно • Затем 50 🍊</div>
                         </div>
                         <div style="position:relative;width:272px;margin:0 auto;">
-                            <!-- Стрелка строго по центру сверху -->
                             <div style="position:absolute;top:-26px;left:0;right:0;text-align:center;font-size:28px;color:var(--c-main);filter:drop-shadow(0 0 10px rgba(255,149,0,0.8));z-index:10;line-height:1;animation:arrow-bounce 1s ease-in-out infinite;">▼</div>
                             <div class="roulette-ring">
                                 <canvas id="roulette-canvas" width="260" height="260" style="border-radius:50%;display:block;position:relative;z-index:1;"></canvas>
@@ -1915,7 +1959,8 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
                         <button id="roulette-btn" onclick="app.spinRoulette()" class="btn-spin">🎲 КРУТИТЬ БЕСПЛАТНО</button>
                         <div id="roulette-status" style="text-align:center;color:rgba(255,255,255,0.3);font-size:12px;font-family:var(--font-ui);"></div>
                     </div>
-                    <div style="width:260px;padding-top:60px;">
+                    <!-- Топ выигрышей СПРАВА -->
+                    <div style="width:220px;padding-top:60px;flex-shrink:0;">
                         <div class="section-title">🏆 ТОП ВЫИГРЫШЕЙ</div>
                         <div id="roulette-leaderboard" class="leaderboard-panel">
                             <div style="color:rgba(255,255,255,0.2);text-align:center;padding:16px;font-size:12px;">Загрузка...</div>
@@ -2371,7 +2416,7 @@ const app = {
             this.inventory=d.inventory||[];
             this.customMaps=d.customMaps||[];
             this.friends=d.friends||[];
-        this.questData=d.questData||{}; this.coins=d.coins||0; this.rouletteUsed=d.rouletteUsed||false; this.questRotation=d.questRotation||null; this.visitedMaps=d.visitedMaps||[];
+        this.questData=d.questData||{}; this.coins=d.coins||0; this.tokens=d.tokens||0; this.rouletteUsed=d.rouletteUsed||false; this.questRotation=d.questRotation||null; this.visitedMaps=d.visitedMaps||[];
         this.level=d.level||1; this.xp=d.xp||0;
         this.dailyStreak=d.dailyStreak||0; this.lastLoginDay=d.lastLoginDay||0;
         this.dailyItemClaimed=d.dailyItemClaimed||null;
@@ -2586,10 +2631,10 @@ const app = {
     },
 
     initRoulette(){
-        const prizes = [5,5,10,10,10,15,15,20,20,25,30,35,40,50,60,75,100,200];
+        const prizes = [5,5,10,10,15,15,20,25,30,40,50,75,100,200,300,400,500];
         const colors = ['#FF4081','#FF9800','#FFD740','#69F0AE','#40C4FF','#E040FB',
                         '#FF6E40','#00E5FF','#CCFF90','#FF80AB','#82B1FF','#FF9800',
-                        '#FFD740','#69F0AE','#FF4081','#40C4FF','#E040FB','#FF6E40'];
+                        '#FFD740','#69F0AE','#FF4081','#40C4FF','#E040FB'];
         const canvas = document.getElementById('roulette-canvas');
         if(!canvas) return;
         const ctx = canvas.getContext('2d');
@@ -3520,7 +3565,7 @@ const app = {
             myColor:this._myColor,
             inventory:this.inventory, customMaps:this.customMaps, rouletteUsed:this.rouletteUsed||false,
             friends:this.friends, friendRequests:this.friendRequests, sentReqs:this.sentReqs, visitedMaps:this.visitedMaps||[],
-            questData:this.questData, coins:this.coins, questRotation:this.questRotation,
+            questData:this.questData, coins:this.coins, tokens:this.tokens||0, questRotation:this.questRotation,
             rouletteTotal:this.rouletteTotal||0,
             level:this.level||1, xp:this.xp||0,
             dailyStreak:this.dailyStreak||0, lastLoginDay:this.lastLoginDay||0,
@@ -3551,6 +3596,7 @@ const app = {
         document.getElementById('display-name').innerHTML=(this.fullTag || this.username)+this.devBadge(this.username);
         document.getElementById('balance-val').innerText=this.balance;
         document.getElementById('ingame-balance').innerText=this.balance;
+        const tokEl=document.getElementById('tokens-val'); if(tokEl) tokEl.innerText=this.tokens||0;
         this._renderInventoryList();
         const cnt=this.friendRequests.length,b=document.getElementById('fr-badge');
         b.classList.toggle('hidden',cnt===0);if(cnt>0)b.innerText=cnt;
@@ -6037,6 +6083,9 @@ const app = {
         if(this.inventory.includes(id))return;
         if(this.balance>=price){
             this.balance-=price;this.inventory.push(id); this._questProgress('buys',1); this._questProgress('wear',this.inventory.length);
+            // Начисляем токены: 1 токен за каждые 100 🍊
+            const tokensEarned = Math.floor(price / 100);
+            if(tokensEarned > 0){ this.tokens=(this.tokens||0)+tokensEarned; }
             this.saveData();this.renderShop();this.updateAvatarPreview();
             // Обновляем персонажа сразу если в игре
             if(this.mode==='play' && this.playerGroup && this.scene){
@@ -6046,7 +6095,8 @@ const app = {
             }
             const bv2=document.getElementById('balance-val'); if(bv2) bv2.textContent=this.balance;
             const it=SHOP_ITEMS.find(i=>i.id===id);
-            this.showNotif(it.icon,'Куплено!',`${it.name} в гардеробе`);
+            const tokMsg = tokensEarned>0 ? ` +${tokensEarned}🪙` : '';
+            this.showNotif(it.icon,'Куплено!',`${it.name} в гардеробе${tokMsg}`);
         }else this.showNotif('💸','Мало цитрусов',`Нужно ещё ${price-this.balance} 🍊`);
     },
     removeItem(id){
@@ -11918,20 +11968,42 @@ const app = {
         if(paywallEl) paywallEl.style.display = msgsLeft > 0 ? 'none' : 'block';
     },
 
-    buyAiMessages(){
-        const cost = 1000;
-        if((this.balance||0) < cost){
-            this._showToast('❌ Нужно 1000 🍊 для доступа к ИИ!'); return;
+    buyAiMessages(){ this.buyAiPack(5); },
+    buyAiPack(count){
+        const citrusCost = count * 200;
+        const tokenCost = count;
+        // Сначала пробуем токены, потом цитрусы
+        if((this.tokens||0) >= tokenCost){
+            this.tokens -= tokenCost;
+            this.saveData();
+            const cur = parseInt(localStorage.getItem('citrus_ai_msgs')||'0');
+            localStorage.setItem('citrus_ai_msgs', String(cur + count));
+            this.initAiHelper();
+            this._showToast(`✅ Куплен пак ${count} сообщений за ${tokenCost}🪙`);
+            this._sfx('buy');
+        } else if((this.balance||0) >= citrusCost){
+            this.balance -= citrusCost;
+            this.saveData();
+            const cur = parseInt(localStorage.getItem('citrus_ai_msgs')||'0');
+            localStorage.setItem('citrus_ai_msgs', String(cur + count));
+            this.initAiHelper();
+            this._showToast(`✅ Куплен пак ${count} сообщений за ${citrusCost}🍊`);
+            this._sfx('buy');
+        } else {
+            this._showToast(`❌ Нужно ${tokenCost}🪙 или ${citrusCost}🍊`);
         }
-        // Deduct balance
-        this.balance -= cost;
+    },
+    exchangeToTokens(){
+        const amount = parseInt(document.getElementById('exchange-amount')?.value||'0');
+        if(amount < 100){ this.showNotif('❌','Минимум 100 🍊','Введи сумму не меньше 100'); return; }
+        if((this.balance||0) < amount){ this.showNotif('❌','Мало цитрусов',`Нужно ${amount} 🍊`); return; }
+        const tokens = Math.floor(amount/100);
+        this.balance -= amount;
+        this.tokens = (this.tokens||0) + tokens;
         this.saveData();
-        // Grant 5 messages
-        const cur = parseInt(localStorage.getItem('citrus_ai_msgs')||'0');
-        localStorage.setItem('citrus_ai_msgs', String(cur + 5));
-        this.initAiHelper();
-        this._showToast('✅ Доступ к ИИ куплен! 5 сообщений');
-        this._sfx('buy');
+        document.getElementById('exchange-amount').value='';
+        document.getElementById('exchange-preview').textContent='0 🪙';
+        this.showNotif('🪙','Обмен успешен!',`+${tokens} токенов`);
     },
 
     _aiConversation: [],
@@ -12019,11 +12091,21 @@ const app = {
         const loadDiv = this._aiAddMessage('assistant','<span style="opacity:0.4;font-style:italic;">Думаю...</span>', true);
 
         try {
+            // Передаём актуальные данные игрока чтобы ИИ знал реальное состояние
+            const playerContext = [
+                `Игрок: ${this.username} (ID: ${this.userId})`,
+                `Баланс: ${this.balance} 🍊`,
+                `Токены: ${this.tokens||0} 🪙`,
+                `Уровень: ${this.level||1} (XP: ${this.xp||0})`,
+                `Предметы в инвентаре: ${this.inventory.length ? this.inventory.join(', ') : 'нет'}`,
+                `Друзья: ${this.friends.length}`,
+                `Ежедневная серия: ${this.dailyStreak||0} дней`,
+            ].join('\n');
             const resp = await fetch(this._API+'/ai-proxy',{
                 method:'POST',
                 headers:{'Content-Type':'application/json'},
                 body: JSON.stringify({
-                    system:'Ты — ИИ Хелпер игры Citrus Online 🍊. Ты знаешь всё об этой игре: цитрусы (внутриигровая валюта), миры, НФТ, магазин, рулетка, кредиты, шахта, задания, аватары. Ты также умеешь помогать с любыми вопросами вне игры. Отвечай на языке пользователя (русском или другом). Будь дружелюбным, кратким и полезным.',
+                    playerContext,
                     messages: this._aiConversation
                 })
             });
