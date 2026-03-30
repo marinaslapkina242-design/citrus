@@ -615,6 +615,16 @@ if(req.method==='DELETE'&&parts[0]==='devmail'&&parts[1]){
         return reply(res,200,top);
     }
 
+    // Leaderboard (по токенам)
+    if(req.method==='GET'&&parts[0]==='leaderboard-tokens'){
+        const top = Object.values(DB.players)
+            .filter(p=>p.name)
+            .sort((a,b)=>(b.tokens||0)-(a.tokens||0))
+            .slice(0,50)
+            .map(p=>({id:p.id,name:p.name,tag:p.tag||'',color:p.color||'#FF9800',tokens:p.tokens||0,inventory:p.inventory||[]}));
+        return reply(res,200,top);
+    }
+
     // Leaderboard (по времени на сайте)
     if(req.method==='GET'&&parts[0]==='leaderboard-time'){
         const top = Object.values(DB.players)
@@ -756,42 +766,6 @@ if(req.method==='DELETE'&&parts[0]==='devmail'&&parts[1]){
             console.error('❌ GROQ_KEY не задан в Environment Variables!');
             return reply(res,500,{error:'GROQ_KEY not set on server'});
         }
-        // Добавляем контекст игрока в системный промпт
-        const gameSystemPrompt = `Ты — CITRUS AI, встроенный ИИ-помощник игры CITRUS ONLINE 🍊. Отвечай на языке пользователя, дружелюбно и по делу.
-
-=== ОБ ИГРЕ CITRUS ONLINE ===
-Citrus Online — браузерная многопользовательская игра с 3D миром. Валюта — Цитрусы 🍊 и Токены 🪙.
-
-=== КАК ЗАРАБАТЫВАТЬ ЦИТРУСЫ ===
-- Шахта ⛏️ — копай блоки, получай ресурсы, продавай их
-- Работа ⚡ — выполняй мини-задания за цитрусы
-- Рулетка 🎰 — крути рулетку (раз в день бесплатно)
-- Задания 🎯 — ежедневные задания с наградами
-- Ежедневная награда 🎁 — заходи каждый день (стрик увеличивает награду)
-- Кредиты 💳 — выдавай кредиты другим игрокам под процент
-- Подарки от друзей
-
-=== ТОКЕНЫ 🪙 ===
-- Зарабатываются при покупке в магазине (1 токен за каждые 100 🍊)
-- Обмен: 100 🍊 = 1 🪙 (раздел Обмен)
-- Тратятся на паки сообщений CITRUS AI (1 🪙 = 1 сообщение)
-
-=== РАЗДЕЛЫ ===
-Миры 🌍, Шахта ⛏️, Работа ⚡, Аватар 👤, Магазин 🛒, Друзья 👫, Студия 🎮, Задания 🎯, Рулетка 🎰, Кредиты 💳, Подарки 🎁, НФТ Подарки 💎, Топ 🏆, Статистика 📊, Обмен 💱
-
-=== МАГАЗИН ===
-Категории: головные уборы, одежда, оружие, питомцы, эффекты, редкие. При покупке получаешь токены.
-
-=== СОВЕТЫ ===
-- Заходи каждый день для ежедневной награды
-- Выполняй задания — быстрый способ заработать
-- Шахта даёт стабильный доход
-- Топ-3 получают медали рядом с именем
-
-${d.playerContext ? '=== ДАННЫЕ ИГРОКА (актуальные) ===\n' + d.playerContext : ''}
-
-Если не знаешь ответа — честно скажи об этом.`;
-
         const messages=d.messages.map(m=>{
             if(typeof m.content==='string') return m;
             const text=(Array.isArray(m.content)?m.content:[m.content])
@@ -802,7 +776,7 @@ ${d.playerContext ? '=== ДАННЫЕ ИГРОКА (актуальные) ===\n'
             model:'llama-3.1-8b-instant',
             max_tokens:1000,
             messages:[
-                {role:'system',content:gameSystemPrompt},
+                {role:'system',content:d.system||'Ты — ИИ Хелпер игры Citrus Online 🍊. Отвечай на языке пользователя, кратко и по делу.'},
                 ...messages
             ]
         });
