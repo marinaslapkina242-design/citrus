@@ -1136,15 +1136,7 @@
                 <div id="ai-paywall" style="flex-shrink:0;margin-bottom:14px;border-radius:20px;background:linear-gradient(135deg,rgba(13,9,32,0.95),rgba(7,3,20,0.98));border:1px solid rgba(123,47,255,0.3);padding:16px;">
                     <div style="font-family:var(--font-head);font-size:14px;letter-spacing:2px;color:#fff;margin-bottom:4px;">🛒 МАГАЗИН ПАКОВ</div>
                     <div style="font-size:11px;color:rgba(255,255,255,0.3);font-family:var(--font-mono);margin-bottom:12px;">Покупай паки за 🍊 цитрусы или 🪙 токены</div>
-                    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;">
-                        ${[5,10,15,20,25,30,35,40,45,50].map(n=>`
-                        <div onclick="app.buyAiPack(${n})" style="background:rgba(123,47,255,0.08);border:1px solid rgba(123,47,255,0.2);border-radius:12px;padding:10px 6px;text-align:center;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='rgba(123,47,255,0.2)';this.style.borderColor='rgba(123,47,255,0.5)'" onmouseout="this.style.background='rgba(123,47,255,0.08)';this.style.borderColor='rgba(123,47,255,0.2)'">
-                            <div style="font-family:var(--font-head);font-size:16px;color:#B060FF;">${n}</div>
-                            <div style="font-size:9px;color:rgba(255,255,255,0.4);font-family:var(--font-mono);">сообщ.</div>
-                            <div style="font-size:10px;color:#FF9500;font-family:var(--font-mono);margin-top:4px;">${n*200}🍊</div>
-                            <div style="font-size:9px;color:#B060FF;font-family:var(--font-mono);">или ${n}🪙</div>
-                        </div>`).join('')}
-                    </div>
+                    <div id="ai-packs-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;"></div>
                 </div>
 
                 <!-- ── CHAT AREA ── -->
@@ -1223,6 +1215,8 @@
                             <span class="hot-badge">HOT</span>
                         </div>
                     </div>
+
+
 
                     <div class="card world-card" onclick="app.launch('play','parkour')">
                         <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(0,229,255,0.1),#050510);">
@@ -1307,15 +1301,7 @@
                         </div>
                     </div>
 
-                    <div class="card world-card" onclick="app.launch('play','sky')">
-                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(255,220,0,0.2),#050510);">
-                            <span class="world-emoji">☁️</span>
-                            <div class="world-glow" style="background:rgba(255,220,0,0.12);"></div>
-                        </div>
-                        <div class="card-info">
-                            <div><b>Небесный город</b><br><small class="world-tag" style="color:#FDE68A">🏙️ Над облаками!</small></div>
-                        </div>
-                    </div>
+
 
                 </div>
                 <div class="section-title">Миры игроков</div>
@@ -1934,14 +1920,7 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
                     <!-- Таблица шансов СЛЕВА -->
                     <div style="width:200px;padding-top:60px;flex-shrink:0;">
                         <div class="section-title" style="font-size:13px;margin-bottom:10px;">📊 Таблица шансов</div>
-                        <div style="display:flex;flex-direction:column;gap:4px;">
-                            ${[{v:5,c:'#FF4081',p:'11.8%'},{v:10,c:'#FF9800',p:'11.8%'},{v:15,c:'#FFD740',p:'11.8%'},{v:20,c:'#69F0AE',p:'5.9%'},{v:25,c:'#40C4FF',p:'5.9%'},{v:30,c:'#E040FB',p:'5.9%'},{v:40,c:'#FF6E40',p:'5.9%'},{v:50,c:'#00E5FF',p:'5.9%'},{v:75,c:'#CCFF90',p:'5.9%'},{v:100,c:'#FF80AB',p:'5.9%'},{v:200,c:'#82B1FF',p:'5.9%'},{v:300,c:'#FFD740',p:'5.9%'},{v:400,c:'#69F0AE',p:'5.9%'},{v:500,c:'#FF4081',p:'5.9%'}].map(r=>`
-                            <div style="display:flex;align-items:center;gap:8px;padding:5px 8px;background:rgba(255,255,255,0.02);border-radius:8px;border:1px solid rgba(255,255,255,0.04);">
-                                <div style="width:10px;height:10px;border-radius:50%;background:${r.c};flex-shrink:0;"></div>
-                                <span style="flex:1;font-family:var(--font-mono);font-size:11px;color:rgba(255,255,255,0.7);">${r.v} 🍊</span>
-                                <span style="font-family:var(--font-mono);font-size:11px;color:${r.c};">${r.p}</span>
-                            </div>`).join('')}
-                        </div>
+                        <div id="roulette-chances-list" style="display:flex;flex-direction:column;gap:4px;"></div>
                     </div>
                     <!-- Рулетка по центру -->
                     <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
@@ -2631,6 +2610,16 @@ const app = {
     },
 
     initRoulette(){
+        // Рендерим таблицу шансов
+        const chancesList = document.getElementById('roulette-chances-list');
+        if(chancesList && !chancesList.children.length){
+            const items = [{v:5,c:'#FF4081',p:'11.8%'},{v:10,c:'#FF9800',p:'11.8%'},{v:15,c:'#FFD740',p:'11.8%'},{v:20,c:'#69F0AE',p:'5.9%'},{v:25,c:'#40C4FF',p:'5.9%'},{v:30,c:'#E040FB',p:'5.9%'},{v:40,c:'#FF6E40',p:'5.9%'},{v:50,c:'#00E5FF',p:'5.9%'},{v:75,c:'#CCFF90',p:'5.9%'},{v:100,c:'#FF80AB',p:'5.9%'},{v:200,c:'#82B1FF',p:'5.9%'},{v:300,c:'#FFD740',p:'5.9%'},{v:400,c:'#69F0AE',p:'5.9%'},{v:500,c:'#FF4081',p:'5.9%'}];
+            chancesList.innerHTML = items.map(r=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 8px;background:rgba(255,255,255,0.02);border-radius:8px;border:1px solid rgba(255,255,255,0.04);">
+                <div style="width:10px;height:10px;border-radius:50%;background:${r.c};flex-shrink:0;"></div>
+                <span style="flex:1;font-family:var(--font-mono);font-size:11px;color:rgba(255,255,255,0.7);">${r.v} 🍊</span>
+                <span style="font-family:var(--font-mono);font-size:11px;color:${r.c};">${r.p}</span>
+            </div>`).join('');
+        }
         const prizes = [5,5,10,10,15,15,20,25,30,40,50,75,100,200,300,400,500];
         const colors = ['#FF4081','#FF9800','#FFD740','#69F0AE','#40C4FF','#E040FB',
                         '#FF6E40','#00E5FF','#CCFF90','#FF80AB','#82B1FF','#FF9800',
@@ -5989,7 +5978,7 @@ const app = {
 
         switchTab(id){
         this._sfx('nav');
-        ['games','mine','work','avatar','shop','friends','studio','quests','promo','daily','roulette','credits','gifts','nft','stats','leaderboard','admin','help','cases','aihelper','devmail'].forEach(t=>{
+        ['games','mine','work','avatar','shop','friends','studio','quests','promo','daily','roulette','credits','gifts','nft','stats','leaderboard','admin','help','cases','aihelper','devmail','exchange'].forEach(t=>{
             document.getElementById('tab-'+t)?.classList.add('hidden');
             document.getElementById('nav-'+t)?.classList.remove('active');
         });
@@ -6013,6 +6002,7 @@ const app = {
         if(id==='aihelper'){ this.initAiHelper(); }
         if(id==='devmail'){ this.initDevMail(); }
         if(id==='stats'){ this.loadStats(); }
+        if(id==='exchange'){ this._initExchangeTab(); }
         if(id==='leaderboard'){
             this.loadLeaderboard();
             if(this._lbRefreshInterval) clearInterval(this._lbRefreshInterval);
@@ -11966,6 +11956,16 @@ const app = {
         const paywallEl = document.getElementById('ai-paywall');
         if(statusEl) statusEl.textContent = msgsLeft > 0 ? `💬 ${msgsLeft} сообщ. осталось` : 'Нет доступа';
         if(paywallEl) paywallEl.style.display = msgsLeft > 0 ? 'none' : 'block';
+        const grid = document.getElementById('ai-packs-grid');
+        if(grid && !grid.children.length){
+            grid.innerHTML = [5,10,15,20,25,30,35,40,45,50].map(n=>`
+                <div onclick="app.buyAiPack(${n})" style="background:rgba(123,47,255,0.08);border:1px solid rgba(123,47,255,0.2);border-radius:12px;padding:10px 6px;text-align:center;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='rgba(123,47,255,0.2)';this.style.borderColor='rgba(123,47,255,0.5)'" onmouseout="this.style.background='rgba(123,47,255,0.08)';this.style.borderColor='rgba(123,47,255,0.2)'">
+                    <div style="font-family:var(--font-head);font-size:16px;color:#B060FF;">${n}</div>
+                    <div style="font-size:9px;color:rgba(255,255,255,0.4);font-family:var(--font-mono);">сообщ.</div>
+                    <div style="font-size:10px;color:#FF9500;font-family:var(--font-mono);margin-top:4px;">${n*200}🍊</div>
+                    <div style="font-size:9px;color:#B060FF;font-family:var(--font-mono);">или ${n}🪙</div>
+                </div>`).join('');
+        }
     },
 
     buyAiMessages(){ this.buyAiPack(5); },
@@ -11993,6 +11993,13 @@ const app = {
             this._showToast(`❌ Нужно ${tokenCost}🪙 или ${citrusCost}🍊`);
         }
     },
+    _initExchangeTab(){
+        const balEl = document.getElementById('exchange-balance');
+        const tokEl = document.getElementById('exchange-tokens');
+        if(balEl) balEl.textContent = this.balance;
+        if(tokEl) tokEl.textContent = this.tokens||0;
+    },
+
     exchangeToTokens(){
         const amount = parseInt(document.getElementById('exchange-amount')?.value||'0');
         if(amount < 100){ this.showNotif('❌','Минимум 100 🍊','Введи сумму не меньше 100'); return; }
@@ -12091,21 +12098,11 @@ const app = {
         const loadDiv = this._aiAddMessage('assistant','<span style="opacity:0.4;font-style:italic;">Думаю...</span>', true);
 
         try {
-            // Передаём актуальные данные игрока чтобы ИИ знал реальное состояние
-            const playerContext = [
-                `Игрок: ${this.username} (ID: ${this.userId})`,
-                `Баланс: ${this.balance} 🍊`,
-                `Токены: ${this.tokens||0} 🪙`,
-                `Уровень: ${this.level||1} (XP: ${this.xp||0})`,
-                `Предметы в инвентаре: ${this.inventory.length ? this.inventory.join(', ') : 'нет'}`,
-                `Друзья: ${this.friends.length}`,
-                `Ежедневная серия: ${this.dailyStreak||0} дней`,
-            ].join('\n');
             const resp = await fetch(this._API+'/ai-proxy',{
                 method:'POST',
                 headers:{'Content-Type':'application/json'},
                 body: JSON.stringify({
-                    playerContext,
+                    system:'Ты — ИИ Хелпер игры Citrus Online 🍊. Ты знаешь всё об этой игре: цитрусы (внутриигровая валюта), миры, НФТ, магазин, рулетка, кредиты, шахта, задания, аватары. Ты также умеешь помогать с любыми вопросами вне игры. Отвечай на языке пользователя (русском или другом). Будь дружелюбным, кратким и полезным.',
                     messages: this._aiConversation
                 })
             });
