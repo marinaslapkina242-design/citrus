@@ -1738,12 +1738,17 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
                             style="padding:6px 14px;border-radius:7px;font-size:11px;font-weight:700;font-family:var(--font-mono);letter-spacing:0.5px;
                             background:linear-gradient(135deg,rgba(0,229,255,0.15),rgba(0,102,255,0.1));color:var(--c-main);
                             border:1px solid rgba(0,229,255,0.2);box-shadow:0 0 12px rgba(0,229,255,0.08);">
-                            🍊 Монеты
+                            🍊 Цитрусы
                         </button>
                         <button id="lb-btn-time" onclick="app.loadLeaderboard('time')"
                             style="padding:6px 14px;border-radius:7px;font-size:11px;font-weight:700;font-family:var(--font-mono);letter-spacing:0.5px;
                             background:transparent;color:rgba(220,240,255,0.3);border:1px solid transparent;">
                             ⏱ Время
+                        </button>
+                        <button id="lb-btn-tokens" onclick="app.loadLeaderboard('tokens')"
+                            style="padding:6px 14px;border-radius:7px;font-size:11px;font-weight:700;font-family:var(--font-mono);letter-spacing:0.5px;
+                            background:transparent;color:rgba(220,240,255,0.3);border:1px solid transparent;">
+                            🪙 Токены
                         </button>
                     </div>
                 </div>
@@ -3070,22 +3075,26 @@ const app = {
                 return;
             }
             for(const g of gifts){
+                const isToken = g.gift_type === 'token';
+                const icon = isToken ? '🪙' : '🍊';
+                const color = isToken ? '#B060FF' : '#FF9800';
                 const div=document.createElement('div');
                 div.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#111;border-radius:8px;border:1px solid #1a1a1a;margin-bottom:6px;';
-                div.innerHTML=`<div><b style="color:#FF9800">+${g.amount} 🍊</b><br><span style="color:#666;font-size:12px;">от ${g.from_name||g.from_id}</span></div>
-                    <button onclick="app._claimGift(${g.amount},'${g.from_id}',this)" style="padding:7px 14px;background:rgba(255,149,0,0.2);border:1px solid #FF9800;border-radius:8px;color:#FF9800;font-size:13px;cursor:pointer;">Забрать</button>`;
+                div.innerHTML=`<div><b style="color:${color}">+${g.amount} ${icon}</b><br><span style="color:#666;font-size:12px;">от ${g.from_name||g.from_id}</span></div>
+                    <button onclick="app._claimGift(${g.amount},'${g.from_id}',this,'${g.gift_type||'citrus'}')" style="padding:7px 14px;background:rgba(255,149,0,0.2);border:1px solid #FF9800;border-radius:8px;color:#FF9800;font-size:13px;cursor:pointer;">Забрать</button>`;
                 inbox.appendChild(div);
             }
         }catch(e){ inbox.innerHTML='<div style="color:#444;font-size:12px;">Ошибка загрузки</div>'; }
     },
 
-    async _claimGift(amount,fromId,btn){
+    async _claimGift(amount,fromId,btn,giftType){
         if(btn.disabled) return;
         btn.disabled = true; btn.textContent = '...';
+        const isToken = giftType === 'token';
         try{
             const r=await fetch(this._API+'/mail/'+this.userId);
             const msgs=await r.json();
-            const giftIdx=msgs.findIndex(m=>m.type==='gift'&&String(m.from_id)===String(fromId)&&m.amount===amount);
+            const giftIdx=msgs.findIndex(m=>m.type==='gift'&&String(m.from_id)===String(fromId)&&m.amount===amount&&(m.gift_type||'citrus')===(giftType||'citrus'));
             if(giftIdx===-1){
                 btn.textContent='✓';
                 this.showNotif('❌','Уже забрано','Этот подарок уже получен');
@@ -3095,9 +3104,15 @@ const app = {
             const remaining=msgs.filter((_,i)=>i!==giftIdx);
             await fetch(this._API+'/mail/'+this.userId,{method:'DELETE'});
             for(const m of remaining) await fetch(this._API+'/mail/'+this.userId,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(m)});
-            this.balance+=amount; this.saveData();
-            document.getElementById('balance-val').textContent=this.balance;
-            this.showNotif('🎁',`+${amount} 🍊 получено!`,`Подарок от игрока`);
+            if(isToken){
+                this.tokens=(this.tokens||0)+amount; this.saveData();
+                const tokEl=document.getElementById('tokens-val'); if(tokEl) tokEl.textContent=this.tokens;
+                this.showNotif('🎁',`+${amount} 🪙 получено!`,`Токены от игрока`);
+            } else {
+                this.balance+=amount; this.saveData();
+                document.getElementById('balance-val').textContent=this.balance;
+                this.showNotif('🎁',`+${amount} 🍊 получено!`,`Подарок от игрока`);
+            }
             btn.closest('div[style]')?.remove();
             this._loadGiftsInbox();
         }catch(e){
@@ -3120,7 +3135,7 @@ const app = {
             this.saveData();
             document.getElementById('balance-val').textContent=this.balance;
             await fetch(this._API+'/mail/'+this._giftSelectedId,{method:'POST',headers:{'Content-Type':'application/json'},
-                body:JSON.stringify({type:'gift',from_id:String(this.userId),from_name:this.username+'#'+this.userId,amount})});
+                body:JSON.stringify({type:'gift',gift_type:isToken?'token':'citrus',from_id:String(this.userId),from_name:this.username+'#'+this.userId,amount})});
             this.showNotif('🎁','Подарок отправлен!',`${amount} 🍊 → ${this._giftSelectedName}`);
             document.getElementById('gift-amount').value='';
             this._giftSelectedId=null; this._giftSelectedName=null;
@@ -3973,7 +3988,7 @@ const app = {
         try {
             const list = document.getElementById('lb-list');
             if(!list){ this._lbFetching = false; return; }
-            const endpoint = this._lbMode==='time' ? '/leaderboard-time' : '/leaderboard';
+            const endpoint = this._lbMode==='time' ? '/leaderboard-time' : this._lbMode==='tokens' ? '/leaderboard-tokens' : '/leaderboard';
             const r = await fetch(this._API+endpoint);
             if(!r.ok){ this._lbFetching = false; return; }
             const top = await r.json();
@@ -4010,7 +4025,7 @@ const app = {
         try {
             const list = document.getElementById('lb-list');
             if(!list){ this._lbFetching = false; return; }
-            const endpoint = this._lbMode==='time' ? '/leaderboard-time' : '/leaderboard';
+            const endpoint = this._lbMode==='time' ? '/leaderboard-time' : this._lbMode==='tokens' ? '/leaderboard-tokens' : '/leaderboard';
             const r = await fetch(this._API+endpoint);
             if(!r.ok){ this._lbFetching = false; return; }
             const top = await r.json();
@@ -4044,10 +4059,12 @@ const app = {
         // Обновить стили кнопок
         const btnB = document.getElementById('lb-btn-balance');
         const btnT = document.getElementById('lb-btn-time');
+        const btnTok = document.getElementById('lb-btn-tokens');
         const activeStyle = 'padding:6px 14px;border-radius:7px;font-size:11px;font-weight:700;font-family:var(--font-mono);letter-spacing:0.5px;background:linear-gradient(135deg,rgba(0,229,255,0.15),rgba(0,102,255,0.1));color:var(--c-main);border:1px solid rgba(0,229,255,0.2);box-shadow:0 0 12px rgba(0,229,255,0.08);';
         const inactiveStyle = 'padding:6px 14px;border-radius:7px;font-size:11px;font-weight:700;font-family:var(--font-mono);letter-spacing:0.5px;background:transparent;color:rgba(220,240,255,0.3);border:1px solid transparent;';
         if(btnB) btnB.style.cssText = this._lbMode==='balance' ? activeStyle : inactiveStyle;
         if(btnT) btnT.style.cssText = this._lbMode==='time'    ? activeStyle : inactiveStyle;
+        if(btnTok) btnTok.style.cssText = this._lbMode==='tokens' ? activeStyle : inactiveStyle;
 
         const podium = document.getElementById('lb-podium');
         const list   = document.getElementById('lb-list');
@@ -4059,14 +4076,15 @@ const app = {
 
         let top = [];
         try {
-            const endpoint = this._lbMode==='time' ? '/leaderboard-time' : '/leaderboard';
+            const endpoint = this._lbMode==='time' ? '/leaderboard-time' : this._lbMode==='tokens' ? '/leaderboard-tokens' : '/leaderboard';
             const r = await fetch(this._API+endpoint);
             if(r.ok) top = await r.json();
         } catch(e){}
 
         // ── Список 1-10 с data-атрибутами для тихого обновления ──
         const isTime = this._lbMode === 'time';
-        const fmtVal = (p) => isTime ? this._fmtHubTime(p.hubTime||0) : (p.balance||0).toLocaleString('ru') + ' 🍊';
+        const isTokens = this._lbMode === 'tokens';
+        const fmtVal = (p) => isTime ? this._fmtHubTime(p.hubTime||0) : isTokens ? (p.tokens||0).toLocaleString('ru') + ' 🪙' : (p.balance||0).toLocaleString('ru') + ' 🍊';
         const medals = ['🥇','🥈','🥉'];
         podium.innerHTML = '';
         list.innerHTML = '';
