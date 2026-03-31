@@ -28,6 +28,7 @@ function fixDB(){
     if(!DB.bans) DB.bans={};
     if(!DB.nfts) DB.nfts={};
     if(!DB.pendingEarnings) DB.pendingEarnings={};
+    if(!DB.coding) DB.coding={};
     if(!DB.support) DB.support={};
     if(!DB.dm) DB.dm={};
     if(!DB.stats) DB.stats={totalRegistered:0,totalSessions:0,worldPlays:{},dailyActive:{},firstSeenDates:[]};
@@ -500,6 +501,7 @@ if(req.method==='DELETE'&&parts[0]==='devmail'&&parts[1]){
         if(nft.sellerIsPlayer && prevOwnerId && String(prevOwnerId)!==String(d.buyerId)){
             if(!DB.players[prevOwnerId]) DB.players[prevOwnerId]={id:String(prevOwnerId),balance:0};
             if(!DB.pendingEarnings) DB.pendingEarnings={};
+    if(!DB.coding) DB.coding={};
             if(!DB.pendingEarnings[prevOwnerId]) DB.pendingEarnings[prevOwnerId]={total:0,sales:[]};
             DB.pendingEarnings[prevOwnerId].total=(DB.pendingEarnings[prevOwnerId].total||0)+nft.price;
             DB.pendingEarnings[prevOwnerId].sales.push({
@@ -536,7 +538,53 @@ if(req.method==='DELETE'&&parts[0]==='devmail'&&parts[1]){
     }
     if(req.method==='GET'&&parts[0]==='earnings'&&parts[1]){
         if(!DB.pendingEarnings) DB.pendingEarnings={};
+    if(!DB.coding) DB.coding={};
         return reply(res,200, DB.pendingEarnings[parts[1]]||{total:0,sales:[]});
+    }
+    // ══════ CODING ══════
+    if(req.method==='GET'&&parts[0]==='coding'&&!parts[1]){
+        const author = url.searchParams.get('author');
+        let projects = Object.values(DB.coding||{}).sort((a,b)=>b.ts-a.ts);
+        if(author) projects = projects.filter(p=>String(p.authorId)===String(author));
+        // Считаем просмотры не здесь, а при GET /coding/:id
+        return reply(res,200,projects.slice(0,50));
+    }
+    if(req.method==='GET'&&parts[0]==='coding'&&parts[1]){
+        const p = (DB.coding||{})[parts[1]];
+        if(!p) return reply(res,404,{error:'not found'});
+        p.views = (p.views||0)+1;
+        saveDB();
+        return reply(res,200,p);
+    }
+    if(req.method==='POST'&&parts[0]==='coding'&&!parts[1]){
+        const d=await body(req);
+        if(!d.title||!d.code||!d.authorId) return reply(res,400,{error:'bad'});
+        if(!DB.coding) DB.coding={};
+        const id='code_'+Date.now()+'_'+String(d.authorId);
+        DB.coding[id]={id,title:d.title,desc:d.desc||'',code:d.code,authorId:String(d.authorId),authorName:d.authorName||'?',authorColor:d.authorColor||'#888',likes:0,likedBy:[],views:0,ts:Date.now()};
+        saveDB();
+        return reply(res,200,{ok:true,id});
+    }
+    if(req.method==='POST'&&parts[0]==='coding'&&parts[2]==='like'){
+        const d=await body(req);
+        const p=(DB.coding||{})[parts[1]];
+        if(!p) return reply(res,404,{error:'not found'});
+        if(!p.likedBy) p.likedBy=[];
+        const uid=String(d.userId);
+        const alreadyLiked=p.likedBy.includes(uid);
+        if(alreadyLiked){ p.likedBy=p.likedBy.filter(x=>x!==uid); p.likes=Math.max(0,(p.likes||1)-1); }
+        else { p.likedBy.push(uid); p.likes=(p.likes||0)+1; }
+        saveDB();
+        return reply(res,200,{ok:true,likes:p.likes,liked:!alreadyLiked});
+    }
+    if(req.method==='DELETE'&&parts[0]==='coding'&&parts[1]){
+        const d=await body(req);
+        const p=(DB.coding||{})[parts[1]];
+        if(!p) return reply(res,404,{error:'not found'});
+        if(String(p.authorId)!==String(d.userId)) return reply(res,403,{error:'forbidden'});
+        delete DB.coding[parts[1]];
+        saveDB();
+        return reply(res,200,{ok:true});
     }
     if(req.method==='POST'&&parts[0]==='earnings'&&parts[1]==='claim'||
        req.method==='POST'&&parts[0]==='earnings'&&parts[2]==='claim'){
