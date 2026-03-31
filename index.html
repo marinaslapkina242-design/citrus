@@ -1123,8 +1123,18 @@
                     <div class="panel-box-title">🚀 Новый проект</div>
                     <input id="coding-title" class="styled-input" placeholder="Название проекта" style="margin-bottom:10px;">
                     <input id="coding-desc" class="styled-input" placeholder="Описание (язык, технологии...)" style="margin-bottom:10px;">
-                    <textarea id="coding-code" placeholder="Вставь свой код сюда..." style="width:100%;min-height:200px;background:rgba(0,0,0,0.4);border:1px solid rgba(0,229,255,0.15);border-radius:12px;color:rgba(220,240,255,0.9);font-family:var(--font-mono);font-size:12px;padding:14px;resize:vertical;outline:none;box-sizing:border-box;line-height:1.6;margin-bottom:10px;"></textarea>
-                    <div style="display:flex;gap:8px;">
+                    <!-- Вкладки скриптов -->
+                    <div style="margin-bottom:8px;">
+                        <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px;flex-wrap:wrap;" id="coding-scripts-tabs">
+                            <button onclick="app._codingSelectScript(0)" id="coding-stab-0" style="padding:5px 12px;border-radius:8px;background:rgba(0,229,255,0.15);border:1px solid rgba(0,229,255,0.3);color:var(--c-main);font-family:var(--font-mono);font-size:11px;cursor:pointer;">main.js</button>
+                            <button onclick="app._codingAddScript()" style="padding:5px 10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.4);font-family:var(--font-mono);font-size:11px;cursor:pointer;">+ Файл</button>
+                        </div>
+                        <div style="display:flex;gap:6px;margin-bottom:6px;">
+                            <input id="coding-script-name" class="styled-input" placeholder="Имя файла (напр. utils.js)" style="flex:1;font-size:12px;padding:8px 12px;">
+                        </div>
+                        <textarea id="coding-code" placeholder="Вставь код файла сюда..." style="width:100%;min-height:200px;background:rgba(0,0,0,0.4);border:1px solid rgba(0,229,255,0.15);border-radius:12px;color:rgba(220,240,255,0.9);font-family:var(--font-mono);font-size:12px;padding:14px;resize:vertical;outline:none;box-sizing:border-box;line-height:1.6;"></textarea>
+                    </div>
+                    <div style="display:flex;gap:8px;margin-top:10px;">
                         <button onclick="app.publishCodingProject()" style="flex:1;padding:10px;background:linear-gradient(135deg,#00E5FF,#0066FF);border:none;border-radius:10px;color:#000;font-family:var(--font-head);font-size:14px;font-weight:700;letter-spacing:1px;cursor:pointer;">🚀 ОПУБЛИКОВАТЬ</button>
                         <button onclick="app._codingTab('feed')" style="padding:10px 16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:rgba(255,255,255,0.4);font-size:13px;cursor:pointer;">Отмена</button>
                     </div>
@@ -12092,6 +12102,11 @@ const app = {
         this.balance -= amount;
         this.tokens = (this.tokens||0) + tokens;
         this.saveData();
+        // Обновляем UI
+        const bv = document.getElementById('balance-val'); if(bv) bv.textContent = this.balance;
+        const tv = document.getElementById('tokens-val'); if(tv) tv.textContent = this.tokens;
+        const eb = document.getElementById('exchange-balance'); if(eb) eb.textContent = this.balance;
+        const et = document.getElementById('exchange-tokens'); if(et) et.textContent = this.tokens;
         document.getElementById('exchange-amount').value='';
         document.getElementById('exchange-preview').textContent='0 🪙';
         this.showNotif('🪙','Обмен успешен!',`+${tokens} токенов`);
@@ -12261,26 +12276,29 @@ const app = {
         const isMe = String(p.authorId) === String(this.userId);
         const liked = (p.likedBy||[]).includes(String(this.userId));
         const ago = this._timeAgo(p.ts||0);
-        const codePreview = (p.code||'').slice(0,300).replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        const scripts = Array.isArray(p.scripts) ? p.scripts : [{name:'main.js', code: p.code||''}];
+        const codePreview = (scripts[0]?.code||'').slice(0,300).replace(/</g,'&lt;').replace(/>/g,'&gt;');
         return `<div class="panel-box" style="padding:0;overflow:hidden;">
             <div style="padding:16px 18px 12px;">
                 <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;">
                     <div style="width:36px;height:36px;border-radius:50%;background:${p.authorColor||'#888'}22;color:${p.authorColor||'#888'};display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex-shrink:0;">${(p.authorName||'?')[0].toUpperCase()}</div>
                     <div style="flex:1;min-width:0;">
                         <div style="font-weight:700;font-size:14px;color:rgba(255,255,255,0.9);">${p.title||'Без названия'}</div>
-                        <div style="font-size:11px;color:rgba(255,255,255,0.35);font-family:var(--font-mono);">${p.authorName||'?'} · ${ago}</div>
+                        <div style="font-size:11px;color:rgba(255,255,255,0.35);font-family:var(--font-mono);">${p.authorName||'?'} · ${ago} · ${scripts.length} файл(ов)</div>
                     </div>
                     ${isMe ? `<button onclick="app.deleteCodingProject('${p.id}')" style="background:rgba(255,60,60,0.1);border:1px solid rgba(255,60,60,0.2);border-radius:8px;color:rgba(255,100,100,0.6);padding:4px 10px;font-size:11px;cursor:pointer;">🗑</button>` : ''}
                 </div>
                 ${p.desc ? `<div style="font-size:12px;color:rgba(255,255,255,0.45);margin-bottom:10px;font-family:var(--font-ui);">${p.desc}</div>` : ''}
-                <pre style="background:rgba(0,0,0,0.4);border:1px solid rgba(0,229,255,0.08);border-radius:10px;padding:12px;font-family:var(--font-mono);font-size:11px;color:rgba(200,240,255,0.8);overflow-x:auto;max-height:160px;overflow-y:auto;margin:0;white-space:pre-wrap;word-break:break-all;">${codePreview}${(p.code||'').length>300?'\n...' : ''}</pre>
+                <pre style="background:rgba(0,0,0,0.4);border:1px solid rgba(0,229,255,0.08);border-radius:10px;padding:12px;font-family:var(--font-mono);font-size:11px;color:rgba(200,240,255,0.8);overflow-x:auto;max-height:120px;overflow-y:auto;margin:0;white-space:pre-wrap;word-break:break-all;">${codePreview}${(scripts[0]?.code||'').length>300?'\n...' : ''}</pre>
             </div>
             <div style="display:flex;align-items:center;gap:0;border-top:1px solid rgba(255,255,255,0.05);">
                 <button onclick="app.likeCodingProject('${p.id}',this)" style="flex:1;padding:10px;background:${liked?'rgba(255,59,48,0.1)':'transparent'};border:none;color:${liked?'#FF3B30':'rgba(255,255,255,0.3)'};font-size:13px;cursor:pointer;transition:all 0.2s;">❤️ ${p.likes||0}</button>
                 <div style="width:1px;height:32px;background:rgba(255,255,255,0.05);"></div>
                 <button onclick="app.viewCodingProject('${p.id}')" style="flex:1;padding:10px;background:transparent;border:none;color:rgba(255,255,255,0.3);font-size:13px;cursor:pointer;">👁 ${p.views||0}</button>
                 <div style="width:1px;height:32px;background:rgba(255,255,255,0.05);"></div>
-                <button onclick="app.copyCodingCode('${p.id}')" style="flex:1;padding:10px;background:transparent;border:none;color:rgba(255,255,255,0.3);font-size:13px;cursor:pointer;">📋 Копировать</button>
+                <button onclick="app.runCodingProject('${p.id}')" style="flex:1;padding:10px;background:rgba(0,229,255,0.08);border:none;color:var(--c-main);font-size:13px;cursor:pointer;">▶ Запустить</button>
+                <div style="width:1px;height:32px;background:rgba(255,255,255,0.05);"></div>
+                <button onclick="app.copyCodingCode('${p.id}')" style="flex:1;padding:10px;background:transparent;border:none;color:rgba(255,255,255,0.3);font-size:13px;cursor:pointer;">📋</button>
             </div>
         </div>`;
     },
@@ -12296,18 +12314,70 @@ const app = {
         return 'только что';
     },
 
+    _codingScripts: [{name:'main.js', code:''}],
+    _codingActiveScript: 0,
+
+    _codingSelectScript(idx){
+        // Сохраняем текущий код
+        const nameEl = document.getElementById('coding-script-name');
+        const codeEl = document.getElementById('coding-code');
+        if(this._codingScripts[this._codingActiveScript]){
+            this._codingScripts[this._codingActiveScript].name = nameEl?.value || this._codingScripts[this._codingActiveScript].name;
+            this._codingScripts[this._codingActiveScript].code = codeEl?.value || '';
+        }
+        this._codingActiveScript = idx;
+        // Загружаем выбранный
+        const s = this._codingScripts[idx];
+        if(nameEl) nameEl.value = s.name;
+        if(codeEl) codeEl.value = s.code;
+        // Обновляем вкладки
+        this._codingRenderScriptTabs();
+    },
+
+    _codingAddScript(){
+        // Сохраняем текущий
+        const nameEl = document.getElementById('coding-script-name');
+        const codeEl = document.getElementById('coding-code');
+        if(this._codingScripts[this._codingActiveScript]){
+            this._codingScripts[this._codingActiveScript].name = nameEl?.value || this._codingScripts[this._codingActiveScript].name;
+            this._codingScripts[this._codingActiveScript].code = codeEl?.value || '';
+        }
+        const newIdx = this._codingScripts.length;
+        this._codingScripts.push({name:`script${newIdx}.js`, code:''});
+        this._codingActiveScript = newIdx;
+        if(nameEl) nameEl.value = `script${newIdx}.js`;
+        if(codeEl) codeEl.value = '';
+        this._codingRenderScriptTabs();
+    },
+
+    _codingRenderScriptTabs(){
+        const container = document.getElementById('coding-scripts-tabs');
+        if(!container) return;
+        container.innerHTML = this._codingScripts.map((s,i)=>`
+            <button onclick="app._codingSelectScript(${i})" style="padding:5px 12px;border-radius:8px;background:${i===this._codingActiveScript?'rgba(0,229,255,0.15)':'transparent'};border:1px solid ${i===this._codingActiveScript?'rgba(0,229,255,0.3)':'rgba(255,255,255,0.12)'};color:${i===this._codingActiveScript?'var(--c-main)':'rgba(255,255,255,0.4)'};font-family:var(--font-mono);font-size:11px;cursor:pointer;">${s.name}</button>
+        `).join('') + `<button onclick="app._codingAddScript()" style="padding:5px 10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.4);font-family:var(--font-mono);font-size:11px;cursor:pointer;">+ Файл</button>`;
+    },
+
     async publishCodingProject(){
         const title = document.getElementById('coding-title')?.value.trim();
         const desc = document.getElementById('coding-desc')?.value.trim();
-        const code = document.getElementById('coding-code')?.value.trim();
+        // Сохраняем текущий скрипт перед публикацией
+        const nameEl = document.getElementById('coding-script-name');
+        const codeEl = document.getElementById('coding-code');
+        if(this._codingScripts[this._codingActiveScript]){
+            this._codingScripts[this._codingActiveScript].name = nameEl?.value || this._codingScripts[this._codingActiveScript].name;
+            this._codingScripts[this._codingActiveScript].code = codeEl?.value || '';
+        }
         if(!title){ this._showToast('❌ Введи название'); return; }
-        if(!code){ this._showToast('❌ Вставь код'); return; }
+        if(!this._codingScripts[0]?.code){ this._showToast('❌ Вставь код в main.js'); return; }
         try{
             await fetch(this._API+'/coding', {
                 method:'POST',
                 headers:{'Content-Type':'application/json'},
                 body: JSON.stringify({
-                    title, desc, code,
+                    title, desc,
+                    code: this._codingScripts[0].code, // для обратной совместимости
+                    scripts: this._codingScripts,
                     authorId: String(this.userId),
                     authorName: this.username,
                     authorColor: this._myColor,
@@ -12315,7 +12385,11 @@ const app = {
             });
             document.getElementById('coding-title').value='';
             document.getElementById('coding-desc').value='';
-            document.getElementById('coding-code').value='';
+            if(codeEl) codeEl.value='';
+            if(nameEl) nameEl.value='main.js';
+            this._codingScripts = [{name:'main.js', code:''}];
+            this._codingActiveScript = 0;
+            this._codingRenderScriptTabs();
             this._showToast('✅ Проект опубликован!');
             this._codingTab('feed');
         }catch(e){ this._showToast('❌ Ошибка публикации'); }
@@ -12338,22 +12412,53 @@ const app = {
         }catch(e){}
     },
 
+    async runCodingProject(id){
+        try{
+            const r = await fetch(this._API+'/coding/'+id);
+            const p = await r.json();
+            const scripts = Array.isArray(p.scripts) ? p.scripts : [{name:'main.js', code: p.code||''}];
+            // Объединяем все скрипты
+            const allCode = scripts.map(s=>`// ── ${s.name} ──\n${s.code}`).join('\n\n');
+            const modal = document.createElement('div');
+            modal.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.9);backdrop-filter:blur(8px);display:flex;flex-direction:column;';
+            modal.innerHTML=`
+                <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(0,0,0,0.8);border-bottom:1px solid rgba(0,229,255,0.1);">
+                    <div style="font-family:var(--font-head);font-size:16px;color:#fff;">${p.title}</div>
+                    <div style="flex:1;"></div>
+                    <button onclick="this.closest('[style*=fixed]').remove()" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:rgba(255,255,255,0.5);padding:6px 14px;cursor:pointer;">✕ Закрыть</button>
+                </div>
+                <iframe id="coding-run-frame" style="flex:1;border:none;background:#fff;"></iframe>`;
+            document.body.appendChild(modal);
+            // Запускаем код в iframe
+            const frame = modal.querySelector('#coding-run-frame');
+            const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{margin:0;font-family:sans-serif;background:#fff;}</style></head><body><script>
+try { ${allCode} } catch(e){ document.body.innerHTML='<div style="color:red;padding:20px;font-family:monospace;">Ошибка: '+e.message+'</div>'; }
+<\/script></body></html>`;
+            frame.srcdoc = html;
+            modal.addEventListener('click', e=>{ if(e.target===modal) modal.remove(); });
+        }catch(e){ this._showToast('❌ Не удалось загрузить проект'); }
+    },
+
     async viewCodingProject(id){
         try{
             const r = await fetch(this._API+'/coding/'+id);
             const p = await r.json();
-            // Показываем полный код в модалке
+            const scripts = Array.isArray(p.scripts) ? p.scripts : [{name:'main.js', code: p.code||''}];
             const modal = document.createElement('div');
             modal.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:20px;';
-            modal.innerHTML=`<div style="background:linear-gradient(160deg,#0e0820,#080514);border:1px solid rgba(0,229,255,0.2);border-radius:20px;padding:24px;max-width:800px;width:100%;max-height:80vh;overflow-y:auto;">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            const tabsHtml = scripts.map((s,i)=>`<button onclick="document.querySelectorAll('.code-tab-content').forEach(x=>x.style.display='none');document.getElementById('code-tab-${i}').style.display='block';document.querySelectorAll('.code-tab-btn').forEach(x=>{x.style.background='transparent';x.style.color='rgba(255,255,255,0.4)'});this.style.background='rgba(0,229,255,0.1)';this.style.color='var(--c-main)'" class="code-tab-btn" style="padding:6px 12px;border:none;border-radius:8px;cursor:pointer;font-family:var(--font-mono);font-size:11px;background:${i===0?'rgba(0,229,255,0.1)':'transparent'};color:${i===0?'var(--c-main)':'rgba(255,255,255,0.4)'};">${s.name}</button>`).join('');
+            const contentsHtml = scripts.map((s,i)=>`<pre id="code-tab-${i}" class="code-tab-content" style="display:${i===0?'block':'none'};background:rgba(0,0,0,0.5);border:1px solid rgba(0,229,255,0.1);border-radius:12px;padding:16px;font-family:var(--font-mono);font-size:12px;color:rgba(200,240,255,0.9);overflow-x:auto;white-space:pre-wrap;word-break:break-all;max-height:320px;overflow-y:auto;margin:0;">${(s.code||'').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre>`).join('');
+            modal.innerHTML=`<div style="background:linear-gradient(160deg,#0e0820,#080514);border:1px solid rgba(0,229,255,0.2);border-radius:20px;padding:24px;max-width:800px;width:100%;max-height:85vh;overflow-y:auto;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
                     <div style="font-family:var(--font-head);font-size:20px;color:#fff;">${p.title}</div>
                     <button onclick="this.closest('[style*=fixed]').remove()" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:rgba(255,255,255,0.5);padding:6px 12px;cursor:pointer;">✕</button>
                 </div>
-                ${p.desc?`<div style="color:rgba(255,255,255,0.4);font-size:12px;margin-bottom:16px;">${p.desc}</div>`:''}
-                <pre style="background:rgba(0,0,0,0.5);border:1px solid rgba(0,229,255,0.1);border-radius:12px;padding:16px;font-family:var(--font-mono);font-size:12px;color:rgba(200,240,255,0.9);overflow-x:auto;white-space:pre-wrap;word-break:break-all;max-height:400px;overflow-y:auto;">${(p.code||'').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre>
+                ${p.desc?`<div style="color:rgba(255,255,255,0.4);font-size:12px;margin-bottom:12px;">${p.desc}</div>`:''}
+                <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">${tabsHtml}</div>
+                ${contentsHtml}
                 <div style="display:flex;gap:8px;margin-top:16px;">
-                    <button onclick="navigator.clipboard.writeText(${JSON.stringify(p.code||'')});this.textContent='✅ Скопировано!';setTimeout(()=>this.textContent='📋 Копировать код',2000)" style="flex:1;padding:10px;background:rgba(0,229,255,0.1);border:1px solid rgba(0,229,255,0.2);border-radius:10px;color:var(--c-main);cursor:pointer;font-family:var(--font-body);">📋 Копировать код</button>
+                    <button onclick="app.runCodingProject('${p.id}');this.closest('[style*=fixed]').remove()" style="flex:1;padding:10px;background:rgba(0,229,255,0.1);border:1px solid rgba(0,229,255,0.2);border-radius:10px;color:var(--c-main);cursor:pointer;font-family:var(--font-body);">▶ Запустить</button>
+                    <button onclick="navigator.clipboard.writeText(${JSON.stringify(scripts.map(s=>s.code).join('\n\n'))});this.textContent='✅ Скопировано!';setTimeout(()=>this.textContent='📋 Копировать',2000)" style="flex:1;padding:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:rgba(255,255,255,0.5);cursor:pointer;font-family:var(--font-body);">📋 Копировать</button>
                 </div>
             </div>`;
             document.body.appendChild(modal);
