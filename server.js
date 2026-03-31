@@ -1142,6 +1142,16 @@ server.on('upgrade',(req,socket)=>{
                 if(msg.map) client.map=client.map||msg.map;
                 broadcastToMap(msg.map,msg,msg.id);
             }
+            if(msg.type==='emote'&&msg.map&&msg.emote){
+                // Рассылаем эмоцию всем на той же карте кроме отправителя
+                broadcastToMap(msg.map,msg,msg.id);
+            }
+            if(msg.type==='scare'&&msg.to){
+                // Пересылаем пугалку конкретному игроку
+                wsClients.forEach(c=>{
+                    if(String(c.userId)===String(msg.to)) wsWrite(c.socket,msg);
+                });
+            }
         }
     });
     const cleanup=()=>{
