@@ -1023,6 +1023,7 @@
                 <div class="nav-item hidden" id="nav-admin"       onclick="app.switchTab('admin')">      <div class="nav-icon"><i class="fas fa-shield-alt"></i></div> Баны</div>
                 <div class="nav-item"        id="nav-help"        onclick="app.switchTab('help')">       <div class="nav-icon"><i class="fas fa-question-circle"></i></div> Помощь</div>
                 <div class="nav-item"        id="nav-coding"      onclick="app.switchTab('coding')">     <div class="nav-icon"><i class="fas fa-code"></i></div> Кодинг</div>
+                <div class="nav-item"        id="nav-movies"      onclick="app.switchTab('movies')">     <div class="nav-icon"><i class="fas fa-film"></i></div> Кино</div>
                 <div class="nav-item"        id="nav-aihelper"    onclick="app.switchTab('aihelper')">   <div class="nav-icon"><i class="fas fa-robot"></i></div> ИИ Хелпер <span class="nav-badge hidden" id="ai-badge">!</span></div>
                 <div class="nav-item"        id="nav-devmail"     onclick="app.switchTab('devmail')">    <div class="nav-icon"><i class="fas fa-envelope"></i></div> Почта <span class="nav-badge hidden" id="devmail-badge">0</span></div>
 
@@ -1142,6 +1143,53 @@
 
                 <!-- Лента проектов -->
                 <div id="coding-feed" style="display:flex;flex-direction:column;gap:12px;"></div>
+            </div>
+
+            <!-- ══════════════════ TAB: КИНО ══════════════════ -->
+            <div id="tab-movies" class="hidden">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+                    <div class="section-title" style="margin:0;">🎬 Кино</div>
+                    <div style="display:flex;gap:8px;align-items:center;">
+                        <input id="movies-search" class="styled-input" placeholder="🔍 Поиск..." style="width:200px;padding:7px 12px;font-size:12px;" oninput="app._moviesSearch(this.value)">
+                        <div id="movies-add-btn" class="hidden">
+                            <button onclick="app._moviesShowAdd()" style="background:linear-gradient(135deg,#FF9800,#E65100);border:none;border-radius:10px;color:#fff;font-weight:700;font-family:var(--font-body);font-size:13px;cursor:pointer;padding:9px 16px;">+ Добавить</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Форма добавления (только для разраба) -->
+                <div id="movies-add-form" class="panel-box" style="display:none;margin-bottom:20px;">
+                    <div class="panel-box-title">➕ Добавить видео</div>
+                    <input id="movies-yturl" class="styled-input" placeholder="YouTube ссылка (https://youtu.be/...)" style="margin-bottom:8px;">
+                    <input id="movies-title" class="styled-input" placeholder="Название" style="margin-bottom:8px;">
+                    <input id="movies-desc" class="styled-input" placeholder="Описание" style="margin-bottom:8px;">
+                    <div style="display:flex;gap:8px;margin-bottom:8px;">
+                        <select id="movies-genre" class="styled-input" style="flex:1;">
+                            <option value="cartoon">🎨 Мультфильм</option>
+                            <option value="movie">🎬 Фильм</option>
+                            <option value="series">📺 Сериал</option>
+                            <option value="citrus">🍊 О цитрусах</option>
+                            <option value="other">🎭 Другое</option>
+                        </select>
+                    </div>
+                    <div style="display:flex;gap:8px;">
+                        <button onclick="app._moviesAdd()" style="flex:1;padding:10px;background:linear-gradient(135deg,#FF9800,#E65100);border:none;border-radius:10px;color:#fff;font-family:var(--font-head);font-size:14px;cursor:pointer;">Добавить</button>
+                        <button onclick="document.getElementById('movies-add-form').style.display='none'" style="padding:10px 16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:rgba(255,255,255,0.4);font-size:13px;cursor:pointer;">Отмена</button>
+                    </div>
+                </div>
+
+                <!-- Фильтры жанров -->
+                <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;" id="movies-genre-filters">
+                    <button onclick="app._moviesFilter('')" class="movies-filter-btn active" data-genre="" style="padding:6px 14px;border-radius:20px;border:1px solid rgba(255,149,0,0.4);background:rgba(255,149,0,0.15);color:#FF9500;font-family:var(--font-mono);font-size:11px;cursor:pointer;">Все</button>
+                    <button onclick="app._moviesFilter('cartoon')" class="movies-filter-btn" data-genre="cartoon" style="padding:6px 14px;border-radius:20px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:rgba(255,255,255,0.4);font-family:var(--font-mono);font-size:11px;cursor:pointer;">🎨 Мультфильмы</button>
+                    <button onclick="app._moviesFilter('movie')" class="movies-filter-btn" data-genre="movie" style="padding:6px 14px;border-radius:20px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:rgba(255,255,255,0.4);font-family:var(--font-mono);font-size:11px;cursor:pointer;">🎬 Фильмы</button>
+                    <button onclick="app._moviesFilter('series')" class="movies-filter-btn" data-genre="series" style="padding:6px 14px;border-radius:20px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:rgba(255,255,255,0.4);font-family:var(--font-mono);font-size:11px;cursor:pointer;">📺 Сериалы</button>
+                    <button onclick="app._moviesFilter('citrus')" class="movies-filter-btn" data-genre="citrus" style="padding:6px 14px;border-radius:20px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:rgba(255,255,255,0.4);font-family:var(--font-mono);font-size:11px;cursor:pointer;">🍊 О цитрусах</button>
+                </div>
+
+                <!-- Сетка видео -->
+                <div id="movies-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;"></div>
+                <div id="movies-empty" style="display:none;text-align:center;padding:60px;color:rgba(255,255,255,0.2);font-size:14px;">Видео пока нет 🎬</div>
             </div>
 
             <div id="tab-aihelper" class="hidden" style="display:flex;flex-direction:column;height:calc(100vh - 64px);overflow:hidden;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(123,47,255,0.06),transparent);">
@@ -6050,7 +6098,7 @@ const app = {
 
         switchTab(id){
         this._sfx('nav');
-        ['games','mine','work','avatar','shop','friends','studio','quests','promo','daily','roulette','credits','gifts','nft','stats','leaderboard','admin','help','cases','aihelper','devmail','exchange','coding'].forEach(t=>{
+        ['games','mine','work','avatar','shop','friends','studio','quests','promo','daily','roulette','credits','gifts','nft','stats','leaderboard','admin','help','cases','aihelper','devmail','exchange','coding','movies'].forEach(t=>{
             document.getElementById('tab-'+t)?.classList.add('hidden');
             document.getElementById('nav-'+t)?.classList.remove('active');
         });
@@ -6072,6 +6120,7 @@ const app = {
         if(id==='admin'){ this.loadBanList(); this.loadBanOnlineList(); }
         if(id==='promo'){ this._renderPromoHistory(); }
         if(id==='coding'){ this.initCoding(); }
+        if(id==='movies'){ this._moviesInit(); }
         if(id==='aihelper'){ this.initAiHelper(); }
         if(id==='devmail'){ this.initDevMail(); }
         if(id==='stats'){ this.loadStats(); }
@@ -12303,6 +12352,161 @@ const app = {
         </div>`;
     },
 
+    // ══════════════════════════════
+    // 🎬 КИНО
+    // ══════════════════════════════
+    _moviesFilter: '',
+    _moviesSearchQuery: '',
+
+    _moviesInit(){
+        // Показываем кнопку добавления только разрабу
+        const addBtn = document.getElementById('movies-add-btn');
+        if(addBtn) addBtn.classList.toggle('hidden', !this.canBan(this.username));
+        this._moviesLoad();
+    },
+
+    async _moviesLoad(){
+        const grid = document.getElementById('movies-grid');
+        const empty = document.getElementById('movies-empty');
+        if(!grid) return;
+        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:rgba(255,255,255,0.2);">Загрузка...</div>`;
+        try{
+            let url = this._API+'/movies';
+            if(this._moviesFilter) url += '?genre='+this._moviesFilter;
+            const r = await fetch(url);
+            const movies = await r.json();
+            // Фильтр поиска
+            const q = (this._moviesSearchQuery||'').toLowerCase();
+            const filtered = q ? movies.filter(m=>(m.title||'').toLowerCase().includes(q)||(m.desc||'').toLowerCase().includes(q)) : movies;
+            if(!filtered.length){
+                grid.innerHTML='';
+                if(empty) empty.style.display='block';
+                return;
+            }
+            if(empty) empty.style.display='none';
+            grid.innerHTML = filtered.map(m=>this._moviesCard(m)).join('');
+        }catch(e){
+            grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:40px;color:rgba(255,255,255,0.2);">Видео пока нет 🎬<br><span style="font-size:11px;opacity:0.5;">Разраб скоро добавит!</span></div>`;
+            if(empty) empty.style.display='none';
+        }
+    },
+
+    _moviesCard(m){
+        const liked = (m.likedBy||[]).includes(String(this.userId));
+        const ytId = this._moviesYtId(m.url||'');
+        const thumb = ytId ? `https://img.youtube.com/vi/${ytId}/mqdefault.jpg` : '';
+        const genreEmoji = {cartoon:'🎨',movie:'🎬',series:'📺',citrus:'🍊',other:'🎭'}[m.genre||'other']||'🎬';
+        return `<div class="panel-box" style="padding:0;overflow:hidden;cursor:pointer;transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+            <div onclick="app._moviesWatch('${m.id}')" style="position:relative;width:100%;padding-top:56.25%;background:#0a0a0a;overflow:hidden;">
+                ${thumb ? `<img src="${thumb}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" loading="lazy">` : `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:48px;">🎬</div>`}
+                <div style="position:absolute;inset:0;background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0'">
+                    <div style="width:54px;height:54px;border-radius:50%;background:rgba(255,0,0,0.85);display:flex;align-items:center;justify-content:center;font-size:22px;">▶</div>
+                </div>
+                <div style="position:absolute;top:8px;left:8px;background:rgba(0,0,0,0.7);border-radius:6px;padding:3px 8px;font-size:10px;color:#fff;font-family:var(--font-mono);">${genreEmoji}</div>
+            </div>
+            <div style="padding:12px;">
+                <div onclick="app._moviesWatch('${m.id}')" style="font-weight:700;font-size:13px;color:rgba(255,255,255,0.9);margin-bottom:4px;line-height:1.4;cursor:pointer;">${m.title||'Без названия'}</div>
+                ${m.desc?`<div style="font-size:11px;color:rgba(255,255,255,0.35);margin-bottom:8px;font-family:var(--font-ui);line-height:1.4;">${m.desc.slice(0,80)}${m.desc.length>80?'...':''}</div>`:''}
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                    <span style="font-size:11px;color:rgba(255,255,255,0.25);font-family:var(--font-mono);">👁 ${m.views||0}</span>
+                    <button onclick="event.stopPropagation();app._moviesLike('${m.id}',this)" style="background:${liked?'rgba(255,59,48,0.15)':'transparent'};border:1px solid ${liked?'rgba(255,59,48,0.4)':'rgba(255,255,255,0.1)'};border-radius:20px;color:${liked?'#FF3B30':'rgba(255,255,255,0.4)'};padding:4px 12px;font-size:12px;cursor:pointer;transition:all 0.2s;">❤️ ${m.likes||0}</button>
+                    ${this.canBan(this.username)?`<button onclick="event.stopPropagation();app._moviesDelete('${m.id}')" style="background:transparent;border:none;color:rgba(255,100,100,0.4);font-size:12px;cursor:pointer;">🗑</button>`:''}
+                </div>
+            </div>
+        </div>`;
+    },
+
+    _moviesYtId(url){
+        if(!url) return null;
+        const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{11})/);
+        return m ? m[1] : null;
+    },
+
+    _moviesWatch(id){
+        fetch(this._API+'/movies/'+id+'/view', {method:'POST'}).catch(()=>{});
+        fetch(this._API+'/movies/'+id).then(r=>r.json()).then(m=>{
+            const ytId = this._moviesYtId(m.url||'');
+            if(!ytId){ this._showToast('❌ Неверная YouTube ссылка'); return; }
+            const modal = document.createElement('div');
+            modal.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.95);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;';
+            modal.innerHTML=`
+                <div style="width:100%;max-width:900px;">
+                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+                        <div style="font-family:var(--font-head);font-size:18px;color:#fff;flex:1;">${m.title}</div>
+                        <button onclick="this.closest('[style*=fixed]').remove()" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:rgba(255,255,255,0.6);padding:7px 16px;cursor:pointer;font-size:13px;">✕ Закрыть</button>
+                    </div>
+                    <div style="position:relative;width:100%;padding-top:56.25%;border-radius:16px;overflow:hidden;background:#000;">
+                        <iframe src="https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0" style="position:absolute;inset:0;width:100%;height:100%;border:none;" allow="autoplay;fullscreen" allowfullscreen></iframe>
+                    </div>
+                    ${m.desc?`<div style="color:rgba(255,255,255,0.4);font-size:13px;margin-top:12px;font-family:var(--font-ui);">${m.desc}</div>`:''}
+                </div>`;
+            document.body.appendChild(modal);
+            modal.addEventListener('click', e=>{ if(e.target===modal) modal.remove(); });
+        }).catch(()=>this._showToast('❌ Не удалось загрузить'));
+    },
+
+    async _moviesLike(id, btn){
+        try{
+            const r = await fetch(this._API+'/movies/'+id+'/like', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userId:String(this.userId)})});
+            const data = await r.json();
+            if(btn){
+                btn.style.background = data.liked ? 'rgba(255,59,48,0.15)' : 'transparent';
+                btn.style.borderColor = data.liked ? 'rgba(255,59,48,0.4)' : 'rgba(255,255,255,0.1)';
+                btn.style.color = data.liked ? '#FF3B30' : 'rgba(255,255,255,0.4)';
+                btn.textContent = '❤️ ' + data.likes;
+            }
+        }catch(e){}
+    },
+
+    _moviesFilter(genre){
+        this._moviesFilter = genre;
+        document.querySelectorAll('.movies-filter-btn').forEach(b=>{
+            const active = b.dataset.genre === genre;
+            b.style.background = active ? 'rgba(255,149,0,0.15)' : 'transparent';
+            b.style.borderColor = active ? 'rgba(255,149,0,0.4)' : 'rgba(255,255,255,0.1)';
+            b.style.color = active ? '#FF9500' : 'rgba(255,255,255,0.4)';
+        });
+        this._moviesLoad();
+    },
+
+    _moviesSearch(q){
+        this._moviesSearchQuery = q;
+        clearTimeout(this._moviesSearchTimer);
+        this._moviesSearchTimer = setTimeout(()=>this._moviesLoad(), 400);
+    },
+
+    _moviesShowAdd(){
+        const form = document.getElementById('movies-add-form');
+        if(form) form.style.display = form.style.display==='none' ? 'block' : 'none';
+    },
+
+    async _moviesAdd(){
+        const url = document.getElementById('movies-yturl')?.value.trim();
+        const title = document.getElementById('movies-title')?.value.trim();
+        const desc = document.getElementById('movies-desc')?.value.trim();
+        const genre = document.getElementById('movies-genre')?.value;
+        if(!url||!title){ this._showToast('❌ Заполни ссылку и название'); return; }
+        if(!this._moviesYtId(url)){ this._showToast('❌ Неверная YouTube ссылка'); return; }
+        try{
+            await fetch(this._API+'/movies', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({url,title,desc,genre,authorId:String(this.userId)})});
+            document.getElementById('movies-yturl').value='';
+            document.getElementById('movies-title').value='';
+            document.getElementById('movies-desc').value='';
+            document.getElementById('movies-add-form').style.display='none';
+            this._showToast('✅ Видео добавлено!');
+            this._moviesLoad();
+        }catch(e){ this._showToast('❌ Ошибка'); }
+    },
+
+    async _moviesDelete(id){
+        if(!confirm('Удалить видео?')) return;
+        try{
+            await fetch(this._API+'/movies/'+id, {method:'DELETE', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userId:String(this.userId)})});
+            this._showToast('🗑 Удалено');
+            this._moviesLoad();
+        }catch(e){}
+    },
+
     _timeAgo(ts){
         const diff = Date.now() - ts;
         const m = Math.floor(diff/60000);
@@ -12417,50 +12621,25 @@ const app = {
             const r = await fetch(this._API+'/coding/'+id);
             const p = await r.json();
             const scripts = Array.isArray(p.scripts) ? p.scripts : [{name:'main.js', code: p.code||''}];
+            // Объединяем все скрипты
             const allCode = scripts.map(s=>`// ── ${s.name} ──\n${s.code}`).join('\n\n');
-
-            // Определяем тип проекта — HTML или JS
-            const firstCode = scripts[0]?.code || '';
-            const isHTML = firstCode.trim().startsWith('<!') || firstCode.includes('<html') || firstCode.includes('<body') || firstCode.includes('<div');
-
-            let html;
-            if(isHTML){
-                // Если это HTML — запускаем как есть
-                html = firstCode;
-            } else {
-                // Если JS — оборачиваем в HTML с консолью
-                html = `<!DOCTYPE html><html><head><meta charset="utf-8">
-<style>
-body{margin:0;font-family:sans-serif;background:#1a1a2e;color:#e0e0e0;}
-#console{position:fixed;bottom:0;left:0;right:0;height:140px;background:#0d0d1a;border-top:1px solid #333;padding:10px;overflow-y:auto;font-family:monospace;font-size:12px;}
-#app{padding:16px;min-height:calc(100vh - 140px);}
-.log{color:#00E5FF;} .err{color:#FF4444;} .warn{color:#FFD600;}
-</style></head><body>
-<div id="app"></div>
-<div id="console"><div style="color:#666;margin-bottom:6px;">▶ Консоль</div></div>
-<script>
-const _con = document.getElementById('console');
-const _log = (msg, cls='log') => {
-    const d = document.createElement('div');
-    d.className = cls;
-    d.textContent = typeof msg === 'object' ? JSON.stringify(msg, null, 2) : String(msg);
-    _con.appendChild(d); _con.scrollTop = _con.scrollHeight;
-};
-const _origLog = console.log, _origErr = console.error, _origWarn = console.warn;
-console.log = (...a) => { _origLog(...a); a.forEach(x=>_log(x,'log')); };
-console.error = (...a) => { _origErr(...a); a.forEach(x=>_log(x,'err')); };
-console.warn = (...a) => { _origWarn(...a); a.forEach(x=>_log(x,'warn')); };
-window.onerror = (msg,src,line,col,err) => { _log('Ошибка: '+msg+' (строка '+line+')','err'); };
-try { ${allCode} } catch(e){ _log('Ошибка: '+e.message,'err'); }
+            const modal = document.createElement('div');
+            modal.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.9);backdrop-filter:blur(8px);display:flex;flex-direction:column;';
+            modal.innerHTML=`
+                <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(0,0,0,0.8);border-bottom:1px solid rgba(0,229,255,0.1);">
+                    <div style="font-family:var(--font-head);font-size:16px;color:#fff;">${p.title}</div>
+                    <div style="flex:1;"></div>
+                    <button onclick="this.closest('[style*=fixed]').remove()" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:rgba(255,255,255,0.5);padding:6px 14px;cursor:pointer;">✕ Закрыть</button>
+                </div>
+                <iframe id="coding-run-frame" style="flex:1;border:none;background:#fff;"></iframe>`;
+            document.body.appendChild(modal);
+            // Запускаем код в iframe
+            const frame = modal.querySelector('#coding-run-frame');
+            const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{margin:0;font-family:sans-serif;background:#fff;}</style></head><body><script>
+try { ${allCode} } catch(e){ document.body.innerHTML='<div style="color:red;padding:20px;font-family:monospace;">Ошибка: '+e.message+'</div>'; }
 <\/script></body></html>`;
-            }
-
-            // Открываем через Blob URL — полный доступ к интернету, fetch, WebSocket и тд
-            const blob = new Blob([html], {type:'text/html'});
-            const url = URL.createObjectURL(blob);
-            const win = window.open(url, '_blank');
-            if(!win){ this._showToast('❌ Браузер заблокировал вкладку — разреши всплывающие окна'); }
-            setTimeout(()=>URL.revokeObjectURL(url), 5000);
+            frame.srcdoc = html;
+            modal.addEventListener('click', e=>{ if(e.target===modal) modal.remove(); });
         }catch(e){ this._showToast('❌ Не удалось загрузить проект'); }
     },
 
