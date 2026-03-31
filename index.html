@@ -12355,7 +12355,7 @@ const app = {
     // ══════════════════════════════
     // 🎬 КИНО
     // ══════════════════════════════
-    _moviesFilter: '',
+    _moviesGenre: '',
     _moviesSearchQuery: '',
 
     _moviesInit(){
@@ -12372,7 +12372,7 @@ const app = {
         grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:rgba(255,255,255,0.2);">Загрузка...</div>`;
         try{
             let url = this._API+'/movies';
-            if(this._moviesFilter) url += '?genre='+this._moviesFilter;
+            if(this._moviesGenre) url += '?genre='+this._moviesGenre;
             const r = await fetch(url);
             const movies = await r.json();
             // Фильтр поиска
@@ -12459,7 +12459,7 @@ const app = {
     },
 
     _moviesFilter(genre){
-        this._moviesFilter = genre;
+        this._moviesGenre = genre;
         document.querySelectorAll('.movies-filter-btn').forEach(b=>{
             const active = b.dataset.genre === genre;
             b.style.background = active ? 'rgba(255,149,0,0.15)' : 'transparent';
