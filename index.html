@@ -2132,6 +2132,60 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
 
         <button class="btn-exit" onclick="app.exitGame()" ontouchstart="app.exitGame()" style="touch-action:manipulation;">← В ХАБ</button>
 
+        <!-- Кнопка эмоций — только для Разраба -->
+        <div id="emote-panel" style="display:none;position:absolute;bottom:90px;right:16px;pointer-events:all;z-index:20;">
+            <!-- Меню эмоций -->
+            <div id="emote-menu" style="display:none;flex-direction:column;gap:6px;margin-bottom:8px;align-items:flex-end;">
+                <button onclick="app._playEmote('wave')" style="
+                    background:rgba(0,229,255,0.12);border:1px solid rgba(0,229,255,0.3);
+                    border-radius:12px;padding:8px 16px;color:#fff;font-family:var(--font-ui);
+                    font-size:13px;cursor:pointer;white-space:nowrap;pointer-events:all;
+                    transition:all 0.15s;backdrop-filter:blur(8px);"
+                    onmouseover="this.style.background='rgba(0,229,255,0.25)'"
+                    onmouseout="this.style.background='rgba(0,229,255,0.12)'">
+                    👋 Привет
+                </button>
+                <button onclick="app._playEmote('dance')" style="
+                    background:rgba(255,149,0,0.12);border:1px solid rgba(255,149,0,0.3);
+                    border-radius:12px;padding:8px 16px;color:#fff;font-family:var(--font-ui);
+                    font-size:13px;cursor:pointer;white-space:nowrap;pointer-events:all;
+                    transition:all 0.15s;backdrop-filter:blur(8px);"
+                    onmouseover="this.style.background='rgba(255,149,0,0.25)'"
+                    onmouseout="this.style.background='rgba(255,149,0,0.12)'">
+                    🕺 Танец
+                </button>
+                <button onclick="app._playEmote('yes')" style="
+                    background:rgba(0,255,148,0.12);border:1px solid rgba(0,255,148,0.3);
+                    border-radius:12px;padding:8px 16px;color:#fff;font-family:var(--font-ui);
+                    font-size:13px;cursor:pointer;white-space:nowrap;pointer-events:all;
+                    transition:all 0.15s;backdrop-filter:blur(8px);"
+                    onmouseover="this.style.background='rgba(0,255,148,0.25)'"
+                    onmouseout="this.style.background='rgba(0,255,148,0.12)'">
+                    👍 Согласен
+                </button>
+                <button onclick="app._playEmote('no')" style="
+                    background:rgba(255,45,85,0.12);border:1px solid rgba(255,45,85,0.3);
+                    border-radius:12px;padding:8px 16px;color:#fff;font-family:var(--font-ui);
+                    font-size:13px;cursor:pointer;white-space:nowrap;pointer-events:all;
+                    transition:all 0.15s;backdrop-filter:blur(8px);"
+                    onmouseover="this.style.background='rgba(255,45,85,0.25)'"
+                    onmouseout="this.style.background='rgba(255,45,85,0.12)'">
+                    🙅 Нет
+                </button>
+            </div>
+            <!-- Главная кнопка открытия меню -->
+            <button id="emote-toggle-btn" onclick="app._toggleEmoteMenu()" style="
+                width:48px;height:48px;border-radius:14px;
+                background:rgba(123,47,255,0.18);border:1px solid rgba(123,47,255,0.4);
+                color:#fff;font-size:22px;cursor:pointer;pointer-events:all;
+                transition:all 0.2s;backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;
+                box-shadow:0 4px 16px rgba(123,47,255,0.3);"
+                onmouseover="this.style.background='rgba(123,47,255,0.32)'"
+                onmouseout="this.style.background='rgba(123,47,255,0.18)'">
+                🎭
+            </button>
+        </div>
+
         <!-- Инструкция студии (только в режиме студии) -->
         <div id="studio-guide" class="hidden" style="position:absolute;bottom:16px;right:16px;background:rgba(5,3,8,0.92);border:1px solid rgba(255,149,0,0.15);border-radius:14px;padding:14px 16px;pointer-events:none;backdrop-filter:blur(16px);min-width:220px;box-shadow:0 4px 24px rgba(0,0,0,0.6);">
             <div style="font-size:8px;color:rgba(255,149,0,0.5);font-family:var(--font-mono);letter-spacing:2px;margin-bottom:10px;text-align:center;">📋 ГОРЯЧИЕ КЛАВИШИ</div>
@@ -6240,6 +6294,57 @@ const app = {
         const el=document.getElementById('ingame-chat');
         if(el){ el.style.display='none'; }
     },
+
+    // ══════════════════════════════════════
+    // 🎭 СИСТЕМА ЭМОЦИЙ
+    // ══════════════════════════════════════
+    _emoteActive: null,
+    _emoteTimer: null,
+
+    _toggleEmoteMenu(){
+        const menu = document.getElementById('emote-menu');
+        if(!menu) return;
+        const open = menu.style.display === 'flex';
+        menu.style.display = open ? 'none' : 'flex';
+        const btn = document.getElementById('emote-toggle-btn');
+        if(btn) btn.style.background = open ? 'rgba(123,47,255,0.18)' : 'rgba(123,47,255,0.4)';
+    },
+
+    _playEmote(type){
+        // Закрываем меню
+        const menu = document.getElementById('emote-menu');
+        if(menu) menu.style.display = 'none';
+        const btn = document.getElementById('emote-toggle-btn');
+        if(btn) btn.style.background = 'rgba(123,47,255,0.18)';
+
+        if(!this.isDev(this.username)) return;
+
+        // Запускаем эмоцию локально
+        this._emoteActive = type;
+        if(this._emoteTimer) clearTimeout(this._emoteTimer);
+        const durations = {wave:3000, dance:4000, yes:2000, no:2000};
+        this._emoteTimer = setTimeout(()=>{ this._emoteActive = null; }, durations[type]||3000);
+
+        // Текст над головой
+        const labels = {wave:'👋 Привет!', dance:'🕺 Танцует!', yes:'👍 Да!', no:'🙅 Нет!'};
+        this._emoteLabel = labels[type] || '';
+        this._emoteLabelTimer = setTimeout(()=>{ this._emoteLabel = null; }, durations[type]||3000);
+
+        // Отправляем всем через WS
+        const msg = {
+            type: 'emote',
+            id: String(this.userId),
+            map: String(this.currentMap),
+            emote: type,
+            name: this.username,
+        };
+        if(this._gameWS && this._gameWS.readyState===1){
+            try{ this._gameWS.send(JSON.stringify(msg)); }catch(e){}
+        }
+
+        this._showToast(labels[type] || '🎭');
+    },
+
     _ingameChatFocus(on){
         this._ingameChatFocused=on;
         if(on){ this._chatWasKeys={...(this.keys||{})}; this.keys={}; }
@@ -7140,6 +7245,15 @@ const app = {
                         // Сообщение игрового чата
                         if(String(msg.id)!==String(this.userId))
                             this._ingameChatAdd(msg.map, msg.name, msg.color, msg.text);
+                    } else if(msg.type==='emote') {
+                        // Эмоция другого игрока
+                        if(String(msg.id)!==String(this.userId) && String(msg.map)===String(this.currentMap)){
+                            if(this._others && this._others[msg.id]){
+                                const o = this._others[msg.id];
+                                o._emote = msg.emote;
+                                o._emoteUntil = Date.now() + 4000;
+                            }
+                        }
                     }
                 }catch(e){}
             };
@@ -7304,6 +7418,21 @@ const app = {
             sprite.scale.set(2.2, 0.55, 1);
             sprite.position.set(0, 3.2, 0);
             g.add(sprite);
+
+            // Спрайт эмоции (изначально скрыт)
+            const emoteCanvas = document.createElement('canvas');
+            emoteCanvas.width = 256; emoteCanvas.height = 64;
+            const emoteCtx = emoteCanvas.getContext('2d');
+            emoteCtx.clearRect(0,0,256,64);
+            const emoteTex = new THREE.CanvasTexture(emoteCanvas);
+            const emoteSprite = new THREE.Sprite(new THREE.SpriteMaterial({map:emoteTex,transparent:true}));
+            emoteSprite.scale.set(2.0, 0.5, 1);
+            emoteSprite.position.set(0, 3.9, 0);
+            emoteSprite.visible = false;
+            g.add(emoteSprite);
+            g._emoteSprite = emoteSprite;
+            g._emoteCanvas = emoteCanvas;
+            g._emoteTex = emoteTex;
         } catch(e) {}
 
         // Аксессуары (те же что у buildCharacter)
@@ -8507,6 +8636,18 @@ const app = {
             sprite.scale.set(1.8, 0.38, 1);
             sprite.position.set(0, 3.0, 0);
             group.add(sprite);
+            // Спрайт эмоции своего персонажа
+            const myEmoteCanvas = document.createElement('canvas');
+            myEmoteCanvas.width = 256; myEmoteCanvas.height = 64;
+            const myEmoteTex = new THREE.CanvasTexture(myEmoteCanvas);
+            const myEmoteSprite = new THREE.Sprite(new THREE.SpriteMaterial({map:myEmoteTex,transparent:true}));
+            myEmoteSprite.scale.set(2.0, 0.5, 1);
+            myEmoteSprite.position.set(0, 3.6, 0);
+            myEmoteSprite.visible = false;
+            group.add(myEmoteSprite);
+            this._myEmoteSprite = myEmoteSprite;
+            this._myEmoteCanvas = myEmoteCanvas;
+            this._myEmoteTex = myEmoteTex;
         } catch(e) {}
         return group;
     },
@@ -9273,6 +9414,9 @@ const app = {
         // Чат — показываем в режиме игры и студии
         if(mode==='play'){ this._ingameChatShow(mapId); }
         else { this._ingameChatHide(); }
+        // Панель эмоций — только для Разраба в режиме игры
+        const emotePanel = document.getElementById('emote-panel');
+        if(emotePanel) emotePanel.style.display = (mode==='play' && this.isDev(this.username)) ? 'block' : 'none';
 
         // Показываем инструкцию студии или обычные подсказки
         const stGuide = document.getElementById('studio-guide');
@@ -10573,15 +10717,67 @@ const app = {
 
                 } else {
                     // IDLE — руки прямо вниз, всё статично
-                    r.leftArm.rotation.x  = L(r.leftArm.rotation.x,  0, 0.08);
-                    r.rightArm.rotation.x = L(r.rightArm.rotation.x, 0, 0.08);
-                    r.leftArm.rotation.z  = L(r.leftArm.rotation.z||0, 0, 0.08);
-                    r.rightArm.rotation.z = L(r.rightArm.rotation.z||0, 0, 0.08);
-                    r.leftLeg.rotation.x  = L(r.leftLeg.rotation.x,  0, 0.08);
-                    r.rightLeg.rotation.x = L(r.rightLeg.rotation.x, 0, 0.08);
-                    r.torso.rotation.x    = L(r.torso.rotation.x||0, 0, 0.08);
-                    r.torso.rotation.y    = L(r.torso.rotation.y, 0, 0.08);
-                    r.torso.rotation.z    = L(r.torso.rotation.z||0, 0, 0.08);
+                    // Но сначала проверяем эмоцию
+                    const emote = this._emoteActive;
+                    if(emote === 'wave'){
+                        // ПРИВЕТ — правая рука машет вверх-вниз
+                        const wave = Math.sin(time * 8) * 0.5 - 1.2;
+                        r.rightArm.rotation.x = L(r.rightArm.rotation.x, wave, 0.25);
+                        r.rightArm.rotation.z = L(r.rightArm.rotation.z||0, -0.5, 0.2);
+                        r.leftArm.rotation.x  = L(r.leftArm.rotation.x, 0, 0.08);
+                        r.leftArm.rotation.z  = L(r.leftArm.rotation.z||0, 0, 0.08);
+                        r.leftLeg.rotation.x  = L(r.leftLeg.rotation.x, 0, 0.08);
+                        r.rightLeg.rotation.x = L(r.rightLeg.rotation.x, 0, 0.08);
+                        r.torso.rotation.x    = L(r.torso.rotation.x||0, 0, 0.08);
+                        r.torso.rotation.y    = L(r.torso.rotation.y, 0, 0.08);
+                        r.torso.rotation.z    = L(r.torso.rotation.z||0, 0, 0.08);
+                    } else if(emote === 'dance'){
+                        // ТАНЕЦ — обе руки машут поочерёдно, торс качается
+                        const d = Math.sin(time * 7);
+                        r.leftArm.rotation.x  = L(r.leftArm.rotation.x, -d*1.0, 0.2);
+                        r.rightArm.rotation.x = L(r.rightArm.rotation.x, d*1.0, 0.2);
+                        r.leftArm.rotation.z  = L(r.leftArm.rotation.z||0, d*0.4, 0.18);
+                        r.rightArm.rotation.z = L(r.rightArm.rotation.z||0, -d*0.4, 0.18);
+                        r.torso.rotation.y    = L(r.torso.rotation.y, d*0.2, 0.15);
+                        r.torso.rotation.z    = L(r.torso.rotation.z||0, d*0.08, 0.15);
+                        r.leftLeg.rotation.x  = L(r.leftLeg.rotation.x, d*0.25, 0.15);
+                        r.rightLeg.rotation.x = L(r.rightLeg.rotation.x, -d*0.25, 0.15);
+                    } else if(emote === 'yes'){
+                        // СОГЛАСЕН — кивок торсом, большой палец вверх (правая рука вверх)
+                        const nod = Math.sin(time * 6) * 0.15;
+                        r.torso.rotation.x    = L(r.torso.rotation.x||0, nod, 0.2);
+                        r.rightArm.rotation.x = L(r.rightArm.rotation.x, -1.6, 0.2);
+                        r.rightArm.rotation.z = L(r.rightArm.rotation.z||0, -0.2, 0.15);
+                        r.leftArm.rotation.x  = L(r.leftArm.rotation.x, 0, 0.08);
+                        r.leftArm.rotation.z  = L(r.leftArm.rotation.z||0, 0, 0.08);
+                        r.leftLeg.rotation.x  = L(r.leftLeg.rotation.x, 0, 0.08);
+                        r.rightLeg.rotation.x = L(r.rightLeg.rotation.x, 0, 0.08);
+                        r.torso.rotation.y    = L(r.torso.rotation.y, 0, 0.08);
+                        r.torso.rotation.z    = L(r.torso.rotation.z||0, 0, 0.08);
+                    } else if(emote === 'no'){
+                        // НЕТ — торс качается влево-вправо, обе руки слегка разведены
+                        const shake = Math.sin(time * 8) * 0.25;
+                        r.torso.rotation.z    = L(r.torso.rotation.z||0, shake, 0.2);
+                        r.leftArm.rotation.z  = L(r.leftArm.rotation.z||0, 0.4, 0.15);
+                        r.rightArm.rotation.z = L(r.rightArm.rotation.z||0, -0.4, 0.15);
+                        r.leftArm.rotation.x  = L(r.leftArm.rotation.x, -0.3, 0.12);
+                        r.rightArm.rotation.x = L(r.rightArm.rotation.x, -0.3, 0.12);
+                        r.leftLeg.rotation.x  = L(r.leftLeg.rotation.x, 0, 0.08);
+                        r.rightLeg.rotation.x = L(r.rightLeg.rotation.x, 0, 0.08);
+                        r.torso.rotation.x    = L(r.torso.rotation.x||0, 0, 0.08);
+                        r.torso.rotation.y    = L(r.torso.rotation.y, 0, 0.08);
+                    } else {
+                        // IDLE чистый
+                        r.leftArm.rotation.x  = L(r.leftArm.rotation.x,  0, 0.08);
+                        r.rightArm.rotation.x = L(r.rightArm.rotation.x, 0, 0.08);
+                        r.leftArm.rotation.z  = L(r.leftArm.rotation.z||0, 0, 0.08);
+                        r.rightArm.rotation.z = L(r.rightArm.rotation.z||0, 0, 0.08);
+                        r.leftLeg.rotation.x  = L(r.leftLeg.rotation.x,  0, 0.08);
+                        r.rightLeg.rotation.x = L(r.rightLeg.rotation.x, 0, 0.08);
+                        r.torso.rotation.x    = L(r.torso.rotation.x||0, 0, 0.08);
+                        r.torso.rotation.y    = L(r.torso.rotation.y, 0, 0.08);
+                        r.torso.rotation.z    = L(r.torso.rotation.z||0, 0, 0.08);
+                    }
                 }
             }
 
@@ -10614,6 +10810,25 @@ const app = {
                 if(this.rig && this.rig.head){
                     const headBob = moving && this.canJump ? Math.sin(time*11)*0.04 : 0;
                     this.rig.head.rotation.z = THREE.MathUtils.lerp(this.rig.head.rotation.z||0, headBob, 0.15);
+                }
+                // Обновляем спрайт эмоции своего персонажа
+                if(this._myEmoteSprite && this._myEmoteCanvas && this._myEmoteTex){
+                    const emoteLabels = {wave:'👋 Привет!', dance:'🕺 Танцует!', yes:'👍 Да!', no:'🙅 Нет!'};
+                    const hasMyEmote = this._emoteActive && this._emoteLabel;
+                    this._myEmoteSprite.visible = !!hasMyEmote;
+                    if(hasMyEmote && this._emoteActive !== this._myEmoteLastDrawn){
+                        this._myEmoteLastDrawn = this._emoteActive;
+                        const ec = this._myEmoteCanvas; const ex = ec.getContext('2d');
+                        ex.clearRect(0,0,256,64);
+                        ex.fillStyle='rgba(0,0,0,0.65)';
+                        ex.beginPath(); ex.roundRect(4,4,248,56,16); ex.fill();
+                        ex.font='bold 26px Arial';
+                        ex.textAlign='center'; ex.textBaseline='middle';
+                        ex.fillStyle='#fff';
+                        ex.fillText(emoteLabels[this._emoteActive]||'', 128, 34);
+                        this._myEmoteTex.needsUpdate = true;
+                    }
+                    if(!hasMyEmote) this._myEmoteLastDrawn = null;
                 }
             }
             if(this.loopFn){try{this.loopFn(delta,time);}catch(e){this.loopFn=null;}}
@@ -10674,7 +10889,70 @@ const app = {
                         const sp = time * 11 + (o._animOffset||0);
                         const s  = Math.sin(sp);
 
-                        if(o._moving && !o._jumping){
+                        // Обновляем спрайт эмоции над головой
+                        if(o._emoteSprite && o._emoteCanvas && o._emoteTex){
+                            const emoteLabels = {wave:'👋 Привет!', dance:'🕺 Танцует!', yes:'👍 Да!', no:'🙅 Нет!'};
+                            const hasEmoteSprite = o._emote && o._emoteUntil && Date.now() < o._emoteUntil;
+                            if(hasEmoteSprite){
+                                o._emoteSprite.visible = true;
+                                // Перерисовываем только при смене эмоции
+                                if(o._emote !== o._lastEmoteDrawn){
+                                    o._lastEmoteDrawn = o._emote;
+                                    const ec = o._emoteCanvas; const ex = ec.getContext('2d');
+                                    ex.clearRect(0,0,256,64);
+                                    ex.fillStyle = 'rgba(0,0,0,0.65)';
+                                    ex.beginPath(); ex.roundRect(4,4,248,56,16); ex.fill();
+                                    ex.font = 'bold 26px Arial';
+                                    ex.textAlign = 'center'; ex.textBaseline = 'middle';
+                                    ex.fillStyle = '#fff';
+                                    ex.fillText(emoteLabels[o._emote]||'', 128, 34);
+                                    o._emoteTex.needsUpdate = true;
+                                }
+                            } else {
+                                o._emoteSprite.visible = false;
+                                o._lastEmoteDrawn = null;
+                            }
+                        }
+
+                        // Проверяем активную эмоцию другого игрока
+                        const hasEmote = o._emote && o._emoteUntil && Date.now() < o._emoteUntil;
+                        if(hasEmote && !o._moving){
+                            if(o._emote === 'wave'){
+                                const wave = Math.sin(time * 8) * 0.5 - 1.2;
+                                rig.rA.rotation.x = L(rig.rA.rotation.x, wave, 0.25);
+                                rig.rA.rotation.z = L(rig.rA.rotation.z||0, -0.5, 0.2);
+                                rig.lA.rotation.x = L(rig.lA.rotation.x, 0, 0.08);
+                                rig.lA.rotation.z = L(rig.lA.rotation.z||0, 0, 0.08);
+                                rig.lL.rotation.x = L(rig.lL.rotation.x, 0, 0.08);
+                                rig.rL.rotation.x = L(rig.rL.rotation.x, 0, 0.08);
+                                if(rig.torso){ rig.torso.rotation.y=L(rig.torso.rotation.y||0,0,0.08); rig.torso.rotation.z=L(rig.torso.rotation.z||0,0,0.08); }
+                            } else if(o._emote === 'dance'){
+                                const d = Math.sin(time * 7);
+                                rig.lA.rotation.x = L(rig.lA.rotation.x, -d*1.0, 0.2);
+                                rig.rA.rotation.x = L(rig.rA.rotation.x, d*1.0, 0.2);
+                                rig.lA.rotation.z = L(rig.lA.rotation.z||0, d*0.4, 0.18);
+                                rig.rA.rotation.z = L(rig.rA.rotation.z||0, -d*0.4, 0.18);
+                                if(rig.torso){ rig.torso.rotation.y=L(rig.torso.rotation.y||0,d*0.2,0.15); rig.torso.rotation.z=L(rig.torso.rotation.z||0,d*0.08,0.15); }
+                                rig.lL.rotation.x = L(rig.lL.rotation.x, d*0.25, 0.15);
+                                rig.rL.rotation.x = L(rig.rL.rotation.x, -d*0.25, 0.15);
+                            } else if(o._emote === 'yes'){
+                                const nod = Math.sin(time * 6) * 0.15;
+                                if(rig.torso) rig.torso.rotation.x = L(rig.torso.rotation.x||0, nod, 0.2);
+                                rig.rA.rotation.x = L(rig.rA.rotation.x, -1.6, 0.2);
+                                rig.rA.rotation.z = L(rig.rA.rotation.z||0, -0.2, 0.15);
+                                rig.lA.rotation.x = L(rig.lA.rotation.x, 0, 0.08);
+                                rig.lA.rotation.z = L(rig.lA.rotation.z||0, 0, 0.08);
+                            } else if(o._emote === 'no'){
+                                const shake = Math.sin(time * 8) * 0.25;
+                                if(rig.torso) rig.torso.rotation.z = L(rig.torso.rotation.z||0, shake, 0.2);
+                                rig.lA.rotation.z = L(rig.lA.rotation.z||0, 0.4, 0.15);
+                                rig.rA.rotation.z = L(rig.rA.rotation.z||0, -0.4, 0.15);
+                                rig.lA.rotation.x = L(rig.lA.rotation.x, -0.3, 0.12);
+                                rig.rA.rotation.x = L(rig.rA.rotation.x, -0.3, 0.12);
+                            }
+                        } else if(o._emoteUntil && Date.now() >= o._emoteUntil){
+                            o._emote = null; // сбрасываем после окончания
+                        } else if(o._moving && !o._jumping){
                             // ХОДЬБА — точно как у главного персонажа
                             rig.lA.rotation.x = L(rig.lA.rotation.x, -s*0.65, 0.22);
                             rig.rA.rotation.x = L(rig.rA.rotation.x,  s*0.65, 0.22);
@@ -11371,6 +11649,10 @@ const app = {
         ['race-hud','dropper-hud','maze-hud','coins-hud'].forEach(id=>{const el=document.getElementById(id);if(el)el.remove();});
         this._ingameChatHide();
         this._ingameChatFocus(false);
+        const emotePanel = document.getElementById('emote-panel');
+        if(emotePanel) emotePanel.style.display = 'none';
+        const emoteMenu = document.getElementById('emote-menu');
+        if(emoteMenu) emoteMenu.style.display = 'none';
         this._raceCar=null; this._raceSpeed=false;
         document.exitPointerLock();
         document.getElementById('engine-view').style.display='none';
