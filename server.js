@@ -558,10 +558,10 @@ if(req.method==='DELETE'&&parts[0]==='devmail'&&parts[1]){
     }
     if(req.method==='POST'&&parts[0]==='coding'&&!parts[1]){
         const d=await body(req);
-        if(!d.title||!d.code||!d.authorId) return reply(res,400,{error:'bad'});
+        if(!d.title||!d.authorId) return reply(res,400,{error:'bad'});
         if(!DB.coding) DB.coding={};
         const id='code_'+Date.now()+'_'+String(d.authorId);
-        DB.coding[id]={id,title:d.title,desc:d.desc||'',code:d.code,authorId:String(d.authorId),authorName:d.authorName||'?',authorColor:d.authorColor||'#888',likes:0,likedBy:[],views:0,ts:Date.now()};
+        DB.coding[id]={id,title:d.title,desc:d.desc||'',code:d.code||'',scripts:d.scripts||[{name:'main.js',code:d.code||''}],authorId:String(d.authorId),authorName:d.authorName||'?',authorColor:d.authorColor||'#888',likes:0,likedBy:[],views:0,ts:Date.now()};
         saveDB();
         return reply(res,200,{ok:true,id});
     }
