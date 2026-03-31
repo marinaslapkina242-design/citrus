@@ -29,6 +29,7 @@ function fixDB(){
     if(!DB.nfts) DB.nfts={};
     if(!DB.pendingEarnings) DB.pendingEarnings={};
     if(!DB.coding) DB.coding={};
+    if(!DB.movies) DB.movies={};
     if(!DB.support) DB.support={};
     if(!DB.dm) DB.dm={};
     if(!DB.stats) DB.stats={totalRegistered:0,totalSessions:0,worldPlays:{},dailyActive:{},firstSeenDates:[]};
@@ -558,10 +559,10 @@ if(req.method==='DELETE'&&parts[0]==='devmail'&&parts[1]){
     }
     if(req.method==='POST'&&parts[0]==='coding'&&!parts[1]){
         const d=await body(req);
-        if(!d.title||!d.authorId) return reply(res,400,{error:'bad'});
+        if(!d.title||!d.code||!d.authorId) return reply(res,400,{error:'bad'});
         if(!DB.coding) DB.coding={};
         const id='code_'+Date.now()+'_'+String(d.authorId);
-        DB.coding[id]={id,title:d.title,desc:d.desc||'',code:d.code||'',scripts:d.scripts||[{name:'main.js',code:d.code||''}],authorId:String(d.authorId),authorName:d.authorName||'?',authorColor:d.authorColor||'#888',likes:0,likedBy:[],views:0,ts:Date.now()};
+        DB.coding[id]={id,title:d.title,desc:d.desc||'',code:d.code,authorId:String(d.authorId),authorName:d.authorName||'?',authorColor:d.authorColor||'#888',likes:0,likedBy:[],views:0,ts:Date.now()};
         saveDB();
         return reply(res,200,{ok:true,id});
     }
@@ -959,6 +960,54 @@ if(req.method==='DELETE'&&parts[0]==='devmail'&&parts[1]){
         }
         saveDB();
         return reply(res,200,{ok:true,coins:promo.coins,desc:promo.desc});
+    }
+
+    // ── MOVIES ──
+    if(req.method==='GET'&&parts[0]==='movies'&&!parts[1]){
+        if(!DB.movies) DB.movies={};
+        let movies = Object.values(DB.movies).sort((a,b)=>b.ts-a.ts);
+        const genre = url.searchParams.get('genre');
+        if(genre) movies = movies.filter(m=>m.genre===genre);
+        return reply(res,200,movies);
+    }
+    if(req.method==='GET'&&parts[0]==='movies'&&parts[1]&&!parts[2]){
+        const m=(DB.movies||{})[parts[1]];
+        if(!m) return reply(res,404,{error:'not found'});
+        return reply(res,200,m);
+    }
+    if(req.method==='POST'&&parts[0]==='movies'&&!parts[1]){
+        const d=await body(req);
+        if(!d.url||!d.title||!d.authorId) return reply(res,400,{error:'bad'});
+        if(!DB.movies) DB.movies={};
+        const id='mov_'+Date.now();
+        DB.movies[id]={id,url:d.url,title:d.title,desc:d.desc||'',genre:d.genre||'other',authorId:String(d.authorId),likes:0,likedBy:[],views:0,ts:Date.now()};
+        saveDB();
+        return reply(res,200,{ok:true,id});
+    }
+    if(req.method==='POST'&&parts[0]==='movies'&&parts[2]==='like'){
+        const d=await body(req);
+        const m=(DB.movies||{})[parts[1]];
+        if(!m) return reply(res,404,{error:'not found'});
+        const uid=String(d.userId||'');
+        if(!m.likedBy) m.likedBy=[];
+        const idx=m.likedBy.indexOf(uid);
+        if(idx===-1){ m.likedBy.push(uid); m.likes=(m.likes||0)+1; }
+        else { m.likedBy.splice(idx,1); m.likes=Math.max(0,(m.likes||1)-1); }
+        saveDB();
+        return reply(res,200,{liked:idx===-1,likes:m.likes});
+    }
+    if(req.method==='POST'&&parts[0]==='movies'&&parts[2]==='view'){
+        const m=(DB.movies||{})[parts[1]];
+        if(!m) return reply(res,404,{error:'not found'});
+        m.views=(m.views||0)+1; saveDB();
+        return reply(res,200,{ok:true});
+    }
+    if(req.method==='DELETE'&&parts[0]==='movies'&&parts[1]){
+        const d=await body(req);
+        const m=(DB.movies||{})[parts[1]];
+        if(!m) return reply(res,404,{error:'not found'});
+        delete DB.movies[parts[1]]; saveDB();
+        return reply(res,200,{ok:true});
     }
 
     reply(res,404,{error:'not found'});
