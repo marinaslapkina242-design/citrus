@@ -1022,6 +1022,7 @@
                 <div class="nav-item"        id="nav-leaderboard" onclick="app.switchTab('leaderboard')"><div class="nav-icon"><i class="fas fa-trophy"></i></div> Топ</div>
                 <div class="nav-item hidden" id="nav-admin"       onclick="app.switchTab('admin')">      <div class="nav-icon"><i class="fas fa-shield-alt"></i></div> Баны</div>
                 <div class="nav-item"        id="nav-help"        onclick="app.switchTab('help')">       <div class="nav-icon"><i class="fas fa-question-circle"></i></div> Помощь</div>
+                <div class="nav-item"        id="nav-coding"      onclick="app.switchTab('coding')">     <div class="nav-icon"><i class="fas fa-code"></i></div> Кодинг</div>
                 <div class="nav-item"        id="nav-aihelper"    onclick="app.switchTab('aihelper')">   <div class="nav-icon"><i class="fas fa-robot"></i></div> ИИ Хелпер <span class="nav-badge hidden" id="ai-badge">!</span></div>
                 <div class="nav-item"        id="nav-devmail"     onclick="app.switchTab('devmail')">    <div class="nav-icon"><i class="fas fa-envelope"></i></div> Почта <span class="nav-badge hidden" id="devmail-badge">0</span></div>
 
@@ -1106,6 +1107,33 @@
 
             <!-- ══════════════════ TAB: AI HELPER ══════════════════ -->
             <!-- ══════════════════ TAB: AI HELPER (NEW DESIGN) ══════════════════ -->
+            <!-- ══════════════════ TAB: CODING ══════════════════ -->
+            <div id="tab-coding" class="hidden">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+                    <div class="section-title" style="margin:0;">💻 Кодинг</div>
+                    <div style="display:flex;gap:8px;">
+                        <button onclick="app._codingTab('feed')" id="coding-tab-feed" style="padding:6px 14px;border-radius:8px;background:rgba(0,229,255,0.15);border:1px solid rgba(0,229,255,0.3);color:var(--c-main);font-family:var(--font-mono);font-size:11px;font-weight:700;cursor:pointer;">🌐 Лента</button>
+                        <button onclick="app._codingTab('my')" id="coding-tab-my" style="padding:6px 14px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.4);font-family:var(--font-mono);font-size:11px;font-weight:700;cursor:pointer;">👤 Мои</button>
+                        <button onclick="app._codingTab('new')" id="coding-tab-new" style="padding:6px 14px;border-radius:8px;background:linear-gradient(135deg,rgba(0,229,255,0.15),rgba(123,47,255,0.1));border:1px solid rgba(0,229,255,0.2);color:var(--c-main);font-family:var(--font-mono);font-size:11px;font-weight:700;cursor:pointer;">+ Новый</button>
+                    </div>
+                </div>
+
+                <!-- Форма создания проекта -->
+                <div id="coding-new-form" class="panel-box" style="display:none;margin-bottom:20px;">
+                    <div class="panel-box-title">🚀 Новый проект</div>
+                    <input id="coding-title" class="styled-input" placeholder="Название проекта" style="margin-bottom:10px;">
+                    <input id="coding-desc" class="styled-input" placeholder="Описание (язык, технологии...)" style="margin-bottom:10px;">
+                    <textarea id="coding-code" placeholder="Вставь свой код сюда..." style="width:100%;min-height:200px;background:rgba(0,0,0,0.4);border:1px solid rgba(0,229,255,0.15);border-radius:12px;color:rgba(220,240,255,0.9);font-family:var(--font-mono);font-size:12px;padding:14px;resize:vertical;outline:none;box-sizing:border-box;line-height:1.6;margin-bottom:10px;"></textarea>
+                    <div style="display:flex;gap:8px;">
+                        <button onclick="app.publishCodingProject()" style="flex:1;padding:10px;background:linear-gradient(135deg,#00E5FF,#0066FF);border:none;border-radius:10px;color:#000;font-family:var(--font-head);font-size:14px;font-weight:700;letter-spacing:1px;cursor:pointer;">🚀 ОПУБЛИКОВАТЬ</button>
+                        <button onclick="app._codingTab('feed')" style="padding:10px 16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:rgba(255,255,255,0.4);font-size:13px;cursor:pointer;">Отмена</button>
+                    </div>
+                </div>
+
+                <!-- Лента проектов -->
+                <div id="coding-feed" style="display:flex;flex-direction:column;gap:12px;"></div>
+            </div>
+
             <div id="tab-aihelper" class="hidden" style="display:flex;flex-direction:column;height:calc(100vh - 64px);overflow:hidden;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(123,47,255,0.06),transparent);">
 
                 <!-- ── TOP BAR ── -->
@@ -1138,7 +1166,7 @@
                         <div style="font-family:var(--font-head);font-size:14px;letter-spacing:2px;color:#fff;">🛒 МАГАЗИН ПАКОВ</div>
                         <div id="ai-msgs-status" style="font-size:11px;color:rgba(180,100,255,0.8);font-family:var(--font-mono);background:rgba(123,47,255,0.15);border:1px solid rgba(123,47,255,0.3);border-radius:20px;padding:3px 10px;"></div>
                     </div>
-                    <div style="font-size:11px;color:rgba(255,255,255,0.3);font-family:var(--font-mono);margin-bottom:12px;">Покупай паки за 🍊 цитрусы или 🔷 токены</div>
+                    <div style="font-size:11px;color:rgba(255,255,255,0.3);font-family:var(--font-mono);margin-bottom:12px;">Покупай паки за 🍊 цитрусы или 🪙 токены</div>
                     <div id="ai-packs-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;"></div>
                 </div>
 
@@ -3111,7 +3139,7 @@ const app = {
             if(isToken){
                 this.tokens=(this.tokens||0)+amount; this.saveData();
                 const tokEl=document.getElementById('token-val'); if(tokEl) tokEl.textContent=this.tokens;
-                this.showNotif('🎁',`+${amount} 🔷 получено!`,`Токены от игрока`);
+                this.showNotif('🎁',`+${amount} 🪙 получено!`,`Токены от игрока`);
             } else {
                 this.balance+=amount; this.saveData();
                 document.getElementById('balance-val').textContent=this.balance;
@@ -3128,10 +3156,10 @@ const app = {
     async sendGift(){
         const amount=parseInt(document.getElementById('gift-amount')?.value||'0');
         const isToken = this._giftType === 'token';
-        if(!amount||amount<1||amount>100000){ this.showNotif('❌','Ошибка', isToken ? 'Сумма от 1 до 100 000 🔷' : 'Сумма от 1 до 100 000 🍊'); return; }
+        if(!amount||amount<1||amount>100000){ this.showNotif('❌','Ошибка', isToken ? 'Сумма от 1 до 100 000 🪙' : 'Сумма от 1 до 100 000 🍊'); return; }
         if(!this._giftSelectedId){ this.showNotif('❌','Выбери друга','Нажми на имя друга выше'); return; }
         if(isToken){
-            if((this.tokens||0)<amount){ this.showNotif('❌','Мало токенов',`Нужно ${amount} 🔷, у тебя ${this.tokens||0}`); return; }
+            if((this.tokens||0)<amount){ this.showNotif('❌','Мало токенов',`Нужно ${amount} 🪙, у тебя ${this.tokens||0}`); return; }
         } else {
             if(this.balance<amount){ this.showNotif('❌','Мало цитрусов',`Нужно ${amount} 🍊, у тебя ${this.balance}`); return; }
         }
@@ -3150,7 +3178,7 @@ const app = {
             const tv=document.getElementById('token-val'); if(tv) tv.textContent=this.tokens||0;
             await fetch(this._API+'/mail/'+this._giftSelectedId,{method:'POST',headers:{'Content-Type':'application/json'},
                 body:JSON.stringify({type:'gift',gift_type:isToken?'token':'citrus',from_id:String(this.userId),from_name:this.username+'#'+this.userId,amount})});
-            this.showNotif('🎁','Подарок отправлен!',`${amount} ${isToken?'🔷':'🍊'} → ${this._giftSelectedName}`);
+            this.showNotif('🎁','Подарок отправлен!',`${amount} ${isToken?'🪙':'🍊'} → ${this._giftSelectedName}`);
             document.getElementById('gift-amount').value='';
             this._giftSelectedId=null; this._giftSelectedName=null; this._giftType='citrus';
             document.getElementById('gift-selected-friend').innerHTML='Выбери друга выше 👆';
@@ -4009,7 +4037,7 @@ const app = {
             if(!r.ok){ this._lbFetching = false; return; }
             const top = await r.json();
             const isTime = this._lbMode === 'time';
-            const isTokens = this._lbMode === 'tokens'; const fmtVal = (p) => isTime ? this._fmtHubTime(p.hubTime||0) : isTokens ? (p.tokens||0).toLocaleString('ru') + ' 🔷' : (p.balance||0).toLocaleString('ru') + ' 🍊';
+            const isTokens = this._lbMode === 'tokens'; const fmtVal = (p) => isTime ? this._fmtHubTime(p.hubTime||0) : isTokens ? (p.tokens||0).toLocaleString('ru') + ' 🪙' : (p.balance||0).toLocaleString('ru') + ' 🍊';
             const medals = ['🥇','🥈','🥉'];
             const totalSlots = Math.max(top.length, 10);
             const rows = list.querySelectorAll('[data-lb-rank]');
@@ -4046,7 +4074,7 @@ const app = {
             if(!r.ok){ this._lbFetching = false; return; }
             const top = await r.json();
             const isTime = this._lbMode === 'time';
-            const isTokens = this._lbMode === 'tokens'; const fmtVal = (p) => isTime ? this._fmtHubTime(p.hubTime||0) : isTokens ? (p.tokens||0).toLocaleString('ru') + ' 🔷' : (p.balance||0).toLocaleString('ru') + ' 🍊';
+            const isTokens = this._lbMode === 'tokens'; const fmtVal = (p) => isTime ? this._fmtHubTime(p.hubTime||0) : isTokens ? (p.tokens||0).toLocaleString('ru') + ' 🪙' : (p.balance||0).toLocaleString('ru') + ' 🍊';
             const medals = ['🥇','🥈','🥉'];
             const totalSlots = Math.max(top.length, 10);
             const rows = list.querySelectorAll('[data-lb-rank]');
@@ -6012,7 +6040,7 @@ const app = {
 
         switchTab(id){
         this._sfx('nav');
-        ['games','mine','work','avatar','shop','friends','studio','quests','promo','daily','roulette','credits','gifts','nft','stats','leaderboard','admin','help','cases','aihelper','devmail','exchange'].forEach(t=>{
+        ['games','mine','work','avatar','shop','friends','studio','quests','promo','daily','roulette','credits','gifts','nft','stats','leaderboard','admin','help','cases','aihelper','devmail','exchange','coding'].forEach(t=>{
             document.getElementById('tab-'+t)?.classList.add('hidden');
             document.getElementById('nav-'+t)?.classList.remove('active');
         });
@@ -6033,6 +6061,7 @@ const app = {
         if(id==='nft'){ this.initNft(); }
         if(id==='admin'){ this.loadBanList(); this.loadBanOnlineList(); }
         if(id==='promo'){ this._renderPromoHistory(); }
+        if(id==='coding'){ this.initCoding(); }
         if(id==='aihelper'){ this.initAiHelper(); }
         if(id==='devmail'){ this.initDevMail(); }
         if(id==='stats'){ this.loadStats(); }
@@ -12018,7 +12047,7 @@ const app = {
                     <div style="font-size:8px;color:rgba(255,255,255,0.2);font-family:var(--font-mono);margin-bottom:4px;">${p.label}</div>
                     <div style="height:1px;background:rgba(123,47,255,0.15);margin:5px 0;"></div>
                     <div style="font-size:10px;color:#FF9500;font-family:var(--font-mono);font-weight:700;">${p.n*200}🍊</div>
-                    <div style="font-size:10px;color:#B060FF;font-family:var(--font-mono);">или ${p.n}🔷</div>
+                    <div style="font-size:10px;color:#B060FF;font-family:var(--font-mono);">или ${p.n}🪙</div>
                 </div>`).join('');
         }
     },
@@ -12177,6 +12206,181 @@ const app = {
         }
         const chat = document.getElementById('ai-chat');
         if(chat) chat.scrollTop = chat.scrollHeight;
+    },
+
+    // ══════════ DEVMAIL ══════════
+
+    // ══════════ КОДИНГ ══════════
+
+    _codingCurrentTab: 'feed',
+
+    initCoding(){
+        this._codingTab(this._codingCurrentTab || 'feed');
+    },
+
+    _codingTab(tab){
+        this._codingCurrentTab = tab;
+        const feed = document.getElementById('coding-feed');
+        const form = document.getElementById('coding-new-form');
+        // Кнопки
+        ['feed','my','new'].forEach(t=>{
+            const btn = document.getElementById('coding-tab-'+t);
+            if(btn) btn.style.cssText = t===tab
+                ? 'padding:6px 14px;border-radius:8px;background:rgba(0,229,255,0.15);border:1px solid rgba(0,229,255,0.3);color:var(--c-main);font-family:var(--font-mono);font-size:11px;font-weight:700;cursor:pointer;'
+                : 'padding:6px 14px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.4);font-family:var(--font-mono);font-size:11px;font-weight:700;cursor:pointer;';
+        });
+        if(form) form.style.display = tab==='new' ? 'block' : 'none';
+        if(feed) feed.style.display = tab==='new' ? 'none' : 'flex';
+        if(tab==='feed') this._loadCodingFeed('all');
+        if(tab==='my') this._loadCodingFeed('my');
+    },
+
+    async _loadCodingFeed(filter){
+        const feed = document.getElementById('coding-feed');
+        if(!feed) return;
+        feed.innerHTML = '<div style="color:rgba(255,255,255,0.2);text-align:center;padding:30px;font-family:var(--font-ui);">Загрузка...</div>';
+        try{
+            const url = filter==='my'
+                ? this._API+'/coding?author='+this.userId
+                : this._API+'/coding';
+            const r = await fetch(url);
+            const projects = await r.json();
+            if(!projects.length){
+                feed.innerHTML = '<div style="color:rgba(255,255,255,0.2);text-align:center;padding:40px;font-family:var(--font-ui);">'+
+                    (filter==='my' ? 'У тебя пока нет проектов 🚀<br><br><button onclick="app._codingTab(\x27new\x27)" style="margin-top:12px;padding:8px 20px;background:rgba(0,229,255,0.1);border:1px solid rgba(0,229,255,0.2);border-radius:8px;color:var(--c-main);cursor:pointer;font-family:var(--font-body);">+ Создать первый</button>' : 'Пока нет проектов. Будь первым! 🚀')
+                    +'</div>';
+                return;
+            }
+            feed.innerHTML = projects.map(p => this._codingCard(p)).join('');
+        }catch(e){
+            feed.innerHTML = '<div style="color:rgba(255,100,100,0.5);text-align:center;padding:30px;">Ошибка загрузки</div>';
+        }
+    },
+
+    _codingCard(p){
+        const isMe = String(p.authorId) === String(this.userId);
+        const liked = (p.likedBy||[]).includes(String(this.userId));
+        const ago = this._timeAgo(p.ts||0);
+        const codePreview = (p.code||'').slice(0,300).replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        return `<div class="panel-box" style="padding:0;overflow:hidden;">
+            <div style="padding:16px 18px 12px;">
+                <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;">
+                    <div style="width:36px;height:36px;border-radius:50%;background:${p.authorColor||'#888'}22;color:${p.authorColor||'#888'};display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex-shrink:0;">${(p.authorName||'?')[0].toUpperCase()}</div>
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-weight:700;font-size:14px;color:rgba(255,255,255,0.9);">${p.title||'Без названия'}</div>
+                        <div style="font-size:11px;color:rgba(255,255,255,0.35);font-family:var(--font-mono);">${p.authorName||'?'} · ${ago}</div>
+                    </div>
+                    ${isMe ? `<button onclick="app.deleteCodingProject('${p.id}')" style="background:rgba(255,60,60,0.1);border:1px solid rgba(255,60,60,0.2);border-radius:8px;color:rgba(255,100,100,0.6);padding:4px 10px;font-size:11px;cursor:pointer;">🗑</button>` : ''}
+                </div>
+                ${p.desc ? `<div style="font-size:12px;color:rgba(255,255,255,0.45);margin-bottom:10px;font-family:var(--font-ui);">${p.desc}</div>` : ''}
+                <pre style="background:rgba(0,0,0,0.4);border:1px solid rgba(0,229,255,0.08);border-radius:10px;padding:12px;font-family:var(--font-mono);font-size:11px;color:rgba(200,240,255,0.8);overflow-x:auto;max-height:160px;overflow-y:auto;margin:0;white-space:pre-wrap;word-break:break-all;">${codePreview}${(p.code||'').length>300?'\n...' : ''}</pre>
+            </div>
+            <div style="display:flex;align-items:center;gap:0;border-top:1px solid rgba(255,255,255,0.05);">
+                <button onclick="app.likeCodingProject('${p.id}',this)" style="flex:1;padding:10px;background:${liked?'rgba(255,59,48,0.1)':'transparent'};border:none;color:${liked?'#FF3B30':'rgba(255,255,255,0.3)'};font-size:13px;cursor:pointer;transition:all 0.2s;">❤️ ${p.likes||0}</button>
+                <div style="width:1px;height:32px;background:rgba(255,255,255,0.05);"></div>
+                <button onclick="app.viewCodingProject('${p.id}')" style="flex:1;padding:10px;background:transparent;border:none;color:rgba(255,255,255,0.3);font-size:13px;cursor:pointer;">👁 ${p.views||0}</button>
+                <div style="width:1px;height:32px;background:rgba(255,255,255,0.05);"></div>
+                <button onclick="app.copyCodingCode('${p.id}')" style="flex:1;padding:10px;background:transparent;border:none;color:rgba(255,255,255,0.3);font-size:13px;cursor:pointer;">📋 Копировать</button>
+            </div>
+        </div>`;
+    },
+
+    _timeAgo(ts){
+        const diff = Date.now() - ts;
+        const m = Math.floor(diff/60000);
+        const h = Math.floor(diff/3600000);
+        const d = Math.floor(diff/86400000);
+        if(d>0) return d+'д назад';
+        if(h>0) return h+'ч назад';
+        if(m>0) return m+'м назад';
+        return 'только что';
+    },
+
+    async publishCodingProject(){
+        const title = document.getElementById('coding-title')?.value.trim();
+        const desc = document.getElementById('coding-desc')?.value.trim();
+        const code = document.getElementById('coding-code')?.value.trim();
+        if(!title){ this._showToast('❌ Введи название'); return; }
+        if(!code){ this._showToast('❌ Вставь код'); return; }
+        try{
+            await fetch(this._API+'/coding', {
+                method:'POST',
+                headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({
+                    title, desc, code,
+                    authorId: String(this.userId),
+                    authorName: this.username,
+                    authorColor: this._myColor,
+                })
+            });
+            document.getElementById('coding-title').value='';
+            document.getElementById('coding-desc').value='';
+            document.getElementById('coding-code').value='';
+            this._showToast('✅ Проект опубликован!');
+            this._codingTab('feed');
+        }catch(e){ this._showToast('❌ Ошибка публикации'); }
+    },
+
+    async likeCodingProject(id, btn){
+        try{
+            const r = await fetch(this._API+'/coding/'+id+'/like', {
+                method:'POST',
+                headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({userId: String(this.userId)})
+            });
+            const data = await r.json();
+            if(btn){
+                const liked = data.liked;
+                btn.style.background = liked ? 'rgba(255,59,48,0.1)' : 'transparent';
+                btn.style.color = liked ? '#FF3B30' : 'rgba(255,255,255,0.3)';
+                btn.textContent = '❤️ ' + data.likes;
+            }
+        }catch(e){}
+    },
+
+    async viewCodingProject(id){
+        try{
+            const r = await fetch(this._API+'/coding/'+id);
+            const p = await r.json();
+            // Показываем полный код в модалке
+            const modal = document.createElement('div');
+            modal.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:20px;';
+            modal.innerHTML=`<div style="background:linear-gradient(160deg,#0e0820,#080514);border:1px solid rgba(0,229,255,0.2);border-radius:20px;padding:24px;max-width:800px;width:100%;max-height:80vh;overflow-y:auto;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                    <div style="font-family:var(--font-head);font-size:20px;color:#fff;">${p.title}</div>
+                    <button onclick="this.closest('[style*=fixed]').remove()" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:rgba(255,255,255,0.5);padding:6px 12px;cursor:pointer;">✕</button>
+                </div>
+                ${p.desc?`<div style="color:rgba(255,255,255,0.4);font-size:12px;margin-bottom:16px;">${p.desc}</div>`:''}
+                <pre style="background:rgba(0,0,0,0.5);border:1px solid rgba(0,229,255,0.1);border-radius:12px;padding:16px;font-family:var(--font-mono);font-size:12px;color:rgba(200,240,255,0.9);overflow-x:auto;white-space:pre-wrap;word-break:break-all;max-height:400px;overflow-y:auto;">${(p.code||'').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre>
+                <div style="display:flex;gap:8px;margin-top:16px;">
+                    <button onclick="navigator.clipboard.writeText(${JSON.stringify(p.code||'')});this.textContent='✅ Скопировано!';setTimeout(()=>this.textContent='📋 Копировать код',2000)" style="flex:1;padding:10px;background:rgba(0,229,255,0.1);border:1px solid rgba(0,229,255,0.2);border-radius:10px;color:var(--c-main);cursor:pointer;font-family:var(--font-body);">📋 Копировать код</button>
+                </div>
+            </div>`;
+            document.body.appendChild(modal);
+            modal.addEventListener('click', e=>{ if(e.target===modal) modal.remove(); });
+        }catch(e){}
+    },
+
+    async copyCodingCode(id){
+        try{
+            const r = await fetch(this._API+'/coding/'+id);
+            const p = await r.json();
+            await navigator.clipboard.writeText(p.code||'');
+            this._showToast('📋 Код скопирован!');
+        }catch(e){ this._showToast('❌ Не удалось скопировать'); }
+    },
+
+    async deleteCodingProject(id){
+        if(!confirm('Удалить проект?')) return;
+        try{
+            await fetch(this._API+'/coding/'+id, {
+                method:'DELETE',
+                headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({userId: String(this.userId)})
+            });
+            this._showToast('🗑 Удалено');
+            this._loadCodingFeed('my');
+        }catch(e){}
     },
 
     // ══════════ DEVMAIL ══════════
