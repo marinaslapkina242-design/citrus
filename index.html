@@ -2136,6 +2136,25 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
         <div id="emote-panel" style="display:none;position:absolute;bottom:90px;right:16px;pointer-events:all;z-index:20;">
             <!-- Меню эмоций -->
             <div id="emote-menu" style="display:none;flex-direction:column;gap:6px;margin-bottom:8px;align-items:flex-end;">
+                <!-- Говорить — с полем ввода -->
+                <div style="display:flex;gap:6px;align-items:center;">
+                    <input id="emote-say-input" type="text" maxlength="40" placeholder="Что сказать..."
+                        autocomplete="off" spellcheck="false"
+                        style="background:rgba(10,6,25,0.9);border:1px solid rgba(255,220,0,0.3);color:#fff;
+                        padding:8px 12px;border-radius:10px;font-size:13px;outline:none;
+                        font-family:var(--font-ui);width:180px;pointer-events:all;"
+                        onfocus="app._ingameChatFocus(true)" onblur="app._ingameChatFocus(false)"
+                        onkeydown="if(event.key==='Enter'){app._playEmote('say');event.preventDefault();}">
+                    <button onclick="app._playEmote('say')" style="
+                        background:rgba(255,220,0,0.12);border:1px solid rgba(255,220,0,0.3);
+                        border-radius:12px;padding:8px 14px;color:#fff;font-family:var(--font-ui);
+                        font-size:13px;cursor:pointer;white-space:nowrap;pointer-events:all;
+                        transition:all 0.15s;backdrop-filter:blur(8px);"
+                        onmouseover="this.style.background='rgba(255,220,0,0.25)'"
+                        onmouseout="this.style.background='rgba(255,220,0,0.12)'">
+                        💬 Сказать
+                    </button>
+                </div>
                 <button onclick="app._playEmote('wave')" style="
                     background:rgba(0,229,255,0.12);border:1px solid rgba(0,229,255,0.3);
                     border-radius:12px;padding:8px 16px;color:#fff;font-family:var(--font-ui);
@@ -2171,6 +2190,18 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
                     onmouseover="this.style.background='rgba(255,45,85,0.25)'"
                     onmouseout="this.style.background='rgba(255,45,85,0.12)'">
                     🙅 Нет
+                </button>
+                <!-- Разделитель -->
+                <div style="height:1px;background:rgba(255,255,255,0.08);width:100%;margin:2px 0;"></div>
+                <!-- Кнопка полёта -->
+                <button id="fly-toggle-btn" onclick="app._toggleFly()" style="
+                    background:rgba(100,180,255,0.12);border:1px solid rgba(100,180,255,0.3);
+                    border-radius:12px;padding:8px 16px;color:#fff;font-family:var(--font-ui);
+                    font-size:13px;cursor:pointer;white-space:nowrap;pointer-events:all;
+                    transition:all 0.15s;backdrop-filter:blur(8px);"
+                    onmouseover="this.style.background='rgba(100,180,255,0.25)'"
+                    onmouseout="this.style.background='rgba(100,180,255,0.12)'">
+                    🕊️ Полёт: ВЫКЛ
                 </button>
             </div>
             <!-- Главная кнопка открытия меню -->
@@ -6319,14 +6350,24 @@ const app = {
 
         if(!this.isDev(this.username)) return;
 
+        // Для эмоции "говорить" берём текст из поля
+        let sayText = '';
+        if(type === 'say'){
+            const inp = document.getElementById('emote-say-input');
+            sayText = (inp?.value||'').trim();
+            if(!sayText){ this._showToast('⚠️ Введи текст!'); if(inp) inp.focus(); return; }
+            if(inp) inp.value = '';
+        }
+
         // Запускаем эмоцию локально
         this._emoteActive = type;
+        this._emoteSayText = sayText;
         if(this._emoteTimer) clearTimeout(this._emoteTimer);
-        const durations = {wave:3000, dance:4000, yes:2000, no:2000};
-        this._emoteTimer = setTimeout(()=>{ this._emoteActive = null; }, durations[type]||3000);
+        const durations = {say:6000, wave:3000, dance:4000, yes:2000, no:2000};
+        this._emoteTimer = setTimeout(()=>{ this._emoteActive = null; this._emoteSayText = ''; }, durations[type]||3000);
 
         // Текст над головой
-        const labels = {wave:'👋 Привет!', dance:'🕺 Танцует!', yes:'👍 Да!', no:'🙅 Нет!'};
+        const labels = {say: sayText, wave:'👋 Привет!', dance:'🕺 Танцует!', yes:'👍 Да!', no:'🙅 Нет!'};
         this._emoteLabel = labels[type] || '';
         this._emoteLabelTimer = setTimeout(()=>{ this._emoteLabel = null; }, durations[type]||3000);
 
@@ -6336,13 +6377,34 @@ const app = {
             id: String(this.userId),
             map: String(this.currentMap),
             emote: type,
+            sayText,
             name: this.username,
         };
         if(this._gameWS && this._gameWS.readyState===1){
             try{ this._gameWS.send(JSON.stringify(msg)); }catch(e){}
         }
 
-        this._showToast(labels[type] || '🎭');
+        const toast = type === 'say' ? `💬 "${sayText}"` : (labels[type] || '🎭');
+        this._showToast(toast);
+    },
+
+    // Режим полёта — только для Разраба
+    _flyMode: false,
+    _toggleFly(){
+        if(!this.isDev(this.username)) return;
+        this._flyMode = !this._flyMode;
+        const btn = document.getElementById('fly-toggle-btn');
+        if(btn){
+            btn.textContent = this._flyMode ? '🕊️ Полёт: ВКЛ' : '🕊️ Полёт: ВЫКЛ';
+            btn.style.background = this._flyMode ? 'rgba(100,180,255,0.35)' : 'rgba(100,180,255,0.12)';
+            btn.style.borderColor = this._flyMode ? 'rgba(100,180,255,0.7)' : 'rgba(100,180,255,0.3)';
+        }
+        if(this._flyMode){
+            this.velocity.y = 0;
+            this._showToast('🕊️ Полёт включён! Space — вверх, Shift — вниз');
+        } else {
+            this._showToast('🕊️ Полёт выключен');
+        }
     },
 
     _ingameChatFocus(on){
@@ -10554,7 +10616,14 @@ const app = {
             }
 
             const grav = this.spaceGrav ? 14 : 40;
-            this.velocity.y -= grav * delta;
+            // Полёт для Разраба
+            if(this._flyMode && this.isDev(this.username)){
+                this.velocity.y = 0;
+                if(this.keys['Space'])  this.playerGroup.position.y += 12 * delta;
+                if(this.keys['ShiftLeft'] || this.keys['ShiftRight']) this.playerGroup.position.y -= 8 * delta;
+                this.canJump = false;
+            } else {
+                this.velocity.y -= grav * delta;
             this.playerGroup.position.y += this.velocity.y * delta;
             const gy = this.checkGround(this.playerGroup.position);
             if(this.playerGroup.position.y <= gy){
@@ -10575,6 +10644,7 @@ const app = {
             const fallLimit = this.currentMap==='dropper' ? -90 : -5;
             const fallSpawn = this.currentMap==='dropper' ? new THREE.Vector3(0,7,0) : new THREE.Vector3(0,5,0);
             if(this.playerGroup.position.y < fallLimit){this.playerGroup.position.copy(fallSpawn); this.velocity.y=0;}
+            } // конец else (не полёт)
 
             if(this._camMode === 'first') {
                 // Вид от первого лица — камера в голове
@@ -10813,19 +10883,31 @@ const app = {
                 }
                 // Обновляем спрайт эмоции своего персонажа
                 if(this._myEmoteSprite && this._myEmoteCanvas && this._myEmoteTex){
-                    const emoteLabels = {wave:'👋 Привет!', dance:'🕺 Танцует!', yes:'👍 Да!', no:'🙅 Нет!'};
+                    const emoteLabels = {wave:'👋 Привет!', dance:'🕺 Танцует!', yes:'👍 Да!', no:'🙅 Нет!', say: this._emoteSayText||'💬'};
                     const hasMyEmote = this._emoteActive && this._emoteLabel;
                     this._myEmoteSprite.visible = !!hasMyEmote;
-                    if(hasMyEmote && this._emoteActive !== this._myEmoteLastDrawn){
+                    if(hasMyEmote && (this._emoteActive !== this._myEmoteLastDrawn || this._emoteActive==='say')){
                         this._myEmoteLastDrawn = this._emoteActive;
                         const ec = this._myEmoteCanvas; const ex = ec.getContext('2d');
                         ex.clearRect(0,0,256,64);
-                        ex.fillStyle='rgba(0,0,0,0.65)';
+                        ex.fillStyle='rgba(0,0,0,0.72)';
                         ex.beginPath(); ex.roundRect(4,4,248,56,16); ex.fill();
-                        ex.font='bold 26px Arial';
+                        ex.font = this._emoteActive==='say' ? 'bold 20px Arial' : 'bold 26px Arial';
                         ex.textAlign='center'; ex.textBaseline='middle';
                         ex.fillStyle='#fff';
-                        ex.fillText(emoteLabels[this._emoteActive]||'', 128, 34);
+                        // Для say рисуем пузырь речи
+                        if(this._emoteActive==='say'){
+                            ex.fillStyle='#FFD700';
+                            ex.font='bold 14px Arial';
+                            ex.fillText('💬', 20, 32);
+                            ex.fillStyle='#fff';
+                            ex.font='bold 18px Arial';
+                            // Обрезаем длинный текст
+                            const txt = this._emoteSayText||'';
+                            ex.fillText(txt.length>22 ? txt.slice(0,21)+'…' : txt, 140, 32);
+                        } else {
+                            ex.fillText(emoteLabels[this._emoteActive]||'', 128, 34);
+                        }
                         this._myEmoteTex.needsUpdate = true;
                     }
                     if(!hasMyEmote) this._myEmoteLastDrawn = null;
@@ -10891,7 +10973,7 @@ const app = {
 
                         // Обновляем спрайт эмоции над головой
                         if(o._emoteSprite && o._emoteCanvas && o._emoteTex){
-                            const emoteLabels = {wave:'👋 Привет!', dance:'🕺 Танцует!', yes:'👍 Да!', no:'🙅 Нет!'};
+                            const emoteLabels = {wave:'👋 Привет!', dance:'🕺 Танцует!', yes:'👍 Да!', no:'🙅 Нет!', say: o._emoteSayText||'💬'};
                             const hasEmoteSprite = o._emote && o._emoteUntil && Date.now() < o._emoteUntil;
                             if(hasEmoteSprite){
                                 o._emoteSprite.visible = true;
