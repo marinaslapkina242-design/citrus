@@ -7,48 +7,48 @@
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&family=Bebas+Neue&display=swap" rel="stylesheet">
     <style>
         /* ╔══════════════════════════════════════════════════════════════════╗
-           ║  CITRUS ONLINE — DISCO PARTY EDITION 🪩                         ║
-           ║  Aesthetic: Neon Disco × Mirror Ball × Club Night                ║
+           ║  CITRUS ONLINE — VOID PROTOCOL EDITION                          ║
+           ║  Aesthetic: Liquid Chrome × Deep Space × Chromatic Aberration   ║
            ╚══════════════════════════════════════════════════════════════════╝ */
 
         @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&family=Bebas+Neue&display=swap');
 
         :root {
-            /* Disco dark floor */
-            --void:      #0A0010;
-            --deep:      #0F0018;
-            --mid:       #150022;
-            --lift:      #1C002E;
-            --raise:     #24003C;
+            /* Void palette */
+            --void:      #00000A;
+            --deep:      #03000F;
+            --mid:       #070518;
+            --lift:      #0D0920;
+            --raise:     #141028;
 
-            /* Disco neon trio */
-            --r:  #FF1FFF;
-            --g:  #00FFB3;
-            --b:  #FF4500;
+            /* Chromatic trio — RGB split */
+            --r:  #FF2D55;
+            --g:  #00FF94;
+            --b:  #0066FF;
 
-            /* Primary accent — hot magenta */
-            --p:     #FF00FF;
-            --p2:    #FF69B4;
-            --p3:    #BF00FF;
+            /* Primary accent — liquid teal */
+            --p:     #00E5FF;
+            --p2:    #00FFCC;
+            --p3:    #7B2FFF;
 
-            /* Gold & lime pulse */
-            --w:  #FFD700;
-            --w2: #ADFF2F;
+            /* Warm pulse */
+            --w:  #FF6B00;
+            --w2: #FFD600;
 
-            /* Legacy aliases — disco recolour */
-            --c-main:    #FF00FF;
-            --c-glow:    #FF69B4;
-            --c-deep:    #BF00FF;
-            --c-bg:      #0A0010;
-            --c-surface: #0F0018;
-            --c-surface2:#150022;
-            --c-surface3:#1C002E;
-            --c-border:  rgba(255,0,255,0.10);
-            --c-border2: rgba(255,0,255,0.22);
-            --c-blue:    #BF00FF;
-            --c-green:   #00FFB3;
-            --c-pink:    #FF1FFF;
-            --c-purple:  #FF4500;
+            /* Legacy aliases */
+            --c-main:    #00E5FF;
+            --c-glow:    #00FFCC;
+            --c-deep:    #0066FF;
+            --c-bg:      #00000A;
+            --c-surface: #03000F;
+            --c-surface2:#070518;
+            --c-surface3:#0D0920;
+            --c-border:  rgba(0,229,255,0.08);
+            --c-border2: rgba(0,229,255,0.18);
+            --c-blue:    #0066FF;
+            --c-green:   #00FF94;
+            --c-pink:    #FF2D55;
+            --c-purple:  #7B2FFF;
 
             --font-head:   'Bebas Neue', sans-serif;
             --font-body:   'Space Grotesk', sans-serif;
@@ -56,15 +56,10 @@
             --font-mono:   'JetBrains Mono', monospace;
             --font-accent: 'Syne', sans-serif;
 
-            --shadow-card: 0 8px 48px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,0,255,0.06) inset;
+            --shadow-card: 0 8px 48px rgba(0,0,0,0.9), 0 0 0 1px rgba(0,229,255,0.04) inset;
             --radius-card: 16px;
             --radius-btn:  10px;
         }
-
-        /* ── Disco confetti sparkles ── */
-        @keyframes sparkle1 { 0%,100%{opacity:0;transform:scale(0) rotate(0deg)} 50%{opacity:1;transform:scale(1) rotate(180deg)} }
-        @keyframes sparkle2 { 0%,100%{opacity:0;transform:scale(0) rotate(0deg)} 50%{opacity:1;transform:scale(1) rotate(-180deg)} }
-        @keyframes discoBeat { 0%,100%{transform:scale(1)} 50%{transform:scale(1.04)} }
 
         * { box-sizing: border-box; user-select: none; }
 
@@ -78,47 +73,44 @@
             cursor: default;
         }
 
-        /* ── Disco background — coloured rotating spotlights ── */
+        /* ── Animated void background ── */
         body::before {
             content: '';
             position: fixed; inset: 0; z-index: 0;
             background:
-                radial-gradient(ellipse 100% 70% at 10% 30%, rgba(255,0,255,0.18) 0%, transparent 55%),
-                radial-gradient(ellipse 80% 60% at 90% 20%, rgba(255,69,0,0.14) 0%, transparent 50%),
-                radial-gradient(ellipse 60% 80% at 50% 100%, rgba(191,0,255,0.12) 0%, transparent 50%),
-                radial-gradient(ellipse 50% 50% at 80% 80%, rgba(0,255,179,0.10) 0%, transparent 50%),
-                radial-gradient(ellipse 40% 40% at 20% 80%, rgba(255,215,0,0.08) 0%, transparent 50%);
-            animation: discoPulse 4s ease-in-out infinite alternate;
+                radial-gradient(ellipse 120% 80% at 15% 50%, rgba(123,47,255,0.12) 0%, transparent 55%),
+                radial-gradient(ellipse 80% 60% at 85% 20%, rgba(0,102,255,0.10) 0%, transparent 50%),
+                radial-gradient(ellipse 60% 80% at 50% 100%, rgba(0,229,255,0.06) 0%, transparent 50%),
+                radial-gradient(ellipse 40% 40% at 90% 90%, rgba(255,45,85,0.06) 0%, transparent 50%);
+            animation: voidPulse 12s ease-in-out infinite alternate;
             pointer-events: none;
         }
-        @keyframes discoPulse {
+        @keyframes voidPulse {
             0%   { opacity: 0.7; transform: scale(1) rotate(0deg); }
-            33%  { opacity: 1;   transform: scale(1.04) rotate(1deg); }
-            66%  { opacity: 0.8; transform: scale(0.98) rotate(-1deg); }
             100% { opacity: 1;   transform: scale(1.03) rotate(0.5deg); }
         }
 
-        /* ── Disco floor tile overlay ── */
+        /* ── Noise texture overlay ── */
         body::after {
             content: '';
             position: fixed; inset: 0; z-index: 9999;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.02'/%3E%3C/svg%3E");
-            pointer-events: none; opacity: 0.5;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+            pointer-events: none; opacity: 0.6;
         }
 
-        /* ── Disco dance floor grid ── */
+        /* ── Moving grid ── */
         #ui-hub::before, #ui-login::before {
             content: '';
             position: fixed; inset: 0; z-index: 1; pointer-events: none;
             background-image:
-                linear-gradient(rgba(255,0,255,0.04) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,0,255,0.04) 1px, transparent 1px);
-            background-size: 48px 48px;
-            animation: discoGridDrift 8s linear infinite;
+                linear-gradient(rgba(0,229,255,0.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,229,255,0.025) 1px, transparent 1px);
+            background-size: 64px 64px;
+            animation: gridDrift 20s linear infinite;
         }
-        @keyframes discoGridDrift {
-            0%   { transform: translateY(0) translateX(0); }
-            100% { transform: translateY(48px) translateX(24px); }
+        @keyframes gridDrift {
+            0%   { transform: translateY(0); }
+            100% { transform: translateY(64px); }
         }
 
         .hidden { display: none !important; }
@@ -140,7 +132,7 @@
             background: var(--void); overflow: hidden;
         }
 
-        /* Spinning disco holo rings */
+        /* Spinning holo rings */
         #ui-login::after {
             content: '';
             position: absolute;
@@ -149,17 +141,14 @@
             background: conic-gradient(
                 from 0deg,
                 transparent 0deg,
-                rgba(255,0,255,0.10) 40deg,
-                transparent 80deg,
-                rgba(255,215,0,0.08) 120deg,
-                transparent 160deg,
-                rgba(0,255,179,0.07) 200deg,
+                rgba(0,229,255,0.06) 60deg,
+                transparent 120deg,
+                rgba(123,47,255,0.05) 180deg,
                 transparent 240deg,
-                rgba(255,69,0,0.08) 280deg,
-                transparent 320deg,
-                rgba(191,0,255,0.07) 360deg
+                rgba(0,255,148,0.04) 300deg,
+                transparent 360deg
             );
-            animation: holoSpin 10s linear infinite;
+            animation: holoSpin 25s linear infinite;
             pointer-events: none;
         }
         @keyframes holoSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
@@ -168,44 +157,38 @@
             position: relative; z-index: 10;
             width: 440px;
             padding: 56px 52px;
-            background: linear-gradient(160deg, rgba(28,0,46,0.97) 0%, rgba(15,0,24,0.98) 100%);
-            border: 1px solid rgba(255,0,255,0.18);
+            background: linear-gradient(160deg, rgba(13,9,32,0.97) 0%, rgba(3,0,15,0.98) 100%);
+            border: 1px solid rgba(0,229,255,0.12);
             border-radius: 24px;
             text-align: center;
             animation: loginAppear 0.7s cubic-bezier(0.34,1.4,0.64,1) both;
             box-shadow:
-                0 0 0 1px rgba(255,255,255,0.05) inset,
+                0 0 0 1px rgba(255,255,255,0.04) inset,
                 0 60px 120px rgba(0,0,0,0.95),
-                0 0 80px rgba(255,0,255,0.12),
-                0 0 160px rgba(191,0,255,0.08);
+                0 0 80px rgba(0,229,255,0.05),
+                0 0 160px rgba(123,47,255,0.04);
         }
         @keyframes loginAppear {
             from { opacity: 0; transform: translateY(40px) scale(0.94); }
             to   { opacity: 1; transform: none; }
         }
 
-        /* Rainbow disco top border */
+        /* Chromatic aberration top border */
         .login-box::before {
             content: '';
-            position: absolute; top: -1px; left: 15%; right: 15%; height: 2px;
+            position: absolute; top: -1px; left: 20%; right: 20%; height: 1px;
             background: linear-gradient(90deg,
-                rgba(255,0,255,0.9),
-                rgba(255,215,0,0.9) 25%,
-                rgba(0,255,179,0.9) 50%,
-                rgba(255,69,0,0.9) 75%,
-                rgba(255,0,255,0.9));
+                transparent,
+                rgba(255,45,85,0.6) 20%,
+                rgba(0,229,255,0.9) 50%,
+                rgba(0,255,148,0.6) 80%,
+                transparent);
             filter: blur(0.5px);
-            animation: rainbowFlow 3s linear infinite;
-            background-size: 200% 100%;
-        }
-        @keyframes rainbowFlow {
-            0% { background-position: 0% 0%; }
-            100% { background-position: 200% 0%; }
         }
         .login-box::after {
             content: '';
             position: absolute; inset: 0; border-radius: 24px;
-            background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255,0,255,0.06), transparent 60%);
+            background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(0,229,255,0.04), transparent 60%);
             pointer-events: none;
         }
 
@@ -215,29 +198,29 @@
             margin: 0 0 2px;
             letter-spacing: 14px;
             position: relative;
-            /* Disco rainbow glow */
+            /* Chromatic split */
             color: #fff;
             text-shadow:
-                -2px 0 rgba(255,0,255,0.8),
-                2px 0 rgba(0,255,179,0.8),
-                0 0 40px rgba(255,0,255,0.5),
-                0 0 80px rgba(191,0,255,0.2);
-            animation: discoLogoGlow 3s ease-in-out infinite;
+                -2px 0 rgba(255,45,85,0.7),
+                2px 0 rgba(0,229,255,0.7),
+                0 0 40px rgba(0,229,255,0.4),
+                0 0 80px rgba(0,229,255,0.15);
+            animation: chromaFlicker 8s ease-in-out infinite;
         }
-        @keyframes discoLogoGlow {
-            0%,100% {
-                text-shadow: -2px 0 rgba(255,0,255,0.8), 2px 0 rgba(0,255,179,0.8), 0 0 40px rgba(255,0,255,0.5), 0 0 80px rgba(191,0,255,0.2);
+        @keyframes chromaFlicker {
+            0%,95%,100% {
+                text-shadow: -2px 0 rgba(255,45,85,0.7), 2px 0 rgba(0,229,255,0.7), 0 0 40px rgba(0,229,255,0.4), 0 0 80px rgba(0,229,255,0.15);
             }
-            33% {
-                text-shadow: -2px 0 rgba(255,215,0,0.8), 2px 0 rgba(255,69,0,0.8), 0 0 50px rgba(255,215,0,0.6), 0 0 100px rgba(255,69,0,0.2);
+            96% {
+                text-shadow: -4px 0 rgba(255,45,85,0.9), 4px 0 rgba(0,229,255,0.9), 0 0 60px rgba(0,229,255,0.6);
             }
-            66% {
-                text-shadow: -2px 0 rgba(0,255,179,0.8), 2px 0 rgba(255,0,255,0.8), 0 0 40px rgba(0,255,179,0.5), 0 0 80px rgba(191,0,255,0.2);
+            97% {
+                text-shadow: -1px 0 rgba(255,45,85,0.5), 1px 0 rgba(0,229,255,0.5), 0 0 20px rgba(0,229,255,0.2);
             }
         }
 
         .login-sub {
-            color: rgba(255,0,255,0.45);
+            color: rgba(0,229,255,0.3);
             margin: 0 0 32px;
             font-size: 10px; letter-spacing: 6px;
             text-transform: uppercase;
@@ -260,9 +243,9 @@
             transition: all 0.2s;
         }
         .auth-tab-btn.active-tab {
-            background: linear-gradient(135deg, rgba(255,0,255,0.15), rgba(191,0,255,0.10));
+            background: linear-gradient(135deg, rgba(0,229,255,0.12), rgba(123,47,255,0.08));
             color: var(--p);
-            box-shadow: 0 0 0 1px rgba(255,0,255,0.2) inset, 0 0 20px rgba(255,0,255,0.08);
+            box-shadow: 0 0 0 1px rgba(0,229,255,0.15) inset, 0 0 20px rgba(0,229,255,0.06);
         }
         .auth-tab-btn:not(.active-tab):hover { color: rgba(220,240,255,0.5); }
 
@@ -275,30 +258,29 @@
             font-family: var(--font-ui); transition: all 0.2s;
         }
         .login-box input:focus {
-            border-color: rgba(255,0,255,0.4);
-            background: rgba(255,0,255,0.04);
-            box-shadow: 0 0 0 3px rgba(255,0,255,0.08), 0 0 24px rgba(255,0,255,0.05);
+            border-color: rgba(0,229,255,0.35);
+            background: rgba(0,229,255,0.04);
+            box-shadow: 0 0 0 3px rgba(0,229,255,0.07), 0 0 24px rgba(0,229,255,0.04);
         }
         .login-box input::placeholder { color: rgba(220,240,255,0.15); }
 
         .btn-primary {
             width: 100%; padding: 16px; margin-top: 12px;
-            background: linear-gradient(135deg, #FF00FF, #BF00FF, #FF4500);
+            background: linear-gradient(135deg, #00C9FF, #0066FF);
             color: #fff; border-radius: 10px;
             font-size: 13px; letter-spacing: 3px; text-transform: uppercase;
             font-weight: 700; font-family: var(--font-accent);
-            box-shadow: 0 4px 32px rgba(255,0,255,0.5), 0 0 0 1px rgba(255,0,255,0.2) inset;
+            box-shadow: 0 4px 32px rgba(0,102,255,0.4), 0 0 0 1px rgba(0,229,255,0.2) inset;
             position: relative; overflow: hidden;
-            animation: discoBeat 1s ease-in-out infinite;
         }
         .btn-primary::before {
             content: '';
             position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-            transition: left 0.5s;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.6s;
         }
         .btn-primary:hover {
-            box-shadow: 0 6px 48px rgba(255,0,255,0.7), 0 0 0 1px rgba(255,215,0,0.4) inset;
+            box-shadow: 0 6px 48px rgba(0,102,255,0.6), 0 0 0 1px rgba(0,229,255,0.3) inset;
             transform: translateY(-2px) !important;
         }
         .btn-primary:hover::before { left: 140%; }
@@ -321,15 +303,15 @@
         /* Liquid chromatic bottom line */
         .hub-header::after {
             content: '';
-            position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+            position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
             background: linear-gradient(90deg,
-                rgba(255,0,255,0.9) 0%,
-                rgba(255,215,0,0.9) 20%,
-                rgba(0,255,179,0.9) 40%,
-                rgba(255,69,0,0.9) 60%,
-                rgba(191,0,255,0.9) 80%,
-                rgba(255,0,255,0.9) 100%);
-            animation: headerLineFlow 3s linear infinite;
+                transparent 0%,
+                rgba(123,47,255,0.6) 15%,
+                rgba(0,229,255,0.9) 35%,
+                rgba(0,255,148,0.6) 55%,
+                rgba(0,102,255,0.7) 75%,
+                transparent 100%);
+            animation: headerLineFlow 6s linear infinite;
             background-size: 200% 100%;
         }
         @keyframes headerLineFlow {
@@ -343,17 +325,17 @@
             letter-spacing: 8px;
             color: #fff;
             text-shadow:
-                -1px 0 rgba(255,0,255,0.7),
-                1px 0 rgba(0,255,179,0.7),
-                0 0 20px rgba(255,0,255,0.6);
+                -1px 0 rgba(255,45,85,0.6),
+                1px 0 rgba(0,229,255,0.6),
+                0 0 20px rgba(0,229,255,0.5);
             position: relative;
         }
         .header-logo::after {
             content: 'ONLINE';
             position: absolute; bottom: -9px; left: 1px;
             font-size: 7px; letter-spacing: 5px;
-            color: rgba(255,0,255,0.4);
-            -webkit-text-fill-color: rgba(255,0,255,0.4);
+            color: rgba(0,229,255,0.3);
+            -webkit-text-fill-color: rgba(0,229,255,0.3);
             font-family: var(--font-mono); font-weight: 300;
             text-shadow: none;
         }
@@ -373,24 +355,24 @@
         .balance-chip {
             display: flex; align-items: center; gap: 7px;
             background: rgba(0,0,0,0.5);
-            border: 1px solid rgba(255,215,0,0.3);
+            border: 1px solid rgba(0,229,255,0.15);
             padding: 6px 14px; border-radius: 50px;
             font-family: var(--font-mono); font-size: 13px; font-weight: 500;
-            color: var(--w);
-            box-shadow: 0 0 20px rgba(255,215,0,0.1), inset 0 1px 0 rgba(255,215,0,0.15);
+            color: var(--p);
+            box-shadow: 0 0 20px rgba(0,229,255,0.05), inset 0 1px 0 rgba(0,229,255,0.1);
             transition: all 0.2s; position: relative; overflow: hidden;
         }
         .balance-chip::before {
             content: '';
             position: absolute; inset: 0; border-radius: 50px;
-            background: linear-gradient(90deg, transparent, rgba(255,215,0,0.06), transparent);
-            animation: chipShimmer 2s ease-in-out infinite;
+            background: linear-gradient(90deg, transparent, rgba(0,229,255,0.04), transparent);
+            animation: chipShimmer 3s ease-in-out infinite;
         }
         @keyframes chipShimmer {
             0%,100% { transform: translateX(-100%); }
             50%      { transform: translateX(100%); }
         }
-        .balance-chip:hover { border-color: rgba(255,215,0,0.5); box-shadow: 0 0 30px rgba(255,215,0,0.2); }
+        .balance-chip:hover { border-color: rgba(0,229,255,0.35); box-shadow: 0 0 30px rgba(0,229,255,0.12); }
 
         .btn-logout {
             background: rgba(255,45,85,0.05);
@@ -415,21 +397,21 @@
             display: flex; flex-direction: column;
             position: relative; overflow: hidden; overflow-y: auto;
         }
-        /* Disco glow strip */
+        /* Ambient glow strip */
         .sidebar::before {
             content: '';
             position: absolute; top: 0; right: 0; width: 1px; height: 100%;
             background: linear-gradient(180deg,
                 transparent 0%,
-                rgba(255,0,255,0.5) 20%,
-                rgba(255,215,0,0.4) 50%,
-                rgba(0,255,179,0.3) 80%,
+                rgba(123,47,255,0.4) 20%,
+                rgba(0,229,255,0.3) 50%,
+                rgba(0,255,148,0.2) 80%,
                 transparent 100%);
         }
         .sidebar::after {
             content: '';
             position: absolute; bottom: 0; left: 0; right: 0; height: 240px;
-            background: radial-gradient(ellipse at 50% 100%, rgba(255,0,255,0.06), transparent 70%);
+            background: radial-gradient(ellipse at 50% 100%, rgba(123,47,255,0.05), transparent 70%);
             pointer-events: none;
         }
 
@@ -13449,6 +13431,132 @@ window.onload = () => app.init();
         </button>
     </div>
 </div>
+
+<!-- 🎆 ФЕЙЕРВЕРКИ -->
+<canvas id="fw" style="position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:99999;"></canvas>
+<script>
+(function(){
+    const cv = document.getElementById('fw');
+    const cx = cv.getContext('2d');
+    let W, H;
+
+    function resize(){ W = cv.width = window.innerWidth; H = cv.height = window.innerHeight; }
+    resize();
+    window.addEventListener('resize', resize);
+
+    const COLORS = [
+        [255,0,255],[255,105,180],[255,215,0],[255,69,0],
+        [0,255,180],[191,0,255],[0,200,255],[255,255,100],
+        [255,50,50],[100,255,100],[255,160,0],[200,100,255]
+    ];
+    function rand(a,b){ return a+Math.random()*(b-a); }
+    function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
+    function cs(c,a){ return `rgba(${c[0]},${c[1]},${c[2]},${a})`; }
+
+    const particles = [], rockets = [];
+
+    class P {
+        constructor(x,y,c){
+            this.x=x; this.y=y; this.c=c;
+            const spd = rand(2,12);
+            const ang = rand(0,Math.PI*2);
+            this.vx=Math.cos(ang)*spd; this.vy=Math.sin(ang)*spd;
+            this.life=1; this.decay=rand(0.008,0.018);
+            this.size=rand(2,4.5); this.g=rand(0.05,0.1);
+            this.trail=[]; this.twinkle=Math.random()>0.4;
+        }
+        update(){
+            this.trail.push({x:this.x,y:this.y});
+            if(this.trail.length>12) this.trail.shift();
+            this.x+=this.vx; this.y+=this.vy;
+            this.vy+=this.g; this.vx*=0.985;
+            this.life-=this.decay;
+        }
+        draw(){
+            if(this.life<=0) return;
+            for(let i=0;i<this.trail.length;i++){
+                const t=this.trail[i];
+                cx.beginPath(); cx.arc(t.x,t.y,this.size*0.5,0,Math.PI*2);
+                cx.fillStyle=cs(this.c,(i/this.trail.length)*this.life*0.5);
+                cx.fill();
+            }
+            const a=this.life*(this.twinkle?(0.7+Math.sin(Date.now()*0.025)*0.3):1);
+            cx.beginPath(); cx.arc(this.x,this.y,this.size,0,Math.PI*2);
+            cx.fillStyle=cs(this.c,a);
+            cx.shadowBlur=18; cx.shadowColor=cs(this.c,1); cx.fill();
+            cx.beginPath(); cx.arc(this.x,this.y,this.size*0.35,0,Math.PI*2);
+            cx.fillStyle=`rgba(255,255,255,${a*0.9})`; cx.fill();
+            cx.shadowBlur=0;
+        }
+    }
+
+    class Rocket {
+        constructor(){
+            this.x=rand(W*0.1,W*0.9); this.y=H+10;
+            this.tx=rand(W*0.08,W*0.92); this.ty=rand(H*0.35,H*0.75);
+            const dx=this.tx-this.x, dy=this.ty-this.y;
+            const d=Math.sqrt(dx*dx+dy*dy), spd=rand(15,22);
+            this.vx=(dx/d)*spd; this.vy=(dy/d)*spd;
+            this.c=pick(COLORS); this.trail=[]; this.done=false;
+        }
+        update(){
+            this.trail.push({x:this.x,y:this.y});
+            if(this.trail.length>14) this.trail.shift();
+            this.x+=this.vx; this.y+=this.vy; this.vy+=0.15;
+            if(this.vy>=0||Math.hypot(this.x-this.tx,this.y-this.ty)<18){
+                this.explode(); this.done=true;
+            }
+        }
+        explode(){
+            const n=Math.floor(rand(150,230));
+            for(let i=0;i<n;i++) particles.push(new P(this.x,this.y,this.c));
+            const c2=pick(COLORS);
+            for(let i=0;i<n*0.35;i++) particles.push(new P(this.x,this.y,c2));
+            for(let i=0;i<25;i++) particles.push(new P(this.x,this.y,[255,255,255]));
+            // вспышка
+            const g=cx.createRadialGradient(this.x,this.y,0,this.x,this.y,80);
+            g.addColorStop(0,cs(this.c,0.9)); g.addColorStop(1,cs(this.c,0));
+            cx.beginPath(); cx.arc(this.x,this.y,80,0,Math.PI*2);
+            cx.fillStyle=g; cx.fill();
+        }
+        draw(){
+            for(let i=0;i<this.trail.length;i++){
+                const t=this.trail[i], a=(i/this.trail.length)*0.8;
+                cx.beginPath(); cx.arc(t.x,t.y,2.5,0,Math.PI*2);
+                cx.fillStyle=cs(this.c,a); cx.fill();
+            }
+            cx.beginPath(); cx.arc(this.x,this.y,3,0,Math.PI*2);
+            cx.fillStyle='#fff'; cx.shadowBlur=14;
+            cx.shadowColor=cs(this.c,1); cx.fill(); cx.shadowBlur=0;
+        }
+    }
+
+    function launch(){
+        rockets.push(new Rocket());
+        if(Math.random()>0.7) setTimeout(()=>rockets.push(new Rocket()),rand(200,500));
+        setTimeout(launch, rand(1500,3000));
+    }
+    setTimeout(launch,800);
+
+    function loop(){
+        requestAnimationFrame(loop);
+        // Прозрачная очистка — не заливаем чёрным!
+        cx.clearRect(0,0,W,H);
+        for(let i=rockets.length-1;i>=0;i--){
+            const r=rockets[i];
+            if(!r.done) r.update();
+            if(r.done){ rockets.splice(i,1); continue; }
+            r.draw();
+        }
+        for(let i=particles.length-1;i>=0;i--){
+            const p=particles[i]; p.update();
+            if(p.life<=0){ particles.splice(i,1); continue; }
+            p.draw();
+        }
+    }
+    loop();
+})();
+</script>
 
 </body>
 </html>
