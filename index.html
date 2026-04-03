@@ -847,7 +847,7 @@
         @keyframes tabFadeIn { from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none} }
 
         [id^="tab-"] { animation: tabFadeIn 0.2s ease; }
-        #tab-games,#tab-avatar,#tab-shop,#tab-friends,#tab-studio,#tab-quests,#tab-roulette,#tab-credits,#tab-gifts { animation: fadeInUp 0.3s ease both; }
+        #tab-games,#tab-avatar,#tab-shop,#tab-friends,#tab-studio,#tab-quests,#tab-roulette,#tab-gifts { animation: fadeInUp 0.3s ease both; }
 
         .grid .card { animation: fadeInUp 0.4s ease both; }
         .grid .card:nth-child(1){animation-delay:.02s}.grid .card:nth-child(2){animation-delay:.04s}.grid .card:nth-child(3){animation-delay:.06s}.grid .card:nth-child(4){animation-delay:.08s}.grid .card:nth-child(5){animation-delay:.10s}.grid .card:nth-child(6){animation-delay:.12s}.grid .card:nth-child(7){animation-delay:.14s}.grid .card:nth-child(8){animation-delay:.16s}.grid .card:nth-child(9){animation-delay:.18s}
@@ -1005,7 +1005,6 @@
             <div id="nav-group-items">
                 <div class="nav-item active" id="nav-games"      onclick="app.switchTab('games')">      <div class="nav-icon"><i class="fas fa-gamepad"></i></div> Миры</div>
                 <div class="nav-item"        id="nav-mine"       onclick="app.switchTab('mine')">       <div class="nav-icon"><i class="fas fa-hammer"></i></div> Шахта</div>
-                <div class="nav-item"        id="nav-work"       onclick="app.switchTab('work')">       <div class="nav-icon"><i class="fas fa-bolt"></i></div> Работа</div>
                 <div class="nav-item"        id="nav-avatar"      onclick="app.switchTab('avatar')">     <div class="nav-icon"><i class="fas fa-user-astronaut"></i></div> Аватар</div>
                 <div class="nav-item"        id="nav-shop"        onclick="app.switchTab('shop')">       <div class="nav-icon"><i class="fas fa-store"></i></div> Магазин</div>
                 <div class="nav-item"        id="nav-friends"     onclick="app.switchTab('friends')">    <div class="nav-icon"><i class="fas fa-users"></i></div> Друзья <span class="nav-badge hidden" id="fr-badge">0</span></div>
@@ -1014,16 +1013,13 @@
                 <div class="nav-item"        id="nav-promo"       onclick="app.switchTab('promo')">      <div class="nav-icon"><i class="fas fa-ticket-alt"></i></div> Промокоды</div>
                 <div class="nav-item"        id="nav-daily"       onclick="app.switchTab('daily')">      <div class="nav-icon"><i class="fas fa-calendar-check"></i></div> Награда <span class="nav-badge hidden" id="daily-badge">!</span></div>
                 <div class="nav-item"        id="nav-roulette"    onclick="app.switchTab('roulette')">   <div class="nav-icon"><i class="fas fa-dice"></i></div> Рулетка</div>
-                <div class="nav-item"        id="nav-credits"     onclick="app.switchTab('credits')">    <div class="nav-icon"><i class="fas fa-coins"></i></div> Кредиты</div>
                 <div class="nav-item"        id="nav-exchange"    onclick="app.switchTab('exchange')">   <div class="nav-icon"><i class="fas fa-exchange-alt"></i></div> Обмен</div>
                 <div class="nav-item"        id="nav-gifts"       onclick="app.switchTab('gifts')">      <div class="nav-icon"><i class="fas fa-gift"></i></div> Подарки</div>
                 <div class="nav-item"        id="nav-nft"         onclick="app.switchTab('nft')">        <div class="nav-icon"><i class="fas fa-gem"></i></div> НФТ Подарки</div>
                 <div class="nav-item"        id="nav-stats"       onclick="app.switchTab('stats')">      <div class="nav-icon"><i class="fas fa-chart-line"></i></div> Статистика</div>
                 <div class="nav-item"        id="nav-leaderboard" onclick="app.switchTab('leaderboard')"><div class="nav-icon"><i class="fas fa-trophy"></i></div> Топ</div>
                 <div class="nav-item hidden" id="nav-admin"       onclick="app.switchTab('admin')">      <div class="nav-icon"><i class="fas fa-shield-alt"></i></div> Баны</div>
-                <div class="nav-item"        id="nav-help"        onclick="app.switchTab('help')">       <div class="nav-icon"><i class="fas fa-question-circle"></i></div> Помощь</div>
                 <div class="nav-item"        id="nav-coding"      onclick="app.switchTab('coding')">     <div class="nav-icon"><i class="fas fa-code"></i></div> Кодинг</div>
-                <div class="nav-item"        id="nav-movies"      onclick="app.switchTab('movies')">     <div class="nav-icon"><i class="fas fa-film"></i></div> Кино</div>
                 <div class="nav-item"        id="nav-contests"    onclick="app.switchTab('contests')">   <div class="nav-icon"><i class="fas fa-trophy"></i></div> Конкурсы <span class="nav-badge hidden" id="contests-badge">!</span></div>
                 <div class="nav-item"        id="nav-aihelper"    onclick="app.switchTab('aihelper')">   <div class="nav-icon"><i class="fas fa-robot"></i></div> ИИ Хелпер <span class="nav-badge hidden" id="ai-badge">!</span></div>
                 <div class="nav-item"        id="nav-devmail"     onclick="app.switchTab('devmail')">    <div class="nav-icon"><i class="fas fa-envelope"></i></div> Почта <span class="nav-badge hidden" id="devmail-badge">0</span></div>
@@ -1043,70 +1039,6 @@
 
 
             <!-- ══════════════════ TAB: HELP ══════════════════ -->
-            <div id="tab-help" class="hidden">
-                <div class="section-title">❓ Помощь — все вкладки</div>
-                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;max-width:900px;">
-
-                    <div style="background:rgba(255,149,0,0.05);border:1px solid rgba(255,149,0,0.12);border-radius:16px;padding:20px 22px;">
-                        <div style="font-family:var(--font-head);font-size:12px;color:#FF9500;margin-bottom:10px;letter-spacing:1px;">🎮 МИРЫ</div>
-                        <div style="color:rgba(255,255,255,0.72);font-size:13.5px;line-height:1.85;font-family:var(--font-body);">Выбери мир и нажми чтобы войти. Управление: <b style="color:#FF9500">WASD</b> — движение, <b style="color:#FF9500">Пробел</b> — прыжок, <b style="color:#FF9500">мышь</b> — камера. На мобиле — джойстик и кнопка прыжка. В каждом мире свои цитрусы и секреты.</div>
-                    </div>
-                    <div style="background:rgba(255,149,0,0.05);border:1px solid rgba(255,149,0,0.12);border-radius:16px;padding:20px 22px;">
-                        <div style="font-family:var(--font-head);font-size:12px;color:#FF4444;margin-bottom:10px;letter-spacing:1px;">🔫 АРЕНА ПВП</div>
-                        <div style="color:rgba(255,255,255,0.72);font-size:13.5px;line-height:1.85;font-family:var(--font-body);">Заходи в Арену ПВП и стреляй по мишеням! <b style="color:#ff6666">ЛКМ</b> — выстрел, прицел в центре экрана. У тебя 30 патронов, через 5 сек перезарядка. Попадание в центр даёт 50 очков. На мобиле — кнопка 🔫 на экране.</div>
-                    </div>
-                    <div style="background:rgba(255,149,0,0.05);border:1px solid rgba(255,149,0,0.12);border-radius:16px;padding:20px 22px;">
-                        <div style="font-family:var(--font-head);font-size:12px;color:#FF9500;margin-bottom:10px;letter-spacing:1px;">👤 АВАТАР</div>
-                        <div style="color:rgba(255,255,255,0.72);font-size:13.5px;line-height:1.85;font-family:var(--font-body);">Настрой внешность персонажа: цвет тела, одежда, аксессуары. Вещи покупаются в <b style="color:#FF9500">Магазине</b> за цитрусы 🍊. Аватар виден другим игрокам в мирах.</div>
-                    </div>
-                    <div style="background:rgba(255,149,0,0.05);border:1px solid rgba(255,149,0,0.12);border-radius:16px;padding:20px 22px;">
-                        <div style="font-family:var(--font-head);font-size:12px;color:#FF9500;margin-bottom:10px;letter-spacing:1px;">🛒 МАГАЗИН</div>
-                        <div style="color:rgba(255,255,255,0.72);font-size:13.5px;line-height:1.85;font-family:var(--font-body);">Покупай шляпы, очки, крылья, мечи, плащи и многое другое. Каждая вещь стоит цитрусы 🍊. Купленное автоматически попадает в инвентарь аватара.</div>
-                    </div>
-                    <div style="background:rgba(255,149,0,0.05);border:1px solid rgba(255,149,0,0.12);border-radius:16px;padding:20px 22px;">
-                        <div style="font-family:var(--font-head);font-size:12px;color:#38BDF8;margin-bottom:10px;letter-spacing:1px;">👥 ДРУЗЬЯ</div>
-                        <div style="color:rgba(255,255,255,0.72);font-size:13.5px;line-height:1.85;font-family:var(--font-body);">Добавляй друзей по тегу — он выглядит как <b style="color:#38BDF8">Ник#1234</b>. Нажми 💬 рядом с другом чтобы написать ему лично. Можно видеть онлайн-статус и в каком мире сидит друг — нажми Войти чтобы попасть к нему.</div>
-                    </div>
-                    <div style="background:rgba(255,149,0,0.05);border:1px solid rgba(255,149,0,0.12);border-radius:16px;padding:20px 22px;">
-                        <div style="font-family:var(--font-head);font-size:12px;color:#38BDF8;margin-bottom:10px;letter-spacing:1px;">💬 ГЛОБАЛЬНЫЙ ЧАТ</div>
-                        <div style="color:rgba(255,255,255,0.72);font-size:13.5px;line-height:1.85;font-family:var(--font-body);">Общий чат для всех игроков онлайн. Пиши сообщения, знакомься с другими. Обновляется каждые 4 секунды автоматически. Сообщения видят все кто онлайн прямо сейчас.</div>
-                    </div>
-
-                    <div style="background:rgba(255,149,0,0.05);border:1px solid rgba(255,149,0,0.12);border-radius:16px;padding:20px 22px;">
-                        <div style="font-family:var(--font-head);font-size:12px;color:#4ADE80;margin-bottom:10px;letter-spacing:1px;">🎰 РУЛЕТКА</div>
-                        <div style="color:rgba(255,255,255,0.72);font-size:13.5px;line-height:1.85;font-family:var(--font-body);">Поставь цитрусы и крути рулетку — можно умножить цитрусы в несколько раз! Чем больше ставишь — тем выше риск и награда. Используй с умом.</div>
-                    </div>
-                    <div style="background:rgba(255,149,0,0.05);border:1px solid rgba(255,149,0,0.12);border-radius:16px;padding:20px 22px;">
-                        <div style="font-family:var(--font-head);font-size:12px;color:#FF9500;margin-bottom:10px;letter-spacing:1px;">💰 КРЕДИТЫ</div>
-                        <div style="color:rgba(255,255,255,0.72);font-size:13.5px;line-height:1.85;font-family:var(--font-body);">Одолжи цитрусы у другого игрока или дай в долг сам. Удобно если цитрусы кончились а хочется купить в магазине. Договаривайся с друзьями!</div>
-                    </div>
-                    <div style="background:rgba(255,149,0,0.05);border:1px solid rgba(255,149,0,0.12);border-radius:16px;padding:20px 22px;">
-                        <div style="font-family:var(--font-head);font-size:12px;color:#F472B6;margin-bottom:10px;letter-spacing:1px;">🎁 ПОДАРКИ и НФТ</div>
-                        <div style="color:rgba(255,255,255,0.72);font-size:13.5px;line-height:1.85;font-family:var(--font-body);">Дари предметы и НФТ-подарки друзьям просто так или за заслуги. НФТ можно продавать и покупать между игроками. Редкие НФТ стоят дорого — следи за рынком!</div>
-                    </div>
-                    <div style="background:rgba(255,149,0,0.05);border:1px solid rgba(255,149,0,0.12);border-radius:16px;padding:20px 22px;">
-                        <div style="font-family:var(--font-head);font-size:12px;color:#4ADE80;margin-bottom:10px;letter-spacing:1px;">🎯 ЗАДАНИЯ</div>
-                        <div style="color:rgba(255,255,255,0.72);font-size:13.5px;line-height:1.85;font-family:var(--font-body);">Каждый день появляются новые задания — выполняй и получай бонусные цитрусы 🍊. Задания разные: прыгать, посещать миры, играть с друзьями. Всё выполнено — жди следующего дня!</div>
-                    </div>
-                    <div style="background:rgba(255,149,0,0.05);border:1px solid rgba(255,149,0,0.12);border-radius:16px;padding:20px 22px;">
-                        <div style="font-family:var(--font-head);font-size:12px;color:#FFD700;margin-bottom:10px;letter-spacing:1px;">🏆 ТОП ИГРОКОВ</div>
-                        <div style="color:rgba(255,255,255,0.72);font-size:13.5px;line-height:1.85;font-family:var(--font-body);">Таблица лучших по балансу монет. Топ-3 — на пьедестале. Копи цитрусы и попади в лидеры!</div>
-                    </div>
-                    <div style="background:rgba(255,149,0,0.05);border:1px solid rgba(255,149,0,0.12);border-radius:16px;padding:20px 22px;">
-                        <div style="font-family:var(--font-head);font-size:12px;color:#FF9500;margin-bottom:10px;letter-spacing:1px;">🎨 СТУДИЯ</div>
-                        <div style="color:rgba(255,255,255,0.72);font-size:13.5px;line-height:1.85;font-family:var(--font-body);">Создавай собственные миры из блоков. Строй что хочешь — платформы, лабиринты, арены. Готовый мир появится в списке миров игроков и другие смогут зайти.</div>
-                    </div>
-                    <div style="background:rgba(255,149,0,0.05);border:1px solid rgba(255,149,0,0.12);border-radius:16px;padding:20px 22px;">
-                        <div style="font-family:var(--font-head);font-size:12px;color:#38BDF8;margin-bottom:10px;letter-spacing:1px;">📊 СТАТИСТИКА</div>
-                        <div style="color:rgba(255,255,255,0.72);font-size:13.5px;line-height:1.85;font-family:var(--font-body);">Общая статистика игры: сколько зарегистрировалось, сессий, кто онлайн. Графики активности и популярности миров. Интересно посмотреть как растёт игра!</div>
-                    </div>
-                    <div style="background:rgba(0,229,255,0.04);border:1px solid rgba(0,229,255,0.1);border-radius:16px;padding:18px 22px;text-align:center;grid-column:1/-1;">
-                        <div style="color:rgba(0,229,255,0.5);font-size:11px;font-family:var(--font-head);letter-spacing:2px;margin-bottom:6px;">CITRUS ONLINE</div>
-                        <div style="color:rgba(255,255,255,0.25);font-size:12px;font-family:var(--font-body);">Зови друзей, собирай цитрусы, становись легендой 🍊</div>
-                    </div>
-                </div>
-            </div>
-
             <!-- ══════════════════ TAB: AI HELPER ══════════════════ -->
             <!-- ══════════════════ TAB: AI HELPER (NEW DESIGN) ══════════════════ -->
             <!-- ══════════════════ TAB: CODING ══════════════════ -->
@@ -1147,52 +1079,6 @@
             </div>
 
             <!-- ══════════════════ TAB: КИНО ══════════════════ -->
-            <div id="tab-movies" class="hidden">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
-                    <div class="section-title" style="margin:0;">🎬 Кино</div>
-                    <div style="display:flex;gap:8px;align-items:center;">
-                        <input id="movies-search" class="styled-input" placeholder="🔍 Поиск..." style="width:200px;padding:7px 12px;font-size:12px;" oninput="app._moviesSearch(this.value)">
-                        <div id="movies-add-btn" class="hidden">
-                            <button onclick="app._moviesShowAdd()" style="background:linear-gradient(135deg,#FF9800,#E65100);border:none;border-radius:10px;color:#fff;font-weight:700;font-family:var(--font-body);font-size:13px;cursor:pointer;padding:9px 16px;">+ Добавить</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Форма добавления (только для разраба) -->
-                <div id="movies-add-form" class="panel-box" style="display:none;margin-bottom:20px;">
-                    <div class="panel-box-title">➕ Добавить видео</div>
-                    <input id="movies-yturl" class="styled-input" placeholder="YouTube ссылка (https://youtu.be/...)" style="margin-bottom:8px;">
-                    <input id="movies-title" class="styled-input" placeholder="Название" style="margin-bottom:8px;">
-                    <input id="movies-desc" class="styled-input" placeholder="Описание" style="margin-bottom:8px;">
-                    <div style="display:flex;gap:8px;margin-bottom:8px;">
-                        <select id="movies-genre" class="styled-input" style="flex:1;">
-                            <option value="cartoon">🎨 Мультфильм</option>
-                            <option value="movie">🎬 Фильм</option>
-                            <option value="series">📺 Сериал</option>
-                            <option value="citrus">🍊 О цитрусах</option>
-                            <option value="other">🎭 Другое</option>
-                        </select>
-                    </div>
-                    <div style="display:flex;gap:8px;">
-                        <button onclick="app._moviesAdd()" style="flex:1;padding:10px;background:linear-gradient(135deg,#FF9800,#E65100);border:none;border-radius:10px;color:#fff;font-family:var(--font-head);font-size:14px;cursor:pointer;">Добавить</button>
-                        <button onclick="document.getElementById('movies-add-form').style.display='none'" style="padding:10px 16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:rgba(255,255,255,0.4);font-size:13px;cursor:pointer;">Отмена</button>
-                    </div>
-                </div>
-
-                <!-- Фильтры жанров -->
-                <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;" id="movies-genre-filters">
-                    <button onclick="app._moviesFilter('')" class="movies-filter-btn active" data-genre="" style="padding:6px 14px;border-radius:20px;border:1px solid rgba(255,149,0,0.4);background:rgba(255,149,0,0.15);color:#FF9500;font-family:var(--font-mono);font-size:11px;cursor:pointer;">Все</button>
-                    <button onclick="app._moviesFilter('cartoon')" class="movies-filter-btn" data-genre="cartoon" style="padding:6px 14px;border-radius:20px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:rgba(255,255,255,0.4);font-family:var(--font-mono);font-size:11px;cursor:pointer;">🎨 Мультфильмы</button>
-                    <button onclick="app._moviesFilter('movie')" class="movies-filter-btn" data-genre="movie" style="padding:6px 14px;border-radius:20px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:rgba(255,255,255,0.4);font-family:var(--font-mono);font-size:11px;cursor:pointer;">🎬 Фильмы</button>
-                    <button onclick="app._moviesFilter('series')" class="movies-filter-btn" data-genre="series" style="padding:6px 14px;border-radius:20px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:rgba(255,255,255,0.4);font-family:var(--font-mono);font-size:11px;cursor:pointer;">📺 Сериалы</button>
-                    <button onclick="app._moviesFilter('citrus')" class="movies-filter-btn" data-genre="citrus" style="padding:6px 14px;border-radius:20px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:rgba(255,255,255,0.4);font-family:var(--font-mono);font-size:11px;cursor:pointer;">🍊 О цитрусах</button>
-                </div>
-
-                <!-- Сетка видео -->
-                <div id="movies-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;"></div>
-                <div id="movies-empty" style="display:none;text-align:center;padding:60px;color:rgba(255,255,255,0.2);font-size:14px;">Видео пока нет 🎬</div>
-            </div>
-
             <!-- ══════════════════ TAB: КОНКУРСЫ ══════════════════ -->
             <div id="tab-contests" class="hidden">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
@@ -1649,39 +1535,6 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
             </div>
 
             <!-- ══════════════════ TAB: CREDITS ══════════════════ -->
-            <div id="tab-credits" class="hidden">
-                <div class="section-title">💳 Кредиты</div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
-
-                    <div id="my-credit-section" class="panel-box">
-                        <div class="panel-box-title" style="color:var(--c-main);">📤 Выставить кредит</div>
-                        <div style="display:flex;flex-direction:column;gap:10px;">
-                            <input id="credit-amount" type="number" min="1000" max="100000" placeholder="Сумма (1000–100000 🍊)" class="styled-input">
-                            <select id="credit-days" class="styled-select">
-                                <option value="10">10 минут</option>
-                                <option value="20">20 минут</option>
-                                <option value="30">30 минут</option>
-                                <option value="45">45 минут</option>
-                                <option value="60">1 час</option>
-                            </select>
-                            <button onclick="app.postCredit()" class="btn-orange-full">Выставить кредит</button>
-                        </div>
-                        <div id="my-active-credit" style="margin-top:12px;"></div>
-                    </div>
-
-                    <div id="my-debt-section" class="panel-box" style="display:none;border-color:rgba(255,68,68,0.2);">
-                        <div class="panel-box-title" style="color:#FF4444;">⚠️ Мой долг</div>
-                        <div id="my-debt-info" style="color:rgba(255,255,255,0.5);font-size:13px;line-height:1.6;"></div>
-                        <button onclick="app.repayCredit()" style="margin-top:14px;padding:11px 24px;background:linear-gradient(135deg,#4CAF50,#2E7D32);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font-body);">💸 Вернуть долг</button>
-                    </div>
-                </div>
-
-                <div class="section-title">📋 Доступные кредиты</div>
-                <div id="credits-list" style="display:flex;flex-direction:column;gap:8px;">
-                    <div style="color:rgba(255,255,255,0.2);font-size:13px;text-align:center;padding:20px;">Загрузка...</div>
-                </div>
-            </div>
-
             <!-- ══════════════════ TAB: GIFTS ══════════════════ -->
             <!-- ══════════════════ TAB: ОБМЕН ══════════════════ -->
             <div id="tab-exchange" class="hidden">
@@ -1930,62 +1783,6 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
                         <input id="stats-search" class="styled-input" placeholder="Поиск по нику..." style="width:200px;padding:6px 12px;font-size:12px;" oninput="app.filterStatsAccounts()">
                     </div>
                     <div id="stats-accounts" style="display:flex;flex-direction:column;gap:6px;max-height:320px;overflow-y:auto;"></div>
-                </div>
-            </div>
-
-            <div id="tab-work" class="hidden">
-                <div style="max-width:560px;margin:0 auto;">
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-                        <div class="section-title" style="margin:0;">⚡ Работа</div>
-                        <div id="work-reward-label" style="font-size:12px;color:rgba(255,255,255,0.3);font-family:var(--font-mono);">+100 🍊 за цикл</div>
-                    </div>
-
-                    <!-- Выбор генератора -->
-                    <div id="work-gen-select" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;"></div>
-
-                    <!-- Шапка генератора -->
-                    <div style="background:linear-gradient(135deg,rgba(20,20,35,0.9),rgba(10,10,20,0.95));border:1px solid rgba(255,149,0,0.15);border-radius:20px;padding:20px;margin-bottom:16px;display:flex;align-items:center;gap:16px;">
-                        <div id="work-gen-icon" style="font-size:44px;filter:grayscale(1);transition:filter 1s;">⚡</div>
-                        <div style="flex:1;">
-                            <div id="work-gen-name" style="font-family:var(--font-head);font-size:16px;letter-spacing:2px;color:rgba(255,255,255,0.9);">ГЕНЕРАТОР #7</div>
-                            <div id="work-gen-status" style="font-size:12px;font-family:var(--font-mono);color:rgba(255,100,100,0.8);margin-top:3px;">● НЕИСПРАВЕН</div>
-                        </div>
-                        <div style="text-align:right;">
-                            <div style="font-size:10px;color:rgba(255,255,255,0.2);font-family:var(--font-mono);">ВЫПОЛНЕНО</div>
-                            <div id="work-cycle-count" style="font-family:var(--font-head);font-size:22px;color:#FF9500;">0</div>
-                        </div>
-                    </div>
-
-                    <!-- Список шагов -->
-                    <div id="work-steps-panel" style="display:none;margin-bottom:16px;"></div>
-
-                    <!-- Вопрос -->
-                    <div id="work-question-panel" style="display:none;background:rgba(0,200,100,0.05);border:1px solid rgba(0,200,100,0.2);border-radius:20px;padding:20px;margin-bottom:16px;">
-                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-                            <div style="font-family:var(--font-head);font-size:13px;letter-spacing:2px;color:#39E08A;">❓ ВОПРОС ПО ШАГУ</div>
-                            <div id="work-q-timer" style="font-family:var(--font-head);font-size:20px;color:#FF9500;"></div>
-                        </div>
-                        <div id="work-q-text" style="font-size:14px;color:rgba(255,255,255,0.8);line-height:1.6;margin-bottom:14px;"></div>
-                        <div id="work-q-answers" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div>
-                    </div>
-
-                    <!-- Результат -->
-                    <div id="work-result-panel" style="display:none;border-radius:20px;padding:22px;text-align:center;margin-bottom:16px;">
-                        <div id="work-result-icon" style="font-size:48px;margin-bottom:8px;"></div>
-                        <div id="work-result-title" style="font-family:var(--font-head);font-size:22px;letter-spacing:3px;margin-bottom:6px;"></div>
-                        <div id="work-result-desc" style="font-size:13px;color:rgba(255,255,255,0.4);font-family:var(--font-mono);"></div>
-                    </div>
-
-                    <!-- Главная кнопка -->
-                    <button id="work-main-btn" onclick="app._workAction()" style="width:100%;padding:14px;background:linear-gradient(135deg,#FF9500,#CC5500);color:#000;border:none;border-radius:12px;font-family:var(--font-head);font-size:18px;letter-spacing:3px;cursor:pointer;transition:all 0.2s;margin-bottom:16px;">
-                        🔧 ПОЧИНИТЬ ГЕНЕРАТОР
-                    </button>
-
-                    <!-- История -->
-                    <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);border-radius:14px;padding:16px;">
-                        <div style="font-size:10px;color:rgba(255,255,255,0.2);font-family:var(--font-mono);margin-bottom:10px;">ИСТОРИЯ</div>
-                        <div id="work-history" style="font-size:12px;color:rgba(255,255,255,0.3);font-family:var(--font-mono);line-height:2;"><div style="color:rgba(255,255,255,0.1);">— пусто —</div></div>
-                    </div>
                 </div>
             </div>
 
@@ -3895,11 +3692,7 @@ const app = {
             title: '⛏️ ШАХТА',
             desc: 'Здесь зарабатываются первые — <b style="color:#FF9500">🍊 Цитрусы</b>.<br><br>Кликай по рудам которые появляются на экране, наполняй мешок и нажимай <b style="color:#FF9500">«Продать всё»</b>.<br><br>Есть обычная руда, серебро, золото и редкие кристаллы — чем редче, тем дороже!',
         },
-        {
-            target: 'nav-work',
-            title: '⚡ РАБОТА',
-            desc: 'Выполняй простые задания прямо в хабе и получай <b style="color:#FF9500">🍊 Цитрусы</b>.<br><br>Задания обновляются — можно делать их снова. Отличный способ заработать пока ждёшь друзей!',
-        },
+
         {
             target: 'nav-shop',
             title: '🛒 МАГАЗИН',
@@ -6227,7 +6020,7 @@ const app = {
 
         switchTab(id){
         this._sfx('nav');
-        ['games','mine','work','avatar','shop','friends','studio','quests','promo','daily','roulette','credits','gifts','nft','stats','leaderboard','admin','help','cases','aihelper','devmail','exchange','coding','movies','contests'].forEach(t=>{
+        ['games','mine','avatar','shop','friends','studio','quests','promo','daily','roulette','gifts','nft','stats','leaderboard','admin','cases','aihelper','devmail','exchange','coding','contests'].forEach(t=>{
             document.getElementById('tab-'+t)?.classList.add('hidden');
             document.getElementById('nav-'+t)?.classList.remove('active');
         });
@@ -12826,6 +12619,9 @@ const app = {
         const timeLeft = c.endsAt - now;
         const isJoined = (c.participants||[]).some(p=>String(p.id)===String(this.userId));
         const isAdmin = this.canBan(this.username);
+        const winner = c.winner || null;
+        const iAmWinner = winner && String(winner.id)===String(this.userId);
+        const iAlreadyClaimed = c.prizeClaimed && c.prizeClaimed.includes(String(this.userId));
 
         // Таймер
         let timerStr = '';
@@ -12839,19 +12635,31 @@ const app = {
         }
 
         // Топ участников
-        const parts = (c.participants||[]).sort((a,b)=>(b.score||0)-(a.score||0)).slice(0,5);
+        const parts = (c.participants||[]).slice().sort((a,b)=>(b.score||0)-(a.score||0)).slice(0,5);
         const topHtml = parts.length ? parts.map((p,i)=>{
             const medals = ['🥇','🥈','🥉'];
             const isMe = String(p.id)===String(this.userId);
-            return `<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:${isMe?'rgba(0,229,255,0.05)':'rgba(255,255,255,0.02)'};border-radius:8px;margin-bottom:4px;">
+            const isWin = winner && String(p.id)===String(winner.id) && !isActive;
+            return `<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:${isWin?'rgba(255,214,0,0.08)':isMe?'rgba(0,229,255,0.05)':'rgba(255,255,255,0.02)'};border-radius:8px;margin-bottom:4px;${isWin?'border:1px solid rgba(255,214,0,0.2);':''}">
                 <span style="width:20px;text-align:center;">${medals[i]||'#'+(i+1)}</span>
-                <span style="flex:1;font-size:12px;color:rgba(255,255,255,${isMe?'0.95':'0.6'});font-family:var(--font-body);">${p.name}${isMe?' (ты)':''}</span>
-                <span style="font-family:var(--font-mono);font-size:12px;color:#FFD600;">${(p.score||0).toLocaleString()}</span>
+                <span style="flex:1;font-size:12px;color:rgba(255,255,255,${isMe?'0.95':'0.6'});font-family:var(--font-body);">${p.name}${isMe?' (ты)':''}${isWin?' 🏆':''}</span>
+                <span style="font-family:var(--font-mono);font-size:12px;color:${isWin?'#FFD600':'rgba(255,255,255,0.4)'};">${(p.score||0).toLocaleString()}</span>
             </div>`;
         }).join('') : `<div style="color:rgba(255,255,255,0.2);font-size:12px;text-align:center;padding:12px;">Участников пока нет</div>`;
 
-        return `<div class="panel-box" style="margin-bottom:16px;border-color:${isActive?'rgba(255,214,0,0.15)':'rgba(255,255,255,0.06)'};position:relative;overflow:hidden;">
+        // Блок победителя для завершённого конкурса
+        const winnerHtml = !isActive && winner ? `
+            <div style="margin-bottom:14px;padding:14px;background:linear-gradient(135deg,rgba(255,214,0,0.1),rgba(255,149,0,0.07));border:1px solid rgba(255,214,0,0.3);border-radius:12px;text-align:center;">
+                <div style="font-size:22px;margin-bottom:4px;">🏆</div>
+                <div style="font-family:var(--font-head);font-size:16px;color:#FFD600;letter-spacing:2px;">ПОБЕДИТЕЛЬ</div>
+                <div style="font-size:14px;color:rgba(255,255,255,0.9);margin-top:4px;font-family:var(--font-body);font-weight:700;">${winner.name}</div>
+                ${c.prize>0?`<div style="font-size:13px;color:#FF9800;font-family:var(--font-mono);margin-top:4px;">+${c.prize} 🍊</div>`:''}
+            </div>` : !isActive && !winner ? `
+            <div style="margin-bottom:14px;padding:12px;background:rgba(255,255,255,0.03);border-radius:10px;text-align:center;color:rgba(255,255,255,0.3);font-size:13px;">Победитель не определён</div>` : '';
+
+        return `<div class="panel-box" style="margin-bottom:16px;border-color:${isActive?'rgba(255,214,0,0.15)':iAmWinner&&!iAlreadyClaimed?'rgba(255,214,0,0.4)':'rgba(255,255,255,0.06)'};position:relative;overflow:hidden;">
             ${isActive?`<div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#FFD600,#FF9800,#FFD600);animation:gradShift 3s ease infinite;background-size:200% 100%;"></div>`:''}
+            ${iAmWinner&&!iAlreadyClaimed?`<div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#FFD600,#fff,#FFD600);animation:gradShift 1.5s ease infinite;background-size:200% 100%;"></div>`:''}
             <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:14px;">
                 <div style="width:52px;height:52px;border-radius:14px;background:${isActive?'rgba(255,214,0,0.1)':'rgba(255,255,255,0.04)'};display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;border:1px solid ${isActive?'rgba(255,214,0,0.2)':'rgba(255,255,255,0.06)'};">${info.icon}</div>
                 <div style="flex:1;min-width:0;">
@@ -12869,6 +12677,7 @@ const app = {
                 ${!isActive?`<div style="background:rgba(0,255,100,0.1);border:1px solid rgba(0,255,100,0.2);border-radius:8px;padding:4px 10px;font-size:11px;color:#00FF94;font-family:var(--font-mono);">Завершён</div>`:''}
             </div>
             ${c.desc?`<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:12px;font-family:var(--font-ui);line-height:1.6;">${c.desc}</div>`:''}
+            ${winnerHtml}
             <div style="margin-bottom:12px;">
                 <div style="font-size:11px;color:rgba(255,255,255,0.3);font-family:var(--font-mono);margin-bottom:8px;">ТОП УЧАСТНИКОВ</div>
                 ${topHtml}
@@ -12876,6 +12685,8 @@ const app = {
             <div style="display:flex;gap:8px;flex-wrap:wrap;">
                 ${isActive&&!isJoined?`<button onclick="app._contestJoin('${c.id}')" style="flex:1;padding:10px;background:linear-gradient(135deg,rgba(255,214,0,0.2),rgba(255,149,0,0.15));border:1px solid rgba(255,214,0,0.3);border-radius:10px;color:#FFD600;font-family:var(--font-head);font-size:14px;letter-spacing:1px;cursor:pointer;">⚡ УЧАСТВОВАТЬ</button>`:''}
                 ${isActive&&isJoined?`<div style="flex:1;padding:10px;background:rgba(0,255,100,0.06);border:1px solid rgba(0,255,100,0.15);border-radius:10px;color:#00FF94;font-size:13px;text-align:center;font-family:var(--font-body);">✅ Ты участвуешь</div>`:''}
+                ${!isActive&&iAmWinner&&!iAlreadyClaimed?`<button onclick="app._contestClaim('${c.id}')" style="flex:1;padding:12px;background:linear-gradient(135deg,#FFD600,#FF9800);border:none;border-radius:10px;color:#000;font-family:var(--font-head);font-size:15px;letter-spacing:2px;cursor:pointer;font-weight:700;box-shadow:0 0 20px rgba(255,214,0,0.4);">🏆 ЗАБРАТЬ ПРИЗ</button>`:''}
+                ${!isActive&&iAmWinner&&iAlreadyClaimed?`<div style="flex:1;padding:10px;background:rgba(255,214,0,0.06);border:1px solid rgba(255,214,0,0.15);border-radius:10px;color:#FFD600;font-size:13px;text-align:center;font-family:var(--font-body);">✅ Приз получен</div>`:''}
                 ${isAdmin&&isActive?`<button onclick="app._contestFinish('${c.id}')" style="padding:10px 14px;background:rgba(255,60,60,0.1);border:1px solid rgba(255,60,60,0.2);border-radius:10px;color:rgba(255,100,100,0.7);font-size:12px;cursor:pointer;">Завершить</button>`:''}
                 ${isAdmin?`<button onclick="app._contestDelete('${c.id}')" style="padding:10px 14px;background:rgba(255,60,60,0.05);border:1px solid rgba(255,60,60,0.1);border-radius:10px;color:rgba(255,100,100,0.4);font-size:12px;cursor:pointer;">🗑</button>`:''}
             </div>
@@ -12935,7 +12746,7 @@ const app = {
     },
 
     async _contestFinish(id){
-        if(!confirm('Завершить конкурс и выдать приз победителю?')) return;
+        if(!confirm('Завершить конкурс? Победитель получит уведомление и кнопку для получения приза.')) return;
         try{
             const r = await fetch(this._API+'/contests/'+id+'/finish', {
                 method:'POST', headers:{'Content-Type':'application/json'},
@@ -12943,9 +12754,30 @@ const app = {
             });
             const data = await r.json();
             if(data.winner){
-                // Выдаём приз победителю
-                this._showToast(`🏆 Победитель: ${data.winner.name}! +${data.prize}🍊`);
-                this.showNotif('🏆','Конкурс завершён!',`Победитель: ${data.winner.name}`);
+                this._showToast(`🏆 Конкурс завершён! Победитель: ${data.winner.name}`);
+                this.showNotif('🏆','Конкурс завершён!',`Победитель: ${data.winner.name}${data.prize>0?' · Приз: '+data.prize+' 🍊':''}`);
+            } else {
+                this._showToast('Конкурс завершён. Участников не было.');
+            }
+            this._contestsLoad();
+        }catch(e){ this._showToast('❌ Ошибка'); }
+    },
+
+    async _contestClaim(id){
+        try{
+            const r = await fetch(this._API+'/contests/'+id+'/claim', {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({userId:String(this.userId)})
+            });
+            const data = await r.json();
+            if(data.error){ this._showToast('❌ '+data.error); return; }
+            // Начисляем приз локально
+            if(data.prize > 0){
+                this.balance = (this.balance||0) + data.prize;
+                this.saveData();
+                document.getElementById('balance-val').textContent = this.balance;
+                this.showNotif('🏆','Приз получен!',`+${data.prize} 🍊 — поздравляем с победой!`);
+                this._showToast(`🎉 +${data.prize} 🍊 зачислено!`);
             }
             this._contestsLoad();
         }catch(e){ this._showToast('❌ Ошибка'); }
