@@ -1024,6 +1024,7 @@
                 <div class="nav-item"        id="nav-help"        onclick="app.switchTab('help')">       <div class="nav-icon"><i class="fas fa-question-circle"></i></div> Помощь</div>
                 <div class="nav-item"        id="nav-coding"      onclick="app.switchTab('coding')">     <div class="nav-icon"><i class="fas fa-code"></i></div> Кодинг</div>
                 <div class="nav-item"        id="nav-movies"      onclick="app.switchTab('movies')">     <div class="nav-icon"><i class="fas fa-film"></i></div> Кино</div>
+                <div class="nav-item"        id="nav-contests"    onclick="app.switchTab('contests')">   <div class="nav-icon"><i class="fas fa-trophy"></i></div> Конкурсы <span class="nav-badge hidden" id="contests-badge">!</span></div>
                 <div class="nav-item"        id="nav-aihelper"    onclick="app.switchTab('aihelper')">   <div class="nav-icon"><i class="fas fa-robot"></i></div> ИИ Хелпер <span class="nav-badge hidden" id="ai-badge">!</span></div>
                 <div class="nav-item"        id="nav-devmail"     onclick="app.switchTab('devmail')">    <div class="nav-icon"><i class="fas fa-envelope"></i></div> Почта <span class="nav-badge hidden" id="devmail-badge">0</span></div>
 
@@ -1190,6 +1191,47 @@
                 <!-- Сетка видео -->
                 <div id="movies-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;"></div>
                 <div id="movies-empty" style="display:none;text-align:center;padding:60px;color:rgba(255,255,255,0.2);font-size:14px;">Видео пока нет 🎬</div>
+            </div>
+
+            <!-- ══════════════════ TAB: КОНКУРСЫ ══════════════════ -->
+            <div id="tab-contests" class="hidden">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+                    <div class="section-title" style="margin:0;">🏆 Конкурсы</div>
+                    <div id="contests-admin-btn" class="hidden">
+                        <button onclick="app._contestsShowCreate()" style="background:linear-gradient(135deg,#FFD600,#FF9800);border:none;border-radius:10px;color:#000;font-weight:700;font-family:var(--font-body);font-size:13px;cursor:pointer;padding:9px 16px;">+ Создать</button>
+                    </div>
+                </div>
+
+                <!-- Форма создания (только разраб) -->
+                <div id="contests-create-form" class="panel-box" style="display:none;margin-bottom:20px;border-color:rgba(255,214,0,0.2);">
+                    <div class="panel-box-title">🏆 Новый конкурс</div>
+                    <input id="contest-title" class="styled-input" placeholder="Название конкурса" style="margin-bottom:8px;">
+                    <textarea id="contest-desc" class="styled-input" placeholder="Описание и правила..." style="min-height:80px;resize:vertical;margin-bottom:8px;"></textarea>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+                        <select id="contest-type" class="styled-input">
+                            <option value="balance">💰 Кто больше накопит цитрусов</option>
+                            <option value="mine">⛏️ Кто больше добудет в шахте</option>
+                            <option value="roulette">🎰 Кто выиграет в рулетке</option>
+                            <option value="level">⭐ Кто быстрее поднимет уровень</option>
+                            <option value="friends">👥 Кто позовёт больше друзей</option>
+                            <option value="custom">🎯 Кастомный (судья разраб)</option>
+                        </select>
+                        <input id="contest-prize" type="number" class="styled-input" placeholder="Приз (цитрусы)" min="0">
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+                        <input id="contest-end" type="datetime-local" class="styled-input">
+                        <input id="contest-maxpart" type="number" class="styled-input" placeholder="Макс. участников (0=∞)" min="0">
+                    </div>
+                    <div style="display:flex;gap:8px;">
+                        <button onclick="app._contestsCreate()" style="flex:1;padding:10px;background:linear-gradient(135deg,#FFD600,#FF9800);border:none;border-radius:10px;color:#000;font-family:var(--font-head);font-size:14px;font-weight:700;cursor:pointer;">🏆 Создать конкурс</button>
+                        <button onclick="document.getElementById('contests-create-form').style.display='none'" style="padding:10px 16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:rgba(255,255,255,0.4);font-size:13px;cursor:pointer;">Отмена</button>
+                    </div>
+                </div>
+
+                <!-- Активные конкурсы -->
+                <div id="contests-active" style="margin-bottom:24px;"></div>
+                <!-- Завершённые -->
+                <div id="contests-finished"></div>
             </div>
 
             <div id="tab-aihelper" class="hidden" style="display:flex;flex-direction:column;height:calc(100vh - 64px);overflow:hidden;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(123,47,255,0.06),transparent);">
@@ -3770,6 +3812,8 @@ const app = {
             }).catch(()=>{});
         }
         this.updateUI();
+        // Обновляем счёт в активных конкурсах
+        setTimeout(()=>this._contestsUpdateScore(), 1000);
     },
     _renderInventoryList(){
         const il=document.getElementById('inventory-list');
@@ -6183,7 +6227,7 @@ const app = {
 
         switchTab(id){
         this._sfx('nav');
-        ['games','mine','work','avatar','shop','friends','studio','quests','promo','daily','roulette','credits','gifts','nft','stats','leaderboard','admin','help','cases','aihelper','devmail','exchange','coding','movies'].forEach(t=>{
+        ['games','mine','work','avatar','shop','friends','studio','quests','promo','daily','roulette','credits','gifts','nft','stats','leaderboard','admin','help','cases','aihelper','devmail','exchange','coding','movies','contests'].forEach(t=>{
             document.getElementById('tab-'+t)?.classList.add('hidden');
             document.getElementById('nav-'+t)?.classList.remove('active');
         });
@@ -6206,6 +6250,7 @@ const app = {
         if(id==='promo'){ this._renderPromoHistory(); }
         if(id==='coding'){ this.initCoding(); }
         if(id==='movies'){ this._moviesInit(); }
+        if(id==='contests'){ this._contestsInit(); }
         if(id==='aihelper'){ this.initAiHelper(); }
         if(id==='devmail'){ this.initDevMail(); }
         if(id==='stats'){ this.loadStats(); }
@@ -12714,6 +12759,226 @@ const app = {
                 <button onclick="app.copyCodingCode('${p.id}')" style="flex:1;padding:10px;background:transparent;border:none;color:rgba(255,255,255,0.3);font-size:13px;cursor:pointer;">📋</button>
             </div>
         </div>`;
+    },
+
+    // ══════════════════════════════
+    // 🏆 КОНКУРСЫ
+    // ══════════════════════════════
+    _contestsInit(){
+        const adminBtn = document.getElementById('contests-admin-btn');
+        if(adminBtn) adminBtn.classList.toggle('hidden', !this.canBan(this.username));
+        this._contestsLoad();
+        // Обновляем каждые 30 сек (таймеры)
+        clearInterval(this._contestsInterval);
+        this._contestsInterval = setInterval(()=>this._contestsLoad(), 30000);
+    },
+
+    async _contestsLoad(){
+        try{
+            const r = await fetch(this._API+'/contests');
+            const all = await r.json();
+            const now = Date.now();
+            const active = all.filter(c=>!c.finished && c.endsAt > now);
+            const finished = all.filter(c=>c.finished || c.endsAt <= now);
+            this._renderContests(active, finished);
+        }catch(e){
+            const el = document.getElementById('contests-active');
+            if(el) el.innerHTML = '<div style="color:rgba(255,255,255,0.2);text-align:center;padding:40px;">Конкурсы недоступны</div>';
+        }
+    },
+
+    _renderContests(active, finished){
+        const aEl = document.getElementById('contests-active');
+        const fEl = document.getElementById('contests-finished');
+
+        const typeInfo = {
+            balance:  {icon:'💰', label:'Накопи цитрусы'},
+            mine:     {icon:'⛏️', label:'Шахта'},
+            roulette: {icon:'🎰', label:'Рулетка'},
+            level:    {icon:'⭐', label:'Уровень'},
+            friends:  {icon:'👥', label:'Друзья'},
+            custom:   {icon:'🎯', label:'Кастомный'},
+        };
+
+        if(aEl){
+            if(!active.length){
+                aEl.innerHTML = `<div style="text-align:center;padding:40px 20px;color:rgba(255,255,255,0.2);">
+                    <div style="font-size:48px;margin-bottom:12px;">🏆</div>
+                    <div style="font-size:14px;">Активных конкурсов нет</div>
+                    <div style="font-size:12px;margin-top:6px;opacity:0.6;">Разраб скоро объявит новый!</div>
+                </div>`;
+            } else {
+                aEl.innerHTML = `<div style="font-family:var(--font-head);font-size:13px;letter-spacing:2px;color:rgba(255,214,0,0.7);margin-bottom:12px;">🔥 АКТИВНЫЕ</div>` +
+                active.map(c=>this._contestCard(c, typeInfo, true)).join('');
+            }
+        }
+
+        if(fEl){
+            if(!finished.length){ fEl.innerHTML=''; return; }
+            fEl.innerHTML = `<div style="font-family:var(--font-head);font-size:13px;letter-spacing:2px;color:rgba(255,255,255,0.25);margin-bottom:12px;margin-top:8px;">✅ ЗАВЕРШЁННЫЕ</div>` +
+            finished.slice(0,5).map(c=>this._contestCard(c, typeInfo, false)).join('');
+        }
+    },
+
+    _contestCard(c, typeInfo, isActive){
+        const info = typeInfo[c.type] || {icon:'🏆', label:'Конкурс'};
+        const now = Date.now();
+        const timeLeft = c.endsAt - now;
+        const isJoined = (c.participants||[]).some(p=>String(p.id)===String(this.userId));
+        const isAdmin = this.canBan(this.username);
+
+        // Таймер
+        let timerStr = '';
+        if(isActive && timeLeft > 0){
+            const h = Math.floor(timeLeft/3600000);
+            const m = Math.floor((timeLeft%3600000)/60000);
+            const s = Math.floor((timeLeft%60000)/1000);
+            if(h > 24) timerStr = `${Math.floor(h/24)}д ${h%24}ч`;
+            else if(h > 0) timerStr = `${h}ч ${m}м`;
+            else timerStr = `${m}м ${s}с`;
+        }
+
+        // Топ участников
+        const parts = (c.participants||[]).sort((a,b)=>(b.score||0)-(a.score||0)).slice(0,5);
+        const topHtml = parts.length ? parts.map((p,i)=>{
+            const medals = ['🥇','🥈','🥉'];
+            const isMe = String(p.id)===String(this.userId);
+            return `<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:${isMe?'rgba(0,229,255,0.05)':'rgba(255,255,255,0.02)'};border-radius:8px;margin-bottom:4px;">
+                <span style="width:20px;text-align:center;">${medals[i]||'#'+(i+1)}</span>
+                <span style="flex:1;font-size:12px;color:rgba(255,255,255,${isMe?'0.95':'0.6'});font-family:var(--font-body);">${p.name}${isMe?' (ты)':''}</span>
+                <span style="font-family:var(--font-mono);font-size:12px;color:#FFD600;">${(p.score||0).toLocaleString()}</span>
+            </div>`;
+        }).join('') : `<div style="color:rgba(255,255,255,0.2);font-size:12px;text-align:center;padding:12px;">Участников пока нет</div>`;
+
+        return `<div class="panel-box" style="margin-bottom:16px;border-color:${isActive?'rgba(255,214,0,0.15)':'rgba(255,255,255,0.06)'};position:relative;overflow:hidden;">
+            ${isActive?`<div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#FFD600,#FF9800,#FFD600);animation:gradShift 3s ease infinite;background-size:200% 100%;"></div>`:''}
+            <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:14px;">
+                <div style="width:52px;height:52px;border-radius:14px;background:${isActive?'rgba(255,214,0,0.1)':'rgba(255,255,255,0.04)'};display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;border:1px solid ${isActive?'rgba(255,214,0,0.2)':'rgba(255,255,255,0.06)'};">${info.icon}</div>
+                <div style="flex:1;min-width:0;">
+                    <div style="font-family:var(--font-head);font-size:18px;color:#fff;margin-bottom:2px;">${c.title}</div>
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                        <span style="font-size:11px;color:rgba(255,255,255,0.35);font-family:var(--font-mono);">${info.label}</span>
+                        ${c.prize>0?`<span style="font-size:11px;color:#FFD600;font-family:var(--font-mono);">🏆 Приз: ${c.prize} 🍊</span>`:''}
+                        ${c.maxParticipants>0?`<span style="font-size:11px;color:rgba(255,255,255,0.3);font-family:var(--font-mono);">👥 ${(c.participants||[]).length}/${c.maxParticipants}</span>`:`<span style="font-size:11px;color:rgba(255,255,255,0.3);font-family:var(--font-mono);">👥 ${(c.participants||[]).length} участников</span>`}
+                    </div>
+                </div>
+                ${isActive&&timerStr?`<div style="text-align:center;flex-shrink:0;">
+                    <div style="font-family:var(--font-mono);font-size:16px;font-weight:700;color:#FFD600;">${timerStr}</div>
+                    <div style="font-size:9px;color:rgba(255,255,255,0.3);font-family:var(--font-mono);">осталось</div>
+                </div>`:''}
+                ${!isActive?`<div style="background:rgba(0,255,100,0.1);border:1px solid rgba(0,255,100,0.2);border-radius:8px;padding:4px 10px;font-size:11px;color:#00FF94;font-family:var(--font-mono);">Завершён</div>`:''}
+            </div>
+            ${c.desc?`<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:12px;font-family:var(--font-ui);line-height:1.6;">${c.desc}</div>`:''}
+            <div style="margin-bottom:12px;">
+                <div style="font-size:11px;color:rgba(255,255,255,0.3);font-family:var(--font-mono);margin-bottom:8px;">ТОП УЧАСТНИКОВ</div>
+                ${topHtml}
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                ${isActive&&!isJoined?`<button onclick="app._contestJoin('${c.id}')" style="flex:1;padding:10px;background:linear-gradient(135deg,rgba(255,214,0,0.2),rgba(255,149,0,0.15));border:1px solid rgba(255,214,0,0.3);border-radius:10px;color:#FFD600;font-family:var(--font-head);font-size:14px;letter-spacing:1px;cursor:pointer;">⚡ УЧАСТВОВАТЬ</button>`:''}
+                ${isActive&&isJoined?`<div style="flex:1;padding:10px;background:rgba(0,255,100,0.06);border:1px solid rgba(0,255,100,0.15);border-radius:10px;color:#00FF94;font-size:13px;text-align:center;font-family:var(--font-body);">✅ Ты участвуешь</div>`:''}
+                ${isAdmin&&isActive?`<button onclick="app._contestFinish('${c.id}')" style="padding:10px 14px;background:rgba(255,60,60,0.1);border:1px solid rgba(255,60,60,0.2);border-radius:10px;color:rgba(255,100,100,0.7);font-size:12px;cursor:pointer;">Завершить</button>`:''}
+                ${isAdmin?`<button onclick="app._contestDelete('${c.id}')" style="padding:10px 14px;background:rgba(255,60,60,0.05);border:1px solid rgba(255,60,60,0.1);border-radius:10px;color:rgba(255,100,100,0.4);font-size:12px;cursor:pointer;">🗑</button>`:''}
+            </div>
+        </div>`;
+    },
+
+    _contestsShowCreate(){
+        const form = document.getElementById('contests-create-form');
+        if(form) form.style.display = form.style.display==='none'?'block':'none';
+        // Дефолтное время — +24 часа
+        const endEl = document.getElementById('contest-end');
+        if(endEl && !endEl.value){
+            const d = new Date(Date.now() + 86400000);
+            endEl.value = d.toISOString().slice(0,16);
+        }
+    },
+
+    async _contestsCreate(){
+        const title = document.getElementById('contest-title')?.value.trim();
+        const desc = document.getElementById('contest-desc')?.value.trim();
+        const type = document.getElementById('contest-type')?.value;
+        const prize = parseInt(document.getElementById('contest-prize')?.value||'0');
+        const endVal = document.getElementById('contest-end')?.value;
+        const maxPart = parseInt(document.getElementById('contest-maxpart')?.value||'0');
+        if(!title){ this._showToast('❌ Введи название'); return; }
+        if(!endVal){ this._showToast('❌ Укажи дату окончания'); return; }
+        const endsAt = new Date(endVal).getTime();
+        if(endsAt <= Date.now()){ this._showToast('❌ Дата должна быть в будущем'); return; }
+        try{
+            await fetch(this._API+'/contests', {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({title,desc,type,prize,endsAt,maxParticipants:maxPart,authorId:String(this.userId)})
+            });
+            document.getElementById('contests-create-form').style.display='none';
+            document.getElementById('contest-title').value='';
+            document.getElementById('contest-desc').value='';
+            document.getElementById('contest-prize').value='';
+            this._showToast('✅ Конкурс создан!');
+            this._contestsLoad();
+            // Бейдж для всех
+            const badge = document.getElementById('contests-badge');
+            if(badge){ badge.classList.remove('hidden'); badge.textContent='!'; }
+        }catch(e){ this._showToast('❌ Ошибка'); }
+    },
+
+    async _contestJoin(id){
+        try{
+            const r = await fetch(this._API+'/contests/'+id+'/join', {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({userId:String(this.userId), name:this.username+'#'+this.userId, color:this._myColor})
+            });
+            const data = await r.json();
+            if(data.error){ this._showToast('❌ '+data.error); return; }
+            this._showToast('⚡ Ты в конкурсе!');
+            this._contestsLoad();
+        }catch(e){ this._showToast('❌ Ошибка'); }
+    },
+
+    async _contestFinish(id){
+        if(!confirm('Завершить конкурс и выдать приз победителю?')) return;
+        try{
+            const r = await fetch(this._API+'/contests/'+id+'/finish', {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({adminId:String(this.userId)})
+            });
+            const data = await r.json();
+            if(data.winner){
+                // Выдаём приз победителю
+                this._showToast(`🏆 Победитель: ${data.winner.name}! +${data.prize}🍊`);
+                this.showNotif('🏆','Конкурс завершён!',`Победитель: ${data.winner.name}`);
+            }
+            this._contestsLoad();
+        }catch(e){ this._showToast('❌ Ошибка'); }
+    },
+
+    async _contestDelete(id){
+        if(!confirm('Удалить конкурс?')) return;
+        try{
+            await fetch(this._API+'/contests/'+id, {method:'DELETE', headers:{'Content-Type':'application/json'}, body:JSON.stringify({adminId:String(this.userId)})});
+            this._showToast('🗑 Удалено');
+            this._contestsLoad();
+        }catch(e){}
+    },
+
+    // Обновление счёта участника — вызывается при изменении баланса/уровня/etc
+    async _contestsUpdateScore(){
+        try{
+            const r = await fetch(this._API+'/contests?active=1');
+            const active = await r.json();
+            for(const c of active){
+                const isJoined = (c.participants||[]).some(p=>String(p.id)===String(this.userId));
+                if(!isJoined) continue;
+                let score = 0;
+                if(c.type==='balance') score = this.balance||0;
+                else if(c.type==='level') score = ((this.level||1)*1000)+(this.xp||0);
+                else if(c.type==='friends') score = (this.friends||[]).length;
+                else continue;
+                await fetch(this._API+'/contests/'+c.id+'/score', {
+                    method:'POST', headers:{'Content-Type':'application/json'},
+                    body: JSON.stringify({userId:String(this.userId), score})
+                });
+            }
+        }catch(e){}
     },
 
     // ══════════════════════════════
