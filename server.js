@@ -9,7 +9,7 @@ const GROQ_KEY        = process.env.GROQ_KEY        || '';
 let DB = {
     players:{}, roulette:{},
     credits:{ credits:{}, borrows:{} },
-    games:{}, studioSync:{}, bans:{},
+    games:{}, studioSync:{}, bans:{}, contests:{},
     nfts:{}, support:{}, // id -> {id,emoji,name,desc,price,rarity,minReward,maxReward,by,ts,priceHistory:[],ownerId,ownerName,opened}
     stats:{
         totalRegistered: 0,
@@ -30,6 +30,7 @@ function fixDB(){
     if(!DB.pendingEarnings) DB.pendingEarnings={};
     if(!DB.coding) DB.coding={};
     if(!DB.movies) DB.movies={};
+    if(!DB.contests) DB.contests={};
     if(!DB.support) DB.support={};
     if(!DB.dm) DB.dm={};
     if(!DB.stats) DB.stats={totalRegistered:0,totalSessions:0,worldPlays:{},dailyActive:{},firstSeenDates:[]};
@@ -967,6 +968,7 @@ if(req.method==='DELETE'&&parts[0]==='devmail'&&parts[1]){
     // ── MOVIES ──
     if(req.method==='GET'&&parts[0]==='movies'&&!parts[1]){
         if(!DB.movies) DB.movies={};
+    if(!DB.contests) DB.contests={};
         let movies = Object.values(DB.movies).sort((a,b)=>b.ts-a.ts);
         const genre = url.searchParams.get('genre');
         if(genre) movies = movies.filter(m=>m.genre===genre);
@@ -981,6 +983,7 @@ if(req.method==='DELETE'&&parts[0]==='devmail'&&parts[1]){
         const d=await body(req);
         if(!d.url||!d.title||!d.authorId) return reply(res,400,{error:'bad'});
         if(!DB.movies) DB.movies={};
+    if(!DB.contests) DB.contests={};
         const id='mov_'+Date.now();
         DB.movies[id]={id,url:d.url,title:d.title,desc:d.desc||'',genre:d.genre||'other',authorId:String(d.authorId),likes:0,likedBy:[],views:0,ts:Date.now()};
         saveDB();
@@ -1009,6 +1012,98 @@ if(req.method==='DELETE'&&parts[0]==='devmail'&&parts[1]){
         const m=(DB.movies||{})[parts[1]];
         if(!m) return reply(res,404,{error:'not found'});
         delete DB.movies[parts[1]]; saveDB();
+        return reply(res,200,{ok:true});
+    }
+
+    // ══════════════ КОНКУРСЫ ══════════════
+
+    if(req.method==='GET'&&parts[0]==='contests'){
+        if(!DB.contests) DB.contests={};
+        const active=url.searchParams.get('active');
+        let list=Object.values(DB.contests);
+        list.forEach(c=>{ if(c.status==='active'&&c.endsAt&&Date.now()>c.endsAt) c.status='finished'; });
+        if(active==='1') list=list.filter(c=>c.status==='active');
+        list.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+        return reply(res,200,list);
+    }
+
+    if(req.method==='POST'&&parts[0]==='contests'&&!parts[1]){
+        const d=await body(req);
+        if(!d.title||!d.authorId) return reply(res,400,{error:'bad data'});
+        if(!DB.contests) DB.contests={};
+        const id='contest_'+Date.now();
+        DB.contests[id]={id,title:d.title,desc:d.desc||'',type:d.type||'balance',
+            prize:parseInt(d.prize)||0,endsAt:d.endsAt||0,
+            maxParticipants:parseInt(d.maxParticipants)||0,
+            authorId:String(d.authorId),status:'active',participants:[],
+            prizeClaimed:[],createdAt:Date.now()};
+        saveDB();
+        return reply(res,200,{ok:true,id});
+    }
+
+    if(req.method==='POST'&&parts[0]==='contests'&&parts[2]==='join'){
+        const d=await body(req);
+        if(!DB.contests) return reply(res,404,{error:'not found'});
+        const c=DB.contests[parts[1]];
+        if(!c) return reply(res,404,{error:'not found'});
+        if(c.status!=='active') return reply(res,400,{error:'Конкурс завершён'});
+        if(c.maxParticipants>0&&(c.participants||[]).length>=c.maxParticipants) return reply(res,400,{error:'Мест нет'});
+        if((c.participants||[]).some(p=>String(p.id)===String(d.userId))) return reply(res,400,{error:'Уже участвуешь'});
+        if(!c.participants) c.participants=[];
+        c.participants.push({id:String(d.userId),name:d.name||'?',color:d.color||'#FF9800',score:0,joinedAt:Date.now()});
+        saveDB();
+        return reply(res,200,{ok:true});
+    }
+
+    if(req.method==='POST'&&parts[0]==='contests'&&parts[2]==='score'){
+        const d=await body(req);
+        if(!DB.contests) return reply(res,200,{ok:true});
+        const c=DB.contests[parts[1]];
+        if(!c||c.status!=='active') return reply(res,200,{ok:true});
+        const p=c.participants&&c.participants.find(p=>String(p.id)===String(d.userId));
+        if(p){ p.score=d.score||0; saveDB(); }
+        return reply(res,200,{ok:true});
+    }
+
+    if(req.method==='POST'&&parts[0]==='contests'&&parts[2]==='finish'){
+        const d=await body(req);
+        if(!DB.contests) return reply(res,404,{error:'not found'});
+        const c=DB.contests[parts[1]];
+        if(!c) return reply(res,404,{error:'not found'});
+        c.status='finished'; c.finishedAt=Date.now();
+        const sorted=(c.participants||[]).slice().sort((a,b)=>(b.score||0)-(a.score||0));
+        const winner=sorted[0]||null;
+        // Приз НЕ выдаём автоматически — победитель сам заберёт кнопкой
+        c.winner=winner;
+        if(!c.prizeClaimed) c.prizeClaimed=[];
+        saveDB();
+        return reply(res,200,{ok:true,winner,prize:c.prize});
+    }
+
+    if(req.method==='POST'&&parts[0]==='contests'&&parts[2]==='claim'){
+        const d=await body(req);
+        if(!DB.contests) return reply(res,404,{error:'not found'});
+        const c=DB.contests[parts[1]];
+        if(!c) return reply(res,404,{error:'Конкурс не найден'});
+        if(c.status!=='finished') return reply(res,400,{error:'Конкурс ещё не завершён'});
+        const winner=c.winner;
+        if(!winner||String(winner.id)!==String(d.userId)) return reply(res,403,{error:'Ты не победитель'});
+        if(!c.prizeClaimed) c.prizeClaimed=[];
+        if(c.prizeClaimed.includes(String(d.userId))) return reply(res,400,{error:'Приз уже получен'});
+        const prize=c.prize||0;
+        if(prize>0){
+            if(!DB.players[String(d.userId)]) return reply(res,404,{error:'Игрок не найден'});
+            DB.players[String(d.userId)].balance=(DB.players[String(d.userId)].balance||0)+prize;
+        }
+        c.prizeClaimed.push(String(d.userId));
+        saveDB();
+        return reply(res,200,{ok:true,prize});
+    }
+
+    if(req.method==='DELETE'&&parts[0]==='contests'&&parts[1]){
+        if(!DB.contests) return reply(res,404,{error:'not found'});
+        delete DB.contests[parts[1]];
+        saveDB();
         return reply(res,200,{ok:true});
     }
 
