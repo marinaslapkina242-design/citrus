@@ -7129,7 +7129,7 @@ const app = {
                                 if(g && g.isObject3D) {
                                     g._targetPos = o._targetPos;
                                     g._targetRy = o._targetRy;
-                                    g._lastSeen = o._lastSeen;
+                                    g._lastSeen = Date.now();
                                     g._lastRebuild = Date.now();
                                     this._others[msg.id]=g;
                                     this.scene&&this.scene.add(g);
