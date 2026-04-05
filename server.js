@@ -1209,10 +1209,10 @@ server.on('upgrade',(req,socket)=>{
             client.lastPong=Date.now();
             if(msg.type==='join'){
                 client.userId=msg.id; client.map=msg.map; client.name=(msg.name||'').toLowerCase();
-                // Шлём новому игроку позиции всех кто уже на карте
+                // Шлём новому игроку позиции всех кто уже на карте — с флагом teleport
                 Object.values(positions).forEach(p=>{
                     if(String(p.id)!==String(msg.id)&&String(p.map)===String(msg.map))
-                        wsWrite(socket,{...p,type:'move'});
+                        wsWrite(socket,{...p,type:'move',teleport:true});
                 });
                 // Просим всех на карте прислать позицию новому игроку
                 wsClients.forEach(c2=>{
