@@ -7085,13 +7085,14 @@ const app = {
                 try {
                     const msg = JSON.parse(e.data);
                     if(msg.type==='req_pos') {
-                        // Кто-то зашёл в мир — сразу отправляем нашу позицию
+                        // Кто-то зашёл в мир — сразу отправляем нашу позицию с флагом teleport
                         if(this.mode==='play' && this.playerGroup && this._gameWS.readyState===1){
                             try{ this._gameWS.send(JSON.stringify({
                                 type:'move', id:String(this.userId), name:this.username,
                                 color:this._myColor, map:String(this.currentMap),
                                 x:this.playerGroup.position.x, y:this.playerGroup.position.y, z:this.playerGroup.position.z,
-                                ry:this.playerGroup.rotation.y, inv:this.inventory||[]
+                                ry:this.playerGroup.rotation.y, inv:this.inventory||[],
+                                teleport:true
                             })); }catch(e){}
                         }
                         return;
@@ -7107,6 +7108,7 @@ const app = {
                         if(String(msg.id)===String(this.userId)) return;
                         if(String(msg.map)!==String(this.currentMap)||this.mode!=='play') return;
                         if(!this._others) this._others={};
+                        const isNew = !this._others[msg.id];
                         if(!this._others[msg.id]) {
                             const g=this._buildOtherPlayer(msg.name, msg.color, msg.inv||[]);
                             if(g && g.isObject3D) { this._others[msg.id]=g; this.scene&&this.scene.add(g); }
@@ -7131,6 +7133,12 @@ const app = {
                         if(!o) return;
                         if(!o._targetPos) o._targetPos = new THREE.Vector3(msg.x,msg.y,msg.z);
                         o._targetPos.set(msg.x, msg.y, msg.z);
+                        // Первый пакет или teleport флаг — телепортируем сразу, не интерполируем
+                        if(isNew || !o._hadFirstPos || msg.teleport) {
+                            o.position.set(msg.x, msg.y, msg.z);
+                            o.rotation.y = msg.ry || 0;
+                            o._hadFirstPos = true;
+                        }
                         o._targetRy = msg.ry || 0;
                         o._lastSeen = Date.now();
                         o._moving = msg.moving;
