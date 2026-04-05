@@ -7112,10 +7112,10 @@ const app = {
                         if(!this._others[msg.id]) {
                             const g=this._buildOtherPlayer(msg.name, msg.color, msg.inv||[]);
                             if(g && g.isObject3D) {
-                                // Сразу ставим на нужную позицию — не ждём интерполяции
                                 g.position.set(msg.x, msg.y, msg.z);
                                 g.rotation.y = msg.ry || 0;
                                 g._hadFirstPos = true;
+                                g._lastSeen = Date.now();
                                 this._others[msg.id]=g;
                                 this.scene&&this.scene.add(g);
                             }
@@ -7140,7 +7140,7 @@ const app = {
                         if(!o) return;
                         if(!o._targetPos) o._targetPos = new THREE.Vector3(msg.x,msg.y,msg.z);
                         o._targetPos.set(msg.x, msg.y, msg.z);
-                        // Первый пакет или teleport флаг — телепортируем сразу без интерполяции
+                        // Первый пакет или teleport флаг — телепортируем сразу, не интерполируем
                         if(isNew || !o._hadFirstPos || msg.teleport) {
                             o.position.set(msg.x, msg.y, msg.z);
                             o.rotation.y = msg.ry || 0;
@@ -9463,7 +9463,7 @@ const app = {
                 for(const id in this._others){
                     const _o = this._others[id];
                     if(!_o) { delete this._others[id]; continue; } // guard
-                    if(now - (_o._lastSeen||0) > 60000){
+                    if(now - (_o._lastSeen||0) > 15000){
                         this.scene&&this.scene.remove(_o);
                         delete this._others[id];
                     }
@@ -10798,13 +10798,13 @@ const app = {
             for(const id in this._others) {
                 const o = this._others[id];
                 if(!o) continue; // guard: entry may have been deleted by stale timer
-                if(now - (o._lastSeen||0) > 60000) {
+                if(now - (o._lastSeen||0) > 15000) {
                     this.scene && this.scene.remove(o);
                     delete this._others[id];
                 } else if(o._targetPos) {
                     const dist = o.position.distanceTo(o._targetPos);
                     if(dist > 8) {
-                        // Слишком далеко — телепорт без интерполяции
+                        // Слишком далеко — телепорт
                         o.position.copy(o._targetPos);
                     } else {
                         // Плавная интерполяция: догоняем за ~100мс (2 пакета по 50мс)
@@ -13376,7 +13376,7 @@ window.onload = () => app.init();
                 jumping: false
             }));
         } catch(e) {}
-    }, 3000);
+    }, 1000);
 
     console.log('[PATCH v2] igchat + AFK fix applied');
 })();
