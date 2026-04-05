@@ -7111,7 +7111,14 @@ const app = {
                         const isNew = !this._others[msg.id];
                         if(!this._others[msg.id]) {
                             const g=this._buildOtherPlayer(msg.name, msg.color, msg.inv||[]);
-                            if(g && g.isObject3D) { this._others[msg.id]=g; this.scene&&this.scene.add(g); }
+                            if(g && g.isObject3D) {
+                                // Сразу ставим на нужную позицию — не ждём интерполяции
+                                g.position.set(msg.x, msg.y, msg.z);
+                                g.rotation.y = msg.ry || 0;
+                                g._hadFirstPos = true;
+                                this._others[msg.id]=g;
+                                this.scene&&this.scene.add(g);
+                            }
                         } else {
                             const o=this._others[msg.id];
                             if(!o) { delete this._others[msg.id]; return; }
@@ -7133,11 +7140,12 @@ const app = {
                         if(!o) return;
                         if(!o._targetPos) o._targetPos = new THREE.Vector3(msg.x,msg.y,msg.z);
                         o._targetPos.set(msg.x, msg.y, msg.z);
-                        // Первый пакет или teleport флаг — телепортируем сразу, не интерполируем
+                        // Первый пакет или teleport флаг — телепортируем сразу без интерполяции
                         if(isNew || !o._hadFirstPos || msg.teleport) {
                             o.position.set(msg.x, msg.y, msg.z);
                             o.rotation.y = msg.ry || 0;
                             o._hadFirstPos = true;
+                            o._targetPos.set(msg.x, msg.y, msg.z);
                         }
                         o._targetRy = msg.ry || 0;
                         o._lastSeen = Date.now();
@@ -10795,8 +10803,8 @@ const app = {
                     delete this._others[id];
                 } else if(o._targetPos) {
                     const dist = o.position.distanceTo(o._targetPos);
-                    if(dist > 15) {
-                        // Слишком далеко — телепорт
+                    if(dist > 8) {
+                        // Слишком далеко — телепорт без интерполяции
                         o.position.copy(o._targetPos);
                     } else {
                         // Плавная интерполяция: догоняем за ~100мс (2 пакета по 50мс)
