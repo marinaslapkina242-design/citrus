@@ -1224,7 +1224,8 @@ server.on('upgrade',(req,socket)=>{
                 client.map=msg.map;
                 client.userId=client.userId||msg.id;
                 positions[msg.id]={...msg,type:'move',ts:Date.now()};
-                broadcastToMap(msg.map,msg,msg.id);
+                // Если это телепорт-ответ — рассылаем с флагом teleport чтобы получатели не интерполировали
+                broadcastToMap(msg.map, msg.teleport ? {...msg, teleport:true} : msg, msg.id);
             }
             if(msg.type==='leave'){
                 if(client.map) broadcastToMap(client.map,{type:'leave',id:msg.id},msg.id);
