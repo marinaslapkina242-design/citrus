@@ -1107,6 +1107,51 @@ if(req.method==='DELETE'&&parts[0]==='devmail'&&parts[1]){
         return reply(res,200,{ok:true});
     }
 
+    // ══════════ АВТОРИЗАЦИЯ ══════════
+
+    // POST /auth/register — регистрация (сохраняем имя+пароль на сервере)
+    if(req.method==='POST'&&parts[0]==='auth'&&parts[1]==='register'){
+        const d=await body(req);
+        if(!d.name||!d.pass) return reply(res,400,{error:'bad data'});
+        const nameLow = d.name.toLowerCase();
+        // Проверяем нет ли уже такого ника
+        const exists = Object.values(DB.players).find(p=>p.name&&p.name.toLowerCase()===nameLow);
+        if(exists) return reply(res,400,{error:'Ник уже занят'});
+        // Создаём/обновляем запись
+        const id = d.id || String(Math.floor(1000+Math.random()*8999));
+        if(!DB.players[id]) DB.players[id]={};
+        DB.players[id].name = d.name;
+        DB.players[id].pass = d.pass;
+        DB.players[id].id = id;
+        DB.players[id].color = d.color||'#FF9800';
+        saveDB();
+        return reply(res,200,{ok:true,id});
+    }
+
+    // POST /auth/login — вход (проверяем пароль на сервере)
+    if(req.method==='POST'&&parts[0]==='auth'&&parts[1]==='login'){
+        const d=await body(req);
+        if(!d.name||!d.pass) return reply(res,400,{error:'bad data'});
+        const nameLow = d.name.toLowerCase();
+        const player = Object.values(DB.players).find(p=>p.name&&p.name.toLowerCase()===nameLow);
+        if(!player) return reply(res,404,{error:'Аккаунт не найден'});
+        if(player.pass && player.pass !== d.pass) return reply(res,403,{error:'Неверный пароль'});
+        return reply(res,200,{ok:true, id:player.id, name:player.name, color:player.color||'#FF9800'});
+    }
+
+    // POST /auth/reset — сброс пароля (только admin)
+    if(req.method==='POST'&&parts[0]==='auth'&&parts[1]==='reset'){
+        const d=await body(req);
+        if(d.adminKey!=='citrus_admin_2025') return reply(res,403,{error:'forbidden'});
+        if(!d.name||!d.newPass) return reply(res,400,{error:'bad data'});
+        const nameLow = d.name.toLowerCase();
+        const player = Object.values(DB.players).find(p=>p.name&&p.name.toLowerCase()===nameLow);
+        if(!player) return reply(res,404,{error:'Игрок не найден'});
+        player.pass = d.newPass;
+        saveDB();
+        return reply(res,200,{ok:true});
+    }
+
     reply(res,404,{error:'not found'});
 });
 
