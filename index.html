@@ -9631,6 +9631,44 @@ const app = {
             for(let i=0;i<2000;i++)sp.push((Math.random()-0.5)*1000,(Math.random()-0.5)*500+100,(Math.random()-0.5)*1000);
             sg.setAttribute('position',new THREE.Float32BufferAttribute(sp,3));
             this.scene.add(new THREE.Points(sg,new THREE.PointsMaterial({color:0xffffff,size:0.5})));
+
+            // 🍊 10 синих светящихся цитрусов — дают 50 🍊 каждый
+            const spaceCitrusPositions = [
+                [0,2,0],   [8,2,-5],  [-8,2,-5], [5,2,10],  [-5,2,10],
+                [12,2,3],  [-12,2,3], [0,2,-12], [10,2,-15],[-10,2,-15]
+            ];
+            const blueMat = new THREE.MeshStandardMaterial({
+                color: 0x0088FF,
+                emissive: 0x0044CC,
+                emissiveIntensity: 1.2,
+                roughness: 0.3,
+                metalness: 0.1
+            });
+            const leafMatBlue = new THREE.MeshStandardMaterial({
+                color: 0x00CCFF,
+                emissive: 0x0088AA,
+                emissiveIntensity: 0.8,
+                roughness: 0.5
+            });
+            spaceCitrusPositions.forEach(([x,y,z]) => {
+                const g = new THREE.Group();
+                // Плод
+                const fruit = new THREE.Mesh(new THREE.SphereGeometry(0.45, 12, 12), blueMat);
+                g.add(fruit);
+                // Листик
+                const leaf = new THREE.Mesh(new THREE.SphereGeometry(0.15, 6, 6), leafMatBlue);
+                leaf.position.set(0, 0.48, 0);
+                g.add(leaf);
+                // Точечный свет — синее свечение вокруг
+                const glow = new THREE.PointLight(0x0099FF, 1.5, 6);
+                glow.position.set(0, 0, 0);
+                g.add(glow);
+                g.position.set(x, y, z);
+                g._spaceCitrus = true;
+                g._reward = 30;
+                this.scene.add(g);
+                this.collectibles.push(g);
+            });
         }
         else if(this.currentMap==='race'){
             // 🏎️ ГОНКИ НА МОНЕТАХ — круговая трасса с монетами
@@ -10523,9 +10561,22 @@ const app = {
             
             for(let i=this.collectibles.length-1;i>=0;i--){
                 const c=this.collectibles[i];
-                c.rotation.y+=2*delta;c.position.y=0.5+Math.sin(time*3+i)*0.2;
+                // Анимация вращения и боба
+                c.rotation.y+=2*delta;
+                c.position.y=0.5+Math.sin(time*3+i)*0.2;
+                // Синие космические цитрусы — пульсируют ярче
+                if(c._spaceCitrus){
+                    const pulse = 0.8 + Math.sin(time*4+i)*0.6;
+                    if(c.children[0] && c.children[0].material) c.children[0].material.emissiveIntensity = pulse;
+                    if(c.children[2]) c.children[2].intensity = pulse * 1.5; // свет пульсирует
+                }
                 if(c.position.distanceTo(this.playerGroup.position)<1.6){
-                    this.scene.remove(c);this.collectibles.splice(i,1);this.balance+=10;this.saveData();this._sfx('coin');
+                    const reward = c._reward || 10;
+                    this.scene.remove(c);this.collectibles.splice(i,1);
+                    this.balance+=reward;this.saveData();this._sfx('coin');
+                    if(c._spaceCitrus){
+                        this.showNotif('💙',`+${reward} 🍊`,`Космический цитрус!`);
+                    }
                 }
             }
             // Снегопад анимация
