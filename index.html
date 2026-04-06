@@ -1688,7 +1688,6 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
 
             <!-- ══════════════════ TAB: ADMIN ══════════════════ -->
             <div id="tab-admin" class="hidden">
-                <!-- Управление паролями -->
                 <div class="section-title">🔑 Управление паролями</div>
                 <div class="panel-box" style="margin-bottom:24px;">
                     <div class="panel-box-title">🔑 Сбросить пароль игрока</div>
@@ -3702,7 +3701,7 @@ const app = {
         const id = Math.floor(1000+Math.random()*8999);
         db.push({name, id, pass, color:this._myColor});
         localStorage.setItem('citrus_global_users', JSON.stringify(db));
-        // Сохраняем пароль на сервере чтобы можно было войти с любого устройства
+        // Сохраняем пароль на сервере чтобы войти с любого устройства
         fetch(this._API+'/auth/register', {method:'POST', headers:{'Content-Type':'application/json'},
             body: JSON.stringify({name, id:String(id), pass, color:this._myColor})
         }).catch(()=>{});
@@ -3956,7 +3955,7 @@ const app = {
                     user = {name:data.name, id:data.id, pass, color:data.color||'#FF9800'};
                     db.push(user);
                 } else {
-                    user.pass = pass; // обновляем локальный пароль
+                    user.pass = pass;
                 }
                 localStorage.setItem('citrus_global_users', JSON.stringify(db));
             }catch(e){
@@ -4020,7 +4019,7 @@ const app = {
     isOwner(name){ return this.isCitrus(name) || this.isDev(name); },
     isVerified(name){ const n=(name||'').toLowerCase().trim(); return ['ft77799','dantiyt_official','mekuper'].includes(n); },
     isSpecial(name){ const n=(name||'').toLowerCase().trim().split('#')[0]; return n==='добрый разраб'; },
-    isEmil(name){ const n=(name||'').toLowerCase().trim().split('#')[0]; return n==='эмиль крутой'; },
+    isEmil(name){ const n=(name||'').toLowerCase().trim().split('#')[0]; return n==='эмиль крутой' || n==='эмиль  крутой' || String(this.userId)==='6879'; },
     isStaff(name){ return this.isAdmin(name) || this.isOwner(name); },
 
     devBadge(name){
@@ -4044,7 +4043,6 @@ const app = {
             });
             const data = await r.json();
             if(data.error) return this._showToast('❌ '+data.error);
-            // Обновляем локально тоже
             try{
                 const db = JSON.parse(localStorage.getItem('citrus_global_users')||'[]');
                 const u = db.find(u=>u.name.toLowerCase()===name.toLowerCase());
