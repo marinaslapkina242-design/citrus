@@ -2458,10 +2458,11 @@ const app = {
         this.dailyItemClaimed=d.dailyItemClaimed||null;
         // Сбрасываем ротацию если в ней есть неизвестные ID — будет пересчитано в _initQuests
         if(this.questRotation && this.questRotation.ids){
-            const _validIds = new Set(['play5','play10','play20','play30','play60','jump10','jump30','jump75','jump150','maps1','maps2','maps4','maps7','friend1','friend3','friend5','buy1','buy2','buy4','build5','build20','build60','roul1','roul3','roulwin','mine5','mine20','mine_sell','wear1','wear3','earn50','earn200']);
+            // Сбрасываем только ротацию при устаревших ID — НЕ трогаем questData (прогресс)
+        const _validIds = new Set(['play5','play10','play20','play30','play60','jump10','jump30','jump75','jump150','maps1','maps2','maps4','maps7','friend1','friend3','friend5','buy1','buy2','buy4','roul1','roul3','roulwin','mine5','mine20','mine_sell','wear1','wear3','earn50','earn200']);
             if(this.questRotation.ids.some(id=>!_validIds.has(id))){
                 this.questRotation = null;
-                this.questData = {};
+                // questData не сбрасываем — _initQuests пересоберёт ротацию
             }
         }
             this.friendRequests=d.friendRequests||[];
@@ -2486,11 +2487,10 @@ const app = {
                 if((srv.rouletteTotal||0)>this.rouletteTotal) this.rouletteTotal=srv.rouletteTotal;
                 if(srv.questData&&Object.keys(srv.questData).length>Object.keys(this.questData||{}).length) {
                     this.questData=srv.questData;
-                    // Чистим устаревшие ключи и сбрасываем ротацию если нужно
-                    const _vIds = new Set(['play5','play10','play30','play60','jump20','jump50','jump100','jump200','maps2','maps3','maps5','maps8','friend1','friend3','friend5','buy1','buy3','buy5','build10','build50','build100','roul1','roulwin']);
-                    Object.keys(this.questData).forEach(k=>{ if(!_vIds.has(k)) delete this.questData[k]; });
-                    if(this.questRotation&&this.questRotation.ids&&this.questRotation.ids.some(id=>!_vIds.has(id))){
-                        this.questRotation=null; this.questData={};
+                    // Чистим только явно мусорные ключи, не трогаем валидные
+                    if(this.questRotation&&this.questRotation.ids){
+                        const knownSrv = new Set(this.questRotation.ids);
+                        Object.keys(this.questData).forEach(k=>{ if(!knownSrv.has(k)) delete this.questData[k]; });
                     }
                 }
                 if(srv.customMaps&&srv.customMaps.length>this.customMaps.length) this.customMaps=srv.customMaps;
@@ -11798,10 +11798,11 @@ const app = {
     },
 
     claimQuest(id){
-        const q = this._questDefs.find(q=>q.id===id);
+        if(!this.questData) this.questData = {};
+        const q = this._questDefs && this._questDefs.find(q=>q.id===id);
         if(!q) return;
         const d = this.questData[id];
-        if(!d.done || d.claimed) return;
+        if(!d || !d.done || d.claimed) return;
         d.claimed = true;
         this.balance = (this.balance||0) + q.reward;
         this.addXP(30);
