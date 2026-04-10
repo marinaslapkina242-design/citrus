@@ -1020,6 +1020,7 @@
                 <div class="nav-item"        id="nav-stats"       onclick="app.switchTab('stats')">      <div class="nav-icon"><i class="fas fa-chart-line"></i></div> Статистика</div>
                 <div class="nav-item"        id="nav-leaderboard" onclick="app.switchTab('leaderboard')"><div class="nav-icon"><i class="fas fa-trophy"></i></div> Топ</div>
                 <div class="nav-item hidden" id="nav-admin"       onclick="app.switchTab('admin')">      <div class="nav-icon"><i class="fas fa-shield-alt"></i></div> Баны</div>
+                <div class="nav-item hidden" id="nav-spy"         onclick="app.switchTab('spy')">        <div class="nav-icon"><i class="fas fa-eye"></i></div> Слежка</div>
                 <div class="nav-item"        id="nav-coding"      onclick="app.switchTab('coding')">     <div class="nav-icon"><i class="fas fa-code"></i></div> Кодинг</div>
                 <div class="nav-item"        id="nav-contests"    onclick="app.switchTab('contests')">   <div class="nav-icon"><i class="fas fa-trophy"></i></div> Конкурсы <span class="nav-badge hidden" id="contests-badge">!</span></div>
                 <div class="nav-item"        id="nav-aihelper"    onclick="app.switchTab('aihelper')">   <div class="nav-icon"><i class="fas fa-robot"></i></div> ИИ Хелпер <span class="nav-badge hidden" id="ai-badge">!</span></div>
@@ -2233,6 +2234,12 @@ const SHOP_ITEMS = [
     {id:'wizard',      name:'Шляпа Волшебника',    icon:'🧙',  price:550  },
     {id:'macaroni',    name:'Макарошки',            icon:'🍝',  price:10000},
     {id:'tvhead',      name:'Голова-Телевизор',     icon:'📺',  price:5000 },
+    // ── ПРЕМИУМ (только Ft77799, Company Citrus, Разраб) ──
+    {id:'prem_crown',   name:'Корона Легенды',     icon:'👑',  price:0, category:'premium'},
+    {id:'prem_aura',    name:'Аура Фиолета',       icon:'🌌',  price:0, category:'premium'},
+    {id:'prem_wings2',  name:'Крылья Архангела',   icon:'🕊️', price:0, category:'premium'},
+    {id:'prem_mask',    name:'Маска Призрака',     icon:'💀',  price:0, category:'premium'},
+    {id:'prem_staff',   name:'Посох Создателя',    icon:'🔱',  price:0, category:'premium'},
 ];
 const COLORS=[
     {c:0xCCCCCC,n:'Камень'},{c:0xFF9800,n:'Апельсин'},{c:0x4CAF50,n:'Трава'},
@@ -4017,17 +4024,21 @@ const app = {
     isCitrus(name){ const n=(name||'').toLowerCase().trim(); return n==='citrus'; },
     isDev(name){ const n=(name||'').toLowerCase().trim(); return n==='разраб' || n==='razrab'; },
     isOwner(name){ return this.isCitrus(name) || this.isDev(name); },
-    isVerified(name){ const n=(name||'').toLowerCase().trim(); return ['ft77799','dantiyt_official','mekuper'].includes(n); },
+    isVerified(name){ const n=(name||'').toLowerCase().trim(); return ['dantiyt_official','mekuper'].includes(n); },
+    isFt(name){ const n=(name||'').toLowerCase().trim().split('#')[0].trim(); return n==='ft77799'; },
+    isCompany(name){ const n=(name||'').toLowerCase().trim().split('#')[0].trim(); return n==='company citrus'; },
     isSpecial(name){ const n=(name||'').toLowerCase().trim().split('#')[0]; return n==='добрый разраб'; },
-    isEmil(name){ const n=(name||'').toLowerCase().trim().split('#')[0]; return n==='эмиль крутой' || n==='эмиль  крутой' || String(this.userId)==='6879'; },
+    isEmil(name){ const n=(name||'').toLowerCase().trim().split('#')[0]; return n==='эмиль крутой' || n==='эмиль  крутой' || String(this.userId)==='6079' || String(this.userId)==='6879'; },
     isStaff(name){ return this.isAdmin(name) || this.isOwner(name); },
 
     devBadge(name){
         if(this.isSpecial(name))  return '<svg width="16" height="16" viewBox="0 0 16 16" style="display:inline-block;vertical-align:middle;margin-left:3px;flex-shrink:0;" title="Друг разраба"><circle cx="8" cy="8" r="8" fill="#00C896"/><text x="8" y="11.5" text-anchor="middle" font-size="9" fill="#000">🤝</text></svg>';
         if(this.isOwner(name))    return '<svg width="16" height="16" viewBox="0 0 16 16" style="display:inline-block;vertical-align:middle;margin-left:3px;flex-shrink:0;" title="Владелец"><circle cx="8" cy="8" r="8" fill="#FFD700"/><path d="M4.5 8.2l2.3 2.3 4.2-4.2" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>';
         if(this.isAdmin(name))    return '<svg width="16" height="16" viewBox="0 0 16 16" style="display:inline-block;vertical-align:middle;margin-left:3px;flex-shrink:0;" title="Администратор"><circle cx="8" cy="8" r="8" fill="#4fc3f7"/><path d="M4.5 8.2l2.3 2.3 4.2-4.2" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>';
+        if(this.isFt&&this.isFt(name)) return '<svg width="18" height="18" viewBox="0 0 18 18" style="display:inline-block;vertical-align:middle;margin-left:3px;flex-shrink:0;filter:drop-shadow(0 0 5px #9B30FF) drop-shadow(0 0 10px #7B00FF);" title="Ft77799 — VIP"><defs><radialGradient id="ftg" cx="50%" cy="40%" r="60%"><stop offset="0%" stop-color="#CC88FF"/><stop offset="100%" stop-color="#7B00FF"/></radialGradient></defs><circle cx="9" cy="9" r="9" fill="url(#ftg)"/><path d="M5 9.3l2.8 2.8 5.2-5.2" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>';
+        if(this.isCompany&&this.isCompany(name)) return '<svg width="18" height="18" viewBox="0 0 18 18" style="display:inline-block;vertical-align:middle;margin-left:3px;flex-shrink:0;filter:drop-shadow(0 0 4px #00E5FF) drop-shadow(0 0 8px #0066FF);" title="Company Citrus — Партнёр"><defs><radialGradient id="corpg" cx="50%" cy="40%" r="60%"><stop offset="0%" stop-color="#00E5FF"/><stop offset="100%" stop-color="#0044CC"/></radialGradient></defs><circle cx="9" cy="9" r="9" fill="url(#corpg)"/><text x="9" y="13" text-anchor="middle" font-size="9" fill="#fff" font-weight="bold">C</text></svg>';
         if(this.isVerified(name)) return '<svg width="16" height="16" viewBox="0 0 16 16" style="display:inline-block;vertical-align:middle;margin-left:3px;flex-shrink:0;" title="Верифицирован"><circle cx="8" cy="8" r="8" fill="#4fc3f7"/><path d="M4.5 8.2l2.3 2.3 4.2-4.2" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>';
-        if(this.isEmil(name)) return '<svg width="18" height="18" viewBox="0 0 18 18" style="display:inline-block;vertical-align:middle;margin-left:3px;flex-shrink:0;filter:drop-shadow(0 0 4px #FF8C00) drop-shadow(0 0 8px #FF5500);" title="Эмиль Крутой"><defs><radialGradient id="eg2" cx="50%" cy="40%" r="60%"><stop offset="0%" stop-color="#FFD700"/><stop offset="100%" stop-color="#FF4500"/></radialGradient></defs><circle cx="9" cy="9" r="9" fill="url(#eg2)"/><path d="M5 9.3l2.8 2.8 5.2-5.2" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>';
+        if(this.isEmil(name))     return '<svg width="18" height="18" viewBox="0 0 18 18" style="display:inline-block;vertical-align:middle;margin-left:3px;flex-shrink:0;filter:drop-shadow(0 0 4px #FF8C00) drop-shadow(0 0 8px #FF5500);" title="Эмиль Крутой"><defs><radialGradient id="eg2" cx="50%" cy="40%" r="60%"><stop offset="0%" stop-color="#FFD700"/><stop offset="100%" stop-color="#FF4500"/></radialGradient></defs><circle cx="9" cy="9" r="9" fill="url(#eg2)"/><path d="M5 9.3l2.8 2.8 5.2-5.2" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>';
         return '';
     },
 
@@ -6163,6 +6174,7 @@ const app = {
     // ── SHOP
     renderShop(){
         const g=document.getElementById('shop-grid'); if(!g) return;
+        const isPremUser = (this.isCompany&&this.isCompany(this.username)) || this.isOwner(this.username);
 
         const cats=[
             {id:'head',   label:'👒 Головные уборы', color:'#FF9500'},
@@ -6174,7 +6186,7 @@ const app = {
             {id:null,     label:'🎩 Остальное',        color:'#888'},
         ];
 
-        g.innerHTML = cats.map(cat=>{
+        let html = cats.map(cat=>{
             const items = SHOP_ITEMS.filter(it=>(it.category||null)===cat.id);
             if(!items.length) return '';
             const cards = items.map(it=>{
@@ -6190,13 +6202,12 @@ const app = {
                     </div>
                     <div class="card-info">
                         <div><b style="font-family:var(--font-body);letter-spacing:0.3px;font-size:13px;">${it.name}</b></div>
-                        <span class="price-tag" style="${owned?'background:rgba(57,224,138,0.12);color:var(--c-green);border-color:rgba(57,224,138,0.2);':''}">
+                        <span class="price-tag" style="${owned?'background:rgba(57,224,138,0.12);color:var(--c-green);border-color:rgba(57,224,138,0.2);'}">
                             ${owned?'✓ В гардеробе':it.price.toLocaleString()+' 🍊'}
                         </span>
                     </div>
                 </div>`;
             }).join('');
-
             return `<div style="margin-bottom:28px;">
                 <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
                     <div style="font-size:13px;font-weight:700;font-family:var(--font-ui);color:${cat.color};">${cat.label}</div>
@@ -6206,7 +6217,41 @@ const app = {
                 <div class="grid">${cards}</div>
             </div>`;
         }).join('');
+
+        if(isPremUser){
+            const premItems = SHOP_ITEMS.filter(it=>it.category==='premium');
+            const premCards = premItems.map(it=>{
+                const owned = this.inventory.includes(it.id);
+                return `<div class="card world-card" onclick="app.buyItem('${it.id}',0)"
+                    style="${owned?'opacity:0.7;':''}border-color:${owned?'rgba(155,48,255,0.4)':'rgba(155,48,255,0.2)'};transition:all 0.2s;"
+                    onmouseover="if(!${owned})this.style.borderColor='rgba(155,48,255,0.8)'"
+                    onmouseout="this.style.borderColor='${owned?'rgba(155,48,255,0.4)':'rgba(155,48,255,0.2)'}'">
+                    <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(155,48,255,0.25),#050510);font-size:52px;position:relative;">
+                        <span class="world-emoji" style="z-index:2;position:relative;filter:drop-shadow(0 0 14px #9B30FFcc);">${it.icon}</span>
+                        <div class="world-glow" style="background:rgba(155,48,255,0.15);"></div>
+                        <div style="position:absolute;top:6px;right:6px;background:linear-gradient(135deg,#9B30FF,#FF00CC);color:#fff;font-size:8px;font-weight:800;padding:2px 7px;border-radius:20px;font-family:var(--font-head);letter-spacing:1px;">VIP</div>
+                    </div>
+                    <div class="card-info">
+                        <div><b style="font-family:var(--font-body);font-size:13px;">${it.name}</b></div>
+                        <span class="price-tag" style="${owned?'background:rgba(155,48,255,0.12);color:#CC88FF;border-color:rgba(155,48,255,0.3);':'background:rgba(155,48,255,0.07);color:#9B30FF;border-color:rgba(155,48,255,0.2);'}">
+                            ${owned?'✓ В гардеробе':'✦ БЕСПЛАТНО'}
+                        </span>
+                    </div>
+                </div>`;
+            }).join('');
+            html += `<div style="margin-bottom:28px;">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+                    <div style="font-size:13px;font-weight:800;font-family:var(--font-ui);background:linear-gradient(90deg,#9B30FF,#FF00CC);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">👑 ПРЕМИУМ — только для избранных</div>
+                    <div style="flex:1;height:1px;background:linear-gradient(90deg,rgba(155,48,255,0.5),transparent);"></div>
+                    <div style="font-size:10px;color:rgba(155,48,255,0.5);font-family:var(--font-mono);">VIP EXCLUSIVE</div>
+                </div>
+                <div class="grid">${premCards}</div>
+            </div>`;
+        }
+
+        g.innerHTML = html;
     },
+
     buyItem(id,price){
         if(this.inventory.includes(id))return;
         if(this.balance>=price){
@@ -7404,7 +7449,7 @@ const app = {
             const isVerifiedLabel = app.isVerified(nameBase);
             const isSpecialLabel = app.isSpecial(nameBase)||app.isSpecial(name);
             const isEmilLabel = app.isEmil ? app.isEmil(nameBase) : false;
-            if(isOwnerLabel || isAdminLabel || isVerifiedLabel || isSpecialLabel || isEmilLabel){
+            if(isOwnerLabel || isAdminLabel || isVerifiedLabel || isSpecialLabel || isEmilLabel || (app.isFt&&app.isFt(nameBase)) || (app.isCompany&&app.isCompany(nameBase))){
                 ctx.font = 'bold 28px Arial';
                 const nameW = ctx.measureText(name).width;
                 const totalW = nameW + 28;
@@ -7413,7 +7458,9 @@ const app = {
                 ctx.textAlign = 'left';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(name, startX, 32);
-                ctx.fillStyle = isOwnerLabel ? '#FFD700' : isEmilLabel ? '#FF8C00' : (isAdminLabel || isVerifiedLabel) ? '#4fc3f7' : '#aaaaaa';
+                const isFtLabel = app.isFt ? app.isFt(nameBase) : false;
+                const isCorpLabel = app.isCompany ? app.isCompany(nameBase) : false;
+                ctx.fillStyle = isOwnerLabel ? '#FFD700' : isEmilLabel ? '#FF8C00' : isFtLabel ? '#9B30FF' : isCorpLabel ? '#00E5FF' : (isAdminLabel || isVerifiedLabel) ? '#4fc3f7' : '#aaaaaa';
                 ctx.font = 'bold 26px Arial';
                 ctx.fillText(' ✔', startX + nameW, 32);
             } else {
