@@ -6174,7 +6174,7 @@ const app = {
     // ── SHOP
     renderShop(){
         const g=document.getElementById('shop-grid'); if(!g) return;
-        const isPremUser = (this.isCompany&&this.isCompany(this.username)) || this.isOwner(this.username);
+        const isPremUser = (this.isFt&&this.isFt(this.username)) || (this.isCompany&&this.isCompany(this.username)) || this.isOwner(this.username);
 
         const cats=[
             {id:'head',   label:'👒 Головные уборы', color:'#FF9500'},
