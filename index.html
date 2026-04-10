@@ -7501,6 +7501,12 @@ const app = {
         if(inv.includes('headphones')){const hm=new THREE.MeshStandardMaterial({color:0x222222,metalness:0.5});const band=new THREE.Mesh(new THREE.TorusGeometry(0.32,0.04,6,16,Math.PI),hm);band.position.set(0,0.35,0);band.rotation.z=Math.PI;headGroup.add(band);[-0.33,0.33].forEach(x=>{const cup=new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.1,0.1,10),new THREE.MeshStandardMaterial({color:0xFF9800,emissive:0xFF5500,emissiveIntensity:0.5}));cup.position.set(x,0.05,0);cup.rotation.z=Math.PI/2;headGroup.add(cup);});}
         if(inv.includes('flame')){const fl=new THREE.Mesh(new THREE.TorusGeometry(0.35,0.06,8,20),new THREE.MeshStandardMaterial({color:0xFF4400,emissive:0xFF2200,emissiveIntensity:1.5}));fl.position.set(0,0.55,0);headGroup.add(fl);}
         if(inv.includes('halo')){const hl=new THREE.Mesh(new THREE.TorusGeometry(0.26,0.04,8,24),new THREE.MeshStandardMaterial({color:0xFFDD44,emissive:0xFFBB00,emissiveIntensity:1.5,metalness:0.6}));hl.position.set(0,0.55,0);hl.rotation.x=Math.PI/6;headGroup.add(hl);}
+        // ── ПРЕМИУМ аксессуары других игроков ──
+        if(inv.includes('prem_crown')){const crMat=new THREE.MeshStandardMaterial({color:0xFFD700,metalness:1,roughness:0.1,emissive:0xAA6600,emissiveIntensity:0.4});const crBase=new THREE.Mesh(new THREE.CylinderGeometry(0.28,0.22,0.18,8),crMat);crBase.position.set(0,0.42,0);headGroup.add(crBase);for(let i=0;i<5;i++){const a=(i/5)*Math.PI*2;const sp=new THREE.Mesh(new THREE.ConeGeometry(0.05,0.18,6),crMat);sp.position.set(Math.cos(a)*0.2,0.57,Math.sin(a)*0.2);headGroup.add(sp);}const cl=new THREE.PointLight(0x9B30FF,1.2,3);cl.position.set(0,0.6,0);headGroup.add(cl);}
+        if(inv.includes('prem_aura')){const am=new THREE.MeshStandardMaterial({color:0x7B00FF,emissive:0x9B30FF,emissiveIntensity:1.0,transparent:true,opacity:0.22});const aura=new THREE.Mesh(new THREE.SphereGeometry(0.85,12,12),am);aura.position.set(0,1.4,0);g.add(aura);[0.6,0.78].forEach((r,i)=>{const rm=new THREE.MeshStandardMaterial({color:0xCC44FF,emissive:0xAA00FF,emissiveIntensity:0.7,transparent:true,opacity:0.35});const ring=new THREE.Mesh(new THREE.TorusGeometry(r,0.025,6,28),rm);ring.rotation.x=i*0.7;ring.position.set(0,1.4,0);g.add(ring);});}
+        if(inv.includes('prem_wings2')){const wm2=new THREE.MeshStandardMaterial({color:0xFFFFFF,emissive:0x88CCFF,emissiveIntensity:0.8,transparent:true,opacity:0.88});const wL2=new THREE.Mesh(new THREE.BoxGeometry(2.0,1.2,0.08),wm2);wL2.position.set(-1.1,0.3,-0.2);wL2.rotation.y=0.4;wL2.rotation.z=0.15;torso.add(wL2);const wR2=new THREE.Mesh(new THREE.BoxGeometry(2.0,1.2,0.08),wm2);wR2.position.set(1.1,0.3,-0.2);wR2.rotation.y=-0.4;wR2.rotation.z=-0.15;torso.add(wR2);}
+        if(inv.includes('prem_mask')){const mm=new THREE.MeshStandardMaterial({color:0x0a0010,metalness:0.8,roughness:0.2});const mask2=new THREE.Mesh(new THREE.BoxGeometry(0.64,0.64,0.1),mm);mask2.position.set(0,0,0.31);headGroup.add(mask2);[-0.14,0.14].forEach(x=>{const eye=new THREE.Mesh(new THREE.SphereGeometry(0.06,8,8),new THREE.MeshStandardMaterial({color:0xFF0000,emissive:0xFF0000,emissiveIntensity:3}));eye.position.set(x,0.08,0.37);headGroup.add(eye);});}
+        if(inv.includes('prem_staff')){const sg2=new THREE.Group();const pole2=new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,1.6),new THREE.MeshStandardMaterial({color:0x330066,metalness:0.7,roughness:0.3}));pole2.position.y=-0.2;sg2.add(pole2);const orb2=new THREE.Mesh(new THREE.SphereGeometry(0.15,10,10),new THREE.MeshStandardMaterial({color:0x9B30FF,emissive:0x7B00FF,emissiveIntensity:2}));orb2.position.y=0.65;sg2.add(orb2);const sl2=new THREE.PointLight(0x9B30FF,1.2,3);sl2.position.y=0.65;sg2.add(sl2);sg2.position.set(0,-0.5,-0.15);sg2.rotation.x=Math.PI/12;const lA2=g.children.find(c=>c.position&&c.position.x<0&&c.userData&&c.userData.isArm)||torso;lA2.add?lA2.add(sg2):torso.add(sg2);}
         if(inv.includes('hair_short')){
             // Короткие каштановые волосы — детализированная шапка с чёлкой и боковыми прядями
             const hm=new THREE.MeshStandardMaterial({color:0x6B3310,roughness:0.85,metalness:0.0});
@@ -8658,6 +8664,80 @@ const app = {
             rA.add(gunGrp);
             this._gunGroup=gunGrp;
         }
+
+        // ══ ПРЕМИУМ АКСЕССУАРЫ ══
+        if(this.inventory.includes('prem_crown')){
+            // Корона Легенды — золотая с фиолетовым свечением
+            const crMat = new THREE.MeshStandardMaterial({color:0xFFD700,metalness:1,roughness:0.1,emissive:0xAA6600,emissiveIntensity:0.4});
+            const crBase = new THREE.Mesh(new THREE.CylinderGeometry(0.28,0.22,0.18,8), crMat);
+            crBase.position.set(0,0.42,0); headGroup.add(crBase);
+            // Зубцы короны
+            for(let i=0;i<5;i++){
+                const a=(i/5)*Math.PI*2;
+                const spike=new THREE.Mesh(new THREE.ConeGeometry(0.05,0.18,6),crMat);
+                spike.position.set(Math.cos(a)*0.2,0.57,Math.sin(a)*0.2);
+                headGroup.add(spike);
+            }
+            // Фиолетовое свечение
+            const crLight=new THREE.PointLight(0x9B30FF,1.5,3);
+            crLight.position.set(0,0.6,0); headGroup.add(crLight);
+        }
+        if(this.inventory.includes('prem_aura')){
+            // Аура Фиолета — пульсирующая сфера
+            const auraMat=new THREE.MeshStandardMaterial({color:0x7B00FF,emissive:0x9B30FF,emissiveIntensity:1.2,transparent:true,opacity:0.25});
+            const aura=new THREE.Mesh(new THREE.SphereGeometry(0.85,14,14),auraMat);
+            aura.position.set(0,0.8,0); group.add(aura);
+            // Кольца
+            [0.6,0.75,0.9].forEach((r,i)=>{
+                const ringMat=new THREE.MeshStandardMaterial({color:0xCC44FF,emissive:0xAA00FF,emissiveIntensity:0.8,transparent:true,opacity:0.4});
+                const ring=new THREE.Mesh(new THREE.TorusGeometry(r,0.025,6,30),ringMat);
+                ring.rotation.x=i*0.6; ring.rotation.z=i*0.4;
+                ring.position.set(0,0.8,0); group.add(ring);
+            });
+        }
+        if(this.inventory.includes('prem_wings2')){
+            // Крылья Архангела — белые светящиеся
+            const wm2=new THREE.MeshStandardMaterial({color:0xFFFFFF,emissive:0x88CCFF,emissiveIntensity:0.9,transparent:true,opacity:0.9});
+            // Большие крылья
+            const wL2=new THREE.Mesh(new THREE.BoxGeometry(2.0,1.2,0.08),wm2);
+            wL2.position.set(-1.1,0.3,-0.2); wL2.rotation.y=0.4; wL2.rotation.z=0.15; torso.add(wL2);
+            const wR2=new THREE.Mesh(new THREE.BoxGeometry(2.0,1.2,0.08),wm2);
+            wR2.position.set(1.1,0.3,-0.2); wR2.rotation.y=-0.4; wR2.rotation.z=-0.15; torso.add(wR2);
+            // Свет от крыльев
+            const wLight=new THREE.PointLight(0x88CCFF,1.2,4);
+            wLight.position.set(0,0.5,0); torso.add(wLight);
+        }
+        if(this.inventory.includes('prem_mask')){
+            // Маска Призрака — тёмная с красными глазами
+            const maskMat=new THREE.MeshStandardMaterial({color:0x0a0010,metalness:0.8,roughness:0.2});
+            const mask2=new THREE.Mesh(new THREE.BoxGeometry(0.64,0.64,0.1),maskMat);
+            mask2.position.set(0,0,0.31); headGroup.add(mask2);
+            // Красные глаза
+            [-0.14,0.14].forEach(x=>{
+                const eye=new THREE.Mesh(new THREE.SphereGeometry(0.06,8,8),
+                    new THREE.MeshStandardMaterial({color:0xFF0000,emissive:0xFF0000,emissiveIntensity:3}));
+                eye.position.set(x,0.08,0.37); headGroup.add(eye);
+            });
+            const mLight=new THREE.PointLight(0xFF0000,1.0,2);
+            mLight.position.set(0,0.1,0.4); headGroup.add(mLight);
+        }
+        if(this.inventory.includes('prem_staff')){
+            // Посох Создателя — в левой руке
+            const staffGrp=new THREE.Group();
+            const pole=new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,1.6),
+                new THREE.MeshStandardMaterial({color:0x330066,metalness:0.7,roughness:0.3}));
+            pole.position.y=-0.2; staffGrp.add(pole);
+            // Навершие — светящийся шар
+            const orb=new THREE.Mesh(new THREE.SphereGeometry(0.15,10,10),
+                new THREE.MeshStandardMaterial({color:0x9B30FF,emissive:0x7B00FF,emissiveIntensity:2}));
+            orb.position.y=0.65; staffGrp.add(orb);
+            const sLight=new THREE.PointLight(0x9B30FF,1.5,3);
+            sLight.position.y=0.65; staffGrp.add(sLight);
+            staffGrp.position.set(0,-0.5,-0.15);
+            staffGrp.rotation.x=Math.PI/12;
+            lA.add(staffGrp);
+        }
+
         if(needsRig)this.rig={leftArm:lA,rightArm:rA,leftLeg:lL,rightLeg:rL,torso,head:headGroup};
         // Всегда сохраняем _rig для анимации других игроков
         group._rig={lA,rA,lL,rL,torso,head:headGroup};
