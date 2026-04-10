@@ -6202,7 +6202,7 @@ const app = {
                     </div>
                     <div class="card-info">
                         <div><b style="font-family:var(--font-body);letter-spacing:0.3px;font-size:13px;">${it.name}</b></div>
-                        <span class="price-tag" style="${owned?'background:rgba(57,224,138,0.12);color:var(--c-green);border-color:rgba(57,224,138,0.2);'}">
+                        <span class="price-tag" style="${owned?`background:rgba(57,224,138,0.12);color:var(--c-green);border-color:rgba(57,224,138,0.2);`:''}">
                             ${owned?'✓ В гардеробе':it.price.toLocaleString()+' 🍊'}
                         </span>
                     </div>
