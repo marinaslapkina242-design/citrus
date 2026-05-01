@@ -1213,7 +1213,7 @@ function broadcastToSession(sessionId,msg,exceptId){
     wsClients.forEach(c=>{ if(c.studioSession===sessionId&&String(c.userId)!==String(exceptId))wsWrite(c.socket,msg); });
 }
 
-// Каждые 10 сек: пингуем клиентов и чистим позиции без живого WS
+// Каждые 30 сек: пингуем клиентов и чистим позиции без живого WS
 setInterval(()=>{
     const activeIds=new Set();
     wsClients.forEach(c=>{ if(c.userId) activeIds.add(String(c.userId)); });
@@ -1225,7 +1225,7 @@ setInterval(()=>{
         }
     });
     wsClients.forEach(c=>wsPing(c.socket));
-}, 10000);
+}, 30000);
 
 server.on('upgrade',(req,socket)=>{
     wsHandshake(req,socket);
@@ -1308,13 +1308,7 @@ server.on('upgrade',(req,socket)=>{
 loadDB().then(()=>{
     server.listen(process.env.PORT||3000,()=>{
         console.log('🍊 Citrus backend OK');
-        // Не даём серверу засыпать на Free плане Render
-        const SELF = process.env.RENDER_EXTERNAL_URL||'';
-        if(SELF){
-            setInterval(()=>{
-                https.get(SELF+'/ping',()=>{}).on('error',e=>console.log('ping err:',e.message));
-                console.log('🏓 self-ping');
-            }, 4*60*1000); // каждые 4 минуты
-        }
+        // ℹ️ Self-ping убран — он съедал 750ч/мес лимит Render Free
+        // Render сам поднимает сервер при запросе (cold start ~30 сек)
     });
 });
