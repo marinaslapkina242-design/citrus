@@ -3,18 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="theme-color" content="#FF69B4">
-    <title>🐣 CITRUS | EASTER 2026</title>
+    <title>CITRUS ONLINE</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&family=Bebas+Neue&display=swap" rel="stylesheet">
     <style>
 
-        /* 🐣 EASTER 2026 THEME */
         :root {
-            --easter-pink: #FF69B4;
-            --easter-purple: #DA70D6;
-            --easter-yellow: #FFD700;
-            --easter-green: #7CFC00;
-            --easter-blue: #87CEEB;
         }
         /* Пасхальный градиент фона */
         body::before {
@@ -24,8 +18,6 @@
                 radial-gradient(ellipse 60% 80% at 50% 100%, rgba(255,215,0,0.08) 0%, transparent 50%),
                 radial-gradient(ellipse 40% 40% at 90% 90%, rgba(124,252,0,0.08) 0%, transparent 50%) !important;
         }
-        /* Пасхальное яйцо вместо иконки токена */
-        .egg-icon::before { content: '🥚'; }
         /* ╔══════════════════════════════════════════════════════════════════╗
            ║  CITRUS ONLINE — VOID PROTOCOL EDITION                          ║
            ║  Aesthetic: Liquid Chrome × Deep Space × Chromatic Aberration   ║
@@ -34,7 +26,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&family=Bebas+Neue&display=swap');
 
         :root {
-            /* 🐣 EASTER PALETTE */
+            /* CITRUS PALETTE */
             --void:      #1A0A0F;
             --deep:      #200D15;
             --mid:       #2C1020;
@@ -103,15 +95,13 @@
                 radial-gradient(ellipse 60% 80% at 50% 100%, rgba(255,215,0,0.12) 0%, transparent 50%),
                 radial-gradient(ellipse 40% 40% at 20% 80%, rgba(124,252,0,0.10) 0%, transparent 50%),
                 radial-gradient(ellipse 50% 50% at 90% 90%, rgba(255,165,0,0.10) 0%, transparent 50%);
-            animation: easterPulse 6s ease-in-out infinite alternate;
+            
             pointer-events: none;
         }
         @keyframes voidPulse {
             0%   { opacity: 0.7; transform: scale(1) rotate(0deg); }
             100% { opacity: 1;   transform: scale(1.03) rotate(0.5deg); }
         }
-        @keyframes easterPulse {
-            0%   { opacity: 0.8; transform: scale(1) rotate(0deg); }
             33%  { opacity: 1;   transform: scale(1.05) rotate(1deg); }
             66%  { opacity: 0.9; transform: scale(0.98) rotate(-1deg); }
             100% { opacity: 1;   transform: scale(1.03) rotate(0.5deg); }
@@ -185,16 +175,16 @@
             position: relative; z-index: 10;
             width: 440px;
             padding: 56px 52px;
-            background: linear-gradient(160deg, rgba(50,15,35,0.97) 0%, rgba(30,8,20,0.98) 100%);
-            border: 1px solid rgba(255,105,180,0.25);
+            background: linear-gradient(160deg, rgba(13,9,32,0.97) 0%, rgba(3,0,15,0.98) 100%);
+            border: 1px solid rgba(0,229,255,0.12);
             border-radius: 24px;
             text-align: center;
             animation: loginAppear 0.7s cubic-bezier(0.34,1.4,0.64,1) both;
             box-shadow:
                 0 0 0 1px rgba(255,255,255,0.04) inset,
                 0 60px 120px rgba(0,0,0,0.95),
-                0 0 80px rgba(255,105,180,0.12),
-                0 0 160px rgba(218,112,214,0.08);
+                0 0 80px rgba(0,229,255,0.05),
+                0 0 160px rgba(123,47,255,0.04);
         }
         @keyframes loginAppear {
             from { opacity: 0; transform: translateY(40px) scale(0.94); }
@@ -229,10 +219,10 @@
             /* Chromatic split */
             color: #fff;
             text-shadow:
-                -2px 0 rgba(255,105,180,0.8),
-                2px 0 rgba(255,215,0,0.8),
-                0 0 40px rgba(255,105,180,0.6),
-                0 0 80px rgba(218,112,214,0.3);
+                -2px 0 rgba(255,45,85,0.7),
+                2px 0 rgba(0,229,255,0.7),
+                0 0 40px rgba(0,229,255,0.4),
+                0 0 80px rgba(0,229,255,0.15);
             animation: chromaFlicker 8s ease-in-out infinite;
         }
         @keyframes chromaFlicker {
@@ -294,7 +284,7 @@
 
         .btn-primary {
             width: 100%; padding: 16px; margin-top: 12px;
-            background: linear-gradient(135deg, #FF69B4, #DA70D6, #FFB347);
+            background: linear-gradient(135deg, #00C9FF, #0066FF);
             color: #fff; border-radius: 10px;
             font-size: 13px; letter-spacing: 3px; text-transform: uppercase;
             font-weight: 700; font-family: var(--font-accent);
@@ -322,7 +312,7 @@
         /* HEADER */
         .hub-header {
             height: 60px;
-            background: rgba(22,7,15,0.95);
+            background: rgba(3,0,15,0.95);
             display: flex; align-items: center;
             padding: 0 24px;
             position: relative; z-index: 10;
@@ -335,11 +325,10 @@
             position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
             background: linear-gradient(90deg,
                 transparent 0%,
-                rgba(255,105,180,0.9) 10%,
-                rgba(255,215,0,0.9) 30%,
-                rgba(124,252,0,0.9) 50%,
-                rgba(218,112,214,0.9) 70%,
-                rgba(255,165,0,0.9) 90%,
+                rgba(123,47,255,0.6) 15%,
+                rgba(0,229,255,0.9) 35%,
+                rgba(0,255,148,0.6) 55%,
+                rgba(0,102,255,0.7) 75%,
                 transparent 100%);
             animation: headerLineFlow 6s linear infinite;
             background-size: 200% 100%;
@@ -385,7 +374,7 @@
         .balance-chip {
             display: flex; align-items: center; gap: 7px;
             background: rgba(0,0,0,0.5);
-            border: 1px solid rgba(255,105,180,0.30);
+            border: 1px solid rgba(0,229,255,0.15);
             padding: 6px 14px; border-radius: 50px;
             font-family: var(--font-mono); font-size: 13px; font-weight: 500;
             color: var(--p);
@@ -422,8 +411,8 @@
            ╚══════════════════════════════════════════════════════════════════╝ */
         .sidebar {
             width: 240px;
-            background: rgba(25,8,18,0.97);
-            border-right: 1px solid rgba(255,105,180,0.08);
+            background: rgba(3,0,15,0.97);
+            border-right: 1px solid rgba(0,229,255,0.05);
             padding: 16px 0;
             display: flex; flex-direction: column;
             position: relative; overflow: hidden; overflow-y: auto;
@@ -630,7 +619,7 @@
 
         .btn-orange-full {
             width: 100%; padding: 13px;
-            background: linear-gradient(135deg, #FF69B4, #DA70D6, #FFB347);
+            background: linear-gradient(135deg, #00C9FF, #0066FF);
             color: #fff; border-radius: 10px;
             font-size: 14px; font-weight: 700;
             font-family: var(--font-body); letter-spacing: 0.3px;
@@ -702,7 +691,7 @@
         }
         .srow input:focus { border-color: rgba(0,229,255,0.25); box-shadow: 0 0 0 3px rgba(0,229,255,0.04); }
         .srow input::placeholder { color: rgba(220,240,255,0.15); }
-        .srow button { background: linear-gradient(135deg, #FF69B4, #DA70D6, #FFB347); color: #fff; padding: 10px 16px; border-radius: 8px; font-size: 12px; font-family: var(--font-body); box-shadow: 0 0 14px rgba(0,102,255,0.3); }
+        .srow button { background: linear-gradient(135deg, #00C9FF, #0066FF); color: #fff; padding: 10px 16px; border-radius: 8px; font-size: 12px; font-family: var(--font-body); box-shadow: 0 0 14px rgba(0,102,255,0.3); }
 
 
         /* ╔══════════════════════════════════════════════════════════════════╗
@@ -738,7 +727,7 @@
 
         .studio-panel {
             position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
-            background: rgba(22,7,15,0.95); padding: 10px 16px; border-radius: 50px;
+            background: rgba(3,0,15,0.95); padding: 10px 16px; border-radius: 50px;
             border: 1px solid rgba(0,229,255,0.15); pointer-events: auto;
             display: flex; gap: 8px; align-items: center;
             backdrop-filter: blur(20px); flex-wrap: wrap; max-width: 90vw;
@@ -746,7 +735,7 @@
         }
         .btn-st { background: rgba(255,255,255,0.04); color: rgba(220,240,255,0.45); padding: 7px 14px; border-radius: 8px; font-size: 12px; border: 1px solid rgba(255,255,255,0.06); font-family: var(--font-body); }
         .btn-st:hover { background: rgba(255,255,255,0.08); color: rgba(220,240,255,0.8); }
-        .btn-publish { background: linear-gradient(135deg, #FF69B4, #DA70D6, #FFB347); color: #fff; padding: 7px 16px; border-radius: 8px; font-size: 12px; font-family: var(--font-accent); box-shadow: 0 0 15px rgba(0,102,255,0.3); }
+        .btn-publish { background: linear-gradient(135deg, #00C9FF, #0066FF); color: #fff; padding: 7px 16px; border-radius: 8px; font-size: 12px; font-family: var(--font-accent); box-shadow: 0 0 15px rgba(0,102,255,0.3); }
         .btn-exit { position: absolute; top: 16px; right: 16px; background: rgba(255,45,85,0.08); color: rgba(255,45,85,0.7); padding: 8px 18px; border-radius: 10px; pointer-events: auto; font-weight: 700; border: 1px solid rgba(255,45,85,0.18); font-family: var(--font-body); }
         .btn-exit:hover { background: rgba(255,45,85,0.16); box-shadow: 0 0 20px rgba(255,45,85,0.15); }
         #ingame-ui { position: absolute; top: 16px; left: 16px; background: rgba(3,0,15,0.9); padding: 10px 18px; border-radius: 12px; border: 1px solid rgba(0,229,255,0.18); font-size: 20px; font-weight: 800; font-family: var(--font-mono); box-shadow: 0 0 20px rgba(0,229,255,0.07); color: var(--p); }
@@ -804,7 +793,7 @@
         .featured-world:hover { border-color: rgba(0,229,255,0.3) !important; box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 40px rgba(0,229,255,0.07) !important; }
 
         .hot-badge { background: linear-gradient(135deg, #FF2D55, #CC003A); color: #fff; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 5px; font-family: var(--font-mono); letter-spacing: 0.5px; box-shadow: 0 0 12px rgba(255,45,85,0.5); animation: pulseGlow 2s ease-in-out infinite; }
-        .new-badge { background: linear-gradient(135deg, #FF69B4, #DA70D6, #FFB347); color: #fff; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 5px; font-family: var(--font-mono); letter-spacing: 0.5px; box-shadow: 0 0 12px rgba(0,102,255,0.4); }
+        .new-badge { background: linear-gradient(135deg, #00C9FF, #0066FF); color: #fff; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 5px; font-family: var(--font-mono); letter-spacing: 0.5px; box-shadow: 0 0 12px rgba(0,102,255,0.4); }
 
         /* STUDIO */
         .studio-hero { display: flex; align-items: center; gap: 18px; background: linear-gradient(135deg, rgba(0,229,255,0.04), rgba(123,47,255,0.02)); border: 1px solid rgba(0,229,255,0.08); border-radius: 14px; padding: 22px 24px; margin-bottom: 20px; }
@@ -1011,7 +1000,7 @@
                 <span id="online-count-chip">онлайн</span>
             </div>
             <div class="balance-chip">🍊 <span id="balance-val">0</span></div>
-            <div class="balance-chip" style="background:linear-gradient(135deg,rgba(123,47,255,0.15),rgba(0,229,255,0.08));border-color:rgba(123,47,255,0.3);color:#B060FF;">🥚 <span id="tokens-val">0</span></div>
+            <div class="balance-chip" style="background:linear-gradient(135deg,rgba(123,47,255,0.15),rgba(0,229,255,0.08));border-color:rgba(123,47,255,0.3);color:#B060FF;">💜 <span id="tokens-val">0</span></div>
             <!-- Уровень -->
             <div id="level-chip" onclick="app.showLevelInfo()" style="background:linear-gradient(135deg,rgba(120,60,220,0.18),rgba(80,20,180,0.10));border:1px solid rgba(140,80,255,0.3);border-radius:10px;padding:6px 12px;font-family:var(--font-mono);font-size:12px;color:#B060FF;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all 0.2s;" title="Твой уровень">
                 ⭐ <span id="level-val">1</span>
@@ -1185,7 +1174,7 @@
                         <div style="font-family:var(--font-head);font-size:14px;letter-spacing:2px;color:#fff;">🛒 МАГАЗИН ПАКОВ</div>
                         <div id="ai-msgs-status" style="font-size:11px;color:rgba(180,100,255,0.8);font-family:var(--font-mono);background:rgba(123,47,255,0.15);border:1px solid rgba(123,47,255,0.3);border-radius:20px;padding:3px 10px;"></div>
                     </div>
-                    <div style="font-size:11px;color:rgba(255,255,255,0.3);font-family:var(--font-mono);margin-bottom:12px;">Покупай паки за 🍊 цитрусы или 🥚 яички</div>
+                    <div style="font-size:11px;color:rgba(255,255,255,0.3);font-family:var(--font-mono);margin-bottom:12px;">Покупай паки за 🍊 цитрусы или 💜 токены</div>
                     <div id="ai-packs-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;"></div>
                 </div>
 
@@ -1252,23 +1241,6 @@
 
             <!-- ══════════════════ TAB: GAMES ══════════════════ -->
             <div id="tab-games">
-                <!-- 🐣 Пасхальный баннер -->
-                <div style="
-                    background: linear-gradient(135deg, rgba(255,105,180,0.15), rgba(255,215,0,0.10), rgba(124,252,0,0.08));
-                    border: 1px solid rgba(255,105,180,0.30);
-                    border-radius: 16px;
-                    padding: 14px 20px;
-                    margin-bottom: 18px;
-                    display: flex;
-                    align-items: center;
-                    gap: 14px;
-                    animation: easterPulse 4s ease-in-out infinite alternate;
-                ">
-                    <span style="font-size: 36px; filter: drop-shadow(0 0 12px rgba(255,215,0,0.7));">🐣</span>
-                    <div>
-                        <div style="font-family: var(--font-head); font-size: 17px; color: #FFD700; letter-spacing: 2px; margin-bottom: 3px;">ПАСХА 2026!</div>
-                        <div style="font-size: 13px; color: rgba(255,200,220,0.85); font-family: var(--font-ui);">Собирай 🥚 яички в мирах и покупай новые аксессуары в магазине!</div>
-                    </div>
                     <span style="font-size: 28px; margin-left: auto; filter: drop-shadow(0 0 8px rgba(255,105,180,0.6));">🌸</span>
                 </div>
                 <div class="section-title">Официальные миры</div>
@@ -1294,27 +1266,6 @@
                         </div>
                         <div class="card-info">
                             <div><b>Небесный Паркур</b><br><small class="world-tag" style="color:rgba(0,229,255,0.7)">⚡ Испытай себя</small></div>
-                        </div>
-                    </div>
-
-                    <div class="card world-card featured-world" onclick="app.launch('play','easter')" style="border-color:rgba(255,105,180,0.3)!important;">
-                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(255,105,180,0.25),rgba(255,215,0,0.10),#0a0510);">
-                            <span class="world-emoji">🥚</span>
-                            <div class="world-glow" style="background:rgba(255,105,180,0.25);"></div>
-                        </div>
-                        <div class="card-info">
-                            <div><b>Пасхальный Паркур</b><br><small class="world-tag" style="color:#FF69B4">🌸 Собирай яички!</small></div>
-                            <span class="new-badge" style="background:linear-gradient(135deg,#FF69B4,#FFD700);box-shadow:0 0 12px rgba(255,105,180,0.5);">NEW 🐣</span>
-                        </div>
-                    </div>
-
-                    <div class="card world-card" onclick="app.launch('play','volcano')">
-                        <div class="card-thumb" style="background:radial-gradient(ellipse at 50% 30%,rgba(255,80,0,0.18),#050510);">
-                            <span class="world-emoji">🌋</span>
-                            <div class="world-glow" style="background:rgba(255,80,0,0.2);"></div>
-                        </div>
-                        <div class="card-info">
-                            <div><b>Остров Вулкана</b><br><small class="world-tag" style="color:#ff7040">🔥 Горячо!</small></div>
                         </div>
                     </div>
 
@@ -1395,44 +1346,6 @@
 
             <!-- ══════════════════ TAB: SHOP ══════════════════ -->
             <div id="tab-shop" class="hidden">
-                <!-- 🐣 Пасхальные аксессуары -->
-                <div style="background:linear-gradient(135deg,rgba(255,105,180,0.12),rgba(255,215,0,0.08));border:1px solid rgba(255,105,180,0.25);border-radius:14px;padding:16px 20px;margin-bottom:20px;">
-                    <div style="font-family:var(--font-head);font-size:18px;color:#FFD700;letter-spacing:2px;margin-bottom:8px;">🐣 ПАСХАЛЬНЫЕ АКСЕССУАРЫ</div>
-                    <div style="font-size:12px;color:rgba(255,200,220,0.7);margin-bottom:14px;font-family:var(--font-ui);">Только за 🥚 яички! Успей до конца пасхи!</div>
-                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
-                        <div onclick="app.buyEasterItem('bunny_hat',5)" style="background:rgba(255,105,180,0.10);border:1px solid rgba(255,105,180,0.25);border-radius:10px;padding:12px;text-align:center;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='rgba(255,105,180,0.6)'" onmouseout="this.style.borderColor='rgba(255,105,180,0.25)'">
-                            <div style="font-size:32px;margin-bottom:6px;">🐰</div>
-                            <div style="font-size:12px;font-weight:700;color:rgba(255,220,240,0.9);">Ушки зайца</div>
-                            <div style="font-size:11px;color:#FF69B4;margin-top:4px;font-family:var(--font-mono);">5 🥚</div>
-                        </div>
-                        <div onclick="app.buyEasterItem('egg_backpack',8)" style="background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.25);border-radius:10px;padding:12px;text-align:center;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='rgba(255,215,0,0.6)'" onmouseout="this.style.borderColor='rgba(255,215,0,0.25)'">
-                            <div style="font-size:32px;margin-bottom:6px;">🥚</div>
-                            <div style="font-size:12px;font-weight:700;color:rgba(255,220,240,0.9);">Рюкзак-яйцо</div>
-                            <div style="font-size:11px;color:#FFD700;margin-top:4px;font-family:var(--font-mono);">8 🥚</div>
-                        </div>
-                        <div onclick="app.buyEasterItem('chick_pet',12)" style="background:rgba(218,112,214,0.08);border:1px solid rgba(218,112,214,0.25);border-radius:10px;padding:12px;text-align:center;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='rgba(218,112,214,0.6)'" onmouseout="this.style.borderColor='rgba(218,112,214,0.25)'">
-                            <div style="font-size:32px;margin-bottom:6px;">🐥</div>
-                            <div style="font-size:12px;font-weight:700;color:rgba(255,220,240,0.9);">Цыплёнок-пет</div>
-                            <div style="font-size:11px;color:#DA70D6;margin-top:4px;font-family:var(--font-mono);">12 🥚</div>
-                        </div>
-                        <div onclick="app.buyEasterItem('flower_crown',6)" style="background:rgba(124,252,0,0.06);border:1px solid rgba(124,252,0,0.20);border-radius:10px;padding:12px;text-align:center;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='rgba(124,252,0,0.5)'" onmouseout="this.style.borderColor='rgba(124,252,0,0.20)'">
-                            <div style="font-size:32px;margin-bottom:6px;">🌸</div>
-                            <div style="font-size:12px;font-weight:700;color:rgba(255,220,240,0.9);">Венок из цветов</div>
-                            <div style="font-size:11px;color:#7CFC00;margin-top:4px;font-family:var(--font-mono);">6 🥚</div>
-                        </div>
-                        <div onclick="app.buyEasterItem('rainbow_trail',15)" style="background:rgba(255,165,0,0.07);border:1px solid rgba(255,165,0,0.22);border-radius:10px;padding:12px;text-align:center;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='rgba(255,165,0,0.6)'" onmouseout="this.style.borderColor='rgba(255,165,0,0.22)'">
-                            <div style="font-size:32px;margin-bottom:6px;">🌈</div>
-                            <div style="font-size:12px;font-weight:700;color:rgba(255,220,240,0.9);">Радужный шлейф</div>
-                            <div style="font-size:11px;color:#FFB347;margin-top:4px;font-family:var(--font-mono);">15 🥚</div>
-                        </div>
-                        <div onclick="app.buyEasterItem('golden_egg',25)" style="background:rgba(255,215,0,0.10);border:2px solid rgba(255,215,0,0.40);border-radius:10px;padding:12px;text-align:center;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='rgba(255,215,0,0.8)'" onmouseout="this.style.borderColor='rgba(255,215,0,0.40)'">
-                            <div style="font-size:32px;margin-bottom:6px;">✨</div>
-                            <div style="font-size:12px;font-weight:700;color:#FFD700;">Золотое яйцо</div>
-                            <div style="font-size:10px;color:rgba(255,215,0,0.6);font-family:var(--font-mono);">ЛЕГЕНДАРНЫЙ</div>
-                            <div style="font-size:11px;color:#FFD700;margin-top:4px;font-family:var(--font-mono);">25 🥚</div>
-                        </div>
-                    </div>
-                </div>
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;">
                     <div class="section-title" style="margin:0;">Магазин</div>
                     <span class="hint-tag">💡 Зарабатывай 🍊 в Цитрусовом Лесу</span>
@@ -1633,34 +1546,34 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
                     <!-- Обмен цитрусов на токены -->
                     <div class="panel-box">
-                        <div class="panel-box-title">🍊 → 🥚 Цитрусы в яички</div>
-                        <div style="color:rgba(255,255,255,0.4);font-size:12px;margin-bottom:16px;font-family:var(--font-ui);">100 🍊 = 1 🥚 яичко</div>
+                        <div class="panel-box-title">🍊 Цитрусы</div>
+                        <div style="color:rgba(255,255,255,0.4);font-size:12px;margin-bottom:16px;font-family:var(--font-ui);">100 🍊 = 1 💜 токен</div>
                         <div style="background:rgba(123,47,255,0.06);border:1px solid rgba(123,47,255,0.15);border-radius:12px;padding:14px;margin-bottom:14px;text-align:center;">
                             <div style="font-family:var(--font-mono);font-size:11px;color:rgba(255,255,255,0.3);margin-bottom:6px;">Твой баланс</div>
                             <div style="font-family:var(--font-head);font-size:24px;color:#FF9500;">🍊 <span id="exchange-balance">0</span></div>
-                            <div style="font-size:11px;color:rgba(180,100,255,0.7);font-family:var(--font-mono);margin-top:4px;">🥚 <span id="exchange-tokens">0</span> яичек 🥚</div>
+                            <div style="font-size:11px;color:rgba(180,100,255,0.7);font-family:var(--font-mono);margin-top:4px;">💜 <span id="exchange-tokens">0</span> токенов</div>
                         </div>
                         <div style="display:flex;gap:8px;margin-bottom:10px;">
-                            <input type="number" id="exchange-amount" min="100" step="100" placeholder="Сумма (мин. 100 🍊)" class="styled-input" style="flex:1;" oninput="document.getElementById('exchange-preview').textContent=Math.floor((+this.value||0)/100)+' 🥚'">
+                            <input type="number" id="exchange-amount" min="100" step="100" placeholder="Сумма (мин. 100 🍊)" class="styled-input" style="flex:1;" oninput="document.getElementById('exchange-preview').textContent=Math.floor((+this.value||0)/100)+' 💜'">
                         </div>
-                        <div style="font-size:12px;color:rgba(180,100,255,0.6);font-family:var(--font-mono);margin-bottom:12px;">Получишь: <span id="exchange-preview">0 🥚</span></div>
-                        <button onclick="app.exchangeToTokens()" class="btn-orange-full" style="background:linear-gradient(135deg,#7B2FFF,#00C9FF);">🥚 Обменять</button>
+                        <div style="font-size:12px;color:rgba(180,100,255,0.6);font-family:var(--font-mono);margin-bottom:12px;">Получишь: <span id="exchange-preview">0 💜</span></div>
+                        <button onclick="app.exchangeToTokens()" class="btn-orange-full" style="background:linear-gradient(135deg,#7B2FFF,#00C9FF);">💜 Обменять</button>
                     </div>
                     <!-- Информация о токенах -->
                     <div class="panel-box">
-                        <div class="panel-box-title">🥚 Что такое яички?</div>
+                        <div class="panel-box-title">💜 Что такое токены?</div>
                         <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px;">
                             <div style="background:rgba(0,229,255,0.04);border:1px solid rgba(0,229,255,0.1);border-radius:10px;padding:12px;">
                                 <div style="font-size:13px;font-weight:700;color:rgba(220,240,255,0.9);margin-bottom:4px;">💬 ИИ Хелпер</div>
-                                <div style="font-size:11px;color:rgba(255,255,255,0.4);font-family:var(--font-ui);">Покупай паки сообщений за яички</div>
+                                <div style="font-size:11px;color:rgba(255,255,255,0.4);font-family:var(--font-ui);">Покупай паки сообщений за токены</div>
                             </div>
                             <div style="background:rgba(255,149,0,0.04);border:1px solid rgba(255,149,0,0.1);border-radius:10px;padding:12px;">
                                 <div style="font-size:13px;font-weight:700;color:rgba(220,240,255,0.9);margin-bottom:4px;">🎁 Подарки</div>
-                                <div style="font-size:11px;color:rgba(255,255,255,0.4);font-family:var(--font-ui);">Отправляй яички друзьям</div>
+                                <div style="font-size:11px;color:rgba(255,255,255,0.4);font-family:var(--font-ui);">Отправляй токены друзьям</div>
                             </div>
                             <div style="background:rgba(123,47,255,0.04);border:1px solid rgba(123,47,255,0.1);border-radius:10px;padding:12px;">
                                 <div style="font-size:13px;font-weight:700;color:rgba(220,240,255,0.9);margin-bottom:4px;">🛍️ Магазин</div>
-                                <div style="font-size:11px;color:rgba(255,255,255,0.4);font-family:var(--font-ui);">При покупке аксессуаров начисляются яички</div>
+                                <div style="font-size:11px;color:rgba(255,255,255,0.4);font-family:var(--font-ui);">При покупке аксессуаров начисляются токены</div>
                             </div>
                         </div>
                     </div>
@@ -1679,7 +1592,7 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
                         <!-- Переключатель тип подарка -->
                         <div style="display:flex;gap:6px;margin-bottom:10px;">
                             <button id="gift-type-citrus" onclick="app._giftType='citrus';this.style.background='rgba(255,149,0,0.2)';this.style.borderColor='rgba(255,149,0,0.4)';document.getElementById('gift-type-token').style.background='transparent';document.getElementById('gift-type-token').style.borderColor='rgba(255,255,255,0.08)';" style="flex:1;padding:7px;border-radius:8px;border:1px solid rgba(255,149,0,0.4);background:rgba(255,149,0,0.2);color:#FF9500;font-family:var(--font-body);font-size:12px;font-weight:700;cursor:pointer;">🍊 Цитрусы</button>
-                            <button id="gift-type-token" onclick="app._giftType='token';this.style.background='rgba(123,47,255,0.2)';this.style.borderColor='rgba(123,47,255,0.4)';document.getElementById('gift-type-citrus').style.background='transparent';document.getElementById('gift-type-citrus').style.borderColor='rgba(255,255,255,0.08)';" style="flex:1;padding:7px;border-radius:8px;border:1px solid rgba(255,255,255,0.08);background:transparent;color:rgba(180,100,255,0.7);font-family:var(--font-body);font-size:12px;font-weight:700;cursor:pointer;">🥚 Яички</button>
+                            <button id="gift-type-token" onclick="app._giftType='token';this.style.background='rgba(123,47,255,0.2)';this.style.borderColor='rgba(123,47,255,0.4)';document.getElementById('gift-type-citrus').style.background='transparent';document.getElementById('gift-type-citrus').style.borderColor='rgba(255,255,255,0.08)';" style="flex:1;padding:7px;border-radius:8px;border:1px solid rgba(255,255,255,0.08);background:transparent;color:rgba(180,100,255,0.7);font-family:var(--font-body);font-size:12px;font-weight:700;cursor:pointer;">💜 Токены</button>
                         </div>
                         <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
                             <input type="number" id="gift-amount" min="1" max="100000" placeholder="Сумма" class="styled-input" style="flex:1;">
@@ -1861,7 +1774,7 @@ spawnBlock(0, 2, -5, 0xFF0000);"></textarea>
                         <button id="lb-btn-tokens" onclick="app.loadLeaderboard('tokens')"
                             style="padding:6px 14px;border-radius:7px;font-size:11px;font-weight:700;font-family:var(--font-mono);letter-spacing:0.5px;
                             background:transparent;color:rgba(220,240,255,0.3);border:1px solid transparent;">
-                            🥚 Яички
+                            💜 Токены
                         </button>
                     </div>
                 </div>
@@ -3285,7 +3198,7 @@ const app = {
         if(!amount||amount<1||amount>100000){ this.showNotif('❌','Ошибка', isToken ? 'Сумма от 1 до 100 000 🪙' : 'Сумма от 1 до 100 000 🍊'); return; }
         if(!this._giftSelectedId){ this.showNotif('❌','Выбери друга','Нажми на имя друга выше'); return; }
         if(isToken){
-            if((this.tokens||0)<amount){ this.showNotif('❌','Мало яичек',`Нужно ${amount} 🥚, у тебя ${this.tokens||0}`); return; }
+            if((this.tokens||0)<amount){ this.showNotif('❌','Мало токенов',`Нужно ${amount} 💜, у тебя ${this.tokens||0}`); return; }
         } else {
             if(this.balance<amount){ this.showNotif('❌','Мало цитрусов',`Нужно ${amount} 🍊, у тебя ${this.balance}`); return; }
         }
@@ -3827,8 +3740,8 @@ const app = {
     _tutSteps: [
         {
             target: null,
-            title: '🐣 ДОБРО ПОЖАЛОВАТЬ!',
-            desc: 'Ты в <b style="color:#FF69B4">CITRUS ONLINE</b> — пасхальное обновление уже здесь! 🥚<br><br>Быстро покажу главное — всего 5 шагов!',
+            title: '🍊 ДОБРО ПОЖАЛОВАТЬ!',
+            desc: 'Ты в <b style="color:#00E5FF">CITRUS ONLINE</b> — лучшая игровая платформа! 🍊<br><br>Быстро покажу главное — всего 5 шагов!',
         },
         {
             target: 'nav-games',
@@ -3847,8 +3760,8 @@ const app = {
         },
         {
             target: 'nav-friends',
-            title: '👥 ДРУЗЬЯ & 🥚 ЯИЧКИ',
-            desc: 'Добавляй друзей по тегу <b style="color:#38BDF8">Ник#1234</b>.<br><br>Дари им <b style="color:#FF9500">цитрусы</b> и <b style="color:#FFD700">🥚 яички</b> — пасхальная валюта!<br><br>Яички получаешь за покупки в магазине или обмен цитрусов.',
+            title: '👥 ДРУЗЬЯ & 💜 ТОКЕНЫ',
+            desc: 'Добавляй друзей по тегу <b style="color:#38BDF8">Ник#1234</b>.<br><br>Дари им <b style="color:#FF9500">цитрусы</b> и <b style="color:#B060FF">💜 токены</b>!<br><br>Токены получаешь за покупки в магазине или обмен цитрусов.',
         },
     ],
 
@@ -4180,7 +4093,7 @@ const app = {
             if(!r.ok){ this._lbFetching = false; return; }
             const top = await r.json();
             const isTime = this._lbMode === 'time';
-            const isTokens = this._lbMode === 'tokens'; const fmtVal = (p) => isTime ? this._fmtHubTime(p.hubTime||0) : isTokens ? (p.tokens||0).toLocaleString('ru') + ' 🥚' : (p.balance||0).toLocaleString('ru') + ' 🍊';
+            const isTokens = this._lbMode === 'tokens'; const fmtVal = (p) => isTime ? this._fmtHubTime(p.hubTime||0) : isTokens ? (p.tokens||0).toLocaleString('ru') + ' 💜' : (p.balance||0).toLocaleString('ru') + ' 🍊';
             const medals = ['🥇','🥈','🥉'];
             const totalSlots = Math.max(top.length, 10);
             const rows = list.querySelectorAll('[data-lb-rank]');
@@ -4217,7 +4130,7 @@ const app = {
             if(!r.ok){ this._lbFetching = false; return; }
             const top = await r.json();
             const isTime = this._lbMode === 'time';
-            const isTokens = this._lbMode === 'tokens'; const fmtVal = (p) => isTime ? this._fmtHubTime(p.hubTime||0) : isTokens ? (p.tokens||0).toLocaleString('ru') + ' 🥚' : (p.balance||0).toLocaleString('ru') + ' 🍊';
+            const isTokens = this._lbMode === 'tokens'; const fmtVal = (p) => isTime ? this._fmtHubTime(p.hubTime||0) : isTokens ? (p.tokens||0).toLocaleString('ru') + ' 💜' : (p.balance||0).toLocaleString('ru') + ' 🍊';
             const medals = ['🥇','🥈','🥉'];
             const totalSlots = Math.max(top.length, 10);
             const rows = list.querySelectorAll('[data-lb-rank]');
@@ -4271,7 +4184,7 @@ const app = {
         // ── Список 1-10 с data-атрибутами для тихого обновления ──
         const isTime = this._lbMode === 'time';
         const isTokens = this._lbMode === 'tokens';
-        const fmtVal = (p) => isTime ? this._fmtHubTime(p.hubTime||0) : isTokens ? (p.tokens||0).toLocaleString('ru') + ' 🥚' : (p.balance||0).toLocaleString('ru') + ' 🍊';
+        const fmtVal = (p) => isTime ? this._fmtHubTime(p.hubTime||0) : isTokens ? (p.tokens||0).toLocaleString('ru') + ' 💜' : (p.balance||0).toLocaleString('ru') + ' 🍊';
         const medals = ['🥇','🥈','🥉'];
         podium.innerHTML = '';
         list.innerHTML = '';
@@ -4332,7 +4245,6 @@ const app = {
     async loadStats(){
         // Только официальные миры — остальное фильтруем
         const wNames={
-            easter:  '🥚 Пасхальный Паркур',
             gather:  '🍊 Цитрусовый Лес',
             parkour: '🏃 Небесный Паркур',
             volcano: '🌋 Остров Вулкана',
@@ -7381,13 +7293,13 @@ const app = {
                     this._gameWSReconnTimer = setTimeout(()=>this._connectGameWS(), 2000);
                     // Временный fallback на polling
                     if(this._posInterval) clearInterval(this._posInterval);
-                    this._posInterval = setInterval(()=>this._pollPositions(), 150);
+                    this._posInterval = setInterval(()=>this._pollPositions(), 500);
                 }
             };
             this._gameWS.onerror = () => {};
         } catch(e) {
             if(this._posInterval) clearInterval(this._posInterval);
-            this._posInterval = setInterval(()=>this._pollPositions(), 150);
+            this._posInterval = setInterval(()=>this._pollPositions(), 500);
         }
     },
 
@@ -9793,7 +9705,7 @@ const app = {
         const wNames={lobby:'Главная Площадь',gather:'Цитрусовый Лес',parkour:'Небесный Паркур',
             volcano:'Остров Вулкана',space:'Космическая База',race:'Гонки',dropper:'Дроппер',obby:'Обби',
             pvp:'Арена ПВП',dungeon:'Тёмное Подземелье',march8:'🌸 8 Марта',
-            underwater:'Подводный мир',crystal:'Кристальная пещера',sky:'Небесный город',easter:'🥚 Пасхальный Паркур'};
+            underwater:'Подводный мир',crystal:'Кристальная пещера',sky:'Небесный город'};
         this._worldName=wNames[mapId]||'Мир игрока';
         if(mode==='play'){
             this._updateStatus('ingame', mapId);
@@ -9834,7 +9746,7 @@ const app = {
     setupScene(){
         const canvas=document.getElementById('gl-canvas');canvas.innerHTML='';
         this.scene=new THREE.Scene();
-        const bgs={lobby:0x0a0a18,gather:0x0d1f0a,parkour:0x87CEEB,volcano:0x1a0800,space:0x000005,race:0x0a0a0a,dropper:0x001133,obby:0x1a0500,maze:0x0a0f0a,coins:0x0d0800,march8:0x1a0a1a,underwater:0x001428,crystal:0x0d0018,sky:0x87CEEB,easter:0xffe0f0};
+        const bgs={lobby:0x0a0a18,gather:0x0d1f0a,parkour:0x87CEEB,volcano:0x1a0800,space:0x000005,race:0x0a0a0a,dropper:0x001133,obby:0x1a0500,maze:0x0a0f0a,coins:0x0d0800,march8:0x1a0a1a,underwater:0x001428,crystal:0x0d0018,sky:0x87CEEB};
         const bg=bgs[this.currentMap]||0x0a0a10;
         this.scene.background=new THREE.Color(bg);
         this.scene.fog=new THREE.FogExp2(bg,0.016);
@@ -9954,12 +9866,12 @@ const app = {
                 }
             }, 1000);
         }
-        // Опрашиваем позиции других игроков с сервера каждые 150мс (fallback если WS не поднялся)
+        // Опрашиваем позиции других игроков с сервера каждые 500мс (fallback если WS не поднялся)
         if(this._posInterval) clearInterval(this._posInterval);
         this._posInterval = setInterval(()=>{
             if(this._gameWSAlive) return; // WS работает — polling не нужен
             this._pollPositions();
-        }, 150);
+        }, 500);
     },
 
     // ── WORLDS
@@ -10304,93 +10216,7 @@ const app = {
             trophy.position.set(0,12.5,-10); this.scene.add(trophy);
             const tL=new THREE.PointLight(0xFFD700,4,10); tL.position.set(0,14,-10); this.scene.add(tL);
         }
-
-
-        else if(this.currentMap==='easter'){
-            // 🥚 ПАСХАЛЬНЫЙ ПАРКУР
-            this.scene.background = new THREE.Color(0xffe0f0);
-            this.scene.fog = new THREE.Fog(0xffe0f0, 60, 300);
-            // Мягкий пасхальный свет
-            this.scene.add(new THREE.AmbientLight(0xffccee, 1.2));
-            const sun = new THREE.DirectionalLight(0xffffaa, 1.5);
-            sun.position.set(50, 80, 30); sun.castShadow = true; this.scene.add(sun);
-            // Земля — зелёная лужайка
-            const grassMat = new THREE.MeshStandardMaterial({color:0x7CFC00, roughness:0.9});
-            const ground = new THREE.Mesh(new THREE.PlaneGeometry(300, 300), grassMat);
-            ground.rotation.x = -Math.PI/2; ground.receiveShadow = true;
-            this.scene.add(ground); this.objectsToIntersect.push(ground);
-            // Цвета платформ — пасхальные
-            const epc = [0xFF69B4, 0xFFD700, 0xDA70D6, 0x98FB98, 0x87CEEB, 0xFFB347, 0xFF69B4];
-            // Стартовая платформа
-            const start = new THREE.Mesh(
-                new THREE.BoxGeometry(10, 1, 10),
-                new THREE.MeshStandardMaterial({color:0xFFD700, roughness:0.5})
-            );
-            this.scene.add(start); this.objectsToIntersect.push(start);
-            // 28 платформ — паркур
-            for(let i = 1; i <= 28; i++){
-                const w = 3 + Math.random()*3, d = 3 + Math.random()*3;
-                const plat = new THREE.Mesh(
-                    new THREE.BoxGeometry(w, 1, d),
-                    new THREE.MeshStandardMaterial({color: epc[i % epc.length], roughness:0.4, metalness:0.1})
-                );
-                plat.position.set(Math.sin(i*1.2)*10, i*2.2, -(i*6.5));
-                plat.castShadow = true; plat.receiveShadow = true;
-                this.scene.add(plat); this.objectsToIntersect.push(plat);
-            }
-            // Финиш — большое золотое яйцо на пьедестале
-            const pedestal = new THREE.Mesh(
-                new THREE.CylinderGeometry(3, 4, 2, 16),
-                new THREE.MeshStandardMaterial({color:0xFFD700, metalness:0.6, roughness:0.3})
-            );
-            pedestal.position.set(Math.sin(28*1.2)*10, 28*2.2+1, -(28*6.5));
-            this.scene.add(pedestal); this.objectsToIntersect.push(pedestal);
-            const egg = new THREE.Mesh(
-                new THREE.SphereGeometry(2, 16, 16),
-                new THREE.MeshStandardMaterial({color:0xFF69B4, emissive:0xFF1493, emissiveIntensity:0.5, metalness:0.3, roughness:0.4})
-            );
-            egg.scale.set(1, 1.4, 1);
-            egg.position.set(Math.sin(28*1.2)*10, 28*2.2+4, -(28*6.5));
-            this.scene.add(egg);
-            const eggLight = new THREE.PointLight(0xFF69B4, 5, 20);
-            eggLight.position.copy(egg.position); this.scene.add(eggLight);
-            // Яички-коллектиблы на платформах
-            const eggPositions = [3,6,9,12,15,18,21,24,27];
-            eggPositions.forEach(idx => {
-                const ex = Math.sin(idx*1.2)*10, ey = idx*2.2+1.5, ez = -(idx*6.5);
-                const eg = new THREE.Group();
-                const body = new THREE.Mesh(
-                    new THREE.SphereGeometry(0.35, 10, 10),
-                    new THREE.MeshStandardMaterial({color:epc[idx%epc.length], emissive:epc[idx%epc.length], emissiveIntensity:0.4, roughness:0.4})
-                );
-                body.scale.set(1, 1.3, 1); eg.add(body);
-                eg.position.set(ex, ey, ez); this.scene.add(eg); this.collectibles.push(eg);
-            });
-            // Декор — деревья (цилиндр + шар)
-            for(let i = 0; i < 20; i++){
-                const tx = (Math.random()-0.5)*200, tz = (Math.random()-0.5)*200;
-                const trunk = new THREE.Mesh(
-                    new THREE.CylinderGeometry(0.4, 0.5, 3, 8),
-                    new THREE.MeshStandardMaterial({color:0x8B4513})
-                );
-                trunk.position.set(tx, 1.5, tz); this.scene.add(trunk);
-                const crown = new THREE.Mesh(
-                    new THREE.SphereGeometry(2.5+Math.random(), 8, 8),
-                    new THREE.MeshStandardMaterial({color:0x32CD32, roughness:0.9})
-                );
-                crown.position.set(tx, 5, tz); this.scene.add(crown);
-            }
-            // Цветы на земле
-            const flowerColors = [0xFF69B4, 0xFFD700, 0xFF6347, 0xDA70D6, 0xFFB347];
-            for(let i = 0; i < 60; i++){
-                const fx = (Math.random()-0.5)*200, fz = (Math.random()-0.5)*200;
-                const flower = new THREE.Mesh(
-                    new THREE.SphereGeometry(0.4, 6, 6),
-                    new THREE.MeshStandardMaterial({color:flowerColors[i%flowerColors.length], emissive:flowerColors[i%flowerColors.length], emissiveIntensity:0.3})
-                );
-                flower.position.set(fx, 0.4, fz); this.scene.add(flower);
-            }
-        }
+        
 
         else if(this.currentMap==='maze'){
             // 🌀 ЛАБИРИНТ — найди выход
@@ -12965,7 +12791,7 @@ const app = {
             const cur = parseInt(localStorage.getItem('citrus_ai_msgs')||'0');
             localStorage.setItem('citrus_ai_msgs', String(cur + count));
             this.initAiHelper();
-            this._showToast(`✅ Куплен пак ${count} сообщений за ${tokenCost}🥚`);
+            this._showToast(`✅ Куплен пак ${count} сообщений за ${tokenCost}💜`);
             this._sfx('buy');
         } else if((this.balance||0) >= citrusCost){
             this.balance -= citrusCost;
@@ -12976,7 +12802,7 @@ const app = {
             this._showToast(`✅ Куплен пак ${count} сообщений за ${citrusCost}🍊`);
             this._sfx('buy');
         } else {
-            this._showToast(`❌ Нужно ${tokenCost}🥚 или ${citrusCost}🍊`);
+            this._showToast(`❌ Нужно ${tokenCost}💜 или ${citrusCost}🍊`);
         }
     },
     _initExchangeTab(){
@@ -12984,22 +12810,6 @@ const app = {
         const tokEl = document.getElementById('exchange-tokens');
         if(balEl) balEl.textContent = this.balance;
         if(tokEl) tokEl.textContent = this.tokens||0;
-    },
-
-    buyEasterItem(itemId, cost){
-        if((this.tokens||0) < cost){
-            this.showNotif('❌','Мало яичек',`Нужно ${cost} 🥚, у тебя ${this.tokens||0}`); return;
-        }
-        const names = {bunny_hat:'Ушки зайца 🐰',egg_backpack:'Рюкзак-яйцо 🥚',chick_pet:'Цыплёнок-пет 🐥',flower_crown:'Венок из цветов 🌸',rainbow_trail:'Радужный шлейф 🌈',golden_egg:'Золотое яйцо ✨'};
-        if((this.inventory||[]).includes(itemId)){
-            this.showNotif('ℹ️','Уже куплено',`${names[itemId]} уже есть в инвентаре`); return;
-        }
-        this.tokens -= cost;
-        if(!this.inventory) this.inventory=[];
-        this.inventory.push(itemId);
-        this.saveData();
-        this.showNotif('🐣','Куплено!',`${names[itemId]} добавлен в инвентарь!`);
-        const tv=document.getElementById('tokens-val'); if(tv) tv.textContent=this.tokens;
     },
     exchangeToTokens(){
         const amount = parseInt(document.getElementById('exchange-amount')?.value||'0');
@@ -13016,7 +12826,7 @@ const app = {
         const et = document.getElementById('exchange-tokens'); if(et) et.textContent = this.tokens;
         document.getElementById('exchange-amount').value='';
         document.getElementById('exchange-preview').textContent='0 🪙';
-        this.showNotif('🥚','Обмен успешен!',`+${tokens} 🥚 яичек`);
+        this.showNotif('💜','Обмен успешен!',`+${tokens} 💜 токенов`);
     },
 
     _aiConversation: [],
@@ -14185,7 +13995,7 @@ window.onload = () => app.init();
     </div>
 </div>
 
-<!-- 🐣 ПАСХАЛЬНЫЕ ФЕЙЕРВЕРКИ + ЗВУК -->
+<!-- 🎆 ФЕЙЕРВЕРКИ -->
 <canvas id="fw" style="position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:99999;"></canvas>
 <script>
 (function(){
